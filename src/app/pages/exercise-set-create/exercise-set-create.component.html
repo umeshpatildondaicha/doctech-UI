@@ -1,0 +1,172 @@
+<div class="exercise-group-dialog">
+  <!-- Dialog Content -->
+  <div class="dialog-content">
+    <form [formGroup]="exerciseGroupForm" (ngSubmit)="onSubmit()" class="form">
+      
+      <!-- Group Information -->
+      <div class="form-section">
+        <h3 class="section-title">Group Information</h3>
+        <div class="form-row">
+          <app-input
+            label="Group Name *"
+            formControlName="groupName"
+            placeholder="Enter group name (e.g., Upper Body Workout)"
+            [required]="true"
+            [errorMessage]="getErrorMessage('groupName')"
+            class="form-field">
+          </app-input>
+        </div>
+
+        <div class="form-row">
+          <app-input
+            label="Description"
+            formControlName="description"
+            placeholder="Describe this exercise group"
+            [multiline]="true"
+            [rows]="3"
+            class="form-field full-width">
+          </app-input>
+        </div>
+
+        <div class="form-row">
+          <app-selectbox
+            label="Category"
+            formControlName="category"
+            [options]="groupCategories"
+            placeholder="Select category"
+            [displayExpr]="'label'"
+            [valueField]="'value'"
+            class="form-field">
+          </app-selectbox>
+
+          <app-selectbox
+            label="Difficulty Level"
+            formControlName="difficulty"
+            [options]="difficultyLevels"
+            placeholder="Select difficulty"
+            [displayExpr]="'label'"
+            [valueField]="'value'"
+            class="form-field">
+          </app-selectbox>
+        </div>
+      </div>
+
+      <!-- Exercise Selection -->
+      <div class="form-section">
+        <div class="section-header">
+          <h3 class="section-title">Exercises in Group</h3>
+        </div>
+
+        <!-- Exercise Search and Filter -->
+        <div class="exercise-search">
+          <div class="search-container">
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>Search exercises...</mat-label>
+              <input matInput [(ngModel)]="searchQuery" [ngModelOptions]="{standalone: true}" placeholder="Search by name, category, or muscles">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </div>
+          
+          <div class="filter-container">
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Category</mat-label>
+              <mat-select [(ngModel)]="selectedCategory" [ngModelOptions]="{standalone: true}" (selectionChange)="onCategoryFilterChange()">
+                <mat-option value="">All Categories</mat-option>
+                <mat-option *ngFor="let category of categories" [value]="category.value">
+                  {{ category.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Difficulty</mat-label>
+              <mat-select [(ngModel)]="selectedDifficulty" [ngModelOptions]="{standalone: true}" (selectionChange)="onDifficultyFilterChange()">
+                <mat-option value="">All Difficulties</mat-option>
+                <mat-option *ngFor="let difficulty of difficulties" [value]="difficulty.value">
+                  {{ difficulty.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Selected Exercises -->
+        <div class="selected-exercises" *ngIf="selectedExercises.length > 0">
+          <h4 class="subsection-title">Selected Exercises ({{ selectedExercises.length }})</h4>
+          <div class="selected-exercises-list">
+            <div class="selected-exercise-item" *ngFor="let exercise of selectedExercises; let i = index">
+              <div class="exercise-info">
+                <div class="exercise-header">
+                  <h5 class="exercise-name">{{ exercise.name }}</h5>
+                  <div class="exercise-meta">
+                    <span class="category-badge">{{ exercise.category }}</span>
+                    <span class="difficulty-badge" [class]="'difficulty-' + exercise.difficulty.toLowerCase()">
+                      {{ exercise.difficulty }}
+                    </span>
+                  </div>
+                </div>
+                <p class="exercise-description">{{ exercise.description }}</p>
+                <div class="exercise-details">
+                  <span class="detail-item">
+                    <mat-icon>fitness_center</mat-icon>
+                    {{ exercise.targetMuscles.join(', ') }}
+                  </span>
+                  <span class="detail-item" *ngIf="exercise.equipment && exercise.equipment.length > 0">
+                    <mat-icon>build</mat-icon>
+                    {{ exercise.equipment.join(', ') }}
+                  </span>
+                </div>
+              </div>
+              <div class="exercise-actions">
+                <button type="button" mat-icon-button (click)="removeExerciseFromGroup(i)" class="remove-btn">
+                  <mat-icon>remove_circle</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Available Exercises -->
+        <div class="available-exercises">
+          <h4 class="subsection-title">Available Exercises</h4>
+          <div class="exercises-grid" *ngIf="getFilteredExercises().length > 0; else noExercises">
+            <div class="exercise-card" 
+                 *ngFor="let exercise of getFilteredExercises()" 
+                 [class.selected]="isExerciseSelected(exercise)"
+                 (click)="toggleExerciseSelection(exercise)">
+              <div class="card-header">
+                <h5 class="exercise-name">{{ exercise.name }}</h5>
+                <div class="exercise-badges">
+                  <span class="category-badge">{{ exercise.category }}</span>
+                  <span class="difficulty-badge" [class]="'difficulty-' + exercise.difficulty.toLowerCase()">
+                    {{ exercise.difficulty }}
+                  </span>
+                </div>
+              </div>
+              <p class="exercise-description">{{ exercise.description }}</p>
+              <div class="exercise-muscles">
+                <mat-icon>fitness_center</mat-icon>
+                <span>{{ exercise.targetMuscles.join(', ') }}</span>
+              </div>
+              <div class="selection-indicator">
+                <mat-icon *ngIf="isExerciseSelected(exercise)">check_circle</mat-icon>
+                <mat-icon *ngIf="!isExerciseSelected(exercise)">radio_button_unchecked</mat-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </form>
+  </div>
+</div>
+
+<!-- No Exercises Template -->
+<ng-template #noExercises>
+  <div class="no-exercises">
+    <mat-icon class="no-exercises-icon">fitness_center</mat-icon>
+    <h4>No exercises found</h4>
+    <p>Try adjusting your search criteria or create some exercises first.</p>
+  </div>
+</ng-template> 

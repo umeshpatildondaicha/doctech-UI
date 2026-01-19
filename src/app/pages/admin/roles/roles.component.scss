@@ -1,0 +1,1801 @@
+.roles-management-page {
+  background: linear-gradient(135deg, var(--page-background-color) 0%, var(--secondary-background-color) 100%);
+  font-family: var(--primary-font-family);
+}
+
+// Page Header
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-3xl);
+  background: var(--background-color);
+  padding: var(--spacing-2xl) var(--spacing-3xl);
+  border-radius: var(--large-border-radius);
+  box-shadow: var(--card-shadow);
+  border: var(--card-border);
+  
+  .header-content {
+    h1 {
+      margin: 0 0 var(--spacing-xs) 0;
+      color: var(--text-primary);
+      font-size: var(--font-size-6xl);
+      font-weight: var(--font-weight-bold);
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--role-doctor-color) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle {
+      color: var(--text-muted);
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-medium);
+    }
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: var(--spacing-md);
+  }
+}
+
+// Bulk Actions Toolbar
+.bulk-actions-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--gradient-primary);
+  color: white;
+  padding: var(--spacing-lg) var(--spacing-2xl);
+  border-radius: var(--card-border-radius);
+  margin-bottom: var(--spacing-2xl);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+  
+  .selected-count {
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-xl);
+  }
+  
+  .bulk-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+  }
+}
+
+// Navigation Tabs
+.navigation-tabs {
+  margin-bottom: var(--spacing-3xl);
+  
+  .tab-list {
+    display: flex;
+    background: var(--background-color);
+    border-radius: var(--card-border-radius);
+    padding: var(--spacing-sm);
+    box-shadow: var(--card-shadow);
+    border: var(--card-border);
+    
+    .tab-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md) var(--spacing-xl);
+      border-radius: var(--button-border-radius);
+      cursor: pointer;
+      transition: var(--transition-base);
+      font-weight: var(--font-weight-medium);
+      color: var(--text-muted);
+      min-width: 140px;
+      justify-content: center;
+      
+      &:hover {
+        background: var(--page-background-color);
+        color: var(--text-secondary);
+      }
+      
+      &.active {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      }
+      
+      app-icon {
+        transition: var(--transition-base);
+      }
+      
+      &.active app-icon {
+        transform: scale(1.1);
+      }
+    }
+  }
+}
+
+// Tab Content
+.tab-content {
+  .tab-panel {
+    min-height: 600px;
+  }
+}
+
+// Overview Dashboard
+.overview-dashboard {
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+    
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: transform 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+      }
+      
+      .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: var(--transition-base);
+        
+        &.doctor { 
+          background: var(--status-info-bg); 
+          color: var(--status-info-color); 
+        }
+        &.staff { 
+          background: var(--status-success-bg); 
+          color: var(--status-success-color); 
+        }
+        &.active { 
+          background: var(--status-warning-bg); 
+          color: var(--status-warning-color); 
+        }
+        &.unassigned { 
+          background: var(--status-danger-bg); 
+          color: var(--status-danger-color); 
+        }
+      }
+      
+      .stat-info {
+        .stat-number {
+          font-size: 28px;
+          font-weight: 700;
+          color: #1e293b;
+          margin-bottom: 4px;
+        }
+        
+        .stat-label {
+          font-size: 14px;
+          color: #64748b;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+  
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  
+  .dashboard-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      
+      h3 {
+        margin: 0;
+        color: #1e293b;
+        font-size: 18px;
+        font-weight: 600;
+      }
+    }
+    
+    &.roles-card {
+      .roles-overview {
+        .role-overview-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 0;
+          border-bottom: 1px solid #f1f5f9;
+          
+          &:last-child {
+            border-bottom: none;
+          }
+          
+          .role-icon-small {
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 8px;
+
+            
+            app-icon {
+              height: auto !important;
+              width: auto !important;
+              text-align: center;
+            }
+            mat-icon {
+              color: var(--status-info-color) !important;
+              background-color: transparent !important;
+            }
+          }
+          
+          
+          .role-info-small {
+            flex: 1;
+            
+            .role-name-small {
+              font-weight: 500;
+              color: #374151;
+              font-size: 14px;
+            }
+            
+            .role-count-small {
+              font-size: 12px;
+              color: #6b7280;
+            }
+          }
+          
+          .role-percentage {
+            font-weight: 600;
+            color: #3b82f6;
+            font-size: 14px;
+          }
+        }
+      }
+    }
+    
+    &.quick-actions-card {
+      .quick-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        
+        .quick-action-btn {
+          width: 100%;
+        }
+      }
+    }
+    
+    &.activity-card {
+      grid-column: 1 / -1;
+      
+      .activity-filters {
+        display: flex;
+        gap: 8px;
+        
+        .filter-btn {
+          padding: 6px 12px;
+          font-size: 12px;
+          color: var(--secondary-font-color);
+            &.active {
+              background: var(--status-info-bg);
+              color: white;
+            }
+        }
+      }
+      
+      .activity-list {
+        .activity-item {
+          display: flex;
+          gap: 12px;
+          padding: 12px 0;
+          border-bottom: 1px solid #f1f5f9;
+          
+          &:last-child {
+            border-bottom: none;
+          }
+          
+          .activity-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+          }
+          
+          .activity-content {
+            flex: 1;
+            
+            .activity-text {
+              font-size: 14px;
+              color: #374151;
+              margin-bottom: 4px;
+            }
+            
+            .activity-time {
+              font-size: 12px;
+              color: #9ca3af;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Permissions Management
+.permissions-management {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
+  
+  .permissions-sidebar {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    height: fit-content;
+    
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      
+      h3 {
+        margin: 0;
+        color: #1e293b;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      
+      .role-count {
+        background: #e0f2fe;
+        color: #0284c7;
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+    }
+    
+    .roles-list {
+      .role-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 8px;
+        border: 2px solid transparent;
+        
+        &:hover {
+          background: #f8fafc;
+          transform: translateY(-1px);
+        }
+        
+        &.selected {
+          background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+          border-color: #3b82f6;
+        }
+        
+        .role-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+        }
+        
+        .role-details {
+          flex: 1;
+          
+          .role-name {
+            font-weight: 500;
+            color: #374151;
+            font-size: 13px;
+            margin-bottom: 2px;
+          }
+          
+          .role-description {
+            font-size: 11px;
+            color: #6b7280;
+            line-height: 1.3;
+          }
+        }
+        
+        .role-badge {
+          .staff-count {
+            background: #f1f5f9;
+            color: #64748b;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+  }
+  
+  .permissions-main {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    
+    .permissions-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f1f5f9;
+      
+      .selected-role-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        
+        .selected-role-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+        }
+        
+        .selected-role-details {
+          h2 {
+            margin: 0 0 4px 0;
+            color: #1e293b;
+            font-size: 20px;
+            font-weight: 700;
+          }
+          
+          p {
+            margin: 0;
+            color: #64748b;
+            font-size: 14px;
+          }
+        }
+      }
+      
+      .permissions-actions {
+        display: flex;
+        gap: 12px;
+      }
+    }
+    
+    .permissions-content {
+      .permissions-grid {
+        .permission-header {
+          display: grid;
+          grid-template-columns: 1fr 80px 80px 80px 80px;
+          gap: 16px;
+          padding: 16px 20px;
+          background: #f8fafc;
+          border-radius: 12px;
+          font-weight: 600;
+          font-size: 13px;
+          color: #374151;
+          margin-bottom: 16px;
+          
+          span:first-child {
+            font-size: 14px;
+          }
+        }
+        
+        .permission-row {
+          display: grid;
+          grid-template-columns: 1fr 80px 80px 80px 80px;
+          gap: 16px;
+          align-items: center;
+          padding: 20px;
+          border-radius: 12px;
+          margin-bottom: 12px;
+          background: white;
+          border: 1px solid #f1f5f9;
+          transition: all 0.3s ease;
+          
+          &:hover {
+            background: #fafbfc;
+            border-color: #e2e8f0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          }
+          
+          .module-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            
+            app-icon {
+              color: #6b7280;
+            }
+            
+            .module-details {
+              .module-name {
+                font-weight: 500;
+                color: #374151;
+                font-size: 14px;
+                margin-bottom: 2px;
+              }
+              
+              .module-description {
+                font-size: 12px;
+                color: #9ca3af;
+              }
+            }
+          }
+          
+          .permission-checkboxes {
+            display: contents;
+            
+            .permission-toggle {
+              display: flex;
+              justify-content: center;
+              position: relative;
+              cursor: pointer;
+              
+              input {
+                position: absolute;
+                opacity: 0;
+                cursor: pointer;
+                
+                &:checked + .toggle-slider {
+                  background: #10b981;
+                  
+                  &::before {
+                    transform: translateX(14px);
+                  }
+                }
+              }
+              
+              .toggle-slider {
+                width: 34px;
+                height: 20px;
+                background: #cbd5e1;
+                border-radius: 20px;
+                position: relative;
+                transition: all 0.3s ease;
+                
+                &::before {
+                  content: '';
+                  position: absolute;
+                  top: 2px;
+                  left: 2px;
+                  width: 16px;
+                  height: 16px;
+                  background: white;
+                  border-radius: 50%;
+                  transition: all 0.3s ease;
+                  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    .no-role-selected {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      color: #9ca3af;
+      
+      app-icon {
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+      
+      h3 {
+        margin: 0 0 8px 0;
+        color: #6b7280;
+        font-size: 18px;
+      }
+      
+      p {
+        margin: 0;
+        text-align: center;
+      }
+    }
+  }
+}
+
+// Staff Management
+.staff-management {
+  .staff-controls {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    
+    .staff-filters {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .staff-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+  }
+  
+  .staff-content {
+    .staff-list {
+      .staff-list-item {
+        display: grid;
+        grid-template-columns: 40px 60px 200px 150px 200px 150px 120px 120px;
+        gap: 16px;
+        align-items: center;
+        background: white;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: 1px solid #f1f5f9;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+          border-color: #e2e8f0;
+        }
+        
+        .staff-selection {
+          .staff-checkbox {
+            width: 16px;
+            height: 16px;
+            accent-color: #3b82f6;
+          }
+        }
+        
+        .staff-avatar {
+          position: relative;
+          
+          .avatar-placeholder {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+          }
+          
+          .status-indicator {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+          }
+        }
+        
+        .staff-basic-info {
+          .staff-name {
+            font-weight: 500;
+            color: #374151;
+            font-size: 14px;
+            margin-bottom: 2px;
+          }
+          
+          .staff-id {
+            font-size: 12px;
+            color: #9ca3af;
+          }
+        }
+        
+        .staff-role-info {
+          .staff-role {
+            font-weight: 500;
+            font-size: 13px;
+            margin-bottom: 2px;
+          }
+          
+          .staff-specialization {
+            font-size: 11px;
+            color: #6b7280;
+          }
+        }
+        
+        .staff-contact-info {
+          .staff-email, .staff-phone {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 2px;
+          }
+        }
+        
+        .staff-assignment-info {
+          .assignment-count {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+          }
+          
+          .no-assignment {
+            color: #ef4444;
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+          }
+        }
+        
+        .staff-attendance-info {
+          .attendance-status {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            margin-bottom: 4px;
+            
+            &.status-on-duty { background: var(--attendance-on-duty-bg); color: var(--attendance-on-duty-color); }
+            &.status-off-duty { background: var(--attendance-off-duty-bg); color: var(--attendance-off-duty-color); }
+            &.status-late { background: var(--attendance-late-bg); color: var(--attendance-late-color); }
+            &.status-absent { background: var(--attendance-absent-bg); color: var(--attendance-absent-color); }
+          }
+          
+          .shift-time {
+            font-size: 10px;
+            color: #9ca3af;
+            text-align: center;
+          }
+        }
+        
+        .staff-actions {
+          display: flex;
+          gap: 4px;
+          justify-content: center;
+          
+          .action-btn {
+            min-width: 32px;
+            width: 32px;
+            height: 32px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Assignments Management
+.assignments-management {
+  .assignments-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    
+    h2 {
+      margin: 0;
+      color: #1e293b;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    
+    .assignment-actions {
+      display: flex;
+      gap: 12px;
+    }
+  }
+  
+  .assignments-content {
+    .doctors-assignments {
+      display: grid;
+      gap: 24px;
+      margin-bottom: 32px;
+      
+      .doctor-assignment-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        
+        .doctor-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid #f1f5f9;
+          
+          .doctor-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            
+            .doctor-avatar {
+              width: 48px;
+              height: 48px;
+              border-radius: 12px;
+              background: linear-gradient(135deg, #3b82f6, #2563eb);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+            }
+            
+            .doctor-details {
+              .doctor-name {
+                font-weight: 600;
+                color: #1e293b;
+                font-size: 16px;
+                margin-bottom: 4px;
+              }
+              
+              .doctor-specialization {
+                font-size: 13px;
+                color: #64748b;
+                margin-bottom: 2px;
+              }
+              
+              .doctor-department {
+                font-size: 12px;
+                color: #9ca3af;
+              }
+            }
+          }
+          
+          .assignment-stats {
+            text-align: right;
+            
+            .assigned-count {
+              font-size: 13px;
+              color: #64748b;
+              margin-bottom: 12px;
+            }
+          }
+        }
+        
+        .assigned-staff-list {
+          .assigned-staff-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: #f8fafc;
+            border: 1px solid #f1f5f9;
+            
+            .staff-info {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              
+              .staff-avatar-small {
+                position: relative;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background: #e5e7eb;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #6b7280;
+                
+                .status-dot {
+                  position: absolute;
+                  bottom: -2px;
+                  right: -2px;
+                  width: 10px;
+                  height: 10px;
+                  border-radius: 50%;
+                  border: 2px solid white;
+                }
+              }
+              
+              .staff-details {
+                .staff-name {
+                  font-weight: 500;
+                  color: #374151;
+                  font-size: 13px;
+                  margin-bottom: 2px;
+                }
+                
+                .staff-role {
+                  font-size: 11px;
+                  color: #6b7280;
+                }
+              }
+            }
+            
+            .staff-schedule {
+              text-align: center;
+              
+              .shift-info {
+                font-size: 12px;
+                color: #374151;
+                font-weight: 500;
+                margin-bottom: 2px;
+              }
+              
+              .days-info {
+                font-size: 10px;
+                color: #9ca3af;
+              }
+            }
+            
+            .assignment-actions {
+              display: flex;
+              gap: 4px;
+              
+              .schedule-btn, .remove-btn {
+                min-width: 28px;
+                width: 28px;
+                height: 28px;
+              }
+            }
+          }
+          
+          .empty-assignments {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+            
+            app-icon {
+              margin-bottom: 12px;
+              opacity: 0.5;
+            }
+            
+            .empty-text {
+              margin-bottom: 16px;
+              font-size: 14px;
+            }
+          }
+        }
+      }
+    }
+    
+    .unassigned-panel {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 2px solid #fbbf24;
+      border-radius: 16px;
+      padding: 24px;
+      
+      .unassigned-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        
+        h3 {
+          margin: 0;
+          color: #92400e;
+          font-size: 16px;
+          font-weight: 600;
+        }
+      }
+      
+      .unassigned-list {
+        display: grid;
+        gap: 12px;
+        
+        .unassigned-staff-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: white;
+          border-radius: 12px;
+          padding: 16px;
+          border: 1px solid #fed7aa;
+          
+          .staff-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            
+            .staff-avatar-small {
+              width: 32px;
+              height: 32px;
+              border-radius: 50%;
+              background: #f3f4f6;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #6b7280;
+            }
+            
+            .staff-details {
+              .staff-name {
+                font-weight: 500;
+                color: #374151;
+                font-size: 14px;
+                margin-bottom: 2px;
+              }
+              
+              .staff-role {
+                font-size: 12px;
+                color: #6b7280;
+              }
+            }
+          }
+          
+          .quick-assign-select {
+            min-width: 200px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Attendance Management
+.attendance-management {
+  .attendance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    
+    h2 {
+      margin: 0;
+      color: #1e293b;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    
+    .attendance-date-filter {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+  }
+  
+  .attendance-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+    
+    .attendance-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      
+      .attendance-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        &.present { background: var(--attendance-on-duty-bg); color: var(--attendance-on-duty-color); }
+        &.late { background: var(--attendance-late-bg); color: var(--attendance-late-color); }
+        &.absent { background: var(--attendance-absent-bg); color: var(--attendance-absent-color); }
+        &.percentage { background: var(--status-info-bg); color: var(--status-info-color); }
+      }
+      
+      .attendance-info {
+        .attendance-number {
+          font-size: 24px;
+          font-weight: 700;
+          color: #1e293b;
+          margin-bottom: 4px;
+        }
+        
+        .attendance-label {
+          font-size: 13px;
+          color: #64748b;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+  
+  .attendance-table {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    
+    .table-header {
+      margin-bottom: 20px;
+      
+      .table-controls {
+        display: flex;
+        gap: 16px;
+        align-items: flex-end;
+      }
+    }
+    
+    .attendance-list {
+      .attendance-list-header {
+        display: grid;
+        grid-template-columns: 200px 120px 120px 100px 100px 80px 100px 100px;
+        gap: 16px;
+        padding: 16px 20px;
+        background: #f8fafc;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 13px;
+        color: #374151;
+        margin-bottom: 12px;
+      }
+      
+      .attendance-list-item {
+        display: grid;
+        grid-template-columns: 200px 120px 120px 100px 100px 80px 100px 100px;
+        gap: 16px;
+        align-items: center;
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 8px;
+        background: white;
+        border: 1px solid #f1f5f9;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background: #fafbfc;
+          border-color: #e2e8f0;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .col-staff {
+          .staff-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            
+            .staff-avatar-tiny {
+              width: 28px;
+              height: 28px;
+              border-radius: 50%;
+              background: #f1f5f9;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #64748b;
+            }
+            
+            .staff-details {
+              .staff-name {
+                font-weight: 500;
+                color: #374151;
+                font-size: 13px;
+                margin-bottom: 2px;
+              }
+              
+              .staff-id {
+                font-size: 11px;
+                color: #9ca3af;
+              }
+            }
+          }
+        }
+        
+        .col-role {
+          .role-badge {
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+          }
+        }
+        
+        .col-schedule, .col-checkin, .col-checkout, .col-hours {
+          .schedule-info, .time-info, .hours-info {
+            font-size: 12px;
+            color: #374151;
+            text-align: center;
+            
+            &.late {
+              color: #ef4444;
+              font-weight: 600;
+            }
+          }
+        }
+        
+        .col-status {
+          .status-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            
+            &.status-on-duty { background: var(--attendance-on-duty-bg); color: var(--attendance-on-duty-color); }
+            &.status-off-duty { background: var(--attendance-off-duty-bg); color: var(--attendance-off-duty-color); }
+            &.status-late { background: var(--attendance-late-bg); color: var(--attendance-late-color); }
+            &.status-absent { background: var(--attendance-absent-bg); color: var(--attendance-absent-color); }
+          }
+        }
+        
+        .col-actions {
+          display: flex;
+          gap: 4px;
+          justify-content: center;
+          
+          .history-btn, .edit-btn {
+            min-width: 28px;
+            width: 28px;
+            height: 28px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Staff Details Drawer
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  animation: fadeIn 0.3s ease;
+  
+  .drawer-content {
+    width: 500px;
+    height: 100vh;
+    background: var(--admin-card-bg);
+    box-shadow: var(--card-shadow), -12px 0 40px rgba(0, 0, 0, 0.15);
+    overflow-y: auto;
+    animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border-left: var(--admin-border);
+    
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-2xl);
+      border-bottom: var(--admin-border);
+      position: sticky;
+      top: 0;
+      background: rgba(255, 255, 255, 0.95);
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      
+      h2 {
+        margin: 0;
+        color: var(--admin-text-primary);
+        font-size: var(--font-size-3xl);
+        font-weight: var(--font-weight-bold);
+        font-family: var(--primary-font-family);
+      }
+      
+      .close-btn {
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition-base);
+        
+        &:hover {
+          background: var(--admin-hover-bg);
+          transform: scale(1.1);
+        }
+      }
+    }
+    
+    .staff-details-content {
+      padding: var(--spacing-2xl);
+      
+      // Staff Profile Section
+      .staff-profile {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-xl);
+        background: var(--admin-light-bg);
+        border-radius: var(--card-border-radius);
+        padding: var(--spacing-2xl);
+        margin-bottom: var(--spacing-2xl);
+        border: var(--admin-border);
+        
+        .profile-avatar {
+          position: relative;
+          flex-shrink: 0;
+          
+          .avatar-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--admin-gradient-neutral);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--admin-text-secondary);
+            box-shadow: var(--primary-shadow);
+            border: 3px solid var(--admin-card-bg);
+          }
+          
+          .status-badge {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--button-border-radius);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-semibold);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 2px solid var(--admin-card-bg);
+            box-shadow: var(--primary-shadow);
+          }
+        }
+        
+        .profile-info {
+          flex: 1;
+          
+          h3 {
+            margin: 0 0 var(--spacing-xs) 0;
+            color: var(--admin-text-primary);
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            font-family: var(--primary-font-family);
+          }
+          
+          .employee-id {
+            color: var(--admin-text-muted);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: var(--spacing-sm);
+          }
+          
+          .role-specialization {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            
+            .role {
+              background: var(--admin-gradient-info);
+              color: var(--admin-text-primary);
+              padding: var(--spacing-xs) var(--spacing-md);
+              border-radius: var(--small-border-radius);
+              font-size: var(--font-size-sm);
+              font-weight: var(--font-weight-medium);
+            }
+            
+            .specialization {
+              color: var(--admin-text-secondary);
+              font-size: var(--font-size-sm);
+              font-weight: var(--font-weight-medium);
+            }
+          }
+        }
+      }
+      
+      // Information Sections
+      .info-section {
+        background: var(--admin-card-bg);
+        border-radius: var(--card-border-radius);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-xl);
+        border: var(--admin-border);
+        box-shadow: var(--primary-shadow);
+        transition: var(--transition-base);
+        
+        &:hover {
+          box-shadow: var(--card-hover-shadow);
+          transform: translateY(-2px);
+        }
+        
+        h4 {
+          margin: 0 0 var(--spacing-lg) 0;
+          color: var(--admin-text-primary);
+          font-size: var(--font-size-lg);
+          font-weight: var(--font-weight-semibold);
+          font-family: var(--primary-font-family);
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-sm);
+          
+          &:before {
+            content: '';
+            width: 3px;
+            height: 20px;
+            background: var(--admin-gradient-neutral);
+            border-radius: 2px;
+          }
+        }
+        
+        // Contact Information
+        .info-grid {
+          display: grid;
+          gap: var(--spacing-md);
+          
+          .info-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: var(--admin-light-bg);
+            border-radius: var(--small-border-radius);
+            border: var(--admin-border);
+            transition: var(--transition-base);
+            
+            &:hover {
+              background: var(--admin-hover-bg);
+              transform: translateX(4px);
+            }
+            
+            app-icon {
+              color: var(--admin-text-muted);
+              flex-shrink: 0;
+            }
+            
+            span {
+              color: var(--admin-text-secondary);
+              font-size: var(--font-size-base);
+              font-weight: var(--font-weight-medium);
+            }
+          }
+        }
+        
+        // Assigned Doctors
+        .assigned-doctors-list {
+          .assigned-doctor-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-md);
+            background: var(--admin-light-bg);
+            border-radius: var(--small-border-radius);
+            margin-bottom: var(--spacing-sm);
+            border: var(--admin-border);
+            transition: var(--transition-base);
+            
+            &:hover {
+              background: var(--admin-hover-bg);
+              transform: translateX(4px);
+            }
+            
+            &:last-child {
+              margin-bottom: 0;
+            }
+            
+            app-icon {
+              color: var(--role-doctor-color);
+              margin-right: var(--spacing-sm);
+            }
+            
+            span {
+              flex: 1;
+              color: var(--admin-text-secondary);
+              font-size: var(--font-size-base);
+              font-weight: var(--font-weight-medium);
+            }
+            
+            .remove-assignment-btn {
+              border-radius: 50%;
+              width: 28px;
+              height: 28px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: var(--transition-base);
+              
+              &:hover {
+                transform: scale(1.1);
+              }
+            }
+          }
+          
+          .no-assignments {
+            text-align: center;
+            color: var(--admin-text-muted);
+            font-size: var(--font-size-base);
+            font-style: italic;
+            padding: var(--spacing-xl);
+            background: var(--admin-light-bg);
+            border-radius: var(--small-border-radius);
+            border: 2px dashed var(--admin-border);
+          }
+        }
+        
+        // Today's Attendance
+        .attendance-today {
+          .attendance-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            background: var(--admin-light-bg);
+            border-radius: var(--small-border-radius);
+            margin-bottom: var(--spacing-sm);
+            border: var(--admin-border);
+            
+            &:last-child {
+              margin-bottom: 0;
+            }
+            
+            .label {
+              color: var(--admin-text-muted);
+              font-size: var(--font-size-sm);
+              font-weight: var(--font-weight-medium);
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+            
+            .value {
+              color: var(--admin-text-primary);
+              font-size: var(--font-size-base);
+              font-weight: var(--font-weight-semibold);
+              
+              &.status-on-duty { 
+                color: var(--attendance-on-duty-color); 
+                background: var(--attendance-on-duty-bg);
+                padding: var(--spacing-xs) var(--spacing-sm);
+                border-radius: var(--small-border-radius);
+              }
+              &.status-off-duty { 
+                color: var(--attendance-off-duty-color); 
+                background: var(--attendance-off-duty-bg);
+                padding: var(--spacing-xs) var(--spacing-sm);
+                border-radius: var(--small-border-radius);
+              }
+              &.status-late { 
+                color: var(--attendance-late-color); 
+                background: var(--attendance-late-bg);
+                padding: var(--spacing-xs) var(--spacing-sm);
+                border-radius: var(--small-border-radius);
+              }
+              &.status-absent { 
+                color: var(--attendance-absent-color); 
+                background: var(--attendance-absent-bg);
+                padding: var(--spacing-xs) var(--spacing-sm);
+                border-radius: var(--small-border-radius);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .permissions-management {
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+  }
+  
+  .assignments-management .assignments-content .doctors-assignments {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 992px) {
+  .permissions-management {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    
+    .permissions-sidebar {
+      order: 1;
+    }
+    
+    .permissions-main {
+      order: 2;
+    }
+  }
+  
+  .staff-management .staff-controls .staff-filters {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .staff-list .staff-list-item {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    text-align: center;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .roles-management-page {
+    padding: var(--spacing-lg);
+  }
+  
+  .page-header {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-xl);
+    
+    .header-actions {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  .navigation-tabs .tab-list {
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    justify-content: center;
+    
+    .tab-item {
+      min-width: auto;
+      flex: 1;
+    }
+  }
+  
+  .attendance-list .attendance-list-header,
+  .attendance-list .attendance-list-item {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+    text-align: center;
+  }
+  
+  .drawer-overlay {
+  .drawer-content {
+    width: 100vw !important;
+      
+      .drawer-header {
+        padding: var(--spacing-lg);
+        
+        h2 {
+          font-size: var(--font-size-xl);
+        }
+      }
+      
+      .staff-details-content {
+        padding: var(--spacing-lg);
+        
+        .staff-profile {
+          flex-direction: column;
+          text-align: center;
+          gap: var(--spacing-lg);
+          padding: var(--spacing-lg);
+          
+          .profile-avatar .avatar-placeholder {
+            width: 60px;
+            height: 60px;
+          }
+        }
+        
+        .info-section {
+          padding: var(--spacing-lg);
+          
+          h4 {
+            font-size: var(--font-size-base);
+          }
+          
+          .info-grid .info-item {
+            flex-direction: column;
+            text-align: center;
+            gap: var(--spacing-sm);
+          }
+          
+          .assigned-doctors-list .assigned-doctor-item {
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            text-align: center;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .drawer-overlay {
+    .drawer-content {
+      .drawer-header {
+        padding: var(--spacing-md);
+        
+        .close-btn {
+          width: 32px;
+          height: 32px;
+        }
+      }
+      
+      .staff-details-content {
+        padding: var(--spacing-md);
+        
+        .staff-profile {
+          padding: var(--spacing-md);
+          gap: var(--spacing-md);
+        }
+        
+        .info-section {
+          padding: var(--spacing-md);
+          margin-bottom: var(--spacing-md);
+        }
+      }
+    }
+  }
+}

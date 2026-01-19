@@ -1,0 +1,29 @@
+.doctor-management-page {
+  background-color: var(--page-background-color);
+  height: 100%;
+
+  .grid-section {
+    height: calc(100% - 5em);
+    background: var(--background-color);
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--card-shadow);
+    border: var(--card-border);
+    overflow: hidden;
+
+    .doctors-grid {
+      width: 100%;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .doctor-management-page {
+    padding: var(--spacing-md);
+  }
+} 
+
+.admin-stats-card {
+  height: 5em;
+  display: grid;
+}

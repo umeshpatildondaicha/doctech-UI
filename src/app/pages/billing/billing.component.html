@@ -1,0 +1,104 @@
+<div class="billing-dashboard">
+  <app-admin-page-header
+    [title]="'Billing Overview'"
+    [subtitle]="'Manage invoices, payments, and outstanding dues'"
+    [actions]="headerActions"
+    (actionClicked)="onHeaderAction($event)">
+  </app-admin-page-header>
+
+  <div class="demo-pill" *ngIf="isDemoData">
+    Demo data (backend not connected)
+  </div>
+
+  <!-- Summary Cards -->
+  <app-admin-stats-card [stats]="statCards"></app-admin-stats-card>
+
+  <!-- Info Banner -->
+  <app-card class="info-banner" [dense]="true">
+    <div class="info-left">
+      <mat-icon class="info-icon">info</mat-icon>
+      <span>All billing actions are recorded automatically in patient history.</span>
+    </div>
+    <div class="info-actions">
+      <button mat-stroked-button (click)="onMainTabChanged('payments')">Record Payment</button>
+      <button mat-stroked-button (click)="openPatientProfile()" matTooltip="Statements are generated from patient profile billing">
+        View Statement
+      </button>
+    </div>
+  </app-card>
+
+  <!-- Tabs -->
+  <app-admin-tabs
+    [tabs]="mainTabs"
+    [activeTabId]="activeMainTab"
+    variant="underline"
+    (tabChanged)="onMainTabChanged($event)">
+  </app-admin-tabs>
+
+  <!-- Invoices -->
+  <div *ngIf="activeMainTab === 'invoices'">
+    <app-admin-tabs
+      [tabs]="statusTabs"
+      [activeTabId]="activeStatus"
+      variant="pills"
+      size="small"
+      (tabChanged)="onStatusTabChanged($event)">
+    </app-admin-tabs>
+
+    <div class="grid-wrapper">
+      <app-grid
+        [rowData]="visibleInvoices"
+        [columnDefs]="columnDefs"
+        [gridOptions]="gridOptions"
+        [showAddButton]="false"
+        [searchPlaceholder]="'Search invoices...'"
+        [height]="'calc(100vh - 520px)'"
+        [width]="'100%'"
+        (rowClicked)="onRowClick($event)">
+      </app-grid>
+    </div>
+
+    <div *ngIf="!loading && visibleInvoices.length === 0" class="empty">
+      No invoices found.
+      <button mat-stroked-button color="primary" (click)="applyStatusFilter('ALL')">Clear filter</button>
+    </div>
+  </div>
+
+  <!-- Payments -->
+  <div *ngIf="activeMainTab === 'payments'">
+    <div class="grid-wrapper">
+      <app-grid
+        [rowData]="allPayments"
+        [columnDefs]="paymentsColumnDefs"
+        [gridOptions]="paymentsGridOptions"
+        [showAddButton]="false"
+        [searchPlaceholder]="'Search payments...'"
+        [height]="'calc(100vh - 520px)'"
+        [width]="'100%'">
+      </app-grid>
+    </div>
+
+    <div *ngIf="!loading && allPayments.length === 0" class="empty">
+      No payments found.
+    </div>
+  </div>
+
+  <!-- Items / Services -->
+  <div *ngIf="activeMainTab === 'items'">
+    <div class="grid-wrapper">
+      <app-grid
+        [rowData]="allItems"
+        [columnDefs]="itemsColumnDefs"
+        [gridOptions]="itemsGridOptions"
+        [showAddButton]="false"
+        [searchPlaceholder]="'Search items/services...'"
+        [height]="'calc(100vh - 520px)'"
+        [width]="'100%'">
+      </app-grid>
+    </div>
+
+    <div *ngIf="!loading && allItems.length === 0" class="empty">
+      No items found.
+    </div>
+  </div>
+</div>

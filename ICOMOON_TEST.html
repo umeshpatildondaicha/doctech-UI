@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Icomoon Icons Test</title>
+  <link rel="stylesheet" href="src/assets/fonts/icomoon.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 3rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+      font-size: 2.5rem;
+    }
+
+    .subtitle {
+      color: #7f8c8d;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+
+    .status {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+    }
+
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .icon-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .icon-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+      background: #f0f2ff;
+    }
+
+    .icon-item i {
+      font-size: 32px;
+      color: #667eea;
+      margin-bottom: 0.75rem;
+    }
+
+    .icon-item span {
+      font-size: 0.875rem;
+      color: #555;
+      text-align: center;
+      word-break: break-word;
+    }
+
+    .test-section {
+      margin-bottom: 3rem;
+    }
+
+    .test-section h2 {
+      color: #667eea;
+      margin-bottom: 1.5rem;
+      font-size: 1.75rem;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 0.5rem;
+    }
+
+    .size-demo {
+      display: flex;
+      align-items: flex-end;
+      gap: 2rem;
+      padding: 2rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+
+    .size-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .color-demo {
+      display: flex;
+      gap: 1rem;
+      padding: 2rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+
+    .instructions {
+      background: #e8f4fd;
+      border-left: 4px solid #2196f3;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+    }
+
+    .instructions h3 {
+      color: #1976d2;
+      margin-bottom: 0.75rem;
+    }
+
+    .instructions ol {
+      margin-left: 1.5rem;
+      color: #555;
+    }
+
+    .instructions li {
+      margin-bottom: 0.5rem;
+    }
+
+    code {
+      background: #f1f3f5;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      color: #d63384;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1.5rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .icon-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 1rem;
+      }
+
+      .size-demo {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Icomoon Icons Test</h1>
+    <p class="subtitle">Visual test page for Icomoon icon integration</p>
+
+    <!-- Status Message -->
+    <div class="status warning">
+      <strong>⚠️ Important:</strong> If you see squares (□) instead of icons, you need to add your Icomoon font files to <code>/src/assets/fonts/</code>
+    </div>
+
+    <!-- Instructions -->
+    <div class="instructions">
+      <h3>📋 Setup Instructions</h3>
+      <ol>
+        <li>Visit <a href="https://icomoon.io/app/" target="_blank">IcoMoon App</a></li>
+        <li>Select icons or upload your SVG files</li>
+        <li>Click "Generate Font" and download the package</li>
+        <li>Copy font files (.eot, .ttf, .woff, .svg) to <code>/src/assets/fonts/</code></li>
+        <li>Update icon classes in <code>/src/assets/fonts/icomoon.css</code></li>
+        <li>Refresh this page to see your icons!</li>
+      </ol>
+    </div>
+
+    <!-- All Icons Grid -->
+    <div class="test-section">
+      <h2>All Icons</h2>
+      <div class="icon-grid">
+        <div class="icon-item">
+          <i class="icon-home"></i>
+          <span>icon-home</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-user"></i>
+          <span>icon-user</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-calendar"></i>
+          <span>icon-calendar</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-settings"></i>
+          <span>icon-settings</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-search"></i>
+          <span>icon-search</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-heart"></i>
+          <span>icon-heart</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-menu"></i>
+          <span>icon-menu</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-close"></i>
+          <span>icon-close</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-check"></i>
+          <span>icon-check</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-arrow-left"></i>
+          <span>icon-arrow-left</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-arrow-right"></i>
+          <span>icon-arrow-right</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-arrow-up"></i>
+          <span>icon-arrow-up</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-arrow-down"></i>
+          <span>icon-arrow-down</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-plus"></i>
+          <span>icon-plus</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-minus"></i>
+          <span>icon-minus</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-edit"></i>
+          <span>icon-edit</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-delete"></i>
+          <span>icon-delete</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-phone"></i>
+          <span>icon-phone</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-email"></i>
+          <span>icon-email</span>
+        </div>
+        <div class="icon-item">
+          <i class="icon-notification"></i>
+          <span>icon-notification</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Size Variations -->
+    <div class="test-section">
+      <h2>Size Variations</h2>
+      <div class="size-demo">
+        <div class="size-item">
+          <i class="icon-heart" style="font-size: 16px;"></i>
+          <span>16px</span>
+        </div>
+        <div class="size-item">
+          <i class="icon-heart" style="font-size: 24px;"></i>
+          <span>24px</span>
+        </div>
+        <div class="size-item">
+          <i class="icon-heart" style="font-size: 32px;"></i>
+          <span>32px</span>
+        </div>
+        <div class="size-item">
+          <i class="icon-heart" style="font-size: 48px;"></i>
+          <span>48px</span>
+        </div>
+        <div class="size-item">
+          <i class="icon-heart" style="font-size: 64px;"></i>
+          <span>64px</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Color Variations -->
+    <div class="test-section">
+      <h2>Color Variations</h2>
+      <div class="color-demo">
+        <i class="icon-heart" style="font-size: 48px; color: #667eea;"></i>
+        <i class="icon-heart" style="font-size: 48px; color: #e74c3c;"></i>
+        <i class="icon-heart" style="font-size: 48px; color: #27ae60;"></i>
+        <i class="icon-heart" style="font-size: 48px; color: #f39c12;"></i>
+        <i class="icon-heart" style="font-size: 48px; color: #9b59b6;"></i>
+        <i class="icon-heart" style="font-size: 48px; color: #2c3e50;"></i>
+      </div>
+    </div>
+
+    <!-- Final Status -->
+    <div class="status success" style="margin-top: 3rem;">
+      <strong>✅ Test Complete!</strong> If you can see all the icons above (not squares), your Icomoon integration is working perfectly!
+    </div>
+
+    <!-- Documentation Links -->
+    <div style="margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
+      <h3 style="color: #667eea; margin-bottom: 1rem;">📚 Documentation</h3>
+      <ul style="list-style: none; padding: 0;">
+        <li style="margin-bottom: 0.5rem;">📖 <strong>Setup Guide:</strong> <code>ICOMOON_SETUP.md</code></li>
+        <li style="margin-bottom: 0.5rem;">⚡ <strong>Quick Reference:</strong> <code>ICOMOON_QUICK_REF.md</code></li>
+        <li style="margin-bottom: 0.5rem;">💻 <strong>Code Examples:</strong> <code>ICOMOON_EXAMPLES.html</code></li>
+        <li style="margin-bottom: 0.5rem;">🎯 <strong>Demo Component:</strong> <code>ICOMOON_DEMO.ts</code></li>
+        <li style="margin-bottom: 0.5rem;">📝 <strong>Summary:</strong> <code>ICOMOON_INTEGRATION_SUMMARY.md</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Add click feedback
+    document.querySelectorAll('.icon-item').forEach(item => {
+      item.addEventListener('click', function() {
+        const iconName = this.querySelector('span').textContent;
+        console.log('Clicked:', iconName);
+        
+        // Visual feedback
+        this.style.background = '#667eea';
+        this.querySelector('i').style.color = 'white';
+        this.querySelector('span').style.color = 'white';
+        
+        setTimeout(() => {
+          this.style.background = '#f8f9fa';
+          this.querySelector('i').style.color = '#667eea';
+          this.querySelector('span').style.color = '#555';
+        }, 300);
+      });
+    });
+
+    // Log loaded status
+    window.addEventListener('load', function() {
+      console.log('✅ Icomoon Test Page Loaded');
+      console.log('📁 Font CSS Path: src/assets/fonts/icomoon.css');
+      console.log('📁 Font Files Path: src/assets/fonts/');
+      console.log('💡 Tip: Check browser console for any font loading errors');
+    });
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,120 @@
+// Local overlay + dialog styling for the Create Template dialog
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.template-dialog {
+  width: 520px;
+  max-width: 90vw;
+  max-height: 80vh;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .close-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+
+    mat-icon {
+      font-size: 22px;
+      color: #6b7280;
+    }
+  }
+}
+
+.dialog-footer.secondary {
+  border-top: 1px solid #e5e7eb;
+  padding: 12px 20px;
+  background: #f9fafb;
+}
+
+.form-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+
+  .form-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    &.full-width {
+      flex: 1 1 100%;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #4b5563;
+    }
+
+    input {
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      padding: 8px 10px;
+      font-size: 13px;
+      outline: none;
+
+      &:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2);
+      }
+    }
+  }
+}
+
+.selected-meds-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+  color: #111827;
+
+  li {
+    padding: 4px 0;
+    border-bottom: 1px solid #e5e7eb;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
+.footer-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+

@@ -1,0 +1,65 @@
+<div class="doctor-create-dialog" [class.view-mode]="isViewMode">
+  <!-- Dialog Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <div class="title-section">
+        <app-icon [fontIcon]="'medical_services'" class="title-icon"></app-icon>
+        <h2 class="title">{{ mode | titlecase }} Doctor</h2>
+      </div>
+      <app-icon [fontIcon]="'close'" (iconClick)="onCancel()"></app-icon>
+    </div>
+  </div>
+
+  <!-- Dialog Content -->
+  <div class="dialog-content">
+    <form [formGroup]="doctorForm" (ngSubmit)="onSubmit()" class="form">
+      <div class="section-title-wrapper"><h4 class="section-title">Doctor Details</h4></div>
+      <div class="form-row">
+        <app-input label="First Name" formControlName="firstName" placeholder="Enter first name" [required]="true" ></app-input>
+        <app-input label="Last Name" formControlName="lastName" placeholder="Enter last name" [required]="true" ></app-input>
+      </div>
+      <div class="form-row">
+        <app-input label="Registration Number" formControlName="registrationNumber" placeholder="Enter registration number" [required]="true" ></app-input>
+        <app-input label="Hospital ID" formControlName="hospitalId" placeholder="Enter hospital ID" [required]="true" ></app-input>
+      </div>
+      <div class="form-row">
+        <app-input label="Specialization" formControlName="specialization" placeholder="Enter specialization" [required]="true" ></app-input>
+        <app-input label="Global Number" formControlName="globalNumber" placeholder="Enter global number" [required]="true" ></app-input>
+      </div>
+      <div class="form-row">
+        <app-input label="Personal Number" formControlName="persanalNumber" placeholder="Enter personal number" [required]="true" ></app-input>
+        <app-input label="Email" formControlName="email" placeholder="Enter email" [required]="true" ></app-input>
+      </div>
+      <div class="form-row">
+        <app-input label="Qualifications" formControlName="qualifications" placeholder="Enter qualifications" [required]="true" ></app-input>
+        <app-input label="Profile Image URL" formControlName="profileImageUrl" placeholder="Enter profile image URL" ></app-input>
+      </div>
+      <div class="form-row">
+        <app-selectbox label="Status" formControlName="doctorStatus" [options]="doctorStatusOptions" placeholder="Select status" [required]="true" [displayExpr]="'label'"></app-selectbox>
+        <app-input label="Department ID" formControlName="departmentId" placeholder="Enter department ID" [required]="true" ></app-input>
+      </div>
+    </form>
+  </div>
+
+  <!-- Dialog Footer -->
+  <div class="dialog-footer">
+    <div class="footer-actions">
+      <app-button
+        type="button"
+        *ngIf="!isViewMode"
+        appearance="basic"
+        (btnClick)="onCancel()"
+        [text]="'Cancel'"
+        class="cancel-btn">
+      </app-button>
+      <app-button
+        type="button"
+        [appearance]="isViewMode ? 'basic' : 'raised'"
+        [disabled]="doctorForm.invalid && !isViewMode"
+        (btnClick)="onSubmit()"
+        [text]="submitButtonText"
+        class="submit-btn">
+      </app-button>
+    </div>
+  </div>
+</div> 

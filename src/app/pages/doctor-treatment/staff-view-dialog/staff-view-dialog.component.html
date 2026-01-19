@@ -1,0 +1,151 @@
+<div class="staff-view-dialog">
+  <div class="dialog-layout">
+    <!-- Left Column: Profile Information -->
+    <div class="left-column">
+      <div class="profile-section">
+        <div class="avatar-container">
+          <div class="staff-avatar" [style.background-color]="'#10b981'">
+            {{ getStaffInitial(staff.name) }}
+          </div>
+          <button class="edit-avatar-btn" (click)="editProfile()" title="Edit Profile">
+            <app-icon fontIcon="edit" [size]="14" [color]="'#fff'"></app-icon>
+          </button>
+        </div>
+        
+        <div class="profile-info">
+          <h2 class="staff-name">{{ staff.name }}</h2>
+          <p class="staff-role">{{ staff.role }}</p>
+        </div>
+      </div>
+
+      <div class="contact-details">
+        <div class="detail-item">
+          <span class="detail-label">Status:</span>
+          <span class="detail-value" [style.color]="getStatusColor(staff.status)">
+            {{ getStatusText(staff.status) }}
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Email:</span>
+          <span class="detail-value">{{ staff.email || 'N/A' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Number:</span>
+          <span class="detail-value">{{ staff.phone || 'N/A' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Work address:</span>
+          <span class="detail-value">{{ staff.workAddress || 'N/A' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Reports to:</span>
+          <span class="detail-value">{{ staff.reportsTo || 'N/A' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Metrics and Information -->
+    <div class="right-column">
+      <!-- Workload Balance Section -->
+      <div class="metrics-section">
+        <h3 class="section-title">Workload Balance</h3>
+        <div class="balance-cards">
+          <div class="balance-card">
+            <div class="balance-circle" [style.background-color]="'#3b82f6'">
+              <span class="balance-number">{{ staff.currentPatients }}</span>
+              <span class="balance-label">available</span>
+            </div>
+            <div class="balance-info">
+              <div class="balance-type">Patients</div>
+              <div class="balance-total">{{ staff.currentPatients }} available (Among {{ staff.maxPatients }} days)</div>
+            </div>
+          </div>
+          <div class="balance-card">
+            <div class="balance-circle" [style.background-color]="getWorkloadColor(staff.workload)">
+              <span class="balance-number">{{ 100 - staff.workload }}</span>
+              <span class="balance-label">available</span>
+            </div>
+            <div class="balance-info">
+              <div class="balance-type">Capacity</div>
+              <div class="balance-total">{{ 100 - staff.workload }}% available (Among 100%)</div>
+            </div>
+          </div>
+          <div class="balance-card">
+            <div class="balance-circle" [style.background-color]="'#10b981'">
+              <span class="balance-number">{{ staff.performance.roundsCompleted }}</span>
+              <span class="balance-label">available</span>
+            </div>
+            <div class="balance-info">
+              <div class="balance-type">Rounds</div>
+              <div class="balance-total">{{ staff.performance.roundsCompleted }} completed this month</div>
+            </div>
+          </div>
+          <div class="balance-card">
+            <div class="balance-circle" [style.background-color]="'#f59e0b'">
+              <span class="balance-number">{{ staff.performance.tasksCompleted }}</span>
+              <span class="balance-label">available</span>
+            </div>
+            <div class="balance-info">
+              <div class="balance-type">Tasks</div>
+              <div class="balance-total">{{ staff.performance.tasksCompleted }} completed this month</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming Schedule Section -->
+      <div class="schedule-section">
+        <h3 class="section-title">Upcoming Schedule</h3>
+        <div class="schedule-table">
+          <div class="table-header">
+            <div class="table-col">Shift Type</div>
+            <div class="table-col">Duration</div>
+            <div class="table-col">Status</div>
+            <div class="table-col"></div>
+          </div>
+          <div class="table-row">
+            <div class="table-col">{{ staff.shift }}</div>
+            <div class="table-col">
+              {{ staff.nextShift ? (staff.nextShift | date:'dd MMM yyyy') : 'Ongoing' }}
+              <span *ngIf="staff.nextShift"> → {{ staff.nextShift | date:'dd MMM yyyy' }}</span>
+            </div>
+            <div class="table-col">
+              <span class="status-dot" [style.background-color]="getStatusColor(staff.status)"></span>
+              Active
+            </div>
+            <div class="table-col">
+              <a href="#" class="view-link">View</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tasks / Performance Section -->
+      <div class="tasks-section">
+        <div class="section-tabs">
+          <button class="tab-button active">Tasks</button>
+          <button class="tab-button">Performance</button>
+        </div>
+        <div class="tasks-table">
+          <div class="table-header">
+            <div class="table-col">Task Type</div>
+            <div class="table-col">Duration</div>
+            <div class="table-col">Status</div>
+            <div class="table-col"></div>
+          </div>
+          <div class="table-row">
+            <div class="table-col">Patient Rounds</div>
+            <div class="table-col">This Month</div>
+            <div class="table-col">
+              <span class="status-dot" [style.background-color]="'#f59e0b'"></span>
+              In Progress
+            </div>
+            <div class="table-col">
+              <a href="#" class="view-link">View</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

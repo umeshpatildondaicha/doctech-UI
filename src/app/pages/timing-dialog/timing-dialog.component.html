@@ -1,0 +1,278 @@
+<div class="timing-dialog" [class.view-mode]="isViewMode">
+  <!-- Dialog Content -->
+  <div class="dialog-content">
+    <form [formGroup]="timingForm" (ngSubmit)="onSubmit()" class="form">
+      
+      <!-- Time For Section -->
+      <div class="form-row">
+        <mat-form-field>
+          <mat-label>Time For</mat-label>
+          <mat-select 
+            formControlName="timeFor" 
+            placeholder="Select time frequency" 
+            [required]="true">
+            <mat-option *ngFor="let option of timeForOptions" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <ng-container *ngIf="timingData.timeFor !== 'leave'">
+          <!-- Working Hours Section -->
+          <div class="working-hours-section">
+            <div class="section-header">
+              <h4 class="section-title">Working Hours:</h4>
+              <span class="time-range">{{ getAppointmentTimeRange() }}</span>
+            </div>
+            
+            <div class="time-inputs">
+              <div class="time-row">
+                <app-input 
+                  label="Start Time" 
+                  formControlName="startTime" 
+                  type="time"
+                  placeholder="Start time" 
+                  [required]="true">
+                </app-input>
+                <span class="time-separator">-</span>
+                <app-input 
+                  label="End Time" 
+                  formControlName="endTime" 
+                  type="time"
+                  placeholder="End time" 
+                  [required]="true">
+                </app-input>
+              </div>
+              
+              <!-- Working Hours Validation Error -->
+              <div class="validation-error" *ngIf="getWorkingHoursValidationError()">
+                <span class="error-message">{{ getWorkingHoursValidationError() }}</span>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Scheduling Type Section -->
+      <div class="form-row" *ngIf="timingData.timeFor !== 'leave'">
+        <mat-form-field>
+          <mat-label>Scheduling Type</mat-label>
+          <mat-select 
+            formControlName="schedulingType" 
+            placeholder="Select scheduling type" 
+            [required]="true">
+            <mat-option *ngFor="let option of schedulingTypeOptions" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        
+
+      </div>
+
+      <!-- Scheduling Type Description -->
+      <div class="scheduling-type-info" *ngIf="timingData.timeFor !== 'leave'">
+        <div class="info-card">
+          <app-icon [fontIcon]="timingData.schedulingType === 'slots' ? 'schedule' : 'access_time'" class="info-icon"></app-icon>
+          <div class="info-content">
+            <h4>{{ getSchedulingTypeLabel() }}</h4>
+            <p>{{ getSchedulingTypeDescription() }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leave Form Section -->
+      <div *ngIf="timingData.timeFor === 'leave'" class="leave-form-section">
+        <div class="form-row">
+          <app-date-picker
+            label="Select Date" 
+            formControlName="selectedDate" 
+            placeholder="Select date" 
+            [required]="true">
+          </app-date-picker>
+        </div>
+        <div class="form-row">
+          <app-input 
+            class="leave-reason-input"
+            label="Reason" 
+            formControlName="reason" 
+            placeholder="Enter reason for leave" 
+            [required]="true"
+            [multiline]="true"
+            [rows]="3">
+          </app-input>
+        </div>
+      </div>
+
+      <!-- Regular Timing Form Section -->
+      <div *ngIf="timingData.timeFor === 'daily' || timingData.timeFor === 'weekly' || timingData.timeFor === 'specific_day'" class="regular-timing-section">
+        
+        <!-- Scheduling Type Specific Fields -->
+        <div class="scheduling-fields">
+          <div class="form-row field-gapping">
+            <!-- Slot-based scheduling fields -->
+            <app-input 
+              *ngIf="timingData.schedulingType === 'slots'"
+              label="Slot Duration (Minutes)" 
+              formControlName="slotDuration" 
+              type="number"
+              placeholder="Duration per slot" 
+              [required]="true">
+            </app-input>
+            
+            <!-- Flexible scheduling field -->
+            <app-input 
+              *ngIf="timingData.schedulingType === 'flexible'"
+              label="Max Appointments Per Day" 
+              formControlName="maxAppointmentsPerDay" 
+              type="number"
+              placeholder="Maximum appointments per day" 
+              [required]="true">
+            </app-input>
+            
+            <!-- Max Appointments per Slot (only for slot-based) -->
+            <app-input 
+              *ngIf="timingData.schedulingType === 'slots'"
+              label="Max Appointments /Slot" 
+              formControlName="maxAppointmentsPerSlot" 
+              type="number"
+              placeholder="Max appointments per slot" 
+              [required]="true">
+            </app-input>
+          </div>
+          
+          <!-- Available Slots Display (only for slot-based) -->
+          <div class="slots-info" *ngIf="timingData.schedulingType === 'slots' && calculateAvailableSlots() > 0">
+            <div class="info-badge">
+              <app-icon [fontIcon]="'event_available'" class="badge-icon"></app-icon>
+              <span>{{ calculateAvailableSlots() }} available slots</span>
+            </div>
+            <div class="calculation-info">
+              <span class="calculation-text">
+                Total appointments: {{ calculateTotalAppointments() }} 
+                ({{ calculateAvailableSlots() }} slots × {{ timingData.maxAppointmentsPerSlot || 1 }} per slot)
+              </span>
+            </div>
+          </div>
+          
+          <!-- Flexible Scheduling Info (only for flexible) -->
+          <div class="flexible-info" *ngIf="timingData.schedulingType === 'flexible'">
+            <div class="info-badge">
+              <app-icon [fontIcon]="'queue'" class="badge-icon"></app-icon>
+              <span>First come, first served scheduling</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Day Selection Section -->
+        <div class="form-row">
+          <!-- Specific Date Section -->
+          <app-date-picker
+            *ngIf="timingData.timeFor === 'specific_day'" 
+            label="Select Date" 
+            formControlName="selectedDate" 
+            placeholder="Select specific date" 
+            [required]="true">
+          </app-date-picker>
+
+          <div class="day-selection" *ngIf="timingData.timeFor === 'weekly'">
+            <mat-form-field>
+              <mat-label>Select Day</mat-label>
+              <mat-select 
+                formControlName="selectedDays" 
+                placeholder="Select days">
+                <mat-option *ngFor="let option of dayOptions" [value]="option.value">
+                  {{ option.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Appointment Time Section -->
+        <div class="appointment-time-section">
+          <div class="section-header">
+            <h4 class="section-title">Appointment Time:</h4>
+            <span class="time-range">{{ getAppointmentTimeRange() }}</span>
+          </div>
+          
+          <!-- Breaks Section -->
+          <div class="breaks-section">
+            <div formArrayName="breaks">
+              <div *ngFor="let break of breaks.controls; let i = index" [formGroupName]="i" class="break-item">
+                <div class="break-row">
+                  <app-input 
+                    label="Reason" 
+                    formControlName="reason" 
+                    placeholder="Break reason" 
+                    [required]="true">
+                  </app-input>
+                  <div class="break-time">
+                    <div class="time-display">
+                      <app-input 
+                        formControlName="startTime" 
+                        type="time"
+                        [label]="'Start Time'"
+                        placeholder="Start time" 
+                        [required]="true">
+                      </app-input>
+                      <span class="time-separator">-</span>
+                      <app-input 
+                        formControlName="endTime" 
+                        type="time"
+                        [label]="'End Time'"
+                        placeholder="End time" 
+                        [required]="true">
+                      </app-input>
+                      <app-icon *ngIf="(breaks.length > 1) && !isViewMode" [fontIcon]="'close'" (iconClick)="removeBreak(i)" class="remove-break-btn" [isCovered]="true"></app-icon>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Break Validation Errors -->
+                <div class="validation-error" *ngIf="getBreakValidationErrors(i).length > 0">
+                  <span class="error-message" *ngFor="let error of getBreakValidationErrors(i)">{{ error }}</span>
+                </div>
+              </div>
+            </div>
+            <app-button *ngIf="!isViewMode" type="button" class="add-break-btn" (btnClick)="addBreak()" [text]="'ADD BREAK'" [appearance]="'basic'">
+            </app-button>
+          </div>
+        </div>
+
+        <!-- Advanced Options Section -->
+        <div class="advanced-options-section">
+          <div class="section-header" (click)="toggleAdvancedOptions()">
+            <h4 class="section-title">ADVANCE OPTION</h4>
+            <app-icon [fontIcon]="advancedOptionsExpanded ? 'expand_less' : 'expand_more'" class="expand-icon"></app-icon>
+          </div>
+          
+          <div class="advanced-content" *ngIf="advancedOptionsExpanded">
+            <div class="form-row field-gapping">
+              <app-input 
+                [label]="'Buffer Time Btn Slots' + ' (Sec)'" 
+                formControlName="bufferTime" 
+                type="number"
+                placeholder="Buffer time in seconds" 
+                [required]="true">
+              </app-input>
+              
+              <mat-form-field>
+                <mat-label>Slot Prioritization</mat-label>
+                <mat-select 
+                  formControlName="slotPrioritization" 
+                  placeholder="Select priority" 
+                  [required]="true">
+                  <mat-option *ngFor="let option of priorityOptions" [value]="option.value">
+                    {{ option.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      </div> <!-- End of regular-timing-section -->
+    </form>
+  </div>
+
+</div> 

@@ -1,0 +1,26 @@
+.lab-test-order-dialog {
+  .dialog-message {
+    margin: 0 0 20px 0;
+    color: #666;
+    font-size: 14px;
+  }
+
+  .lab-test-order-form {
+    .form-row {
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      label {
+        font-weight: 500;
+        color: #333;
+        font-size: 14px;
+      }
+    }
+  }
+}
+

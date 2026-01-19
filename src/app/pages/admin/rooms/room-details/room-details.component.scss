@@ -1,0 +1,585 @@
+.room-details-page {
+  background: linear-gradient(135deg, var(--page-background-color) 0%, var(--secondary-background-color) 100%);
+  font-family: var(--primary-font-family);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-3xl);
+  background: var(--background-color);
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--card-shadow);
+  border: var(--card-border);
+  
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xl);
+  }
+  
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--text-muted);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    
+    .breadcrumb-item.current {
+      color: var(--text-primary);
+      font-weight: var(--font-weight-semibold);
+    }
+    
+    .breadcrumb-separator {
+      opacity: 0.6;
+      color: var(--text-light);
+    }
+  }
+}
+
+.room-info-card {
+  background: white;
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(10px);
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    
+    .room-title {
+      h1 {
+        margin: 0 0 6px 0;
+        color: #1e293b;
+        font-size: 32px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      
+      .room-type {
+        color: #64748b;
+        font-size: 18px;
+        font-weight: 600;
+      }
+    }
+    
+    .room-status {
+      padding: 8px 16px;
+      border-radius: 25px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      
+      &.status-available {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      }
+      
+      &.status-full {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      }
+      
+      &.status-maintenance {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+      }
+    }
+  }
+  
+  .room-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    
+    .detail-item {
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      
+      .label {
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 6px;
+      }
+      
+      .value {
+        color: #1e293b;
+        font-size: 18px;
+        font-weight: 600;
+      }
+      
+      .facilities {
+        display: flex;
+        gap: 10px;
+        margin-top: 4px;
+        
+        .facility-icon {
+          color: #3b82f6;
+          opacity: 0.8;
+          transition: all 0.2s ease;
+          
+          &:hover {
+            opacity: 1;
+            transform: scale(1.1);
+          }
+        }
+      }
+    }
+  }
+}
+
+.beds-section {
+  background: white;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f1f5f9;
+    
+    h2 {
+      margin: 0;
+      color: #1e293b;
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .bed-summary {
+      color: #64748b;
+      font-size: 14px;
+      font-weight: 600;
+      background: #f8fafc;
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid #e2e8f0;
+    }
+  }
+  
+  .beds-grid-simple {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 20px;
+    max-width: none;
+  }
+}
+
+.bed-item {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 20px;
+  border: 2px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  text-align: center;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  &:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    
+    &::before {
+      opacity: 1;
+    }
+  }
+  
+  &.status-available {
+    background: linear-gradient(135deg, var(--room-available-bg) 0%, var(--status-success-bg) 100%);
+    border-color: var(--room-available-border);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
+    
+    .bed-icon {
+      color: var(--room-available-color);
+    }
+    
+    &:hover {
+      box-shadow: var(--card-hover-shadow);
+    }
+  }
+  
+  &.status-occupied {
+    background: linear-gradient(135deg, var(--room-occupied-bg) 0%, var(--status-danger-bg) 100%);
+    border-color: var(--room-occupied-border);
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
+    
+    .bed-icon {
+      color: var(--room-occupied-color);
+    }
+    
+    &:hover {
+      box-shadow: var(--card-hover-shadow);
+    }
+  }
+  
+  &.status-reserved {
+    background: linear-gradient(135deg, #fffbeb 0%, #fed7aa 100%);
+    border-color: #f59e0b;
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
+    
+    .bed-icon {
+      color: #d97706;
+    }
+    
+    &:hover {
+      box-shadow: 0 12px 32px rgba(245, 158, 11, 0.3);
+    }
+  }
+  
+  &.status-cleaning {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-color: #3b82f6;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+    
+    .bed-icon {
+      color: #2563eb;
+    }
+    
+    &:hover {
+      box-shadow: 0 12px 32px rgba(59, 130, 246, 0.3);
+    }
+  }
+  
+  &.status-maintenance {
+    background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
+    border-color: #eab308;
+    box-shadow: 0 4px 16px rgba(234, 179, 8, 0.2);
+    
+    .bed-icon {
+      color: #ca8a04;
+    }
+    
+    &:hover {
+      box-shadow: 0 12px 32px rgba(234, 179, 8, 0.3);
+    }
+  }
+  
+  .bed-icon {
+    font-size: 28px;
+    margin-bottom: 6px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+  
+  .bed-id {
+    color: #1e293b;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    letter-spacing: 0.5px;
+  }
+  
+  .bed-type {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* Patient Details Overlay */
+.patient-details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease-out;
+  
+  .patient-details-panel {
+    background: white;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 480px;
+    max-height: 85vh;
+    overflow: hidden;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 28px;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border-bottom: 1px solid #e2e8f0;
+      
+      h3 {
+        margin: 0;
+        color: #1e293b;
+        font-size: 20px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      
+      .close-btn {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid #e2e8f0;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 12px;
+        color: #64748b;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background: white;
+          transform: scale(1.05);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+      }
+    }
+    
+    .panel-content {
+      padding: 28px;
+      max-height: 50vh;
+      overflow-y: auto;
+      
+      .patient-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        margin-bottom: 8px;
+        background: #f8fafc;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background: #f1f5f9;
+          transform: translateX(4px);
+        }
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+        
+        .label {
+          color: #64748b;
+          font-size: 13px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          flex: 1;
+        }
+        
+        .value {
+          color: #1e293b;
+          font-size: 14px;
+          font-weight: 600;
+          flex: 1;
+          text-align: right;
+          
+          &.status-occupied {
+            color: #dc2626;
+            background: #fef2f2;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+        }
+      }
+    }
+    
+    .panel-actions {
+      padding: 24px 28px;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      gap: 16px;
+      
+      .action-btn {
+        flex: 1;
+        border-radius: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  
+  .loading-spinner {
+    color: var(--text-secondary);
+    font-size: 16px;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .room-details-page {
+    padding: 16px;
+  }
+  
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 20px;
+    
+    .header-left {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+  }
+  
+  .room-info-card {
+    padding: 20px;
+    
+    .card-header .room-title h1 {
+      font-size: 28px;
+    }
+    
+    .room-details-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+  
+  .beds-section {
+    padding: 20px;
+    
+    .beds-grid-simple {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 16px;
+    }
+  }
+  
+  .bed-item {
+    min-height: 120px;
+    padding: 16px;
+    
+    .bed-icon {
+      font-size: 24px;
+    }
+    
+    .bed-id {
+      font-size: 14px;
+    }
+    
+    .bed-type {
+      font-size: 11px;
+    }
+  }
+  
+  .patient-details-overlay .patient-details-panel {
+    width: 95%;
+    margin: 16px;
+    
+    .panel-header {
+      padding: 20px;
+      
+      h3 {
+        font-size: 18px;
+      }
+    }
+    
+    .panel-content {
+      padding: 20px;
+    }
+    
+    .panel-actions {
+      padding: 20px;
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .beds-grid-simple {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}

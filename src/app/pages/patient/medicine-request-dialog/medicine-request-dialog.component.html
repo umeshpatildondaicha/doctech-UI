@@ -1,0 +1,103 @@
+<div class="medicine-request-dialog">
+  <div class="dialog-content">
+    <form [formGroup]="medicineRequestForm" class="medicine-request-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="medicineName">Medicine Name:</label>
+          <app-input 
+            id="medicineName"
+            formControlName="medicineName"
+            placeholder="Enter medicine name">
+          </app-input>
+        </div>
+        <div class="form-group">
+          <label for="dosage">Dosage:</label>
+          <app-input 
+            id="dosage"
+            formControlName="dosage"
+            placeholder="Enter dosage">
+          </app-input>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="frequency">Frequency:</label>
+          <app-input 
+            id="frequency"
+            formControlName="frequency"
+            placeholder="Enter frequency">
+          </app-input>
+        </div>
+        <div class="form-group">
+          <label for="route">Route:</label>
+          <app-selectbox 
+            id="route"
+            formControlName="route"
+            [options]="routeOptions"
+            placeholder="Select Route">
+          </app-selectbox>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="quantity">Quantity:</label>
+          <app-input 
+            id="quantity"
+            formControlName="quantity"
+            type="number"
+            placeholder="Enter quantity">
+          </app-input>
+        </div>
+        <div class="form-group">
+          <label for="urgency">Urgency:</label>
+          <app-selectbox 
+            id="urgency"
+            formControlName="urgency"
+            [options]="urgencyOptions"
+            placeholder="Select Urgency">
+          </app-selectbox>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="reason">Reason:</label>
+        <textarea 
+          id="reason"
+          formControlName="reason"
+          placeholder="Enter reason for medicine request"
+          rows="2">
+        </textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="currentSymptoms">Current Symptoms:</label>
+        <textarea 
+          id="currentSymptoms"
+          formControlName="currentSymptoms"
+          placeholder="Enter current symptoms (comma separated)"
+          rows="2">
+        </textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="notes">Notes:</label>
+        <textarea 
+          id="notes"
+          formControlName="notes"
+          placeholder="Enter additional notes"
+          rows="2">
+        </textarea>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" formControlName="isPrescriptionRequired">
+          Prescription Required
+        </label>
+      </div>
+    </form>
+  </div>
+</div>
+

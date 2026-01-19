@@ -1,0 +1,16 @@
+<div 
+  class="admin-action-bar"
+  [class]="'layout-' + layout + ' align-' + align + ' size-' + size"
+  [class.full-width]="fullWidth">
+  
+  <app-button
+    *ngFor="let action of actions"
+    [text]="action.text"
+    [fontIcon]="action.icon || ''"
+    [color]="action.color"
+    [disabled]="action.disabled || false"
+    [title]="action.tooltip"
+    (btnClick)="onActionClick(action.id)"
+    class="action-button">
+  </app-button>
+</div>

@@ -1,0 +1,53 @@
+<div class="meal-time-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>schedule</mat-icon>
+      Add Meal Time
+    </h2>
+    <button mat-icon-button (click)="onCancel()" class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div mat-dialog-content class="dialog-content">
+    <p class="dialog-description">
+      Add a new meal time to your weekly schedule. Choose a descriptive name and time.
+    </p>
+
+    <div class="form-section">
+      <mat-form-field appearance="outline" class="meal-name-field">
+        <mat-label>Meal Name</mat-label>
+        <input matInput [(ngModel)]="mealTime.label" placeholder="e.g., Breakfast, Lunch, Snack" maxlength="50">
+        <mat-hint>Enter a descriptive name for this meal</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="meal-time-field">
+        <mat-label>Time</mat-label>
+        <mat-select [(ngModel)]="mealTime.time">
+          <mat-option *ngFor="let time of timeOptions" [value]="time">
+            {{ time }}
+          </mat-option>
+        </mat-select>
+        <mat-hint>Select the time for this meal</mat-hint>
+      </mat-form-field>
+    </div>
+
+    <div class="preview-section" *ngIf="mealTime.label && mealTime.time">
+      <h4>Preview</h4>
+      <div class="preview-card">
+        <div class="preview-time">{{ mealTime.time }}</div>
+        <div class="preview-label">{{ mealTime.label }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div mat-dialog-actions class="dialog-actions">
+    <button mat-stroked-button (click)="onCancel()" class="cancel-btn">
+      Cancel
+    </button>
+    <button mat-raised-button color="primary" (click)="onSave()" [disabled]="!isFormValid()" class="save-btn">
+      <mat-icon>add</mat-icon>
+      Add Meal Time
+    </button>
+  </div>
+</div>

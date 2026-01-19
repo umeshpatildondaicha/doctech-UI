@@ -1,0 +1,22 @@
+.schemes-page {
+  background-color: var(--page-background-color);
+
+  .grid-section {
+    background: var(--admin-card-bg);
+    border-radius: var(--input-radius);
+    box-shadow: var(--primary-shadow);
+    border: var(--admin-border);
+    overflow: hidden;
+
+    .schemes-grid {
+      width: 100%;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .schemes-page {
+    padding: var(--spacing-md);
+  }
+} 

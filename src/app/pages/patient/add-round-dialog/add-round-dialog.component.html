@@ -1,0 +1,126 @@
+<div class="add-round-dialog">
+  <div class="dialog-content">
+    <form [formGroup]="roundForm" class="round-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="roundType">Round Type:</label>
+          <app-selectbox 
+            id="roundType"
+            formControlName="roundType"
+            [options]="roundTypeOptions"
+            placeholder="Select Round Type">
+          </app-selectbox>
+        </div>
+        <div class="form-group">
+          <label for="performedBy">Performed By:</label>
+          <app-input 
+            id="performedBy"
+            formControlName="performedBy"
+            placeholder="Enter performer name">
+          </app-input>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="performedByRole">Role:</label>
+          <app-selectbox 
+            id="performedByRole"
+            formControlName="performedByRole"
+            [options]="performedByRoleOptions"
+            placeholder="Select Role">
+          </app-selectbox>
+        </div>
+        <div class="form-group">
+          <label for="priority">Priority:</label>
+          <app-selectbox 
+            id="priority"
+            formControlName="priority"
+            [options]="priorityOptions"
+            placeholder="Select Priority">
+          </app-selectbox>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="roundDate">Round Date:</label>
+          <app-input 
+            id="roundDate"
+            type="date"
+            formControlName="roundDate"
+            placeholder="Select Date">
+          </app-input>
+        </div>
+        <div class="form-group">
+          <label for="roundTime">Round Time:</label>
+          <app-input 
+            id="roundTime"
+            type="time"
+            formControlName="roundTime"
+            placeholder="Select Time">
+          </app-input>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status:</label>
+        <app-selectbox 
+          id="status"
+          formControlName="status"
+          [options]="statusOptions"
+          placeholder="Select Status">
+        </app-selectbox>
+      </div>
+
+      <div class="form-group">
+        <label for="notes">Notes:</label>
+        <app-input 
+          id="notes"
+          formControlName="notes"
+          [multiline]="true"
+          [rows]="3"
+          placeholder="Enter round notes">
+        </app-input>
+      </div>
+
+      <div class="form-group">
+        <label for="observations">Observations:</label>
+        <app-input 
+          id="observations"
+          formControlName="observations"
+          [multiline]="true"
+          [rows]="2"
+          placeholder="Enter observations (comma separated)">
+        </app-input>
+      </div>
+
+      <div class="form-group">
+        <label for="careInstructions">Care Instructions:</label>
+        <app-input 
+          id="careInstructions"
+          formControlName="careInstructions"
+          [multiline]="true"
+          [rows]="2"
+          placeholder="Enter care instructions (comma separated)">
+        </app-input>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group checkbox-group">
+          <label>
+            <input type="checkbox" formControlName="isCritical">
+            Critical Round
+          </label>
+        </div>
+        <div class="form-group checkbox-group">
+          <label>
+            <input type="checkbox" formControlName="requiresFollowUp">
+            Requires Follow-up
+          </label>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+

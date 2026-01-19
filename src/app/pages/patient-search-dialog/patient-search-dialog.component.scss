@@ -1,0 +1,127 @@
+.patient-search-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+
+  .dialog-content {
+    flex: 1;
+
+    .results-section {
+      .results-header {
+        margin-bottom: 20px;
+
+        .results-title {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 600;
+          color: #1f2937;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          .results-count {
+            font-size: 14px;
+            font-weight: 400;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 12px;
+          }
+        }
+      }
+
+      .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        color: #6b7280;
+
+        mat-spinner {
+          margin-bottom: 16px;
+        }
+
+        p {
+          margin: 0;
+          font-size: 14px;
+        }
+      }
+
+      .no-results {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        text-align: center;
+        color: #6b7280;
+
+        .no-results-icon {
+          margin-bottom: 16px;
+          color: #d1d5db;
+        }
+
+        h3 {
+          margin: 0 0 8px;
+          font-size: 18px;
+          font-weight: 600;
+          color: #374151;
+        }
+
+        p {
+          margin: 0;
+          font-size: 14px;
+        }
+      }
+
+      .patients-grid-container {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+        background: white;
+
+        // Style selected rows
+        ::ng-deep {
+          .ag-row {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+
+            &:hover {
+              background-color: #f9fafb !important;
+            }
+
+            &.ag-row-selected {
+              background-color: #eff6ff !important;
+              border-left: 3px solid #3b82f6 !important;
+              
+              .ag-cell {
+                background-color: transparent !important;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .patient-search-dialog {
+
+
+    .dialog-content {
+
+      .results-section {
+        .results-header {
+          .results-title {
+            font-size: 16px;
+          }
+        }
+      }
+    }
+
+  }
+}

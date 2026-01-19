@@ -1,0 +1,649 @@
+.diet-assignment-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 90vh;
+
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
+    border-bottom: 1px solid #e9ecef;
+
+    h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .close-btn {
+      color: #6c757d;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #f8f9fa;
+        color: #495057;
+      }
+    }
+  }
+
+  .dialog-content {
+    flex: 1;
+
+    .dialog-body {
+      display: flex;
+      height: 100%;
+      min-height: 500px;
+      max-height: calc(90vh - 200px);
+    }
+  }
+
+  // Left Section: Diet Selection
+  .diet-selection-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #e9ecef;
+    padding: 24px;
+    overflow-y: auto;
+    max-height: calc(90vh - 200px);
+
+    .selection-controls {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: linear-gradient(180deg, #ffffff 70%, rgba(255,255,255,0.85) 100%);
+      backdrop-filter: saturate(120%) blur(2px);
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+    }
+
+    .browse-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+    }
+
+    .search-inline {
+      margin-bottom: 12px;
+
+      .search-field {
+        width: 100%;
+
+        &.small {
+          ::ng-deep .mat-mdc-text-field-wrapper {
+            background: #f8f9fa;
+            border-radius: 8px;
+            min-height: 36px;
+          }
+          ::ng-deep .mat-mdc-form-field-infix {
+            padding: 6px 10px !important;
+          }
+          ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+            display: none;
+          }
+          ::ng-deep .mat-mdc-form-field-icon-prefix,
+          ::ng-deep .mat-mdc-form-field-icon-suffix,
+          ::ng-deep .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button,
+          ::ng-deep .mat-mdc-icon-button {
+            width: 32px;
+            height: 32px;
+          }
+          ::ng-deep .mat-mdc-form-field-icon-suffix .mat-icon,
+          ::ng-deep .mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+    }
+
+    .browse-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 6px;
+
+      .tab-btn {
+        appearance: none;
+        border: none;
+        background: transparent;
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 12px;
+        color: #475569;
+        font-weight: 600;
+        font-size: 13px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+
+        .tab-count {
+          background: #e2e8f0;
+          color: #334155;
+          font-size: 11px;
+          font-weight: 700;
+          padding: 2px 8px;
+          border-radius: 999px;
+        }
+
+        &:hover {
+          background: #e2e8f0;
+        }
+
+        &.active {
+          color: #0b5ed7;
+          background: linear-gradient(135deg, #e0ecff 0%, #d6e4ff 100%);
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+
+          .tab-count {
+            background: rgba(11, 94, 215, 0.15);
+            color: #0b5ed7;
+          }
+        }
+      }
+    }
+
+    .diet-plans-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      flex: 1;
+      overflow-y: auto;
+
+      .diet-plan-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        background: white;
+        border-bottom: 1px solid #e9ecef;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background: #f8f9fa;
+        }
+
+        &.selected {
+          background: #eff6ff;
+        }
+
+        .plan-info {
+          flex: 1;
+
+          .plan-name {
+            margin: 0 0 4px 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+          }
+
+          .plan-calories {
+            margin: 0;
+            font-size: 13px;
+            color: #6c757d;
+          }
+        }
+
+        .plan-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+
+          .view-btn {
+            color: #6c757d;
+
+            &:hover {
+              background: #f8f9fa;
+              color: #2563eb;
+            }
+
+            mat-icon {
+              font-size: 20px;
+              width: 20px;
+              height: 20px;
+            }
+          }
+
+          .check-icon {
+            color: #2563eb;
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+          }
+
+          .add-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e3f2fd;
+            color: #1976d2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+
+            mat-icon {
+              font-size: 24px;
+              width: 24px;
+              height: 24px;
+            }
+
+            &:hover {
+              background: #1976d2;
+              color: white;
+              transform: scale(1.1);
+            }
+          }
+        }
+      }
+    }
+
+    .individual-diets-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      flex: 1;
+      overflow-y: auto;
+
+      .diet-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        background: white;
+        border-bottom: 1px solid #e9ecef;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background: #f8f9fa;
+        }
+
+        &.selected {
+          background: #eff6ff;
+        }
+
+        .diet-item-info {
+          flex: 1;
+
+          .diet-item-name {
+            margin: 0 0 4px 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+          }
+
+          .diet-item-meta {
+            margin: 0;
+            font-size: 13px;
+            color: #6c757d;
+          }
+        }
+
+        .diet-item-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+
+          .check-icon {
+            color: #2563eb;
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+          }
+
+          .add-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e3f2fd;
+            color: #1976d2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+
+            mat-icon {
+              font-size: 24px;
+              width: 24px;
+              height: 24px;
+            }
+
+            &:hover {
+              background: #1976d2;
+              color: white;
+              transform: scale(1.1);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Right Section: Assignment Summary
+  .assignment-summary-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    max-width: 400px;
+
+    h3 {
+      margin: 0 0 20px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .summary-content {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .selected-plan-card {
+      background: white;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 20px;
+
+      .plan-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+
+        h4 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #2c3e50;
+          flex: 1;
+        }
+
+        .remove-btn {
+          color: #dc3545;
+          flex-shrink: 0;
+
+          &:hover {
+            background: #fff5f5;
+          }
+
+          mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+        }
+      }
+
+      .plan-details {
+        .detail-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 12px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #f1f3f5;
+
+          &:last-of-type {
+            border-bottom: none;
+            margin-bottom: 16px;
+            padding-bottom: 0;
+          }
+
+          .detail-label {
+            font-size: 13px;
+            color: #6c757d;
+            font-weight: 500;
+          }
+
+          .detail-value {
+            font-size: 13px;
+            color: #2c3e50;
+            font-weight: 600;
+            text-align: right;
+          }
+        }
+
+        .plan-description {
+          margin: 16px 0 0 0;
+          font-size: 13px;
+          color: #6c757d;
+          line-height: 1.5;
+        }
+      }
+    }
+
+    .compatibility-message {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #d1fae5;
+      border: 1px solid #a7f3d0;
+      border-radius: 8px;
+      color: #065f46;
+      font-size: 13px;
+      font-weight: 500;
+
+      .check-icon {
+        color: #10b981;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+      }
+    }
+
+    .selected-diets-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+
+      .selected-diet-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+
+        &:hover {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .diet-info {
+          flex: 1;
+
+          .diet-name {
+            margin: 0 0 4px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+          }
+
+          .diet-meta {
+            margin: 0;
+            font-size: 12px;
+            color: #6c757d;
+          }
+        }
+
+        .remove-btn {
+          color: #dc3545;
+          flex-shrink: 0;
+
+          &:hover {
+            background: #fff5f5;
+          }
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+      color: #6c757d;
+
+      .empty-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+
+      p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+    }
+  }
+
+  // Footer
+  .dialog-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-top: 1px solid #e9ecef;
+    background: white;
+    margin-top: 0;
+
+    .footer-left {
+      .date-fields {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .date-picker {
+        width: 200px;
+
+        ::ng-deep .mat-mdc-form-field {
+          .mat-mdc-text-field-wrapper {
+            background: #f8f9fa;
+            border-radius: 8px;
+          }
+        }
+      }
+    }
+
+    .footer-right {
+      display: flex;
+      gap: 12px;
+
+      .cancel-btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        color: #6c757d;
+        border-color: #dee2e6;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: #f8f9fa;
+          border-color: #adb5bd;
+        }
+      }
+
+      .confirm-btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        background: #2563eb;
+        color: white;
+
+        &:hover:not(:disabled) {
+          background: #1d4ed8;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1024px) {
+  .diet-assignment-dialog {
+    .dialog-content {
+      .dialog-body {
+        flex-direction: column;
+
+        .diet-selection-section,
+        .assignment-summary-section {
+          border-right: none;
+          border-bottom: 1px solid #e9ecef;
+          max-height: 50%;
+          max-width: 100%;
+        }
+      }
+    }
+  }
+}
+
+

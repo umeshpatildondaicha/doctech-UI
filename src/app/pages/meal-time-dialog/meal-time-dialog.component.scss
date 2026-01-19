@@ -1,0 +1,208 @@
+.meal-time-dialog {
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
+    border-bottom: 1px solid #e9ecef;
+
+    h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      mat-icon {
+        color: var(--primary-color);
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    .close-btn {
+      color: #6c757d;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #f8f9fa;
+        color: #495057;
+      }
+    }
+  }
+
+  .dialog-content {
+
+    .dialog-description {
+      margin: 0 0 24px 0;
+      color: #6c757d;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .form-section {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-bottom: 24px;
+
+      .meal-name-field,
+      .meal-time-field {
+        width: 100%;
+
+        ::ng-deep .mat-mdc-form-field {
+          .mat-mdc-text-field-wrapper {
+            background: #f8f9fa;
+            border-radius: 8px;
+          }
+        }
+      }
+    }
+
+    .preview-section {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      border: 2px dashed #dee2e6;
+
+      h4 {
+        margin: 0 0 12px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #495057;
+      }
+
+      .preview-card {
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+        .preview-time {
+          background: var(--primary-color);
+          color: white;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 600;
+          min-width: 80px;
+          text-align: center;
+        }
+
+        .preview-label {
+          font-size: 16px;
+          font-weight: 600;
+          color: #495057;
+        }
+      }
+    }
+  }
+
+  .dialog-actions {
+    padding: 0 24px 24px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    border-top: 1px solid #e9ecef;
+    margin-top: 0;
+
+    .cancel-btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 500;
+      color: #6c757d;
+      border-color: #dee2e6;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+      }
+    }
+
+    .save-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 600px) {
+  .meal-time-dialog {
+    .dialog-header {
+      padding: 16px 16px 0 16px;
+
+      h2 {
+        font-size: 18px;
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+
+    .dialog-content {
+
+      .form-section {
+        gap: 16px;
+      }
+
+      .preview-section {
+        padding: 16px;
+
+        .preview-card {
+          padding: 12px;
+          flex-direction: column;
+          text-align: center;
+          gap: 8px;
+
+          .preview-time {
+            min-width: auto;
+            width: fit-content;
+          }
+        }
+      }
+    }
+
+    .dialog-actions {
+      padding: 0 16px 16px 16px;
+      flex-direction: column;
+
+      .cancel-btn,
+      .save-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+}

@@ -1,0 +1,297 @@
+<app-page [breadcrumb]="breadcrumb" [isFooter]="false">
+  <div page-body class="service-details-page">
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="isLoading">
+      <div class="loading-spinner">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading service details...</p>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" *ngIf="!isLoading && service">
+
+      <!-- Service Header -->
+      <div class="service-header">
+        <div class="service-info">
+          <div class="service-icon" [style.background]="service.backgroundColor">
+            <app-icon [fontIcon]="service.icon" [size]="32" style="color: white;"></app-icon>
+          </div>
+          <div class="service-details-header">
+            <h1>{{ service.name }}</h1>
+            <div class="service-meta">
+              <span class="category">{{ getCategoryLabel(service.category) }}</span>
+              <span class="separator">•</span>
+              <span class="department">{{ service.department }}</span>
+              <span class="separator">•</span>
+              <span class="status" [class]="getAvailabilityClass(service.availability)">
+                {{ service.availability }}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="service-actions">
+          <app-button 
+            [text]="isEditMode ? 'Cancel' : 'Edit Service'" 
+            [color]="isEditMode ? 'accent' : 'primary'" 
+            [fontIcon]="isEditMode ? 'close' : 'edit'"
+            (btnClick)="isEditMode ? cancelEdit() : toggleEditMode()">
+          </app-button>
+          
+          <app-button 
+            *ngIf="isEditMode"
+            [text]="isSaving ? 'Saving...' : 'Save Changes'" 
+            [color]="'primary'" 
+            [fontIcon]="'save'"
+            [disabled]="isSaving"
+            (btnClick)="saveService()">
+          </app-button>
+        </div>
+      </div>
+
+      <!-- Service Overview -->
+      <div class="service-overview">
+        <div class="overview-card">
+          <div class="overview-stats">
+            <div class="stat-item">
+              <div class="stat-icon">
+                <app-icon fontIcon="attach_money" [size]="24" [color]="'white'"></app-icon>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value">${{ service.price }}</div>
+                <div class="stat-label">Price</div>
+              </div>
+            </div>
+            
+            <div class="stat-item">
+              <div class="stat-icon">
+                <app-icon fontIcon="schedule" [size]="24"></app-icon>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value">{{ service.duration }} min</div>
+                <div class="stat-label">Duration</div>
+              </div>
+            </div>
+            
+            <div class="stat-item">
+              <div class="stat-icon">
+                <app-icon fontIcon="star" [size]="24"></app-icon>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value">
+                  <span class="stars">{{ getStars(service.rating) }}</span>
+                  {{ service.rating }}
+                </div>
+                <div class="stat-label">Rating</div>
+              </div>
+            </div>
+            
+            <div class="stat-item">
+              <div class="stat-icon">
+                <app-icon fontIcon="medical_services" [size]="24"></app-icon>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value">{{ service.consultationType }}</div>
+                <div class="stat-label">Type</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="service-description">
+            <h3>Description</h3>
+            <p>{{ service.description }}</p>
+          </div>
+          
+          <div class="service-tags" *ngIf="service.tags?.length">
+            <h3>Tags</h3>
+            <div class="tags-list">
+              <span class="tag" *ngFor="let tag of service.tags">{{ tag }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Service Details -->
+      <div class="service-details">
+        <!-- Performance Metrics -->
+        <div class="metrics-section" *ngIf="service.metrics">
+          <h3>Performance Metrics</h3>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-icon">
+                <app-icon fontIcon="event" [size]="24"></app-icon>
+              </div>
+              <div class="metric-info">
+                <div class="metric-value">{{ service.metrics.bookings }}</div>
+                <div class="metric-label">Total Bookings</div>
+              </div>
+            </div>
+            
+            <div class="metric-card">
+              <div class="metric-icon">
+                <app-icon fontIcon="attach_money" [size]="24"></app-icon>
+              </div>
+              <div class="metric-info">
+                <div class="metric-value">${{ service.metrics.revenue }}</div>
+                <div class="metric-label">Revenue</div>
+              </div>
+            </div>
+            
+            <div class="metric-card">
+              <div class="metric-icon">
+                <app-icon fontIcon="pie_chart" [size]="24"></app-icon>
+              </div>
+              <div class="metric-info">
+                <div class="metric-value">{{ service.metrics.capacity }}%</div>
+                <div class="metric-label">Capacity</div>
+              </div>
+            </div>
+            
+            <div class="metric-card">
+              <div class="metric-icon">
+                <app-icon fontIcon="sentiment_satisfied" [size]="24"></app-icon>
+              </div>
+              <div class="metric-info">
+                <div class="metric-value">{{ service.metrics.satisfaction }}%</div>
+                <div class="metric-label">Satisfaction</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Capacity Info -->
+        <div class="capacity-section" *ngIf="service.capacity">
+          <h3>Capacity Information</h3>
+          <div class="capacity-info">
+            <div class="capacity-stats">
+              <div class="capacity-item">
+                <span class="label">Current:</span>
+                <span class="value">{{ service.capacity.currentBookings }}</span>
+              </div>
+              <div class="capacity-item">
+                <span class="label">Maximum:</span>
+                <span class="value">{{ service.capacity.maxBookings }}</span>
+              </div>
+            </div>
+            <div class="capacity-bar">
+              <div class="bar-label">Utilization</div>
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="getCapacityPercentage()"></div>
+              </div>
+              <div class="bar-value">{{ getCapacityPercentage() | number:'1.0-0' }}%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Insurance Info -->
+        <div class="insurance-section" *ngIf="service.insurance">
+          <h3>Insurance Coverage</h3>
+          <div class="insurance-info">
+            <div class="coverage">
+              <span class="coverage-value">{{ service.insurance.coverage }}%</span>
+              <span class="coverage-label">Coverage Rate</span>
+            </div>
+            <div class="billing-codes" *ngIf="service.insurance.codes?.length">
+              <h4>Billing Codes</h4>
+              <div class="codes">
+                <span class="code" *ngFor="let code of service.insurance.codes">{{ code }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Form -->
+        <div class="edit-section" *ngIf="isEditMode">
+          <h3>Edit Service</h3>
+          <form [formGroup]="serviceForm" (ngSubmit)="saveService()">
+            <div class="form-fields">
+              <div class="form-field">
+                <app-input
+                  label="Service Name"
+                  placeholder="Enter service name"
+                  formControlName="name"
+                  [errorMessage]="name?.invalid && name?.touched ? 'Service name is required' : ''">
+                </app-input>
+              </div>
+              
+              <div class="form-field">
+                <app-input
+                  label="Department"
+                  placeholder="Enter department"
+                  formControlName="department"
+                  [errorMessage]="department?.invalid && department?.touched ? 'Department is required' : ''">
+                </app-input>
+              </div>
+              
+              <div class="form-field">
+                <app-input
+                  label="Price"
+                  placeholder="Enter price"
+                  type="number"
+                  formControlName="price"
+                  [errorMessage]="price?.invalid && price?.touched ? 'Valid price is required' : ''">
+                </app-input>
+              </div>
+              
+              <div class="form-field">
+                <app-selectbox
+                  label="Availability"
+                  [options]="availabilityOptions"
+                  formControlName="availability">
+                </app-selectbox>
+              </div>
+              
+              <div class="form-field">
+                <app-input
+                  label="Duration (minutes)"
+                  placeholder="Enter duration"
+                  type="number"
+                  formControlName="duration"
+                  [errorMessage]="duration?.invalid && duration?.touched ? 'Valid duration is required' : ''">
+                </app-input>
+              </div>
+              
+              <div class="form-field">
+                <app-selectbox
+                  label="Consultation Type"
+                  [options]="consultationTypeOptions"
+                  formControlName="consultationType">
+                </app-selectbox>
+              </div>
+              
+              <div class="form-field">
+                <app-selectbox
+                  label="Category"
+                  [options]="categoryOptions"
+                  formControlName="category">
+                </app-selectbox>
+              </div>
+              
+              <div class="form-field">
+                <app-selectbox
+                  label="Status"
+                  [options]="statusOptions"
+                  formControlName="status">
+                </app-selectbox>
+              </div>
+              
+              <div class="form-field full-width">
+                <label>Description</label>
+                <textarea 
+                  formControlName="description" 
+                  placeholder="Enter service description"
+                  rows="4"
+                  class="form-textarea">
+                </textarea>
+                <div class="error-message" *ngIf="description?.invalid && description?.touched">
+                  Description is required
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-page>

@@ -1,0 +1,313 @@
+<div class="doctor-management-page">
+  <!-- 1. Doctor Quick Actions Panel (Top Section) -->
+  <div class="quick-actions-panel">
+    <div class="actions-left">
+      <button class="action-btn primary" (click)="addNewDoctor()">
+        <mat-icon>add</mat-icon>
+        Add New Doctor
+      </button>
+
+    </div>
+    <div class="actions-right">
+      <button class="action-btn secondary" (click)="toggleViewMode()">
+        <mat-icon>{{ viewMode === 'table' ? 'view_module' : 'table_view' }}</mat-icon>
+        {{ viewMode === 'table' ? 'Cards' : 'Table' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. Mini Dashboard/Stats Bar -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-number">{{ stats.total }}</div>
+      <div class="stat-label">Total Doctors</div>
+    </div>
+    <div class="stat-card active">
+      <div class="stat-number">{{ stats.active }}</div>
+      <div class="stat-label">Active Today</div>
+    </div>
+    <div class="stat-card on-leave">
+      <div class="stat-number">{{ stats.onLeave }}</div>
+      <div class="stat-label">On Leave</div>
+    </div>
+    <div class="stat-card inactive">
+      <div class="stat-number">{{ stats.inactive }}</div>
+      <div class="stat-label">Inactive</div>
+    </div>
+    <div class="stat-card specializations">
+      <div class="stat-number">{{ getSpecializationCount() }}</div>
+      <div class="stat-label">Specializations</div>
+    </div>
+  </div>
+
+  <!-- 3. Search and Filters Section -->
+  <div class="filters-section">
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input 
+        type="text" 
+        placeholder="Search by ID, Name, Phone, or Specialization..."
+        [(ngModel)]="searchTerm"
+        (input)="applyFilters()"
+      >
+    </div>
+    
+    <div class="filters">
+      <mat-select 
+        placeholder="Specialization" 
+        multiple 
+        [(ngModel)]="selectedSpecializations"
+        (selectionChange)="applyFilters()"
+      >
+        <mat-option *ngFor="let spec of specializations" [value]="spec">
+          {{ spec }}
+        </mat-option>
+      </mat-select>
+
+      <mat-select 
+        placeholder="Hospital" 
+        multiple 
+        [(ngModel)]="selectedHospitals"
+        (selectionChange)="applyFilters()"
+      >
+        <mat-option *ngFor="let hospital of hospitals" [value]="hospital">
+          {{ hospital }}
+        </mat-option>
+      </mat-select>
+
+      <mat-select 
+        placeholder="Status" 
+        multiple 
+        [(ngModel)]="selectedStatuses"
+        (selectionChange)="applyFilters()"
+      >
+        <mat-option *ngFor="let status of statuses" [value]="status">
+          {{ status }}
+        </mat-option>
+      </mat-select>
+
+      <mat-select 
+        placeholder="Availability" 
+        multiple 
+        [(ngModel)]="selectedAvailability"
+        (selectionChange)="applyFilters()"
+      >
+        <mat-option *ngFor="let availability of availabilityOptions" [value]="availability">
+          {{ availability }}
+        </mat-option>
+      </mat-select>
+
+      <mat-select 
+        placeholder="Sort By" 
+        [(ngModel)]="sortBy"
+        (selectionChange)="applyFilters()"
+      >
+        <mat-option value="name">Name</mat-option>
+        <mat-option value="specialization">Specialization</mat-option>
+        <mat-option value="hospital">Hospital</mat-option>
+        <mat-option value="status">Status</mat-option>
+        <mat-option value="joinedDate">Joined Date</mat-option>
+      </mat-select>
+
+      <button class="sort-btn" (click)="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; applyFilters()">
+        <mat-icon>{{ sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- 4. Bulk Actions Bar -->
+  <div class="bulk-actions" *ngIf="selectedDoctors.length > 0">
+    <div class="bulk-info">
+      <mat-checkbox 
+        [(ngModel)]="selectAll" 
+        (change)="onSelectAll()"
+      >
+        {{ selectedDoctors.length }} doctor(s) selected
+      </mat-checkbox>
+    </div>
+    <div class="bulk-buttons">
+      <button class="bulk-btn">Edit Selected</button>
+      <button class="bulk-btn danger">Delete Selected</button>
+      <button class="bulk-btn">Export Selected</button>
+    </div>
+  </div>
+
+  <!-- 5. Doctor List Content -->
+  <div class="doctors-content">
+    <!-- Table View -->
+    <div class="table-view" *ngIf="viewMode === 'table'">
+      <table class="doctors-table">
+        <thead>
+          <tr>
+            <th>
+              <mat-checkbox 
+                [(ngModel)]="selectAll" 
+                (change)="onSelectAll()"
+              ></mat-checkbox>
+            </th>
+            <th>Doctor ID</th>
+            <th>Profile</th>
+            <th>Specialization</th>
+            <th>Hospital</th>
+            <th>Availability</th>
+            <th>Status</th>
+            <th>Contact</th>
+            <th>Login Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let doctor of filteredDoctors" [class.selected]="selectedDoctors.includes(doctor.id)">
+            <td>
+              <mat-checkbox 
+                [checked]="selectedDoctors.includes(doctor.id)"
+                (change)="onDoctorSelect(doctor.id)"
+              ></mat-checkbox>
+            </td>
+            <td>{{ doctor.id }}</td>
+            <td class="profile-cell">
+              <img [src]="doctor.profilePic" [alt]="doctor.name" class="profile-pic">
+              <div class="profile-info">
+                <div class="name">{{ doctor.name }}</div>
+                <div class="experience">{{ doctor.experience }}</div>
+              </div>
+            </td>
+            <td>
+              <span class="specialization-tag">{{ doctor.specialization }}</span>
+            </td>
+            <td>{{ doctor.hospital }}</td>
+            <td>
+              <span class="availability-badge" [style.background-color]="getAvailabilityColor(doctor.availability)">
+                {{ doctor.availability }}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge" [style.background-color]="getStatusColor(doctor.status)">
+                {{ doctor.status }}
+              </span>
+            </td>
+            <td class="contact-cell">
+              <div class="phone">{{ doctor.phone }}</div>
+              <div class="email">{{ doctor.email }}</div>
+            </td>
+            <td class="login-status">
+              <mat-icon [class.logged-in]="doctor.hasUserAccount" [class.never-logged]="!doctor.hasUserAccount">
+                {{ doctor.hasUserAccount ? 'lock' : 'lock_open' }}
+              </mat-icon>
+              <span class="login-text">{{ doctor.hasUserAccount ? 'Has Account' : 'No Login' }}</span>
+            </td>
+            <td class="actions-cell">
+              <button mat-icon-button [matMenuTriggerFor]="menu" class="action-menu-btn">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="viewDoctor(doctor)">
+                  <mat-icon>visibility</mat-icon>
+                  <span>View</span>
+                </button>
+                <button mat-menu-item (click)="editDoctor(doctor)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                <button mat-menu-item (click)="scheduleDoctor(doctor)">
+                  <mat-icon>schedule</mat-icon>
+                  <span>Schedule</span>
+                </button>
+                <button mat-menu-item (click)="toggleDoctorStatus(doctor)">
+                  <mat-icon>{{ doctor.status === 'Active' ? 'block' : 'check_circle' }}</mat-icon>
+                  <span>{{ doctor.status === 'Active' ? 'Deactivate' : 'Activate' }}</span>
+                </button>
+                <button mat-menu-item (click)="deleteDoctor(doctor)" class="danger">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Cards View -->
+    <div class="cards-view" *ngIf="viewMode === 'cards'">
+      <div class="doctors-grid">
+        <div class="doctor-card" *ngFor="let doctor of filteredDoctors" [class.selected]="selectedDoctors.includes(doctor.id)">
+          <div class="card-header">
+            <mat-checkbox 
+              [checked]="selectedDoctors.includes(doctor.id)"
+              (change)="onDoctorSelect(doctor.id)"
+            ></mat-checkbox>
+            <div class="availability-dot" [style.background-color]="getAvailabilityColor(doctor.availability)"></div>
+          </div>
+          
+          <div class="card-body">
+            <img [src]="doctor.profilePic" [alt]="doctor.name" class="card-profile-pic">
+            <h3 class="doctor-name">{{ doctor.name }}</h3>
+            <p class="doctor-id">{{ doctor.id }}</p>
+            
+            <div class="specialization">
+              <span class="spec-tag">{{ doctor.specialization }}</span>
+            </div>
+            
+            <div class="hospital-info">
+              <mat-icon>location_on</mat-icon>
+              <span>{{ doctor.hospital }}</span>
+            </div>
+            
+            <div class="status-info">
+              <span class="status-badge" [style.background-color]="getStatusColor(doctor.status)">
+                {{ doctor.status }}
+              </span>
+            </div>
+            
+            <div class="contact-info">
+              <div class="phone">{{ doctor.phone }}</div>
+              <div class="email">{{ doctor.email }}</div>
+            </div>
+            
+            <div class="tags">
+              <mat-chip *ngFor="let tag of doctor.tags" class="tag-chip">
+                {{ tag }}
+              </mat-chip>
+            </div>
+            
+            <div class="login-indicator">
+              <mat-icon [class.logged-in]="doctor.hasUserAccount" [class.never-logged]="!doctor.hasUserAccount">
+                {{ doctor.hasUserAccount ? 'lock' : 'lock_open' }}
+              </mat-icon>
+              <span>{{ doctor.hasUserAccount ? 'Has Account' : 'No Login' }}</span>
+            </div>
+          </div>
+          
+          <div class="card-actions">
+            <button class="card-btn" (click)="viewDoctor(doctor)">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button class="card-btn" (click)="editDoctor(doctor)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button class="card-btn" (click)="scheduleDoctor(doctor)">
+              <mat-icon>schedule</mat-icon>
+            </button>
+            <button class="card-btn danger" (click)="deleteDoctor(doctor)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="filteredDoctors.length === 0">
+      <div class="empty-illustration">
+        <mat-icon>medical_services</mat-icon>
+      </div>
+      <h3>No doctors found</h3>
+      <p>No doctors match your current filters. Try adjusting your search criteria.</p>
+      <button class="primary-btn" (click)="addNewDoctor()">
+        <mat-icon>add</mat-icon>
+        Add First Doctor
+      </button>
+    </div>
+  </div>
+</div>

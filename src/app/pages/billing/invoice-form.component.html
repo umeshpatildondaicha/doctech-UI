@@ -1,0 +1,163 @@
+<mat-dialog-content>
+  <form [formGroup]="form" class="invoice-form" (ngSubmit)="save()">
+    <div class="invoice-layout">
+      <!-- Left: Item creation (templates + quick add) -->
+      <div class="left-section">
+        <div class="create-section">
+          <div class="create-header">
+            <h3 class="section-title">Add Items</h3>
+            <span class="items-count">{{ items.length }} item(s)</span>
+          </div>
+
+          <!-- Quick Template Chips -->
+          <div class="quick-templates">
+            <button type="button" mat-stroked-button class="chip" *ngFor="let template of templates" (click)="addTemplate(template)" [disabled]="readonlyMode">
+              <mat-icon>{{ getTemplateIcon(template.id) }}</mat-icon>
+              {{ template.name }}
+            </button>
+          </div>
+
+          <!-- Quick Add Item Form -->
+          <div class="quick-add" [formGroup]="newItemForm">
+            <mat-form-field appearance="outline" class="qa-desc">
+              <mat-label>Description</mat-label>
+              <input matInput formControlName="description" placeholder="e.g., Dressing, Consultation fees" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="qa-qty">
+              <mat-label>Qty</mat-label>
+              <input matInput type="number" min="1" formControlName="quantity" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="qa-price">
+              <mat-label>Unit Price</mat-label>
+              <input matInput type="number" min="0" formControlName="unitPrice" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="qa-discount">
+              <mat-label>Discount</mat-label>
+              <input matInput type="number" min="0" formControlName="discount" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="qa-tax">
+              <mat-label>Tax %</mat-label>
+              <input matInput type="number" min="0" max="100" formControlName="taxRate" />
+            </mat-form-field>
+            <button mat-flat-button color="primary" type="button" (click)="addNewItem()" [disabled]="readonlyMode">
+              <mat-icon>add</mat-icon>
+              Add
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: listing + totals + notes + tax settings -->
+      <div class="right-section">
+        <!-- Items List -->
+        <div class="items-section">
+          <div class="items-header">
+            <h3 class="section-title">Invoice Items</h3>
+            <span class="items-count">{{ items.length }} item(s)</span>
+          </div>
+
+          <div formArrayName="items" class="items-list">
+            <div *ngFor="let g of items.controls; let i = index" [formGroupName]="i" class="item-card">
+              <div class="item-main">
+                <mat-form-field appearance="outline" class="item-description">
+                  <mat-label>Description</mat-label>
+                  <input matInput formControlName="description" placeholder="Item description" />
+                </mat-form-field>
+                
+                <div class="item-details">
+                  <mat-form-field appearance="outline" class="item-qty">
+                    <mat-label>Qty</mat-label>
+                    <input matInput type="number" formControlName="quantity" min="1" />
+                  </mat-form-field>
+                  
+                  <mat-form-field appearance="outline" class="item-price">
+                    <mat-label>Unit Price</mat-label>
+                    <input matInput type="number" formControlName="unitPrice" min="0" />
+                  </mat-form-field>
+                  
+                  <mat-form-field appearance="outline" class="item-discount">
+                    <mat-label>Discount</mat-label>
+                    <input matInput type="number" formControlName="discount" min="0" />
+                  </mat-form-field>
+                  
+                  <mat-form-field appearance="outline" class="item-tax">
+                    <mat-label>Tax %</mat-label>
+                    <input matInput type="number" formControlName="taxRate" min="0" max="100" />
+                  </mat-form-field>
+                </div>
+              </div>
+              
+              <div class="item-footer">
+                <div class="item-total">
+                  Total: <strong>₹ {{ (g.value.quantity * g.value.unitPrice - (g.value.discount || 0)) * (1 + (g.value.taxRate || 0)/100) | number:'1.2-2' }}</strong>
+                </div>
+                <button 
+                  mat-icon-button 
+                  type="button" 
+                  color="warn" 
+                  (click)="removeItem(i)" 
+                  [disabled]="readonlyMode"
+                  matTooltip="Remove item">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+            
+            <div *ngIf="items.length === 0" class="no-items">
+              <mat-icon>receipt_long</mat-icon>
+              <p>No items added yet</p>
+              <p class="hint">Use templates or add custom items to get started</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compact Summary Bar and Notes -->
+        <div class="summary-bar">
+          <div class="summary-item">Sub: <strong>₹ {{ getTotals().subTotal | number:'1.0-2' }}</strong></div>
+          <div class="summary-item">Disc: <strong>₹ {{ getTotals().discountTotal | number:'1.0-2' }}</strong></div>
+          <div class="summary-item">Tax: <strong>₹ {{ getTotals().taxTotal | number:'1.0-2' }}</strong></div>
+          <div class="summary-item total">Total: <strong>₹ {{ getTotals().total | number:'1.0-2' }}</strong></div>
+        </div>
+        <mat-form-field appearance="outline" class="notes-field">
+          <mat-label>Notes</mat-label>
+          <textarea matInput rows="2" formControlName="notes" placeholder="Additional notes..."></textarea>
+        </mat-form-field>
+
+        <div class="tax-settings-card">
+          <h3 class="section-title">Tax Settings</h3>
+          <mat-radio-group [value]="taxMode" (change)="updateTaxMode($event.value)" aria-label="Tax mode">
+            <mat-radio-button value="INTRA">Intra-state (CGST + SGST)</mat-radio-button>
+            <mat-radio-button value="INTER" style="margin-left:12px;">Inter-state (IGST)</mat-radio-button>
+          </mat-radio-group>
+          <div style="margin:12px 0 0 0; font-size:12px; color:#666;">
+            <ng-container *ngIf="taxMode === 'INTRA'; else igstInfo2">
+              Using CGST {{ gstRate }}% + SGST {{ sgstRate }}%
+            </ng-container>
+            <ng-template #igstInfo2>
+              Using IGST {{ igstRate }}%
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pre-footer strip: dates (core dialog footer below is for actions only) -->
+    <div class="footer-dates">
+      <div class="dates-left">
+        <mat-form-field appearance="outline">
+          <mat-label>Invoice Date</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="date" />
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Due Date</mat-label>
+          <input matInput [matDatepicker]="picker2" formControlName="dueDate" />
+          <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+          <mat-datepicker #picker2></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>

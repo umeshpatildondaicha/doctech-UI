@@ -1,0 +1,193 @@
+:host {
+  display: block;
+  background: #fff;
+  border-radius: var(--card-border-radius, 16px);
+  box-shadow: var(--admin-shadow, 0 2px 8px rgba(16, 179, 179, 0.08));
+  padding: var(--spacing-2xl, 24px);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+:host(:hover) {
+  box-shadow: var(--admin-shadow-md, 0 4px 16px rgba(16, 179, 179, 0.12));
+}
+
+.app-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md, 12px);
+  margin-bottom: var(--spacing-xl, 20px);
+}
+
+:host(.app-card--divider) .app-card-header {
+  padding-bottom: var(--spacing-lg, 16px);
+  border-bottom: 1px solid var(--admin-border, #e2e8f0);
+}
+
+:host(.app-card--dense) {
+  padding: var(--spacing-lg, 16px);
+  border-radius: var(--button-border-radius, 12px);
+}
+
+:host(.app-card--dense) .app-card-header {
+  margin-bottom: var(--spacing-lg, 16px);
+}
+
+:host(.app-card--dense).app-card--divider .app-card-header {
+  padding-bottom: var(--spacing-md, 12px);
+}
+
+.app-card-title {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.app-card-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-md, 12px);
+  min-width: 0;
+}
+
+.app-card-separator {
+  color: var(--admin-border, #cbd5e1);
+  font-weight: var(--font-weight-bold, 700);
+  line-height: 1;
+}
+
+.app-card-title-text {
+  font-size: var(--font-size-3xl, 20px);
+  font-weight: var(--font-weight-bold, 700);
+  margin: 0;
+  color: var(--text-primary, #1e293b);
+}
+
+.app-card-subtitle {
+  color: var(--text-muted, #64748b);
+  font-size: var(--font-size-lg, 14px);
+  white-space: nowrap;
+}
+
+:host(.app-card--dense) .app-card-title-text {
+  font-size: var(--font-size-2xl, 18px);
+}
+
+:host(.app-card--dense) .app-card-subtitle {
+  font-size: var(--font-size-md, 12px);
+}
+
+.app-card-actions {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  :host {
+    padding: 16px;
+  }
+}
+
+:host {
+  display: block;
+  background: #fff;
+  border-radius: var(--card-border-radius, 16px);
+  box-shadow: var(--admin-shadow, 0 2px 8px rgba(16, 179, 179, 0.08));
+  padding: var(--spacing-2xl, 24px);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+:host(:hover) {
+  box-shadow: var(--admin-shadow-md, 0 4px 16px rgba(16, 179, 179, 0.12));
+}
+
+.app-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md, 12px);
+  margin-bottom: var(--spacing-xl, 20px);
+}
+
+:host(.app-card--divider) .app-card-header {
+  padding-bottom: var(--spacing-lg, 16px);
+  border-bottom: 1px solid var(--admin-border, #e2e8f0);
+}
+
+:host(.app-card--dense) {
+  padding: var(--spacing-lg, 16px);
+  border-radius: var(--button-border-radius, 12px);
+}
+
+:host(.app-card--dense) .app-card-header {
+  margin-bottom: var(--spacing-lg, 16px);
+}
+
+:host(.app-card--dense).app-card--divider .app-card-header {
+  padding-bottom: var(--spacing-md, 12px);
+}
+
+.app-card-title {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.app-card-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-md, 12px);
+  min-width: 0;
+}
+
+.app-card-separator {
+  color: var(--admin-border, #cbd5e1);
+  font-weight: var(--font-weight-bold, 700);
+  line-height: 1;
+}
+
+.app-card-title-text {
+  font-size: var(--font-size-3xl, 20px);
+  font-weight: var(--font-weight-bold, 700);
+  margin: 0;
+  color: var(--text-primary, #1e293b);
+}
+
+.app-card-subtitle {
+  color: var(--text-muted, #64748b);
+  font-size: var(--font-size-lg, 14px);
+  white-space: nowrap;
+}
+
+:host(.app-card--dense) .app-card-title-text {
+  font-size: var(--font-size-2xl, 18px);
+}
+
+:host(.app-card--dense) .app-card-subtitle {
+  font-size: var(--font-size-md, 12px);
+}
+
+.app-card-actions {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  :host {
+    padding: 16px;
+  }
+}
+
+

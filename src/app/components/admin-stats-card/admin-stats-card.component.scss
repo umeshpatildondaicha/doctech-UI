@@ -1,0 +1,240 @@
+.admin-stats-grid {
+  display: grid;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+  
+  .stat-card {
+    background: var(--admin-card-bg);
+    padding: var(--spacing-md);
+    border-radius: var(--input-radius);
+    box-shadow: var(--primary-shadow);
+    border: var(--admin-border);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    transition: var(--transition-base);
+    position: relative;
+    overflow: hidden;
+    
+    &:hover {
+      transform: translateY(-2px);
+      background: var(--admin-hover-bg);
+      
+      .stat-icon {
+        transform: scale(1.05);
+        transition: transform 0.2s ease;
+      }
+    }
+    
+    .stat-icon {
+      width: var(--primary-icon-width);
+      height: var(--primary-icon-height);
+      border-radius: var(--button-radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--text-muted);
+      transition: var(--transition-base);
+    }
+    
+    .stat-content {
+      flex: 1;
+      min-width: 0;
+      
+      .stat-value {
+        font-size: var(--primary-font-size);
+        font-weight: var(--primary-font-weight);
+        color: var(--admin-text-primary);
+        line-height: 1.1;
+      }
+      
+      .stat-label {
+        color: var(--admin-text-muted);
+        font-size: var(--tertiary-font-size);
+        font-weight: var(--tertiary-font-weight);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: var(--spacing-xs);
+      }
+      
+      .stat-trend {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        font-size: var(--font-size-sm);
+        
+        .trend-positive {
+          color: var(--status-success-color);
+        }
+        
+        .trend-negative {
+          color: var(--status-danger-color);
+        }
+        
+        .trend-value {
+          font-weight: var(--font-weight-semibold);
+        }
+        
+        .trend-label {
+          color: var(--text-muted);
+        }
+      }
+    }
+    
+    // Responsive card layout
+    @media (max-width: 640px) {
+      flex-direction: column;
+      text-align: center;
+      gap: var(--spacing-md);
+      
+      .stat-content {
+        .stat-value {
+          font-size: var(--font-size-4xl);
+        }
+      }
+    }
+  }
+}
+
+// Specific stat card types with light colors
+.stat-card {
+  &.success {
+    border-left: 4px solid var(--status-success-color);
+    background: var(--status-success-bg);
+    
+    .stat-icon {
+      color: var(--status-success-color);
+    }
+  }
+  
+  &.warning {
+    border-left: 4px solid var(--status-warning-color);
+    background: var(--status-warning-bg);
+    
+    .stat-icon {
+      color: var(--status-warning-color);
+    }
+  }
+  
+  &.danger {
+    border-left: 4px solid var(--status-danger-color);
+    background: var(--status-danger-bg);
+    
+    .stat-icon {
+      color: var(--status-danger-color);
+    }
+  }
+  
+  &.info {
+    border-left: 4px solid var(--status-info-color);
+    background: var(--status-info-bg);
+    
+    .stat-icon {
+      color: var(--status-info-color);
+    }
+  }
+}
+
+// Responsive grid adjustments
+@media (max-width: 1200px) {
+  .admin-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Custom icon colors for specific icon types
+.stat-card {
+  .stat-icon {
+    // Medical/Health icons
+    &[data-icon="local_hospital"],
+    &[data-icon="medical_services"] {
+      color: var(--status-danger-color) !important;
+    }
+    
+    // People/Staff icons
+    &[data-icon="groups"],
+    &[data-icon="person"],
+    &[data-icon="person_add"] {
+      color: var(--status-info-color) !important;
+    }
+    
+    // Room/Building icons
+    &[data-icon="meeting_room"],
+    &[data-icon="hotel"] {
+      color: var(--status-neutral-color) !important;
+    }
+    
+    // Analytics/Chart icons
+    &[data-icon="analytics"],
+    &[data-icon="trending_up"],
+    &[data-icon="pie_chart"] {
+      color: var(--status-info-color) !important;
+    }
+    
+    // Emergency/Critical icons
+    &[data-icon="emergency"],
+    &[data-icon="warning"] {
+      color: var(--status-warning-color) !important;
+    }
+    
+    // Shield/Security icons
+    &[data-icon="shield"],
+    &[data-icon="security"] {
+      color: var(--status-info-color) !important;
+    }
+    
+    // Category/Classification icons
+    &[data-icon="category"],
+    &[data-icon="inventory_2"] {
+      color: var(--status-neutral-color) !important;
+    }
+    
+    // Pause/Leave icons
+    &[data-icon="pause_circle"] {
+      color: var(--status-warning-color) !important;
+    }
+    
+    // Check/Success icons
+    &[data-icon="check_circle"] {
+      color: var(--status-success-color) !important;
+    }
+    
+    // Heart/Medical icons
+    &[data-icon="favorite"],
+    &[data-icon="favorite_border"] {
+      color: var(--status-danger-color) !important;
+    }
+    
+    // Schedule/Time icons
+    &[data-icon="schedule"],
+    &[data-icon="access_time"] {
+      color: var(--status-info-color) !important;
+    }
+    
+    // Money/Financial icons
+    &[data-icon="attach_money"],
+    &[data-icon="account_balance_wallet"] {
+      color: var(--status-success-color) !important;
+    }
+    
+    // Settings/Configuration icons
+    &[data-icon="settings"],
+    &[data-icon="tune"] {
+      color: var(--status-neutral-color) !important;
+    }
+  }
+}

@@ -1,0 +1,24 @@
+<app-page [breadcrumb]="breadcrumb" [isFooter]="false">
+  <div page-body class="plans-page">
+  <!-- Page Header -->
+  <app-admin-page-header
+    title="Plans & Offers"
+    subtitle="Manage healthcare plans and offers"
+    [actions]="headerActions"
+    (actionClicked)="onHeaderAction($event)">
+  </app-admin-page-header>
+  
+  <!-- Data Grid -->
+  <div class="grid-section">
+    <app-grid
+      [rowData]="plans"
+      [columnDefs]="columnDefs"
+      [gridOptions]="gridOptions"
+      [height]="'600px'"
+      [animateRows]="true"
+      searchPlaceholder="Search plans..."
+      class="plans-grid">
+    </app-grid>
+  </div>
+</div> 
+</app-page> 

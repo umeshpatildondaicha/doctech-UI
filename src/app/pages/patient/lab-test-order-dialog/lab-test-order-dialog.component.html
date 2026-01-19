@@ -1,0 +1,44 @@
+<div class="lab-test-order-dialog">
+  <div class="dialog-content">
+    <p class="dialog-message">Order lab test for {{ data.patientName }}</p>
+    
+    <form [formGroup]="labTestOrderForm" class="lab-test-order-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="testName">Test Name:</label>
+          <app-input 
+            id="testName"
+            formControlName="testName"
+            placeholder="Enter lab test name (e.g., Complete Blood Count, HbA1c)">
+          </app-input>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="category">Category:</label>
+          <app-selectbox 
+            id="category"
+            formControlName="category"
+            [options]="testCategories"
+            placeholder="Select test category">
+          </app-selectbox>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="notes">Notes (Optional):</label>
+          <app-input 
+            id="notes"
+            formControlName="notes"
+            [multiline]="true"
+            [rows]="3"
+            placeholder="Add any additional notes or instructions">
+          </app-input>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+

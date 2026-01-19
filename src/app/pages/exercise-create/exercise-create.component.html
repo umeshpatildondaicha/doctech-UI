@@ -1,0 +1,182 @@
+<div class="exercise-create-container">
+  <div class="dialog-content">
+    <form [formGroup]="exerciseForm" (ngSubmit)="onSubmit()" class="form">
+      <!-- Basic Information -->
+      <div class="form-section">
+        <h3 class="section-title">Basic Information</h3>
+        <div class="form-row">
+          <app-input
+            label="Name *"
+            formControlName="name"
+            placeholder="Enter exercise name"
+            [required]="true"
+            [errorMessage]="getErrorMessage('name')"
+            class="form-field">
+          </app-input>
+        </div>
+
+        <div class="form-row">
+          <app-selectbox
+            label="Category *"
+            formControlName="category"
+            [options]="categories"
+            placeholder="Select category"
+            [required]="true"
+            [displayExpr]="'label'"
+            [valueField]="'value'"
+            [errorMessage]="getErrorMessage('category')"
+            class="form-field">
+          </app-selectbox>
+
+          <app-selectbox
+            label="Difficulty *"
+            formControlName="difficulty"
+            [options]="difficulties"
+            placeholder="Select difficulty"
+            [required]="true"
+            [displayExpr]="'label'"
+            [valueField]="'value'"
+            [errorMessage]="getErrorMessage('difficulty')"
+            class="form-field">
+          </app-selectbox>
+        </div>
+
+        <div class="form-row">
+          <app-input
+            label="Target Muscles *"
+            formControlName="targetMuscles"
+            placeholder="comma separated (eg. Quads, Glutes)"
+            [required]="true"
+            [errorMessage]="getErrorMessage('targetMuscles')"
+            class="form-field">
+          </app-input>
+
+          <app-input
+            label="Equipment"
+            formControlName="equipment"
+            placeholder="comma separated"
+            class="form-field">
+          </app-input>
+        </div>
+
+        <div class="form-row">
+          <app-input
+            label="Tags"
+            formControlName="tags"
+            placeholder="comma separated"
+            class="form-field">
+          </app-input>
+        </div>
+      </div>
+
+      <!-- Description and Details -->
+      <div class="form-section">
+        <h3 class="section-title">Description & Details</h3>
+        <div class="form-row">
+          <app-input
+            label="Description *"
+            formControlName="description"
+            placeholder="Enter exercise description"
+            [required]="true"
+            [multiline]="true"
+            [rows]="3"
+            [errorMessage]="getErrorMessage('description')"
+            class="form-field full-width">
+          </app-input>
+        </div>
+
+        <div class="form-row">
+          <app-input
+            label="Coaching Cues"
+            formControlName="coachingCues"
+            placeholder="Enter coaching instructions"
+            [multiline]="true"
+            [rows]="3"
+            class="form-field">
+          </app-input>
+
+          <app-input
+            label="Contraindications"
+            formControlName="contraindications"
+            placeholder="Enter contraindications"
+            [multiline]="true"
+            [rows]="3"
+            class="form-field">
+          </app-input>
+        </div>
+      </div>
+
+      <!-- Media Upload -->
+      <div class="form-section">
+        <h3 class="section-title">Media</h3>
+        <div class="form-row">
+          <div class="media-upload">
+            <label class="upload-label">Upload Media (image / gif / video)</label>
+            <input type="file" multiple accept="image/*,video/*" (change)="onFileSelected($event)" class="file-input">
+            <button type="button" mat-stroked-button class="upload-btn">
+              <mat-icon>cloud_upload</mat-icon>
+              Choose files
+            </button>
+            
+            <div class="selected-files" *ngIf="selectedFiles.length > 0">
+              <div class="file-item" *ngFor="let file of selectedFiles; let i = index">
+                <span class="file-name">{{ file.name }}</span>
+                <button type="button" mat-icon-button (click)="removeFile(i)" class="remove-file">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sets Configuration -->
+      <div class="form-section">
+        <h3 class="section-title">Sets Configuration</h3>
+        <div class="sets-container" formArrayName="sets">
+          <div class="set-item" *ngFor="let set of setsArray.controls; let i = index" [formGroupName]="i">
+            <div class="set-header">
+              <h4>Set {{ i + 1 }}</h4>
+              <button type="button" mat-icon-button (click)="removeSet(i)" *ngIf="setsArray.length > 1" class="remove-set">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            
+            <div class="set-fields">
+              <div class="field-group">
+                <label>Reps</label>
+                <input type="number" formControlName="reps" min="1" class="number-input">
+              </div>
+              
+              <div class="field-group">
+                <label>Hold Time (sec)</label>
+                <input type="number" formControlName="holdTime" min="0" class="number-input">
+              </div>
+              
+              <div class="field-group">
+                <label>Rest Time (sec)</label>
+                <input type="number" formControlName="restTime" min="0" class="number-input">
+              </div>
+              
+              <div class="field-group">
+                <label>Tempo</label>
+                <input type="text" formControlName="tempo" class="text-input">
+              </div>
+            </div>
+            
+            <button type="button" mat-stroked-button (click)="applySetToAll(i)" class="apply-set-btn">
+              Apply set{{ i + 1 }} → all
+            </button>
+          </div>
+        </div>
+        
+        <div class="sets-actions">
+          <button type="button" mat-stroked-button color="primary" (click)="addSet()" class="add-set-btn">
+            <mat-icon>add</mat-icon>
+            + Add Set
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div> 

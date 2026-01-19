@@ -1,0 +1,104 @@
+<div class="form-container">
+  <div class="form-header">
+    <h2>{{ isEditMode ? 'Edit Patient' : 'Add New Patient' }}</h2>
+    <a routerLink="/patients" class="back-button">← Back to Patients</a>
+  </div>
+
+  <form [formGroup]="patientForm" (ngSubmit)="onSubmit()" class="patient-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="name">Full Name *</label>
+        <input 
+          type="text" 
+          id="name" 
+          formControlName="name" 
+          placeholder="Enter patient's full name"
+          [class.error]="patientForm.get('name')?.invalid && patientForm.get('name')?.touched"
+        >
+        <div class="error-message" *ngIf="getErrorMessage('name')">
+          {{ getErrorMessage('name') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="age">Age *</label>
+        <input 
+          type="number" 
+          id="age" 
+          formControlName="age" 
+          placeholder="Enter age"
+          [class.error]="patientForm.get('age')?.invalid && patientForm.get('age')?.touched"
+        >
+        <div class="error-message" *ngIf="getErrorMessage('age')">
+          {{ getErrorMessage('age') }}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="phone">Phone Number *</label>
+        <input 
+          type="tel" 
+          id="phone" 
+          formControlName="phone" 
+          placeholder="Enter phone number"
+          [class.error]="patientForm.get('phone')?.invalid && patientForm.get('phone')?.touched"
+        >
+        <div class="error-message" *ngIf="getErrorMessage('phone')">
+          {{ getErrorMessage('phone') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address *</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email" 
+          placeholder="Enter email address"
+          [class.error]="patientForm.get('email')?.invalid && patientForm.get('email')?.touched"
+        >
+        <div class="error-message" *ngIf="getErrorMessage('email')">
+          {{ getErrorMessage('email') }}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="diagnosis">Diagnosis *</label>
+        <input 
+          type="text" 
+          id="diagnosis" 
+          formControlName="diagnosis" 
+          placeholder="Enter diagnosis"
+          [class.error]="patientForm.get('diagnosis')?.invalid && patientForm.get('diagnosis')?.touched"
+        >
+        <div class="error-message" *ngIf="getErrorMessage('diagnosis')">
+          {{ getErrorMessage('diagnosis') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="lastVisit">Last Visit Date *</label>
+        <input 
+          type="date" 
+          id="lastVisit" 
+          formControlName="lastVisit" 
+          [class.error]="patientForm.get('lastVisit')?.invalid && patientForm.get('lastVisit')?.touched"
+        >
+        <div class="error-message" *ngIf="getErrorMessage('lastVisit')">
+          {{ getErrorMessage('lastVisit') }}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" routerLink="/patients" class="cancel-btn">Cancel</button>
+      <button type="submit" [disabled]="patientForm.invalid" class="submit-btn">
+        {{ isEditMode ? 'Update Patient' : 'Add Patient' }}
+      </button>
+    </div>
+  </form>
+</div>

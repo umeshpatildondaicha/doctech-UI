@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="220" height="60" viewBox="0 0 220 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="8" width="44" height="44" rx="12" fill="#18B6B2"/>
+  <g>
+    <rect x="19" y="18" width="6" height="20" rx="3" fill="white"/>
+    <rect x="10" y="27" width="24" height="6" rx="3" fill="white"/>
+  </g>
+  <text x="54" y="40" font-family="'Segoe UI', 'Arial', sans-serif" font-size="32" font-weight="bold" fill="#18B6B2">Shree</text>
+  <text x="143" y="40" font-family="'Segoe UI', 'Arial', sans-serif" font-size="32" font-weight="bold" fill="#111">Clinic</text>
+</svg>

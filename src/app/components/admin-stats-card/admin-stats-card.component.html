@@ -1,0 +1,30 @@
+<div class="admin-stats-grid" [style.grid-template-columns]="getGridColumns()">
+  <div class="stat-card" *ngFor="let stat of stats" [class]="stat.type">
+    <div class="stat-icon" *ngIf="stat.icon" [attr.data-icon]="stat.icon">
+      <app-icon [fontIcon]="stat.icon" [size]="24"></app-icon>
+    </div>
+    
+    <div class="stat-content">
+      <div class="stat-value" [style.color]="stat.valueColor">
+        {{ stat.value }}
+      </div>
+      <div class="stat-label">
+        {{ stat.label }}
+      </div>
+      
+      <div class="stat-trend" *ngIf="showTrends && stat.trend">
+        <app-icon 
+          [fontIcon]="stat.trend.isPositive ? 'trending_up' : 'trending_down'"
+          [size]="16"
+          [class]="stat.trend.isPositive ? 'trend-positive' : 'trend-negative'">
+        </app-icon>
+        <span class="trend-value" [class]="stat.trend.isPositive ? 'trend-positive' : 'trend-negative'">
+          {{ stat.trend.value }}%
+        </span>
+        <span class="trend-label" *ngIf="stat.trend.label">
+          {{ stat.trend.label }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

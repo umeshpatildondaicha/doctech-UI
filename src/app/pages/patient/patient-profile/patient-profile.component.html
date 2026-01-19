@@ -1,0 +1,1548 @@
+<div class="patient-profile-container">
+
+
+
+  <!-- Navigation Tabs -->
+  <div class="tabs-container">
+    <!-- Desktop Vertical Tabs -->
+    <div class="tabs-list-wrapper">
+      <mat-tab-group class="desktop-tabs" (selectedIndexChange)="onTabChange(tabs[$event].id)" orientation="vertical">
+      <mat-tab *ngFor="let tab of tabs" [label]="tab.label">
+        <ng-template mat-tab-label>
+          <div class="tab-label">
+            <app-icon [fontIcon]="tab.icon" [size]="18" [color]="selectedTab === tab.id ? 'white' : 'var(--text-muted)'"></app-icon>
+            {{ tab.label }}
+            <span class="tab-badge" *ngIf="tab.badge > 0">{{ tab.badge }}</span>
+          </div>
+        </ng-template>
+      </mat-tab>
+      </mat-tab-group>
+      <div class="tabs-footer-action">
+        <app-button appearance="stroked" color="primary" (btnClick)="openTabConfig()">
+          <app-icon fontIcon="tune" [size]="16"></app-icon>
+          <span>Customize Tabs</span>
+        </app-button>
+      </div>
+    </div>
+
+    <!-- Mobile Horizontal Tabs -->
+    <div class="mobile-tabs">
+      <div class="tabs-scroll-container">
+        <div class="tabs-scroll-content">
+          <button 
+            *ngFor="let tab of tabs; let i = index" 
+            class="mobile-tab-button"
+            [class.active]="selectedTab === tab.id"
+            (click)="onTabChange(tab.id)">
+            <app-icon [fontIcon]="tab.icon" [size]="16" [color]="selectedTab === tab.id ? 'white' : 'var(--text-muted)'"></app-icon>
+            <span class="tab-text">{{ tab.label }}</span>
+            <span class="tab-badge" *ngIf="tab.badge > 0">{{ tab.badge }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <!-- Overview Tab -->
+    <div *ngIf="selectedTab === 'overview'" class="overview-tab">
+      <!-- Modern Patient Overview -->
+      <div class="modern-overview">
+        
+        <!-- Patient Header Card -->
+        <div class="patient-header-card">
+          <div class="header-content">
+            <div class="patient-avatar-section">
+              <div class="patient-avatar">
+                <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=120&h=120&fit=crop&crop=face" 
+                     alt="Patient Profile" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="avatar-fallback">
+                  <app-icon fontIcon="person" [size]="48" color="var(--text-muted)"></app-icon>
+                </div>
+                <div class="status-indicator" [class]="patientInfo.admissionStatus.toLowerCase()">
+                  <app-icon fontIcon="circle" [size]="14" [color]="patientInfo.admissionStatus === 'IPD' ? 'var(--status-success-color)' : 'var(--status-warning-color)'"></app-icon>
+                </div>
+              </div>
+              <div class="patient-info">
+                <h1 class="patient-name">{{ patientInfo.name }}</h1>
+                <div class="patient-id">
+                  <app-icon fontIcon="assignment_ind" [size]="16" color="var(--primary-color)"></app-icon>
+                  <span>{{ patientInfo.id }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="patient-status-badges">
+              <div class="status-badge" [class]="patientInfo.admissionStatus.toLowerCase()">
+                <app-icon fontIcon="personal_injury" [color]="'var(--primary-text-color)'" [size]="14"></app-icon>
+                <span>{{ patientInfo.admissionStatus }}</span>
+              </div>
+              <div class="status-badge department">
+                <app-icon fontIcon="business" [color]="'var(--primary-text-color)'" [size]="14"></app-icon>
+                <span>{{ patientInfo.department }}</span>
+              </div>
+              <div class="status-badge alert" *ngIf="getAbnormalVitalSigns().length > 0">
+                <app-icon fontIcon="warning" [color]="'var(--primary-text-color)'" [size]="14"></app-icon>
+                <span>{{ getAbnormalVitalSigns().length }} Abnormal Vitals</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Patient Details Card -->
+        <div class="patient-details-card">
+          <div class="card-header">
+            <h2 class="card-title">Patient Details</h2>
+            <button mat-icon-button [matMenuTriggerFor]="actionsMenu" class="actions-menu-btn">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            
+          </div>
+          
+          <!-- Angular Material Menu -->
+          <mat-menu #actionsMenu="matMenu" class="actions-menu">
+            <button mat-menu-item *ngFor="let action of quickActions" (click)="action.action()">
+              <app-icon [fontIcon]="action.icon" [color]="action.color" [size]="25"></app-icon>
+              <span>{{ action.label }}</span>
+            </button>
+          </mat-menu>
+
+          <div class="card-content">
+            <div class="details-grid">
+              <div class="detail-item">
+                <div class="detail-icon">
+                  <app-icon fontIcon="person" [size]="25" color="var(--primary-color)"></app-icon>
+                </div>
+                <div class="detail-info">
+                  <span class="detail-label">Age & Gender</span>
+                  <span class="detail-value">{{ patientInfo.age }} years, {{ patientInfo.gender }}</span>
+                </div>
+              </div>
+              
+              <div class="detail-item">
+                <div class="detail-icon">
+                  <app-icon fontIcon="invert_colors" [size]="25" color="var(--status-danger-color)"></app-icon>
+                </div>
+                <div class="detail-info">
+                  <span class="detail-label">Blood Group</span>
+                  <span class="detail-value">{{ patientInfo.bloodGroup }}</span>
+                </div>
+              </div>
+              
+              <div class="detail-item">
+                <div class="detail-icon">
+                  <app-icon fontIcon="phone" [size]="25" color="var(--status-success-color)"></app-icon>
+                </div>
+                <div class="detail-info">
+                  <span class="detail-label">Contact</span>
+                  <span class="detail-value">{{ patientInfo.contactNumber }}</span>
+                </div>
+              </div>
+              
+              <div class="detail-item">
+                <div class="detail-icon">
+                  <app-icon fontIcon="local_hospital" [size]="25" color="var(--status-info-color)"></app-icon>
+                </div>
+                <div class="detail-info">
+                  <span class="detail-label">Primary Doctor</span>
+                  <span class="detail-value">{{ patientInfo.primaryDoctor }}</span>
+                </div>
+              </div>
+              
+              <div class="detail-item">
+                <div class="detail-icon">
+                  <app-icon fontIcon="priority_high" [size]="25" color="var(--status-warning-color)"></app-icon>
+                </div>
+                <div class="detail-info">
+                  <span class="detail-label">Emergency Contact</span>
+                  <span class="detail-value">{{ patientInfo.emergencyContact }}</span>
+                </div>
+              </div>
+
+              <div class="detail-item stat-item">
+                <div class="detail-icon">
+                  <app-icon fontIcon="event" [size]="25" color="var(--primary-color)"></app-icon>
+                </div>
+                <div class="detail-info">
+                  <span class="detail-label">Total Appointments</span>
+                  <span class="detail-value stat-number">{{ patientStats.totalAppointments }}</span>
+                </div>
+              </div>
+              
+              <div class="detail-item stat-item">
+                <div class="detail-icon">
+                  <app-icon fontIcon="healing" [size]="25" color="var(--status-success-color)"></app-icon>
+                </div>
+                <div class="detail-info">
+                  <span class="detail-label">Active Medications</span>
+                  <span class="detail-value stat-number">{{ patientStats.activeMedications }}</span>
+                </div>
+              </div>
+              
+              <div class="detail-item stat-item">
+                <div class="detail-icon">
+                  <app-icon fontIcon="assessment" [size]="25" color="var(--status-info-color)"></app-icon>
+                </div>
+                <div class="detail-info">
+                  <span class="detail-label">Lab Reports</span>
+                  <span class="detail-value stat-number">{{ patientStats.labReports }}</span>
+                </div>
+              </div>
+              
+              <div class="detail-item stat-item">
+                <div class="detail-icon">
+                  <app-icon fontIcon="note" [size]="25" color="var(--status-warning-color)"></app-icon>
+                </div>
+                <div class="detail-info">
+                  <span class="detail-label">Clinical Notes</span>
+                  <span class="detail-value stat-number">{{ patientStats.clinicalNotes }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="selectedTab === 'medical-record'" class="medical-record-tab">
+      <!-- Summary Cards -->
+      <div class="summary-cards">
+        <div class="summary-card appointments">
+          <div class="card-icon">
+            <app-icon fontIcon="event" [size]="20" color="var(--primary-color)"></app-icon>
+          </div>
+          <div class="card-content">
+            <div class="card-number">{{ patientStats.pendingAppointments }}</div>
+            <div class="card-label">UPCOMING APPOINTMENTS</div>
+          </div>
+        </div>
+        
+        <div class="summary-card vitals">
+          <div class="card-icon">
+            <app-icon fontIcon="favorite" [size]="20" color="var(--status-warning-color)"></app-icon>
+          </div>
+          <div class="card-content">
+            <div class="card-number">{{ getAbnormalVitalSigns().length }}</div>
+            <div class="card-label">ABNORMAL VITALS</div>
+          </div>
+        </div>
+        
+        <div class="summary-card labs">
+          <div class="card-icon">
+            <app-icon fontIcon="report_problem" [size]="20" color="var(--status-danger-color)"></app-icon>
+          </div>
+          <div class="card-content">
+            <div class="card-number">{{ patientStats.abnormalLabReports }}</div>
+            <div class="card-label">ABNORMAL LAB RESULTS</div>
+          </div>
+        </div>
+        
+        <div class="summary-card medications">
+          <div class="card-icon">
+            <app-icon fontIcon="local_pharmacy" [size]="20" color="var(--status-success-color)"></app-icon>
+          </div>
+          <div class="card-content">
+            <div class="card-number">{{ patientStats.activeMedications }}</div>
+            <div class="card-label">ACTIVE MEDICATIONS</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content Layout -->
+      <div class="medical-content">
+        <!-- Left Panel - Latest Vital Signs -->
+        <div class="left-panel">
+          <div class="panel-card">
+            <div class="panel-header">
+              <app-icon fontIcon="favorite" [size]="18" color="var(--primary-color)"></app-icon>
+              <h3>Latest Vital Signs</h3>
+            </div>
+            <div class="panel-content">
+              <div class="vitals-list">
+                <div *ngFor="let vital of vitalSigns" class="vital-card" [class.abnormal]="!vital.isNormal">
+                  <div class="vital-left">
+                    <div class="vital-label">{{ vital.type }}</div>
+                    <div class="vital-value">{{ vital.value }} {{ vital.unit }}</div>
+                    <div class="vital-time">{{ vital.time | date:'shortTime' }}</div>
+                  </div>
+                  <div class="vital-right">
+                    <div class="vital-status" [class]="vital.isNormal ? 'normal' : 'abnormal'">
+                      <app-icon [fontIcon]="vital.isNormal ? 'check_circle' : 'warning'" [size]="16" [color]="vital.isNormal ? 'var(--status-success-color)' : 'var(--status-danger-color)'"></app-icon>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel - Today's Care Schedule -->
+        <div class="right-panel">
+          <div class="panel-card">
+            <div class="panel-header">
+              <app-icon fontIcon="schedule" [size]="18" color="var(--primary-color)"></app-icon>
+              <h3>Today's Care Schedule</h3>
+            </div>
+            <div class="panel-content">
+              <div class="care-timeline">
+                <div *ngFor="let item of careSchedule" class="timeline-item">
+                  <div class="timeline-marker" [style.background-color]="getStatusColor(item.status)">
+                    <app-icon [fontIcon]="getStatusIcon(item.status)" [size]="14" color="white"></app-icon>
+                  </div>
+                  <div class="timeline-content">
+                    <div class="timeline-header">
+                      <div class="timeline-time">{{ item.startTime | date:'shortTime' }}</div>
+                      <div class="timeline-priority" [style.background-color]="getPriorityColor(item.priority)">
+                        {{ item.priority }}
+                      </div>
+                    </div>
+                    <div class="timeline-title">{{ item.title }}</div>
+                    <div class="timeline-description">{{ item.description }}</div>
+                    <div class="timeline-footer">
+                      <span class="timeline-assignee">{{ item.assignee }}</span>
+                      <span class="timeline-status" [style.color]="getStatusColor(item.status)">{{ item.status }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+        <!-- Profile Tab -->
+    <div *ngIf="selectedTab === 'profile'" class="profile-tab">
+      <div class="profile-grid">
+        <!-- Personal Information -->
+        <mat-card class="profile-card personal-info">
+          <mat-card-header>
+            <mat-card-title>
+              <app-icon fontIcon="person" [size]="20" [color]="'var(--primary-text-color)'"></app-icon>
+              Personal Information
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="compact-info-grid">
+              <div class="info-row">
+                <div class="info-item">
+                  <label>Full Name</label>
+                  <span>{{ patientInfo.name }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Age</label>
+                  <span>{{ patientInfo.age }} years</span>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-item">
+                  <label>Gender</label>
+                  <span>{{ patientInfo.gender }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Blood Group</label>
+                  <span>{{ patientInfo.bloodGroup }}</span>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-item">
+                  <label>Contact</label>
+                  <span>{{ patientInfo.contactNumber }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Email</label>
+                  <span>{{ patientInfo.email }}</span>
+                </div>
+              </div>
+              <div class="info-row full-width">
+                <div class="info-item">
+                  <label>Address</label>
+                  <span>{{ patientInfo.address }}</span>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-item">
+                  <label>Emergency Contact</label>
+                  <span>{{ patientInfo.emergencyContact }} ({{ patientInfo.emergencyContactRelation }})</span>
+                </div>
+                <div class="info-item">
+                  <label>Next of Kin</label>
+                  <span>{{ patientInfo.nextOfKin || 'Not specified' }}</span>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-item">
+                  <label>Occupation</label>
+                  <span>{{ patientInfo.occupation || 'Not specified' }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Marital Status</label>
+                  <span>{{ patientInfo.maritalStatus || 'Not specified' }}</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Medical Information -->
+        <mat-card class="profile-card medical-info">
+          <mat-card-header>
+            <mat-card-title>
+              <app-icon fontIcon="medical_services" [size]="20" [color]="'var(--primary-text-color)'"></app-icon>
+              Medical Information
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="compact-medical-grid">
+              <div class="medical-row">
+                <div class="medical-item">
+                  <label>Primary Doctor</label>
+                  <span>{{ patientInfo.primaryDoctor }}</span>
+                </div>
+                <div class="medical-item">
+                  <label>Department</label>
+                  <span>{{ patientInfo.department }}</span>
+                </div>
+              </div>
+              <div class="medical-row">
+                <div class="medical-item full-width">
+                  <label>Diagnosis</label>
+                  <div class="diagnosis-tags">
+                    <span *ngFor="let diagnosis of patientInfo.diagnosis" class="diagnosis-tag">
+                      {{ diagnosis }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="medical-row">
+                <div class="medical-item full-width">
+                  <label>Allergies</label>
+                  <div class="allergy-tags">
+                    <span *ngFor="let allergy of patientInfo.allergies" class="allergy-tag">
+                      {{ allergy }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Insurance Information -->
+        <mat-card class="profile-card insurance-info">
+          <mat-card-header>
+            <mat-card-title>
+              <app-icon fontIcon="security" [size]="20" [color]="'var(--primary-text-color)'"></app-icon>
+              Insurance Information
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="compact-insurance-grid">
+              <div class="insurance-row">
+                <div class="insurance-item">
+                  <label>Provider</label>
+                  <span>{{ patientInfo.insuranceProvider || 'Not specified' }}</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Vitals Tab -->
+    <div *ngIf="selectedTab === 'vitals'" class="vitals-tab">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <app-icon fontIcon="favorite" [size]="24"></app-icon>
+            Vital Signs History
+          </mat-card-title>
+
+        </mat-card-header>
+        <mat-card-content>
+          <table mat-table [dataSource]="vitalSigns" class="vitals-table">
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>Vital Sign</th>
+              <td mat-cell *matCellDef="let vital">{{ vital.type }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="value">
+              <th mat-header-cell *matHeaderCellDef>Value</th>
+              <td mat-cell *matCellDef="let vital">
+                <span [class.abnormal]="!vital.isNormal">
+                  {{ vital.value }} {{ vital.unit }}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let vital">
+                <span class="status-badge" [class]="vital.isNormal ? 'normal' : 'abnormal'">
+                  <app-icon [fontIcon]="vital.isNormal ? 'check_circle' : 'warning'" [size]="16"></app-icon>
+                  {{ vital.isNormal ? 'Normal' : 'Abnormal' }}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let vital">{{ vital.date | date:'mediumDate' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="time">
+              <th mat-header-cell *matHeaderCellDef>Time</th>
+              <td mat-cell *matCellDef="let vital">{{ vital.time | date:'shortTime' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="recordedBy">
+              <th mat-header-cell *matHeaderCellDef>Recorded By</th>
+              <td mat-cell *matCellDef="let vital">{{ vital.recordedBy }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['type', 'value', 'status', 'date', 'time', 'recordedBy']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['type', 'value', 'status', 'date', 'time', 'recordedBy'];"></tr>
+          </table>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Medications Tab -->
+    <div *ngIf="selectedTab === 'medications'" class="medications-tab">
+      <div class="medications-grid-container">
+        <app-grid
+          [gridOptions]="medicationsGridOptions"
+          [rowData]="medications"
+          [columnDefs]="medicationsColumns"
+          [height]="'520px'"
+          searchPlaceholder="Search medicines..."
+          class="medications-grid"
+          [rightTooltemplateRef]="medicationsActionsTemplate">
+        </app-grid>
+      </div>
+
+      <!-- Assign Medicines Dialog (separate component) -->
+
+      <!-- New Medication Dialog (details form) -->
+    </div>
+
+    <ng-template #medicationsActionsTemplate>
+      <app-button 
+        appearance="raised" 
+        color="primary" 
+        class="create-btn" 
+        (btnClick)="openNewMedicationDialog()"
+        [text]="'Create'">
+      </app-button>
+      <app-button 
+        appearance="raised" 
+        color="primary" 
+        class="assign-btn" 
+        (btnClick)="openAssignMedicationsDialog()"
+        [text]="'Assign Medicine'">
+      </app-button>
+      <app-button
+        appearance="raised"
+        color="primary"
+        class="template-btn"
+        [disabled]="!canCreateMedicationTemplate()"
+        (btnClick)="openCreateTemplateDialog()"
+        [text]="'Create Template'">
+      </app-button>
+    </ng-template>
+
+    <!-- Create Medication Template Dialog (separate component) -->
+
+    <!-- Appointments Tab -->
+    <div *ngIf="selectedTab === 'appointments'" class="appointments-tab">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <app-icon fontIcon="event" [size]="24"></app-icon>
+            Appointment History
+          </mat-card-title>
+
+        </mat-card-header>
+        <mat-card-content>
+          <table mat-table [dataSource]="appointments" class="appointments-table">
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let appointment">{{ appointment.date | date:'mediumDate' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="time">
+              <th mat-header-cell *matHeaderCellDef>Time</th>
+              <td mat-cell *matCellDef="let appointment">{{ appointment.time | date:'shortTime' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>Type</th>
+              <td mat-cell *matCellDef="let appointment">{{ appointment.type }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="doctor">
+              <th mat-header-cell *matHeaderCellDef>Doctor</th>
+              <td mat-cell *matCellDef="let appointment">{{ appointment.doctor }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="department">
+              <th mat-header-cell *matHeaderCellDef>Department</th>
+              <td mat-cell *matCellDef="let appointment">{{ appointment.department }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let appointment">
+                <span class="status-badge" [class]="appointment.status">
+                  {{ appointment.status }}
+                </span>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['date', 'time', 'type', 'doctor', 'department', 'status']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['date', 'time', 'type', 'doctor', 'department', 'status'];"></tr>
+          </table>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Lab Reports Tab -->
+    <div *ngIf="selectedTab === 'lab-reports'" class="lab-reports-tab">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <app-icon fontIcon="science" [size]="24"></app-icon>
+            Laboratory Reports
+          </mat-card-title>
+
+        </mat-card-header>
+        <mat-card-content>
+          <table mat-table [dataSource]="labReports" class="lab-reports-table">
+            <ng-container matColumnDef="testName">
+              <th mat-header-cell *matHeaderCellDef>Test Name</th>
+              <td mat-cell *matCellDef="let report">{{ report.testName }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>Category</th>
+              <td mat-cell *matCellDef="let report">{{ report.category }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="result">
+              <th mat-header-cell *matHeaderCellDef>Result</th>
+              <td mat-cell *matCellDef="let report">
+                <span [class.abnormal]="report.status === 'abnormal'">
+                  {{ report.result }}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="normalRange">
+              <th mat-header-cell *matHeaderCellDef>Normal Range</th>
+              <td mat-cell *matCellDef="let report">{{ report.normalRange }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let report">
+                <span class="status-badge" [class]="report.status">
+                  {{ report.status }}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let report">{{ report.date | date:'mediumDate' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="orderedBy">
+              <th mat-header-cell *matHeaderCellDef>Ordered By</th>
+              <td mat-cell *matCellDef="let report">{{ report.orderedBy }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['testName', 'category', 'result', 'normalRange', 'status', 'date', 'orderedBy']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['testName', 'category', 'result', 'normalRange', 'status', 'date', 'orderedBy'];"></tr>
+          </table>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Clinical Notes Tab -->
+    <div *ngIf="selectedTab === 'clinical-notes'" class="clinical-notes-tab">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <app-icon fontIcon="note" [size]="24"></app-icon>
+            Clinical Notes
+          </mat-card-title>
+
+        </mat-card-header>
+        <mat-card-content>
+          <div class="notes-list">
+            <div *ngFor="let note of clinicalNotes" class="note-item">
+              <div class="note-header">
+                  <span class="note-type">{{ note.type }}</span>
+                  <span class="note-date">{{ note.date | date:'mediumDate' }}</span>
+              </div>
+              <div class="note-title">{{ note.title }}</div>
+              <div class="note-content">{{ note.content }}</div>
+              <div class="note-author">{{ note.author }}</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Care Plan Tab -->
+    <div *ngIf="selectedTab === 'care-plan'" class="care-plan-tab">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <app-icon fontIcon="medical_services" [size]="24"></app-icon>
+            Care Plan & Schedule
+          </mat-card-title>
+
+        </mat-card-header>
+        <mat-card-content>
+          <div class="care-plan-container">
+            <div class="care-timeline">
+              <div *ngFor="let item of careSchedule" class="timeline-item">
+                <div class="timeline-marker" [style.background-color]="getStatusColor(item.status)">
+                  <app-icon [fontIcon]="getStatusIcon(item.status)" [size]="24" color="white"></app-icon>
+                </div>
+                <div class="timeline-content">
+                  <div class="timeline-header">
+                    <h4>{{ item.title }}</h4>
+                    <div class="timeline-meta">
+                      <span class="time">{{ item.startTime | date:'shortTime' }} - {{ item.endTime | date:'shortTime' }}</span>
+                      <span class="priority" [style.background-color]="getPriorityColor(item.priority)">
+                        {{ item.priority }}
+                      </span>
+                    </div>
+                  </div>
+                  <p>{{ item.description }}</p>
+                  <div class="timeline-footer">
+                    <span class="assignee">{{ item.assignee }}</span>
+                    <span class="status" [style.color]="getStatusColor(item.status)">
+                      {{ item.status }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Rounds Tab -->
+    <div *ngIf="selectedTab === 'rounds'" class="rounds-tab">
+      <div class="rounds-header">
+        <h2>Patient Rounds</h2>
+        <div class="rounds-actions">
+          <app-button appearance="stroked" color="primary" (btnClick)="addNewRound()">
+            <app-icon fontIcon="add" [size]="16"></app-icon>
+            <span>Add Round</span>
+          </app-button>
+          <app-button appearance="basic" color="primary" (btnClick)="scheduleRounds()">
+            <app-icon fontIcon="schedule" [size]="16"></app-icon>
+            <span>Schedule Rounds</span>
+          </app-button>
+        </div>
+      </div>
+
+      <!-- Round Schedules -->
+      <div class="round-schedules">
+        <h3>Upcoming Rounds</h3>
+        <div class="schedule-cards">
+          <div *ngFor="let schedule of roundSchedules" class="schedule-card">
+            <div class="schedule-header">
+              <div class="schedule-type" [style.background-color]="getRoundTypeColor(schedule.roundType)">
+                <app-icon [fontIcon]="getRoundTypeIcon(schedule.roundType)" [size]="16" [color]="'var(--primary-text-color)'"></app-icon>
+                {{ schedule.roundType.replace('_', ' ') }}
+              </div>
+              <span class="schedule-priority" [style.background-color]="getPriorityColor(schedule.priority)">
+                {{ schedule.priority }}
+              </span>
+            </div>
+            <div class="schedule-details">
+              <p><strong>Assigned to:</strong> {{ schedule.assignedTo }}</p>
+              <p><strong>Frequency:</strong> {{ schedule.frequency.replace('_', ' ') }}</p>
+              <p><strong>Next:</strong> {{ formatTimeAgo(schedule.nextScheduled!) }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Completed Rounds -->
+      <div class="completed-rounds">
+        <h3>Recent Rounds</h3>
+        <div class="rounds-list">
+          <div *ngFor="let round of patientRounds" class="round-card">
+            <div class="round-header">
+              <div class="round-type" [style.background-color]="getRoundTypeColor(round.roundType)">
+                <app-icon [fontIcon]="getRoundTypeIcon(round.roundType)" [size]="16" [color]="'var(--primary-text-color)'"></app-icon>
+                {{ round.roundType.replace('_', ' ') }}
+              </div>
+              <div class="round-meta">
+                <span class="round-performer">{{ round.performedBy }}</span>
+                <span class="round-time">{{ formatTimeAgo(round.roundTime) }}</span>
+              </div>
+            </div>
+            
+            <div class="round-content">
+              <div class="round-notes">
+                <h4>Notes:</h4>
+                <p>{{ round.notes }}</p>
+              </div>
+              
+              <div class="round-observations" *ngIf="round.observations.length > 0">
+                <h4>Observations:</h4>
+                <ul>
+                  <li *ngFor="let observation of round.observations">{{ observation }}</li>
+                </ul>
+              </div>
+
+              <div class="round-vitals" *ngIf="round.vitalSigns">
+                <h4>Vital Signs:</h4>
+                <div class="vitals-grid">
+                  <div class="vital-item" *ngIf="round.vitalSigns.bloodPressure">
+                    <span class="vital-label">BP:</span>
+                    <span class="vital-value">{{ round.vitalSigns.bloodPressure }}</span>
+                  </div>
+                  <div class="vital-item" *ngIf="round.vitalSigns.heartRate">
+                    <span class="vital-label">HR:</span>
+                    <span class="vital-value">{{ round.vitalSigns.heartRate }} bpm</span>
+                  </div>
+                  <div class="vital-item" *ngIf="round.vitalSigns.temperature">
+                    <span class="vital-label">Temp:</span>
+                    <span class="vital-value">{{ round.vitalSigns.temperature }}°C</span>
+                  </div>
+                  <div class="vital-item" *ngIf="round.vitalSigns.oxygenSaturation">
+                    <span class="vital-label">SpO2:</span>
+                    <span class="vital-value">{{ round.vitalSigns.oxygenSaturation }}%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="round-care-instructions" *ngIf="round.careInstructions.length > 0">
+                <h4>Care Instructions:</h4>
+                <ul>
+                  <li *ngFor="let instruction of round.careInstructions">{{ instruction }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Medicine Requests Tab -->
+    <div *ngIf="selectedTab === 'medicine-requests'" class="medicine-requests-tab">
+      <div class="medicine-requests-header">
+        <h2>Medicine Requests</h2>
+        <app-button appearance="stroked" color="primary" (btnClick)="addMedicineRequest()">
+          <app-icon fontIcon="add" [size]="16"></app-icon>
+          <span>Request Medicine</span>
+        </app-button>
+      </div>
+
+      <div class="medicine-requests-list">
+        <div *ngFor="let request of medicineRequests" class="medicine-request-card">
+          <div class="request-header">
+            <div class="request-info">
+              <h4>{{ request.medicineName }}</h4>
+              <p>{{ request.dosage }} • {{ request.frequency }} • {{ request.route }}</p>
+            </div>
+            <div class="request-status" [style.background-color]="getMedicineRequestStatusColor(request.status)">
+              {{ request.status }}
+            </div>
+          </div>
+          
+          <div class="request-details">
+            <div class="request-meta">
+              <p><strong>Requested by:</strong> {{ request.requestedBy }}</p>
+              <p><strong>Reason:</strong> {{ request.reason }}</p>
+              <p><strong>Urgency:</strong> {{ request.urgency }}</p>
+              <p><strong>Requested:</strong> {{ formatTimeAgo(request.requestTime) }}</p>
+            </div>
+
+            <div class="request-symptoms" *ngIf="request.currentSymptoms && request.currentSymptoms.length > 0">
+              <h5>Current Symptoms:</h5>
+              <div class="symptoms-chips">
+                <mat-chip *ngFor="let symptom of request.currentSymptoms">{{ symptom }}</mat-chip>
+              </div>
+            </div>
+
+            <div class="request-notes" *ngIf="request.notes">
+              <h5>Notes:</h5>
+              <p>{{ request.notes }}</p>
+            </div>
+
+            <div class="request-actions" *ngIf="request.status === 'PENDING'">
+              <app-button appearance="stroked" color="primary" (btnClick)="approveMedicineRequest(request)">
+                <app-icon fontIcon="check" [size]="16"></app-icon>
+                <span>Approve</span>
+              </app-button>
+              <app-button appearance="stroked" color="warn" (btnClick)="rejectMedicineRequest(request)">
+                <app-icon fontIcon="close" [size]="16"></app-icon>
+                <span>Reject</span>
+              </app-button>
+            </div>
+
+            <div class="request-approval" *ngIf="request.status === 'APPROVED'">
+              <p><strong>Approved by:</strong> {{ request.approvedBy }}</p>
+              <p><strong>Approved on:</strong> {{ formatTimeAgo(request.approvedDate!) }}</p>
+              <p *ngIf="request.pharmacyNotes"><strong>Pharmacy Notes:</strong> {{ request.pharmacyNotes }}</p>
+            </div>
+
+            <div class="request-rejection" *ngIf="request.status === 'REJECTED'">
+              <p><strong>Rejection Reason:</strong> {{ request.rejectionReason }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Relatives Tab -->
+    <div *ngIf="selectedTab === 'relatives'" class="relatives-tab">
+      <div class="relatives-header">
+        <h2>Patient Relatives</h2>
+        <app-button appearance="stroked" color="primary" (btnClick)="addRelative()">
+          <app-icon fontIcon="add" [size]="16" [color]="'var(--primary-text-color)'"></app-icon>
+          <span>Add Relative</span>
+        </app-button>
+      </div>
+
+      <div class="relatives-list">
+        <div *ngFor="let relative of patientRelatives" class="relative-card">
+          <div class="relative-header">
+            <div class="relative-info">
+              <div class="relative-avatar" [style.background-color]="getRelativeRelationshipColor(relative.relationship)">
+                <app-icon [fontIcon]="getRelativeRelationshipIcon(relative.relationship)" [size]="25" [color]="'var(--primary-text-color)'"></app-icon>
+              </div>
+              <div class="relative-details">
+                <h4>{{ relative.relativeName }}</h4>
+                <p>{{ relative.relationship }} • {{ relative.contactNumber }}</p>
+                <div class="relative-badges">
+                  <span *ngIf="relative.emergencyContact" class="emergency-badge">Emergency Contact</span>
+                  <span *ngIf="relative.canMakeDecisions" class="decision-badge">Can Make Decisions</span>
+                  <span class="verification-badge" [class.verified]="relative.verificationStatus === 'VERIFIED'">
+                    {{ relative.verificationStatus }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="relative-actions">
+              <app-button appearance="basic" color="primary" (btnClick)="contactRelative(relative)">
+                <app-icon fontIcon="call" [size]="16"></app-icon>
+                <span>Call</span>
+              </app-button>
+              <app-button appearance="basic" color="accent" *ngIf="relative.verificationStatus !== 'VERIFIED'" (btnClick)="verifyRelative(relative)">
+                <app-icon fontIcon="verified" [size]="16"></app-icon>
+                <span>Verify</span>
+              </app-button>
+            </div>
+          </div>
+
+          <div class="relative-details-expanded">
+            <div class="contact-info">
+              <h5>Contact Information</h5>
+              <p *ngIf="relative.alternateContactNumber"><strong>Alternate:</strong> {{ relative.alternateContactNumber }}</p>
+              <p *ngIf="relative.email"><strong>Email:</strong> {{ relative.email }}</p>
+              <p *ngIf="relative.address"><strong>Address:</strong> {{ relative.address }}</p>
+            </div>
+
+            <div class="permissions-info">
+              <h5>Permissions</h5>
+              <div class="permissions-grid">
+                <div class="permission-item">
+                  <app-icon fontIcon="notifications" [size]="16"></app-icon>
+                  <span>Receive Updates: {{ relative.canReceiveUpdates ? 'Yes' : 'No' }}</span>
+                </div>
+                <div class="permission-item">
+                  <app-icon fontIcon="visibility" [size]="16"></app-icon>
+                  <span>Can Visit: {{ relative.canVisit ? 'Yes' : 'No' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="visiting-hours" *ngIf="relative.visitingHours">
+              <h5>Visiting Hours</h5>
+              <p><strong>Time:</strong> {{ relative.visitingHours.startTime }} - {{ relative.visitingHours.endTime }}</p>
+              <p><strong>Days:</strong> {{ relative.visitingHours.days.join(', ') }}</p>
+            </div>
+
+            <div class="relative-notes" *ngIf="relative.notes">
+              <h5>Notes</h5>
+              <p>{{ relative.notes }}</p>
+            </div>
+
+            <div class="relative-verification" *ngIf="relative.verificationNotes">
+              <h5>Verification Notes</h5>
+              <p>{{ relative.verificationNotes }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercise Assignment Tab -->
+    <div *ngIf="selectedTab === 'exercise-assignment'" class="exercise-assignment-tab">
+      <!-- Dashboard Header -->
+      <div class="exercise-assignment-header">
+        <div class="header-content">
+          <div class="header-text">
+            <h2>Exercise Assignments</h2>
+            <p class="header-subtitle">Manage and track patient exercise programs</p>
+          </div>
+          <app-button 
+            appearance="raised" 
+            color="primary" 
+            (btnClick)="openExerciseAssignmentDialog()"
+            class="assign-exercise-btn">
+            <app-icon fontIcon="add" [size]="18" [color]="'#ffffff'"></app-icon>
+            <span>Assign Exercise</span>
+          </app-button>
+        </div>
+      </div>
+
+      <!-- Statistics Cards -->
+      <div class="stats-section">
+        <div class="stat-card total-assignments">
+          <div class="stat-icon">
+            <mat-icon>fitness_center</mat-icon>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ exerciseAssignments.length }}</div>
+            <div class="stat-label">Total Assignments</div>
+          </div>
+        </div>
+
+        <div class="stat-card active-assignments">
+          <div class="stat-icon">
+            <mat-icon>play_circle</mat-icon>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ getActiveAssignmentsCount() }}</div>
+            <div class="stat-label">Active</div>
+          </div>
+        </div>
+
+        <div class="stat-card completed-assignments">
+          <div class="stat-icon">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ getCompletedAssignmentsCount() }}</div>
+            <div class="stat-label">Completed</div>
+          </div>
+        </div>
+
+        <div class="stat-card categories-count">
+          <div class="stat-icon">
+            <mat-icon>category</mat-icon>
+          </div>
+          <div class="stat-content">
+            <div class="stat-number">{{ getUniqueCategoriesCount() }}</div>
+            <div class="stat-label">Categories</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Overview (Highcharts only) -->
+      <div class="progress-overview" *ngIf="exerciseAssignments.length > 0">
+        <div style="background:#fff; border-radius:12px; padding:12px 16px; margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+          <highcharts-chart
+            [Highcharts]="Highcharts"
+            [options]="progressChartOptions"
+            style="width: 100%; height: 320px; display: block;">
+          </highcharts-chart>
+        </div>
+      </div>
+
+      <!-- Assigned Exercises (single listing, shows after assigning) -->
+      <div class="assigned-exercises-section patient-profile-assigned-exercises">
+        <div class="header-content">
+          <div class="header-text">
+            <h3>Assigned Exercises</h3>
+            <p class="header-subtitle" *ngIf="assignedExercises.length === 0">No exercises assigned yet. Use "Assign Exercise" to add.</p>
+          </div>
+          <div class="header-actions" *ngIf="assignedExercises.length > 0">
+            <span class="metric-chip neutral">
+              <mat-icon>fitness_center</mat-icon>
+              {{ assignedExercises.length }} total
+            </span>
+          </div>
+        </div>
+        
+        <div *ngIf="assignedExercises.length === 0" class="empty-state">
+          <mat-icon class="empty-icon">fitness_center</mat-icon>
+          <p>No exercises assigned yet. Click "Assign Exercise" to get started.</p>
+        </div>
+
+        <div *ngIf="assignedExercises.length > 0" class="exercises-content">
+          <div class="exercise-list-grid">
+            <div class="exercise-item-row" *ngFor="let assignment of assignedExercises">
+              <div class="exercise-image-cell">
+                <img *ngIf="assignment.exercise.imageUrl" 
+                     [src]="assignment.exercise.imageUrl" 
+                     [alt]="assignment.exercise.name"
+                     class="exercise-image">
+                <div class="exercise-image-placeholder" *ngIf="!assignment.exercise.imageUrl">
+                  <mat-icon>fitness_center</mat-icon>
+                </div>
+              </div>
+              <div class="exercise-name-cell">
+                <span class="exercise-name">{{ assignment.exercise.name }}</span>
+                <span class="exercise-category-badge" *ngIf="assignment.exercise.category">
+                  {{ assignment.exercise.category }}
+                </span>
+              </div>
+              <div class="exercise-sets-info">
+                <div class="sets-display" *ngIf="assignment.exercise.sets && assignment.exercise.sets.length > 0">
+                  <span class="sets-text">
+                    {{ assignment.exercise.sets.length }} set{{ assignment.exercise.sets.length > 1 ? 's' : '' }} × 
+                    {{ getAverageReps(assignment.exercise.sets) }} rep{{ getAverageReps(assignment.exercise.sets) > 1 ? 's' : '' }}
+                  </span>
+                  <button mat-icon-button 
+                          class="edit-sets-btn"
+                          (click)="editExerciseSets(assignment)"
+                          matTooltip="Edit Sets">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </div>
+                <div class="sets-display no-sets" *ngIf="!assignment.exercise.sets || assignment.exercise.sets.length === 0">
+                  <span class="sets-text">No sets configured</span>
+                  <button mat-icon-button 
+                          class="edit-sets-btn"
+                          (click)="editExerciseSets(assignment)"
+                          matTooltip="Configure Sets">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+              </div>
+              <div class="exercise-actions">
+                <button mat-icon-button 
+                        (click)="removeAssignedExercise(assignment)" 
+                        matTooltip="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body Diagnosis Tab -->
+    <div *ngIf="selectedTab === 'body-diagnosis'" class="body-diagnosis-tab">
+      <app-full-body-diagnosis></app-full-body-diagnosis>
+    </div>
+
+    <!-- Billing Tab -->
+    <div *ngIf="selectedTab === 'billing'" class="billing-tab">
+      <app-patient-billing-dashboard 
+        [patientId]="patientInfo.id || ''"
+        [patientName]="patientInfo.name || ''"
+        [embedded]="true"
+        [openInvoiceId]="billingOpenInvoiceId">
+      </app-patient-billing-dashboard>
+    </div>
+
+    <!-- Diet Assignment Tab -->
+    <div *ngIf="selectedTab === 'diet-assignment'" class="diet-assignment-tab">
+      <!-- Header with CTA -->
+      <div class="diet-assignment-header">
+        <div class="header-content">
+          <div class="header-text">
+            <h2>Diet Assignments</h2>
+            <p class="header-subtitle">Plan weekly meals or assign specific diets for today</p>
+          </div>
+          <div class="header-actions" style="display:flex; gap:8px;">
+            <app-button 
+              appearance="stroked" 
+              color="primary" 
+              (btnClick)="createWeeklyPlan()">
+              <app-icon fontIcon="add" [size]="18"></app-icon>
+              <span>New Weekly Plan</span>
+            </app-button>
+            <app-button 
+              appearance="raised" 
+              color="primary" 
+              (btnClick)="openDietAssignmentDialog()"
+              class="assign-diet-btn">
+              <app-icon fontIcon="add" [size]="18" [color]="'#ffffff'"></app-icon>
+              <span>Assign Diet</span>
+            </app-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two Cards: Individual Diets (Top) and Weekly Schedule (Bottom) -->
+      <div class="diet-assignment-cards-grid">
+        <!-- Individual Diets Card (Top) -->
+        <div class="weekly-plan-unified-card">
+          <!-- Header Section -->
+          <div class="weekly-plan-card-header">
+            <div class="header-content">
+              <mat-icon class="header-icon">restaurant</mat-icon>
+              <div class="header-text">
+                <h3 class="header-title">Individual Diets</h3>
+                <p class="header-subtitle">Assigned specific diets</p>
+              </div>
+            </div>
+            <div class="week-summary">
+              <span class="summary-badge">
+                <span>{{ getTotalIndividualDiets() }} Diets</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Individual Diets Content -->
+          <div class="individual-diets-content">
+            <ng-container *ngIf="getIndividualDietAssignments().length > 0; else noIndividualDiets">
+              <div *ngFor="let assignment of getIndividualDietAssignments()" class="individual-assignment-item">
+                <div class="assignment-header">
+                  <div class="assignment-info">
+                    <h4 class="assignment-title">{{ assignment.planName }}</h4>
+                    <p class="assignment-dates">
+                      <mat-icon>calendar_today</mat-icon>
+                      <span>{{ formatDateShort(assignment.startDate) }} - {{ formatDateShort(assignment.endDate) }}</span>
+                    </p>
+                  </div>
+                  <div class="assignment-actions">
+                    <button mat-icon-button (click)="viewDietAssignment(assignment)" matTooltip="View">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="editDietAssignment(assignment)" matTooltip="Edit">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="removeDietAssignment(assignment)" matTooltip="Delete">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+                <div class="individual-diets-list">
+                  <div class="meal-diets-grid" *ngIf="getIndividualDietsFromAssignment(assignment).length > 0">
+                    <div class="diet-item-row" *ngFor="let diet of getIndividualDietsFromAssignment(assignment)" (click)="viewDietDetails(diet)">
+                      <div class="diet-image-cell">
+                        <img *ngIf="diet.imageUrl" 
+                             [src]="diet.imageUrl" 
+                             [alt]="diet.name"
+                             class="diet-image">
+                        <div class="diet-image-placeholder" *ngIf="!diet.imageUrl">
+                          <mat-icon>restaurant</mat-icon>
+                        </div>
+                      </div>
+                      <div class="diet-name-cell">
+                        <span class="diet-name">{{ diet.name }}</span>
+                        <span class="diet-type-badge" *ngIf="diet.dietType">
+                          {{ diet.dietType }}
+                        </span>
+                      </div>
+                      <div class="nutrition-grid">
+                        <div class="nutrition-item">
+                          <span class="nutrition-value">{{ diet.calories || 0 }}</span>
+                          <span class="nutrition-label">KCAL</span>
+                        </div>
+                        <div class="nutrition-item">
+                          <span class="nutrition-value">{{ diet.protein || 0 }}</span>
+                          <span class="nutrition-label">PROTEIN</span>
+                        </div>
+                        <div class="nutrition-item">
+                          <span class="nutrition-value">{{ diet.carbs || 0 }}</span>
+                          <span class="nutrition-label">CARBS</span>
+                        </div>
+                        <div class="nutrition-item">
+                          <span class="nutrition-value">{{ diet.fat || 0 }}</span>
+                          <span class="nutrition-label">FAT</span>
+                        </div>
+                        <div class="nutrition-item">
+                          <span class="nutrition-value">{{ diet.fiber || 0 }}</span>
+                          <span class="nutrition-label">FIBER</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div *ngIf="getIndividualDietsFromAssignment(assignment).length === 0" class="empty-state">
+                    <mat-icon>restaurant_menu</mat-icon>
+                    <p>No diets assigned</p>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-template #noIndividualDiets>
+              <div class="empty-state" style="margin-top:12px;">
+                <mat-icon class="empty-icon">restaurant</mat-icon>
+                <p>No specific diets assigned. Create a weekly plan or assign a specific diet for today.</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Weekly Plans Card (Bottom) -->
+        <div class="weekly-plan-unified-card">
+          <ng-container *ngIf="getActiveWeeklyPlanAssignment() as activePlan; else noWeeklyPlan">
+                <!-- Header Section -->
+                <div class="weekly-plan-card-header">
+                  <div class="header-content">
+                    <mat-icon class="header-icon">calendar_view_week</mat-icon>
+                    <div class="header-text">
+                      <h3 class="header-title">Weekly Schedule</h3>
+                      <p class="header-subtitle">Select a day to view assigned diets</p>
+                    </div>
+                  </div>
+                  <div class="week-summary">
+                    <span class="summary-badge">
+                      <span>{{ getTotalWeeklyDiets(activePlan) }} Diets</span>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Day Selector - Professional Pills/Tabs Style -->
+                <div class="day-selector-section">
+                  <div class="day-selector-pills">
+                    <button
+                      *ngFor="let day of getWeekDays(); let i = index"
+                      class="day-pill"
+                      [class.active]="selectedDietDayIndex === i"
+                      [class.has-diets]="getDietsForDay(activePlan, day).length > 0"
+                      (click)="onSelectDietDayIndex(i)">
+                      <span class="day-label">{{ day }}</span>
+                      <span class="day-count" *ngIf="selectedDietDayIndex === i">
+                        {{ getDietsForDay(activePlan, day).length }}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Selected Day Info & Diets -->
+                <div class="selected-day-section">
+                  <div class="selected-day-header">
+                    <div class="selected-day-info">
+                      <span class="selected-day-title">{{ getWeekDays()[selectedDietDayIndex] }}</span>
+                      <span class="selected-day-subtitle">
+                        {{ getDietsForDay(activePlan, getWeekDays()[selectedDietDayIndex]).length }} 
+                        {{ getDietsForDay(activePlan, getWeekDays()[selectedDietDayIndex]).length === 1 ? 'diet' : 'diets' }} assigned
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="diets-content-wrapper">
+                    <div *ngIf="getDietsForDay(activePlan, getWeekDays()[selectedDietDayIndex]).length > 0; else emptySelectedDay">
+                      <!-- Meals grouped by meal time -->
+                      <div class="meals-by-time" *ngFor="let meal of getMealsForSelectedDay(activePlan)">
+                        <div class="meal-time-section" *ngIf="meal.diets.length > 0">
+                          <div class="meal-time-header">
+                            <div class="meal-time-info">
+                              <span class="meal-time-label">{{ meal.label }}</span>
+                              <span class="meal-time" *ngIf="meal.time">{{ meal.time }}</span>
+                              <span class="meal-diet-count">{{ meal.diets.length }} {{ meal.diets.length === 1 ? 'diet' : 'diets' }}</span>
+                            </div>
+                            <div class="nutrition-grid totals-grid">
+                              <div class="nutrition-item total-item">
+                                <span class="nutrition-value">{{ getMealTotal(meal.diets, 'calories') }}</span>
+                                <span class="nutrition-label">KCAL</span>
+                              </div>
+                              <div class="nutrition-item total-item">
+                                <span class="nutrition-value">{{ getMealTotal(meal.diets, 'protein') }}</span>
+                                <span class="nutrition-label">PROTEIN</span>
+                              </div>
+                              <div class="nutrition-item total-item">
+                                <span class="nutrition-value">{{ getMealTotal(meal.diets, 'carbs') }}</span>
+                                <span class="nutrition-label">CARBS</span>
+                              </div>
+                              <div class="nutrition-item total-item">
+                                <span class="nutrition-value">{{ getMealTotal(meal.diets, 'fat') }}</span>
+                                <span class="nutrition-label">FAT</span>
+                              </div>
+                              <div class="nutrition-item total-item">
+                                <span class="nutrition-value">{{ getMealTotal(meal.diets, 'fiber') }}</span>
+                                <span class="nutrition-label">FIBER</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Diet Items -->
+                          <div class="meal-diets-grid">
+                            <div class="diet-item-row" *ngFor="let diet of meal.diets" (click)="viewDietDetails(diet)">
+                              <div class="diet-image-cell">
+                                <img *ngIf="getDietObjectFromSchedule(diet).imageUrl" 
+                                     [src]="getDietObjectFromSchedule(diet).imageUrl" 
+                                     [alt]="getDietObjectFromSchedule(diet).name"
+                                     class="diet-image">
+                                <div class="diet-image-placeholder" *ngIf="!getDietObjectFromSchedule(diet).imageUrl">
+                                  <mat-icon>restaurant</mat-icon>
+                                </div>
+                              </div>
+                              <div class="diet-name-cell">
+                                <span class="diet-name">{{ getDietObjectFromSchedule(diet).name }}</span>
+                                <span class="diet-type-badge" *ngIf="getDietObjectFromSchedule(diet).dietType">
+                                  {{ getDietObjectFromSchedule(diet).dietType }}
+                                </span>
+                              </div>
+                              <div class="nutrition-grid">
+                                <div class="nutrition-item">
+                                  <span class="nutrition-value">{{ getDietObjectFromSchedule(diet).calories || 0 }}</span>
+                                  <span class="nutrition-label">KCAL</span>
+                                </div>
+                                <div class="nutrition-item">
+                                  <span class="nutrition-value">{{ getDietObjectFromSchedule(diet).protein || 0 }}</span>
+                                  <span class="nutrition-label">PROTEIN</span>
+                                </div>
+                                <div class="nutrition-item">
+                                  <span class="nutrition-value">{{ getDietObjectFromSchedule(diet).carbs || 0 }}</span>
+                                  <span class="nutrition-label">CARBS</span>
+                                </div>
+                                <div class="nutrition-item">
+                                  <span class="nutrition-value">{{ getDietObjectFromSchedule(diet).fat || 0 }}</span>
+                                  <span class="nutrition-label">FAT</span>
+                                </div>
+                                <div class="nutrition-item">
+                                  <span class="nutrition-value">{{ getDietObjectFromSchedule(diet).fiber || 0 }}</span>
+                                  <span class="nutrition-label">FIBER</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <ng-template #emptySelectedDay>
+                      <div class="empty-day-state-modern">
+                        <div class="empty-state-icon-wrapper">
+                          <mat-icon class="empty-state-icon">restaurant_menu</mat-icon>
+                        </div>
+                        <h3 class="empty-state-title">No Diets Assigned</h3>
+                        <p class="empty-state-message">No diets have been assigned for {{ getWeekDays()[selectedDietDayIndex] }} yet.</p>
+                      </div>
+                    </ng-template>
+                  </div>
+                </div>
+          </ng-container>
+
+          <ng-template #noWeeklyPlan>
+            <div class="empty-state" style="margin-top:12px;">
+              <mat-icon class="empty-icon">calendar_today</mat-icon>
+              <p>No weekly plan assigned. Create a weekly plan or assign a specific diet for today.</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+
+
+  <!-- Discharge Dialog -->
+  <div *ngIf="showDischargeDialog" class="dialog-overlay">
+    <div class="discharge-dialog">
+      <div class="dialog-header">
+        <h3>Discharge Patient</h3>
+        <app-icon fontIcon="close" [size]="24" (click)="cancelDischarge()"></app-icon>
+      </div>
+      <div class="dialog-content">
+        <p>Are you sure you want to discharge {{ patientInfo.name }}?</p>
+        <p>This action will change the patient status to OPD and return to profile view.</p>
+        <div class="discharge-details">
+          <div class="detail-item">
+            <span class="label">Length of Stay:</span>
+            <span class="value">{{ getDaysInHospital() }} days</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Discharge Date:</span>
+            <span class="value">{{ getCurrentDate() | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <app-button appearance="stroked" color="primary" (btnClick)="cancelDischarge()">
+          Cancel
+        </app-button>
+        <app-button appearance="raised" color="warn" (btnClick)="confirmDischarge()">
+          Confirm Discharge
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Panel -->
+  <div *ngIf="showNotifications" class="notification-panel">
+    <div class="notification-header">
+      <h3>Notifications ({{ notifications.length }})</h3>
+      <button class="close-notifications" (click)="toggleNotifications()">
+        <app-icon fontIcon="close" [size]="20"></app-icon>
+      </button>
+    </div>
+    <div class="notification-list">
+      <div *ngFor="let notification of notifications" 
+           class="notification-item"
+           [class.unread]="!notification.read"
+           (click)="markNotificationRead(notification)">
+        <div class="notification-icon" [style.background-color]="notification.color">
+          <app-icon [fontIcon]="notification.icon" [size]="16"></app-icon>
+        </div>
+        <div class="notification-content">
+          <div class="notification-title">{{ notification.title }}</div>
+          <div class="notification-message">{{ notification.message }}</div>
+          <div class="notification-time">{{ notification.time | date:'shortTime' }}</div>
+        </div>
+        <div class="notification-actions">
+          <button class="action-btn" (click)="handleNotificationAction(notification)">
+            <app-icon fontIcon="arrow_forward" [size]="16"></app-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Care Team Dialog -->
+  <div *ngIf="showCareTeamDialog" class="dialog-overlay">
+    <div class="care-team-dialog">
+      <div class="dialog-header">
+        <h3>Care Team</h3>
+        <app-icon fontIcon="close" [size]="24" (click)="closeCareTeamDialog()"></app-icon>
+      </div>
+      <div class="dialog-content">
+        <div class="care-team-grid">
+          <div *ngFor="let member of careTeam" class="team-member-card">
+            <div class="member-avatar" [style.background-color]="member.color">
+              {{ member.name.charAt(0) }}
+            </div>
+            <div class="member-info">
+              <div class="member-name">{{ member.name }}</div>
+              <div class="member-role">{{ member.role }}</div>
+              <div class="member-department">{{ member.department }}</div>
+            </div>
+            <div class="member-actions">
+              <button class="contact-btn" (click)="contactTeamMember(member)">
+                <app-icon fontIcon="phone" [size]="16"></app-icon>
+              </button>
+              <button class="message-btn" (click)="messageTeamMember(member)">
+                <app-icon fontIcon="message" [size]="16"></app-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Round Dialog -->
+
+
+
+  <!-- Relative Dialog -->
+
+  <!-- Tab Configuration Dialog -->
+
+  <!-- Loading Overlay -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Saving changes...</p>
+  </div>
+</div>

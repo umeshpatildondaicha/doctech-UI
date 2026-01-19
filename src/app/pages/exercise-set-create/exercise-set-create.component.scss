@@ -1,0 +1,456 @@
+.exercise-group-dialog {
+  overflow-y: auto;
+}
+
+// Content
+.dialog-content {
+
+  .form {
+    .form-section {
+      margin-bottom: 24px;
+
+      .section-title {
+        margin: 0 0 16px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #495057;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e9ecef;
+        position: relative;
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -1px;
+          left: 0;
+          width: 40px;
+          height: 2px;
+          background: var(--primary-color);
+        }
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+
+        .add-exercise-btn {
+          height: 36px;
+          padding: 0 16px;
+          font-size: 13px;
+          border-radius: 6px;
+        }
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+
+        &.full-width {
+          grid-template-columns: 1fr;
+        }
+
+        .form-field {
+          &.full-width {
+            grid-column: 1 / -1;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Exercise Search
+.exercise-search {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #e9ecef;
+
+  .search-container {
+    margin-bottom: 12px;
+
+    .search-field {
+      width: 100%;
+    }
+  }
+
+  .filter-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+
+    .filter-field {
+      width: 100%;
+    }
+  }
+}
+
+// Selected Exercises
+.selected-exercises {
+  margin-bottom: 24px;
+
+  .subsection-title {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+  }
+
+  .selected-exercises-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .selected-exercise-item {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 16px;
+      border: 1px solid #e9ecef;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+
+      .exercise-info {
+        flex: 1;
+
+        .exercise-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 8px;
+
+          .exercise-name {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #495057;
+          }
+
+          .exercise-meta {
+            display: flex;
+            gap: 8px;
+
+            .category-badge {
+              background: var(--primary-color);
+              color: white;
+              padding: 2px 8px;
+              border-radius: 12px;
+              font-size: 11px;
+              font-weight: 500;
+            }
+
+            .difficulty-badge {
+              padding: 2px 8px;
+              border-radius: 12px;
+              font-size: 11px;
+              font-weight: 500;
+
+              &.difficulty-beginner {
+                background: #d4edda;
+                color: #155724;
+              }
+
+              &.difficulty-intermediate {
+                background: #fff3cd;
+                color: #856404;
+              }
+
+              &.difficulty-advanced {
+                background: #f8d7da;
+                color: #721c24;
+              }
+
+              &.difficulty-expert {
+                background: #d1ecf1;
+                color: #0c5460;
+              }
+            }
+          }
+        }
+
+        .exercise-description {
+          margin: 0 0 8px 0;
+          font-size: 13px;
+          color: #6c757d;
+          line-height: 1.4;
+        }
+
+        .exercise-details {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+
+          .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #6c757d;
+
+            mat-icon {
+              font-size: 16px;
+              width: 16px;
+              height: 16px;
+            }
+          }
+        }
+      }
+
+      .exercise-actions {
+        .remove-btn {
+          color: #dc3545;
+          
+          &:hover {
+            background: #ffebee;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Available Exercises
+.available-exercises {
+  .subsection-title {
+    margin: 0 0 16px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+  }
+
+  .exercises-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+
+    .exercise-card {
+      background: white;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+
+      &:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+      }
+
+      &.selected {
+        border-color: var(--primary-color);
+        background: #f8f9ff;
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+
+        .exercise-name {
+          margin: 0;
+          font-size: 15px;
+          font-weight: 600;
+          color: #495057;
+          flex: 1;
+        }
+
+        .exercise-badges {
+          display: flex;
+          gap: 6px;
+
+          .category-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 500;
+          }
+
+          .difficulty-badge {
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 500;
+
+            &.difficulty-beginner {
+              background: #d4edda;
+              color: #155724;
+            }
+
+            &.difficulty-intermediate {
+              background: #fff3cd;
+              color: #856404;
+            }
+
+            &.difficulty-advanced {
+              background: #f8d7da;
+              color: #721c24;
+            }
+
+            &.difficulty-expert {
+              background: #d1ecf1;
+              color: #0c5460;
+            }
+          }
+        }
+      }
+
+      .exercise-description {
+        margin: 0 0 12px 0;
+        font-size: 12px;
+        color: #6c757d;
+        line-height: 1.4;
+      }
+
+      .exercise-muscles {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: #6c757d;
+
+        mat-icon {
+          font-size: 14px;
+          width: 14px;
+          height: 14px;
+        }
+      }
+
+      .selection-indicator {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+          color: var(--primary-color);
+        }
+      }
+    }
+  }
+}
+
+// No Exercises
+.no-exercises {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+
+  .no-exercises-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+// Footer
+.dialog-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+  border-radius: 0 0 12px 12px;
+
+  .footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    .cancel-btn {
+      background: white;
+      color: #6c757d;
+      border: 1px solid #dee2e6;
+    }
+
+    .submit-btn {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .exercise-group-dialog {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .dialog-content {
+
+    .form {
+      .form-section {
+        .form-row {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+      }
+    }
+  }
+
+  .exercise-search {
+    .filter-container {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+  }
+
+  .available-exercises {
+    .exercises-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+  }
+
+  .dialog-footer {
+    padding: 16px;
+
+    .footer-actions {
+      flex-direction: column;
+
+      .cancel-btn,
+      .submit-btn {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Custom scrollbar
+.exercise-group-dialog::-webkit-scrollbar {
+  width: 6px;
+}
+
+.exercise-group-dialog::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.exercise-group-dialog::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+}

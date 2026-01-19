@@ -1,0 +1,828 @@
+<app-page [breadcrumb]="breadcrumb" [isFooter]="false">
+<div page-body class="roles-management-page">
+  <!-- Page Header -->
+  <app-admin-page-header
+    title="Roles & Staff Management"
+    subtitle="Comprehensive role and staff management system"
+    [actions]="headerActions"
+    (actionClicked)="onHeaderAction($event)">
+  </app-admin-page-header>
+
+  <!-- Navigation Tabs -->
+  <app-admin-tabs
+    [tabs]="tabs"
+    [activeTabId]="activeTab"
+    variant="pills"
+    size="medium"
+    (tabChanged)="onTabChange($event)">
+  </app-admin-tabs>
+
+  <!-- Bulk Actions Toolbar -->
+  <div class="bulk-actions-toolbar" *ngIf="showBulkActions">
+    <div class="selected-count">{{ bulkSelectedStaff.size }} staff members selected</div>
+    <div class="bulk-actions">
+      <app-selectbox
+        [label]="'Assign to Doctor'"
+        [options]="doctorOptions"
+        [valueField]="'value'"
+        [displayExpr]="'label'"
+        (dataChange)="bulkAssignToDoctor($event)"
+        class="bulk-assign-select">
+      </app-selectbox>
+      <app-button 
+        [text]="'Remove All'" 
+        [color]="'warn'" 
+        [fontIcon]="'remove'"
+        class="bulk-remove-btn">
+      </app-button>
+      <app-button 
+        [text]="'Clear Selection'" 
+        [color]="'accent'" 
+        [fontIcon]="'clear'"
+        (btnClick)="clearSelection()"
+        class="clear-selection-btn">
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <!-- Overview Tab -->
+    <div class="tab-panel" *ngIf="activeTab === 'overview'">
+      <div class="overview-dashboard">
+        <!-- Statistics Cards -->
+        <app-admin-stats-card
+          [stats]="statsCards">
+        </app-admin-stats-card>
+
+        <!-- Role Distribution -->
+        <div class="dashboard-grid">
+          <div class="dashboard-card roles-card">
+            <div class="card-header">
+              <h3>Role Distribution</h3>
+              <app-button [fontIcon]="'visibility'" [color]="'accent'" (btnClick)="setActiveTab('permissions')"></app-button>
+            </div>
+            <div class="roles-overview">
+              <div *ngFor="let role of roles" class="role-overview-item">
+                <div class="role-icon-small" [style.background-color]="role.color">
+                  <app-icon [fontIcon]="role.icon" [size]="16"></app-icon>
+                </div>
+                <div class="role-info-small">
+                  <div class="role-name-small">{{ role.name }}</div>
+                  <div class="role-count-small">{{ getStaffCountForRole(role.name) }} staff</div>
+                </div>
+                <div class="role-percentage">
+                  {{ ((getStaffCountForRole(role.name) / staff.length) * 100).toFixed(1) }}%
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-card quick-actions-card">
+            <div class="card-header">
+              <h3>Quick Actions</h3>
+            </div>
+            <div class="quick-actions">
+              <app-button 
+                [text]="'Add New Staff'" 
+                [color]="'primary'" 
+                [fontIcon]="'person_add'"
+                (btnClick)="navigateToStaffForm()"
+                class="quick-action-btn">
+              </app-button>
+              <app-button 
+                [text]="'Manage Assignments'" 
+                [color]="'accent'" 
+                [fontIcon]="'assignment_ind'"
+                (btnClick)="setActiveTab('assignments')"
+                class="quick-action-btn">
+              </app-button>
+              <app-button 
+                [text]="'View Attendance'" 
+                [color]="'accent'" 
+                [fontIcon]="'schedule'"
+                (btnClick)="setActiveTab('attendance')"
+                class="quick-action-btn">
+              </app-button>
+              <app-button 
+                [text]="'Export Reports'" 
+                [color]="'accent'" 
+                [fontIcon]="'download'"
+                (btnClick)="exportReports()"
+                class="quick-action-btn">
+              </app-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="dashboard-card activity-card">
+          <div class="card-header">
+            <h3>Recent Activity</h3>
+            <div class="activity-filters">
+              <app-button [text]="'Today'" [color]="'accent'" class="filter-btn active"></app-button>
+              <app-button [text]="'Week'" [color]="'accent'" class="filter-btn"></app-button>
+              <app-button [text]="'Month'" [color]="'accent'" class="filter-btn"></app-button>
+            </div>
+          </div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-icon">
+                <app-icon [fontIcon]="'person_add'" [size]="16"></app-icon>
+              </div>
+              <div class="activity-content">
+                <div class="activity-text">New nurse Emily Davis added to ICU team</div>
+                <div class="activity-time">2 hours ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon">
+                <app-icon [fontIcon]="'assignment_turned_in'" [size]="16"></app-icon>
+              </div>
+              <div class="activity-content">
+                <div class="activity-text">Dr. Sarah Johnson assigned 3 new staff members</div>
+                <div class="activity-time">4 hours ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon">
+                <app-icon [fontIcon]="'schedule'" [size]="16"></app-icon>
+              </div>
+              <div class="activity-content">
+                <div class="activity-text">Morning shift attendance completed - 95% present</div>
+                <div class="activity-time">6 hours ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Role Permissions Tab -->
+    <div class="tab-panel" *ngIf="activeTab === 'permissions'">
+      <div class="permissions-management">
+        <div class="permissions-sidebar">
+          <div class="sidebar-header">
+            <h3>Hospital Roles</h3>
+            <div class="role-count">{{ roles.length }} Roles</div>
+          </div>
+          <div class="roles-list">
+            <div 
+              *ngFor="let role of roles" 
+              class="role-item"
+              [class.selected]="selectedRole?.id === role.id"
+              (click)="selectRole(role)">
+              <div class="role-icon" [style.background-color]="role.color">
+                <app-icon [fontIcon]="role.icon" [size]="20"></app-icon>
+              </div>
+              <div class="role-details">
+                <div class="role-name">{{ role.name }}</div>
+                <div class="role-description">{{ role.description }}</div>
+              </div>
+              <div class="role-badge">
+                <div class="staff-count">{{ getStaffCountForRole(role.name) }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="permissions-main">
+          <div class="permissions-header" *ngIf="selectedRole">
+            <div class="selected-role-info">
+              <div class="selected-role-icon" [style.background-color]="selectedRole.color">
+                <app-icon [fontIcon]="selectedRole.icon" [size]="24"></app-icon>
+              </div>
+              <div class="selected-role-details">
+                <h2>{{ selectedRole.name }} Permissions</h2>
+                <p>{{ selectedRole.description }}</p>
+              </div>
+            </div>
+            <div class="permissions-actions">
+              <app-button [text]="'Reset to Default'" [color]="'accent'" [fontIcon]="'refresh'"></app-button>
+              <app-button [text]="'Save Changes'" [color]="'primary'" [fontIcon]="'save'"></app-button>
+            </div>
+          </div>
+
+          <div class="permissions-content" *ngIf="selectedRole">
+            <div class="permissions-grid">
+              <div class="permission-header">
+                <span>Module</span>
+                <span>Read</span>
+                <span>Write</span>
+                <span>Update</span>
+                <span>Delete</span>
+              </div>
+              
+              <div *ngFor="let module of moduleOptions" class="permission-row">
+                <div class="module-info">
+                  <app-icon [fontIcon]="module.icon" [size]="20"></app-icon>
+                  <div class="module-details">
+                    <div class="module-name">{{ module.label }}</div>
+                    <div class="module-description">Manage {{ module.label.toLowerCase() }} access</div>
+                  </div>
+                </div>
+                
+                <div class="permission-checkboxes">
+                  <label class="permission-toggle">
+                    <input 
+                      type="checkbox" 
+                      [checked]="getPermissionValue(module.key, 'read')"
+                      (change)="updatePermission(module.key, 'read', $event)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  
+                  <label class="permission-toggle">
+                    <input 
+                      type="checkbox" 
+                      [checked]="getPermissionValue(module.key, 'write')"
+                      (change)="updatePermission(module.key, 'write', $event)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  
+                  <label class="permission-toggle">
+                    <input 
+                      type="checkbox" 
+                      [checked]="getPermissionValue(module.key, 'update')"
+                      (change)="updatePermission(module.key, 'update', $event)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  
+                  <label class="permission-toggle">
+                    <input 
+                      type="checkbox" 
+                      [checked]="getPermissionValue(module.key, 'delete')"
+                      (change)="updatePermission(module.key, 'delete', $event)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="no-role-selected" *ngIf="!selectedRole">
+            <app-icon [fontIcon]="'security'" [size]="48"></app-icon>
+            <h3>Select a Role</h3>
+            <p>Choose a role from the sidebar to manage its permissions</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Staff Management Tab -->
+    <div class="tab-panel" *ngIf="activeTab === 'staff'">
+      <div class="staff-management">
+        <div class="staff-controls">
+          <div class="staff-filters">
+            <app-input
+              [label]="'Search Staff'"
+              [placeholder]="'Search by name, ID, or email'"
+              [value]="searchTerm"
+              (valueChange)="searchTerm = $event"
+              [prefixIconName]="'search'"
+              class="search-input">
+            </app-input>
+            
+            <app-selectbox
+              [label]="'Filter by Role'"
+              [data]="selectedRoleFilter"
+              (dataChange)="selectedRoleFilter = $event"
+              [options]="allRoleOptions"
+              [valueField]="'value'"
+              [displayExpr]="'label'"
+              class="role-filter">
+            </app-selectbox>
+
+            <app-selectbox
+              [label]="'Filter by Status'"
+              [data]="selectedStatusFilter"
+              (dataChange)="selectedStatusFilter = $event"
+              [options]="statusFilterOptions"
+              [valueField]="'value'"
+              [displayExpr]="'label'"
+              class="status-filter">
+            </app-selectbox>
+          </div>
+
+          <div class="staff-actions">
+            <app-button 
+              [text]="'Add Staff'" 
+              [color]="'primary'" 
+              [fontIcon]="'person_add'"
+              (btnClick)="navigateToStaffForm()"
+              class="add-staff-btn">
+            </app-button>
+            <app-button 
+              [text]="'Import CSV'" 
+              [color]="'accent'" 
+              [fontIcon]="'upload'"
+              class="import-btn">
+            </app-button>
+            <app-button 
+              [text]="'Export CSV'" 
+              [color]="'accent'" 
+              [fontIcon]="'download'"
+              class="export-btn">
+            </app-button>
+          </div>
+        </div>
+
+        <div class="staff-content">
+          <div class="staff-list">
+            <div 
+              *ngFor="let staffMember of filteredStaff; trackBy: trackByStaffId" 
+              class="staff-list-item"
+              (click)="selectStaff(staffMember)">
+              
+              <div class="staff-selection">
+                <input 
+                  type="checkbox" 
+                  [checked]="bulkSelectedStaff.has(staffMember.id)"
+                  (change)="toggleStaffSelection(staffMember.id); $event.stopPropagation()"
+                  class="staff-checkbox">
+              </div>
+              
+              <div class="staff-avatar">
+                <div class="avatar-placeholder">
+                  <app-icon [fontIcon]="'person'" [size]="24"></app-icon>
+                </div>
+                <div 
+                  class="status-indicator" 
+                  [style.background-color]="getAttendanceStatusColor(staffMember.attendance.status)">
+                </div>
+              </div>
+              
+              <div class="staff-basic-info">
+                <div class="staff-name">{{ staffMember.fullName }}</div>
+                <div class="staff-id">{{ staffMember.employeeId }}</div>
+              </div>
+              
+              <div class="staff-role-info">
+                <div class="staff-role" [style.color]="getRoleByName(staffMember.role)?.color">
+                  {{ staffMember.role }}
+                </div>
+                <div class="staff-specialization" *ngIf="staffMember.specialization">
+                  {{ staffMember.specialization }}
+                </div>
+              </div>
+              
+              <div class="staff-contact-info">
+                <div class="staff-email">{{ staffMember.email }}</div>
+                <div class="staff-phone">{{ staffMember.phone }}</div>
+              </div>
+              
+              <div class="staff-assignment-info">
+                <div class="assignment-count" *ngIf="staffMember.assignedDoctors.length > 0">
+                  {{ staffMember.assignedDoctors.length }} Doctor(s)
+                </div>
+                <div class="no-assignment" *ngIf="staffMember.assignedDoctors.length === 0">
+                  Unassigned
+                </div>
+              </div>
+              
+              <div class="staff-attendance-info">
+                <div class="attendance-status" [class]="'status-' + staffMember.attendance.status">
+                  {{ staffMember.attendance.status | titlecase }}
+                </div>
+                <div class="shift-time" *ngIf="staffMember.attendance.inTime">
+                  {{ staffMember.attendance.inTime }}
+                </div>
+              </div>
+              
+              <div class="staff-actions">
+                <app-button 
+                  [fontIcon]="'edit'" 
+                  [color]="'accent'"
+                  (btnClick)="editStaff(staffMember); $event.stopPropagation()"
+                  class="action-btn">
+                </app-button>
+                <app-button 
+                  [fontIcon]="'assignment_ind'" 
+                  [color]="'primary'"
+                  (btnClick)="manageAssignments(staffMember); $event.stopPropagation()"
+                  class="action-btn">
+                </app-button>
+                <app-button 
+                  [fontIcon]="'more_vert'" 
+                  [color]="'accent'"
+                  class="action-btn">
+                </app-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assignments Tab -->
+    <div class="tab-panel" *ngIf="activeTab === 'assignments'">
+      <div class="assignments-management">
+        <div class="assignments-header">
+          <h2>Staff-Doctor Assignments</h2>
+          <div class="assignment-actions">
+            <app-button 
+              [text]="'Bulk Assign'" 
+              [color]="'primary'" 
+              [fontIcon]="'group_add'"
+              (btnClick)="openBulkAssignDialog()"
+              class="bulk-assign-btn">
+            </app-button>
+            <app-button 
+              [text]="'Assignment Rules'" 
+              [color]="'accent'" 
+              [fontIcon]="'rule'"
+              class="rules-btn">
+            </app-button>
+          </div>
+        </div>
+
+        <div class="assignments-content">
+          <div class="doctors-assignments">
+            <div *ngFor="let doctor of doctors" class="doctor-assignment-card">
+              <div class="doctor-header">
+                <div class="doctor-info">
+                  <div class="doctor-avatar">
+                    <app-icon [fontIcon]="'local_hospital'" [size]="24"></app-icon>
+                  </div>
+                  <div class="doctor-details">
+                    <div class="doctor-name">{{ doctor.name }}</div>
+                    <div class="doctor-specialization">{{ doctor.specialization }}</div>
+                    <div class="doctor-department">{{ doctor.department }}</div>
+                  </div>
+                </div>
+                <div class="assignment-stats">
+                  <div class="assigned-count">{{ getStaffCountForDoctor(doctor.id) }} Staff Assigned</div>
+                  <app-button 
+                    [text]="'Assign Staff'" 
+                    [color]="'primary'" 
+                    [fontIcon]="'person_add'"
+                    (btnClick)="openAssignmentDialog(doctor)"
+                    class="assign-btn">
+                  </app-button>
+                </div>
+              </div>
+
+              <div class="assigned-staff-list">
+                <div 
+                  *ngFor="let staffMember of getStaffForDoctor(doctor.id)" 
+                  class="assigned-staff-item">
+                  
+                  <div class="staff-info">
+                    <div class="staff-avatar-small">
+                      <app-icon [fontIcon]="'person'" [size]="16"></app-icon>
+                      <div 
+                        class="status-dot" 
+                        [style.background-color]="getAttendanceStatusColor(staffMember.attendance.status)">
+                      </div>
+                    </div>
+                    <div class="staff-details">
+                      <div class="staff-name">{{ staffMember.fullName }}</div>
+                      <div class="staff-role">{{ staffMember.role }}</div>
+                    </div>
+                  </div>
+
+                  <div class="staff-schedule">
+                    <div class="shift-info">{{ staffMember.shift.start }} - {{ staffMember.shift.end }}</div>
+                    <div class="days-info">{{ staffMember.shift.days.length }} days/week</div>
+                  </div>
+
+                  <div class="assignment-actions">
+                    <app-button 
+                      [fontIcon]="'schedule'" 
+                      [color]="'accent'"
+                      (btnClick)="viewSchedule(staffMember)"
+                      class="schedule-btn">
+                    </app-button>
+                    <app-button 
+                      [fontIcon]="'remove'" 
+                      [color]="'warn'"
+                      (btnClick)="removeAssignment(staffMember.id, doctor.id)"
+                      class="remove-btn">
+                    </app-button>
+                  </div>
+                </div>
+
+                <div class="empty-assignments" *ngIf="getStaffCountForDoctor(doctor.id) === 0">
+                  <app-icon [fontIcon]="'group_off'" [size]="32"></app-icon>
+                  <div class="empty-text">No staff assigned</div>
+                  <app-button 
+                    [text]="'Assign First Staff'" 
+                    [color]="'primary'" 
+                    [fontIcon]="'person_add'"
+                    (btnClick)="openAssignmentDialog(doctor)"
+                    class="first-assign-btn">
+                  </app-button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unassigned Staff Panel -->
+          <div class="unassigned-panel" *ngIf="unassignedStaff.length > 0">
+            <div class="unassigned-header">
+              <h3>Unassigned Staff ({{ unassignedStaff.length }})</h3>
+              <app-button 
+                [text]="'Assign All'" 
+                [color]="'primary'" 
+                [fontIcon]="'group_add'"
+                (btnClick)="assignAllUnassigned()"
+                class="assign-all-btn">
+              </app-button>
+            </div>
+            <div class="unassigned-list">
+              <div 
+                *ngFor="let staffMember of unassignedStaff" 
+                class="unassigned-staff-item">
+                
+                <div class="staff-info">
+                  <div class="staff-avatar-small">
+                    <app-icon [fontIcon]="'person'" [size]="16"></app-icon>
+                  </div>
+                  <div class="staff-details">
+                    <div class="staff-name">{{ staffMember.fullName }}</div>
+                    <div class="staff-role">{{ staffMember.role }}</div>
+                  </div>
+                </div>
+
+                <app-selectbox
+                  [label]="'Assign to Doctor'"
+                  [options]="doctorOptions"
+                  [valueField]="'value'"
+                  [displayExpr]="'label'"
+                  (dataChange)="quickAssignStaff(staffMember.id, $event)"
+                  class="quick-assign-select">
+                </app-selectbox>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attendance Tab -->
+    <div class="tab-panel" *ngIf="activeTab === 'attendance'">
+      <div class="attendance-management">
+        <div class="attendance-header">
+          <h2>Attendance Tracking</h2>
+          <div class="attendance-date-filter">
+            <app-input
+              [label]="'Date'"
+              [value]="selectedDate"
+              (valueChange)="selectedDate = $event"
+              type="date"
+              class="date-input">
+            </app-input>
+            <app-button [text]="'Today'" [color]="'accent'" (btnClick)="setToday()" class="today-btn"></app-button>
+            <app-button [text]="'Export Report'" [color]="'primary'" [fontIcon]="'download'" class="export-btn"></app-button>
+          </div>
+        </div>
+
+        <div class="attendance-stats">
+          <div class="attendance-card present">
+            <div class="attendance-icon">
+              <app-icon [fontIcon]="'check_circle'" [size]="24"></app-icon>
+            </div>
+            <div class="attendance-info">
+              <div class="attendance-number">{{ getPresentStaffCount() }}</div>
+              <div class="attendance-label">Present</div>
+            </div>
+          </div>
+
+          <div class="attendance-card late">
+            <div class="attendance-icon">
+              <app-icon [fontIcon]="'schedule'" [size]="24"></app-icon>
+            </div>
+            <div class="attendance-info">
+              <div class="attendance-number">{{ getLateStaffCount() }}</div>
+              <div class="attendance-label">Late Arrivals</div>
+            </div>
+          </div>
+
+          <div class="attendance-card absent">
+            <div class="attendance-icon">
+              <app-icon [fontIcon]="'cancel'" [size]="24"></app-icon>
+            </div>
+            <div class="attendance-info">
+              <div class="attendance-number">{{ getAbsentStaffCount() }}</div>
+              <div class="attendance-label">Absent</div>
+            </div>
+          </div>
+
+          <div class="attendance-card percentage">
+            <div class="attendance-icon">
+              <app-icon [fontIcon]="'analytics'" [size]="24"></app-icon>
+            </div>
+            <div class="attendance-info">
+              <div class="attendance-number">{{ getAttendancePercentage() }}%</div>
+              <div class="attendance-label">Attendance Rate</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="attendance-table">
+          <div class="table-header">
+            <div class="table-controls">
+              <app-input
+                [placeholder]="'Search staff...'"
+                [value]="attendanceSearchTerm"
+                (valueChange)="attendanceSearchTerm = $event"
+                [prefixIconName]="'search'"
+                class="attendance-search">
+              </app-input>
+              
+              <app-selectbox
+                [label]="'Filter by Status'"
+                [options]="attendanceStatusOptions"
+                [valueField]="'value'"
+                [displayExpr]="'label'"
+                class="attendance-filter">
+              </app-selectbox>
+            </div>
+          </div>
+
+          <div class="attendance-list">
+            <div class="attendance-list-header">
+              <div class="col-staff">Staff Member</div>
+              <div class="col-role">Role</div>
+              <div class="col-schedule">Schedule</div>
+              <div class="col-checkin">Check In</div>
+              <div class="col-checkout">Check Out</div>
+              <div class="col-hours">Hours</div>
+              <div class="col-status">Status</div>
+              <div class="col-actions">Actions</div>
+            </div>
+
+            <div 
+              *ngFor="let staffMember of getFilteredAttendanceStaff()" 
+              class="attendance-list-item">
+              
+              <div class="col-staff">
+                <div class="staff-info">
+                  <div class="staff-avatar-tiny">
+                    <app-icon [fontIcon]="'person'" [size]="16"></app-icon>
+                  </div>
+                  <div class="staff-details">
+                    <div class="staff-name">{{ staffMember.fullName }}</div>
+                    <div class="staff-id">{{ staffMember.employeeId }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-role">
+                <div class="role-badge" [style.background-color]="getRoleByName(staffMember.role)?.color">
+                  {{ staffMember.role }}
+                </div>
+              </div>
+
+              <div class="col-schedule">
+                <div class="schedule-info">
+                  <div class="shift-time">{{ staffMember.shift.start }} - {{ staffMember.shift.end }}</div>
+                </div>
+              </div>
+
+              <div class="col-checkin">
+                <div class="time-info" [class.late]="isLateArrival(staffMember)">
+                  {{ staffMember.attendance.inTime || '--' }}
+                </div>
+              </div>
+
+              <div class="col-checkout">
+                <div class="time-info">
+                  {{ staffMember.attendance.outTime || '--' }}
+                </div>
+              </div>
+
+              <div class="col-hours">
+                <div class="hours-info">
+                  {{ staffMember.attendance.totalHours || 0 }}h
+                </div>
+              </div>
+
+              <div class="col-status">
+                <div class="status-badge" [class]="'status-' + staffMember.attendance.status">
+                  {{ staffMember.attendance.status | titlecase }}
+                </div>
+              </div>
+
+              <div class="col-actions">
+                <app-button 
+                  [fontIcon]="'history'" 
+                  [color]="'accent'"
+                  (btnClick)="viewAttendanceHistory(staffMember)"
+                  class="history-btn">
+                </app-button>
+                <app-button 
+                  [fontIcon]="'edit'" 
+                  [color]="'accent'"
+                  (btnClick)="editAttendance(staffMember)"
+                  class="edit-btn">
+                </app-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Staff Details Drawer -->
+  <div class="drawer-overlay" *ngIf="showStaffDetails" (click)="closeStaffDetails()">
+    <div class="drawer-content" (click)="$event.stopPropagation()">
+      <div class="drawer-header">
+        <h2>Staff Details</h2>
+        <app-button 
+          [fontIcon]="'close'" 
+          [color]="'accent'"
+          (btnClick)="closeStaffDetails()"
+          class="close-btn">
+        </app-button>
+      </div>
+      
+      <div class="staff-details-content" *ngIf="selectedStaff">
+        <!-- Staff Profile -->
+        <div class="staff-profile">
+          <div class="profile-avatar">
+            <div class="avatar-placeholder">
+              <app-icon [fontIcon]="'person'" [size]="48"></app-icon>
+            </div>
+            <div 
+              class="status-badge" 
+              [style.background-color]="getAttendanceStatusColor(selectedStaff.attendance.status)">
+              {{ selectedStaff.attendance.status | titlecase }}
+            </div>
+          </div>
+          
+          <div class="profile-info">
+            <h3>{{ selectedStaff.fullName }}</h3>
+            <div class="employee-id">{{ selectedStaff.employeeId }}</div>
+            <div class="role-specialization">
+              <span class="role">{{ selectedStaff.role }}</span>
+              <span *ngIf="selectedStaff.specialization" class="specialization">
+                • {{ selectedStaff.specialization }}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Contact Information -->
+        <div class="info-section">
+          <h4>Contact Information</h4>
+          <div class="info-grid">
+            <div class="info-item">
+              <app-icon [fontIcon]="'email'" [size]="16"></app-icon>
+              <span>{{ selectedStaff.email }}</span>
+            </div>
+            <div class="info-item">
+              <app-icon [fontIcon]="'phone'" [size]="16"></app-icon>
+              <span>{{ selectedStaff.phone }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Assigned Doctors -->
+        <div class="info-section">
+          <h4>Assigned Doctors</h4>
+          <div class="assigned-doctors-list">
+            <div 
+              *ngFor="let doctorId of selectedStaff.assignedDoctors" 
+              class="assigned-doctor-item">
+              <app-icon [fontIcon]="'local_hospital'" [size]="16"></app-icon>
+              <span>{{ getDoctorById(doctorId)?.name }}</span>
+              <app-button 
+                [fontIcon]="'remove'" 
+                [color]="'warn'"
+                (btnClick)="removeStaffFromDoctor(selectedStaff.id, doctorId)"
+                class="remove-assignment-btn">
+              </app-button>
+            </div>
+            
+            <div *ngIf="selectedStaff.assignedDoctors.length === 0" class="no-assignments">
+              No doctor assignments
+            </div>
+          </div>
+        </div>
+        
+        <!-- Today's Attendance -->
+        <div class="info-section">
+          <h4>Today's Attendance</h4>
+          <div class="attendance-today">
+            <div class="attendance-item">
+              <span class="label">Status:</span>
+              <span class="value" [class]="'status-' + selectedStaff.attendance.status">
+                {{ selectedStaff.attendance.status | titlecase }}
+              </span>
+            </div>
+            <div class="attendance-item" *ngIf="selectedStaff.attendance.inTime">
+              <span class="label">In Time:</span>
+              <span class="value">{{ selectedStaff.attendance.inTime }}</span>
+            </div>
+            <div class="attendance-item" *ngIf="selectedStaff.attendance.outTime">
+              <span class="label">Out Time:</span>
+              <span class="value">{{ selectedStaff.attendance.outTime }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</app-page>

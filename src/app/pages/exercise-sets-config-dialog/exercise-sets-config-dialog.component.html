@@ -1,0 +1,120 @@
+<div class="exercise-sets-config-dialog">
+  <!-- Exercise Info Section -->
+  <div class="exercise-info">
+    <div class="info-header">
+      <div>
+        <h3 class="exercise-name">{{ exercise.name }}</h3>
+        <div class="exercise-meta">
+          <span class="category-badge">{{ exercise.category }}</span>
+          <span class="difficulty-badge">{{ exercise.difficulty }}</span>
+        </div>
+      </div>
+      <button 
+        mat-icon-button 
+        (click)="toggleEditMode()" 
+        [matTooltip]="mode === 'view' ? 'Edit' : 'View'"
+        class="toggle-edit-btn">
+        <mat-icon>{{ mode === 'view' ? 'edit' : 'visibility' }}</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="dialog-content">
+    <form [formGroup]="setsForm" class="sets-form">
+      <div class="form-section">
+        <h3 class="section-title">Sets Configuration</h3>
+        <div formArrayName="sets" class="sets-container">
+          <div 
+            *ngFor="let set of setsArray.controls; let i = index" 
+            [formGroupName]="i"
+            class="set-item">
+            <div class="set-header">
+              <h4>Set {{ i + 1 }}</h4>
+              <button 
+                type="button" 
+                mat-icon-button 
+                (click)="removeSet(i)" 
+                *ngIf="setsArray.length > 1 && mode === 'edit'"
+                class="remove-set"
+                matTooltip="Remove set">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            
+            <div class="set-fields">
+              <mat-form-field appearance="outline" class="field-group">
+                <mat-label>Reps</mat-label>
+                <input 
+                  matInput 
+                  type="number" 
+                  formControlName="reps" 
+                  min="1"
+                  [readonly]="mode === 'view'">
+                <mat-icon matSuffix>repeat</mat-icon>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="field-group">
+                <mat-label>Hold Time (sec)</mat-label>
+                <input 
+                  matInput 
+                  type="number" 
+                  formControlName="holdTime" 
+                  min="0"
+                  [readonly]="mode === 'view'">
+                <mat-icon matSuffix>timer</mat-icon>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="field-group">
+                <mat-label>Rest Time (sec)</mat-label>
+                <input 
+                  matInput 
+                  type="number" 
+                  formControlName="restTime" 
+                  min="0"
+                  [readonly]="mode === 'view'">
+                <mat-icon matSuffix>schedule</mat-icon>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="field-group">
+                <mat-label>Tempo</mat-label>
+                <input 
+                  matInput 
+                  type="text" 
+                  formControlName="tempo"
+                  placeholder="e.g., 2-1-2"
+                  [readonly]="mode === 'view'">
+              </mat-form-field>
+            </div>
+            
+            <button 
+              type="button" 
+              mat-stroked-button 
+              (click)="applySetToAll(i)" 
+              *ngIf="mode === 'edit'"
+              class="apply-set-btn"
+              matTooltip="Apply this set configuration to all sets">
+              <mat-icon>content_copy</mat-icon>
+              Apply to all sets
+            </button>
+          </div>
+        </div>
+        
+        <div class="sets-actions" *ngIf="mode === 'edit'">
+          <button 
+            type="button" 
+            mat-stroked-button 
+            color="primary" 
+            (click)="addSet()" 
+            class="add-set-btn">
+            <mat-icon>add</mat-icon>
+            Add Set
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+

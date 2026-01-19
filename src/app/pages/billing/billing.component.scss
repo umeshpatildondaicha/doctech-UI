@@ -1,0 +1,246 @@
+.billing-dashboard {
+  background: #fff;
+}
+
+.demo-pill {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.info-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  margin-bottom: 12px;
+}
+
+.info-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.info-icon {
+  color: #059669;
+}
+
+.info-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.grid-wrapper {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #eef2f7;
+  overflow: hidden;
+  padding: 8px;
+}
+
+.billing-grid {
+  width: 100% !important;
+  height: calc(100vh - 340px) !important;
+  min-height: 520px !important;
+  display: block !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  ::ng-deep {
+    .ag-root-wrapper {
+      height: 100% !important;
+      width: 100% !important;
+      border: none;
+    }
+
+    .ag-root-wrapper-body {
+      height: 100% !important;
+      width: 100% !important;
+    }
+
+    .ag-header {
+      background: #fafafa !important;
+      border-bottom: 1px solid #e0e0e0 !important;
+      font-weight: 500;
+      font-size: 13px;
+      color: #333;
+      height: 40px !important;
+      min-height: 40px !important;
+    }
+
+    .ag-header-cell {
+      padding: 0 12px !important;
+      border-right: 1px solid #e0e0e0 !important;
+    }
+
+    .ag-header-cell:last-child {
+      border-right: none !important;
+    }
+
+    .ag-header-cell-label {
+      color: #333;
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .ag-header-cell-text {
+      color: #333;
+    }
+
+    .ag-body-viewport {
+      height: 100% !important;
+    }
+
+    .ag-row {
+      border-bottom: 1px solid #f0f0f0 !important;
+      background: white !important;
+      font-size: 13px;
+      min-height: 48px !important;
+      height: 48px !important;
+
+      &:hover {
+        background: #fafafa !important;
+      }
+    }
+
+    .ag-row-even {
+      background: white !important;
+    }
+
+    .ag-row-odd {
+      background: white !important;
+    }
+
+    .ag-cell {
+      padding: 8px 12px !important;
+      border-right: 1px solid #f0f0f0 !important;
+      display: flex;
+      align-items: center;
+      line-height: 1.4;
+      color: #333;
+    }
+
+    .ag-cell:last-child {
+      border-right: none !important;
+    }
+
+    .ag-floating-filter {
+      padding: 4px 12px !important;
+      background: white !important;
+      border-bottom: 1px solid #f0f0f0 !important;
+      min-height: 32px !important;
+    }
+
+    .ag-floating-filter-input {
+      border: 1px solid #e0e0e0 !important;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 13px;
+    }
+
+    // Status pills styling
+    .status-pill {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .status-pill.draft {
+      background: #f5f5f5;
+      color: #666;
+    }
+
+    .status-pill.issued {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .status-pill.paid {
+      background: #e8f5e9;
+      color: #388e3c;
+    }
+
+    .status-pill.partially_paid {
+      background: #fff3e0;
+      color: #f57c00;
+    }
+
+    .status-pill.void {
+      background: #ffebee;
+      color: #d32f2f;
+    }
+
+    // Two-line cell styling
+    .cell-two-line {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 48px;
+
+      .primary {
+        color: #333;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 1.4;
+      }
+
+      .secondary {
+        color: #999;
+        font-size: 11px;
+        font-weight: 400;
+        line-height: 1.4;
+        margin-top: 2px;
+      }
+    }
+
+    // Remove default AG Grid borders and shadows
+    .ag-horizontal-scroll,
+    .ag-scrollbar,
+    .ag-scrollbar-invisible {
+      border-top: 1px solid #e0e0e0 !important;
+    }
+
+    .ag-paging-panel {
+      border-top: 1px solid #e0e0e0 !important;
+      padding: 12px 16px !important;
+      background: #fafafa !important;
+      font-size: 13px;
+      color: #666;
+    }
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 14px;
+
+  button {
+    margin-top: 16px;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .info-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,36 @@
+<div class="tab-config-dialog">
+  <div class="dialog-content">
+    <p>Overview is always enabled and first.</p>
+    <div class="tab-config-list">
+      <div class="tab-config-item" *ngFor="let item of tabConfigItems; let i = index">
+        <div class="left">
+          <button 
+            class="reorder-btn" 
+            (click)="moveTabUp(i)" 
+            [disabled]="i===0 || item.id==='overview' || (i>0 && tabConfigItems[i-1].id==='overview')">
+            <app-icon fontIcon="arrow_upward" [size]="16"></app-icon>
+          </button>
+          <button 
+            class="reorder-btn" 
+            (click)="moveTabDown(i)" 
+            [disabled]="i===tabConfigItems.length-1 || item.id==='overview'">
+            <app-icon fontIcon="arrow_downward" [size]="16"></app-icon>
+          </button>
+        </div>
+        <div class="center">
+          <app-icon [fontIcon]="item.icon" [size]="18"></app-icon>
+          <span class="tab-label">{{ item.label }}</span>
+        </div>
+        <div class="right">
+          <mat-slide-toggle 
+            [(ngModel)]="item.enabled" 
+            [disabled]="item.id==='overview'"
+            (change)="toggleTabEnabled(item)">
+            Enabled
+          </mat-slide-toggle>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

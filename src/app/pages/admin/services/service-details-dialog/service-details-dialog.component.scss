@@ -1,0 +1,31 @@
+.service-details { padding: 0; }
+
+.hero {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px; border-bottom: var(--primary-border);
+  background: var(--secondary-background-color);
+}
+.hero-left { display: flex; align-items: center; gap: 12px; }
+.hero-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+.hero-text .name { margin: 0; font-size: 20px; font-weight: 700; color: var(--primary-font-color); }
+.hero-text .meta { color: var(--secondary-font-color); }
+.hero-right { text-align: right; }
+.hero-right .price { font-size: 22px; font-weight: 700; color: var(--primary-color); }
+.hero-right .availability { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; margin-top: 6px; }
+.hero-right .availability.available { background: var(--status-available-bg); color: var(--status-available-color); }
+.hero-right .availability.limited { background: var(--status-warning-bg); color: var(--status-warning-color); }
+.hero-right .availability.unavailable { background: var(--status-unavailable-bg); color: var(--status-unavailable-color); }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 16px; }
+.stat { background: var(--surface-color); border: var(--primary-border); border-radius: var(--input-radius); padding: 12px; }
+.stat .label { color: var(--secondary-font-color); font-size: 12px; }
+.stat .value { color: var(--primary-font-color); font-weight: 600; margin-top: 2px; }
+.rating .stars { color: #fbbf24; margin-right: 6px; }
+
+.description { padding: 0 16px 16px; }
+.section-title { font-weight: 700; color: var(--primary-font-color); margin-bottom: 6px; }
+
+.actions { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-top: var(--primary-border); }
+.actions .spacer { flex: 1; }
+
+

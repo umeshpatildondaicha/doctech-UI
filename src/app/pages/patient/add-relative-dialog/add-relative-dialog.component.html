@@ -1,0 +1,106 @@
+<div class="add-relative-dialog">
+  <div class="dialog-content">
+    <form [formGroup]="relativeForm" class="relative-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="relativeName">Relative Name:</label>
+          <app-input 
+            id="relativeName"
+            formControlName="relativeName"
+            placeholder="Enter relative name">
+          </app-input>
+        </div>
+        <div class="form-group">
+          <label for="relationship">Relationship:</label>
+          <app-selectbox 
+            id="relationship"
+            formControlName="relationship"
+            [options]="relationshipOptions"
+            placeholder="Select Relationship">
+          </app-selectbox>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="contactNumber">Contact Number:</label>
+          <app-input 
+            id="contactNumber"
+            formControlName="contactNumber"
+            placeholder="Enter contact number">
+          </app-input>
+        </div>
+        <div class="form-group">
+          <label for="alternateContactNumber">Alternate Contact:</label>
+          <app-input 
+            id="alternateContactNumber"
+            formControlName="alternateContactNumber"
+            placeholder="Enter alternate contact">
+          </app-input>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <app-input 
+            id="email"
+            formControlName="email"
+            type="email"
+            placeholder="Enter email address">
+          </app-input>
+        </div>
+        <div class="form-group">
+          <label for="address">Address:</label>
+          <app-input 
+            id="address"
+            formControlName="address"
+            placeholder="Enter address">
+          </app-input>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="notes">Notes:</label>
+        <app-input 
+          id="notes"
+          formControlName="notes"
+          [multiline]="true"
+          [rows]="2"
+          placeholder="Enter additional notes">
+        </app-input>
+      </div>
+
+      <div class="permissions-section">
+        <h4>Permissions</h4>
+        <div class="permissions-grid">
+          <div class="permission-item">
+            <label>
+              <input type="checkbox" formControlName="emergencyContact">
+              Emergency Contact
+            </label>
+          </div>
+          <div class="permission-item">
+            <label>
+              <input type="checkbox" formControlName="canMakeDecisions">
+              Can Make Decisions
+            </label>
+          </div>
+          <div class="permission-item">
+            <label>
+              <input type="checkbox" formControlName="canReceiveUpdates">
+              Can Receive Updates
+            </label>
+          </div>
+          <div class="permission-item">
+            <label>
+              <input type="checkbox" formControlName="canVisit">
+              Can Visit
+            </label>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+

@@ -1,0 +1,671 @@
+.diet-plan-view {
+  background: #f8f9fa;
+  min-height: 100vh;
+  font-family: 'Roboto', sans-serif;
+
+  .plan-overview {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 24px;
+    overflow: hidden;
+
+    .overview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 24px;
+      border-bottom: 1px solid #e9ecef;
+
+      .plan-info {
+        flex: 1;
+
+        .plan-name {
+          margin: 0 0 8px 0;
+          font-size: 28px;
+          font-weight: 600;
+          color: #2c3e50;
+        }
+
+        .plan-description {
+          margin: 0;
+          color: #6c757d;
+          font-size: 16px;
+          line-height: 1.5;
+        }
+      }
+
+      .plan-actions {
+        display: flex;
+        gap: 12px;
+
+        .edit-btn, .delete-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 10px 16px;
+          border-radius: 8px;
+          font-weight: 500;
+          transition: all 0.2s ease;
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+
+        .edit-btn {
+          color: var(--primary-color);
+          border-color: var(--primary-color);
+
+          &:hover {
+            background: #e3f2fd;
+          }
+        }
+
+        .delete-btn {
+          color: #dc3545;
+          border-color: #dc3545;
+
+          &:hover {
+            background: #ffebee;
+          }
+        }
+      }
+    }
+
+    .overview-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1px;
+      background: #e9ecef;
+
+      .overview-card {
+        background: white;
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+
+        .card-icon {
+          width: 60px;
+          height: 60px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+
+          mat-icon {
+            font-size: 28px;
+            width: 28px;
+            height: 28px;
+            color: white;
+          }
+
+          &:nth-child(1) {
+            background: var(--primary-color);
+          }
+
+          &:nth-child(2) {
+            background: #ff6b6b;
+          }
+
+          &:nth-child(3) {
+            background: #4ecdc4;
+          }
+
+          &:nth-child(4) {
+            background: #45b7d1;
+          }
+        }
+
+        .card-content {
+          flex: 1;
+
+          .card-value {
+            font-size: 32px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 4px;
+            line-height: 1;
+          }
+
+          .card-label {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+        }
+      }
+    }
+
+    .plan-description {
+      padding: 24px;
+      border-top: 1px solid #e9ecef;
+
+      h3 {
+        margin: 0 0 12px 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+
+      p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+    }
+  }
+
+  .plan-tabs {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+
+    ::ng-deep .mat-mdc-tab-group {
+      .mat-mdc-tab-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+
+        .mat-mdc-tab-label {
+          font-weight: 500;
+          color: #6c757d;
+          transition: all 0.2s ease;
+
+          &.mat-mdc-tab-label-active {
+            color: var(--primary-color);
+          }
+        }
+      }
+
+      .mat-mdc-tab-body-wrapper {
+        .mat-mdc-tab-body {
+          .mat-mdc-tab-body-content {
+            padding: 24px;
+          }
+        }
+      }
+    }
+
+    .schedule-content {
+      .schedule-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+
+        .day-column {
+          background: #f8f9fa;
+          border-radius: 12px;
+          overflow: hidden;
+
+          .day-header {
+            background: #e9ecef;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            h3 {
+              margin: 0;
+              font-size: 16px;
+              font-weight: 600;
+              color: #495057;
+            }
+
+            .day-calories {
+              background: var(--primary-color);
+              color: white;
+              padding: 4px 8px;
+              border-radius: 6px;
+              font-size: 12px;
+              font-weight: 600;
+            }
+          }
+
+          .day-meals {
+            padding: 16px;
+
+            .meal-slot {
+              margin-bottom: 16px;
+
+              &:last-child {
+                margin-bottom: 0;
+              }
+
+              .meal-header {
+                margin-bottom: 8px;
+
+                .meal-time {
+                  font-size: 12px;
+                  font-weight: 600;
+                  color: #6c757d;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                }
+
+                .meal-label {
+                  font-size: 14px;
+                  font-weight: 600;
+                  color: #495057;
+                }
+              }
+
+              .meal-diets {
+                .diet-item {
+                  background: white;
+                  border-radius: 8px;
+                  padding: 12px;
+                  margin-bottom: 8px;
+                  display: flex;
+                  align-items: center;
+                  gap: 12px;
+                  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+                  &:last-child {
+                    margin-bottom: 0;
+                  }
+
+                  .diet-image {
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 6px;
+                    overflow: hidden;
+                    flex-shrink: 0;
+
+                    img {
+                      width: 100%;
+                      height: 100%;
+                      object-fit: cover;
+                    }
+
+                    .image-placeholder {
+                      width: 100%;
+                      height: 100%;
+                      background: #e9ecef;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      color: #6c757d;
+
+                      mat-icon {
+                        font-size: 20px;
+                        width: 20px;
+                        height: 20px;
+                      }
+                    }
+                  }
+
+                  .diet-info {
+                    flex: 1;
+
+                    .diet-name {
+                      font-size: 14px;
+                      font-weight: 600;
+                      color: #495057;
+                      margin-bottom: 2px;
+                    }
+
+                    .diet-calories {
+                      font-size: 12px;
+                      color: #6c757d;
+                      font-weight: 500;
+                    }
+                  }
+                }
+              }
+
+              .empty-meal {
+                background: white;
+                border-radius: 8px;
+                padding: 16px;
+                text-align: center;
+                color: #6c757d;
+                border: 2px dashed #dee2e6;
+
+                mat-icon {
+                  font-size: 24px;
+                  width: 24px;
+                  height: 24px;
+                  margin-bottom: 8px;
+                  display: block;
+                  margin-left: auto;
+                  margin-right: auto;
+                }
+
+                span {
+                  font-size: 12px;
+                  font-weight: 500;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .nutrition-content {
+      padding: 1em;
+      .nutrition-overview {
+        margin-bottom: 32px;
+
+        h3 {
+          margin: 0 0 20px 0;
+          font-size: 18px;
+          font-weight: 600;
+          color: #2c3e50;
+        }
+
+        .nutrition-stats {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: 16px;
+
+          .stat-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+
+            .stat-value {
+              font-size: 24px;
+              font-weight: 600;
+              color: #495057;
+              margin-bottom: 4px;
+            }
+
+            .stat-label {
+              font-size: 12px;
+              color: #6c757d;
+              font-weight: 500;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+          }
+        }
+      }
+
+      .daily-breakdown {
+        h3 {
+          margin: 0 0 20px 0;
+          font-size: 18px;
+          font-weight: 600;
+          color: #2c3e50;
+        }
+
+        .daily-chart {
+          .day-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+
+            &:last-child {
+              margin-bottom: 0;
+            }
+
+            .bar-label {
+              width: 80px;
+              font-size: 14px;
+              font-weight: 500;
+              color: #495057;
+            }
+
+            .bar-container {
+              flex: 1;
+              height: 20px;
+              background: #e9ecef;
+              border-radius: 10px;
+              overflow: hidden;
+
+              .bar-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #007bff, #0056b3);
+                border-radius: 10px;
+                transition: width 0.3s ease;
+              }
+            }
+
+            .bar-value {
+              width: 80px;
+              font-size: 14px;
+              font-weight: 600;
+              color: #495057;
+              text-align: right;
+            }
+          }
+        }
+      }
+    }
+
+    .details-content {
+      padding: 1em;
+      .detail-section {
+        h3 {
+          margin: 0 0 20px 0;
+          font-size: 18px;
+          font-weight: 600;
+          color: #2c3e50;
+        }
+
+        .detail-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 16px;
+
+          .detail-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+
+            .detail-label {
+              display: block;
+              font-size: 12px;
+              color: #6c757d;
+              font-weight: 500;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin-bottom: 4px;
+            }
+
+            .detail-value {
+              display: block;
+              font-size: 16px;
+              font-weight: 600;
+              color: #495057;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .diet-plan-view {
+    padding: 16px;
+
+    .plan-overview {
+      .overview-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+
+        .plan-info {
+          text-align: center;
+
+          .plan-name {
+            font-size: 24px;
+          }
+        }
+
+        .plan-actions {
+          justify-content: center;
+        }
+      }
+
+      .overview-cards {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 16px;
+
+        .overview-card {
+          padding: 16px;
+
+          .card-header {
+            flex-direction: column;
+            gap: 8px;
+            text-align: center;
+
+            .card-icon {
+              width: 40px;
+              height: 40px;
+
+              mat-icon {
+                font-size: 20px;
+                width: 20px;
+                height: 20px;
+              }
+            }
+          }
+
+          .card-value {
+            font-size: 24px;
+          }
+
+          .card-label {
+            font-size: 12px;
+          }
+        }
+      }
+    }
+
+    .plan-content {
+      .content-tabs {
+        .mat-tab-group {
+          ::ng-deep .mat-mdc-tab-header {
+            .mat-mdc-tab-label-container {
+              .mat-mdc-tab-list {
+                .mat-mdc-tab {
+                  .mat-mdc-tab-label-content {
+                    font-size: 14px;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .tab-content {
+        padding: 16px;
+
+        .weekly-schedule {
+          .schedule-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+
+            .day-column {
+              .day-header {
+                padding: 12px;
+              }
+
+              .day-meals {
+                .meal-slot {
+                  padding: 12px;
+
+                  .meal-slot-header {
+                    margin-bottom: 8px;
+                  }
+
+                  .selected-diets {
+                    .diet-item {
+                      .diet-info {
+                        .diet-thumbnail {
+                          width: 40px;
+                          height: 40px;
+                        }
+
+                        .diet-details {
+                          .diet-name {
+                            font-size: 14px;
+                          }
+
+                          .diet-calories {
+                            font-size: 12px;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        .nutrition-summary {
+          .nutrition-cards {
+            grid-template-columns: 1fr;
+            gap: 16px;
+
+            .nutrition-card {
+              padding: 16px;
+
+              .card-header {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+
+                .card-icon {
+                  width: 40px;
+                  height: 40px;
+
+                  mat-icon {
+                    font-size: 20px;
+                    width: 20px;
+                    height: 20px;
+                  }
+                }
+              }
+
+              .card-value {
+                font-size: 24px;
+              }
+
+              .card-label {
+                font-size: 12px;
+              }
+            }
+          }
+        }
+
+        .plan-details {
+          .details-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+
+            .detail-item {
+              padding: 16px;
+
+              .detail-label {
+                font-size: 14px;
+              }
+
+              .detail-value {
+                font-size: 16px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

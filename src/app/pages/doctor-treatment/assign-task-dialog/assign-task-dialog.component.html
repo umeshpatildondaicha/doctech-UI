@@ -1,0 +1,98 @@
+<div class="assign-task-dialog">
+  <div class="dialog-content">
+    <div class="staff-info" *ngIf="data.staffName">
+      <span class="staff-label">Assigning to:</span>
+      <span class="staff-name">{{ data.staffName }}</span>
+    </div>
+
+    <form [formGroup]="assignTaskForm" class="assign-task-form">
+      <div class="form-row">
+        <app-selectbox
+          [label]="'Task Type'"
+          [options]="taskTypeOptionsArray"
+          [formGroup]="assignTaskForm"
+          formControlName="taskType">
+        </app-selectbox>
+
+        <app-selectbox
+          [label]="'Priority'"
+          [options]="priorityOptionsArray"
+          [formGroup]="assignTaskForm"
+          formControlName="priority">
+        </app-selectbox>
+      </div>
+
+      <div class="form-row">
+        <app-input
+          [label]="'Task Title'"
+          [formGroup]="assignTaskForm"
+          formControlName="title"
+          [required]="true">
+        </app-input>
+      </div>
+
+      <div class="form-row">
+        <app-input
+          [label]="'Description'"
+          [multiline]="true"
+          [rows]="3"
+          [formGroup]="assignTaskForm"
+          formControlName="description"
+          [required]="true">
+        </app-input>
+      </div>
+
+      <div class="form-row">
+        <app-selectbox
+          [label]="'Assign To'"
+          [options]="staffOptions"
+          [formGroup]="assignTaskForm"
+          formControlName="assignedTo"
+          [required]="true">
+        </app-selectbox>
+
+        <app-input
+          [label]="'Due Date'"
+          [type]="'datetime-local'"
+          [formGroup]="assignTaskForm"
+          formControlName="dueDate"
+          [required]="true">
+        </app-input>
+      </div>
+
+      <div class="form-row">
+        <app-input
+          [label]="'Estimated Duration (minutes)'"
+          [type]="'number'"
+          [formGroup]="assignTaskForm"
+          formControlName="estimatedDuration">
+        </app-input>
+
+        <app-input
+          [label]="'Patient ID (optional)'"
+          [formGroup]="assignTaskForm"
+          formControlName="patientId">
+        </app-input>
+      </div>
+
+      <div class="form-row">
+        <app-input
+          [label]="'Location (optional)'"
+          [formGroup]="assignTaskForm"
+          formControlName="location">
+        </app-input>
+      </div>
+
+      <div class="form-row">
+        <app-input
+          [label]="'Notes'"
+          [multiline]="true"
+          [rows]="2"
+          [formGroup]="assignTaskForm"
+          formControlName="notes">
+        </app-input>
+      </div>
+    </form>
+  </div>
+</div>
+

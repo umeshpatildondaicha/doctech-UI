@@ -1,0 +1,109 @@
+<div class="plan-card" (click)="onCardClick()">
+  <!-- Card Header with Gradient Background -->
+  <div class="plan-header">
+    <div class="plan-header-content">
+      <div class="plan-badge">
+        <mat-icon>restaurant_menu</mat-icon>
+        <span>{{ plan.planId ? plan.type : (plan.assignmentType === 'weekly' ? 'Weekly Plan' : 'Individual') }}</span>
+      </div>
+      <div class="plan-actions" *ngIf="showActions">
+        <button mat-icon-button (click)="onView($event)" matTooltip="View plan" class="action-btn view-btn">
+          <mat-icon>visibility</mat-icon>
+        </button>
+        <button mat-icon-button (click)="onEdit($event)" matTooltip="Edit plan" class="action-btn edit-btn">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button (click)="onDelete($event)" matTooltip="Delete plan" class="action-btn delete-btn">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card Body -->
+  <div class="plan-body">
+    <div class="plan-title-section">
+      <h3 class="plan-name">{{ plan.name }}</h3>
+      <div class="plan-status" [class]="'status-' + plan.status.toLowerCase()">
+        <mat-icon>{{ getStatusIcon(plan.status) }}</mat-icon>
+        <span>{{ plan.status }}</span>
+      </div>
+    </div>
+
+    <div class="plan-description" *ngIf="plan.description">
+      <p>{{ plan.description }}</p>
+    </div>
+
+    <!-- Plan Stats -->
+    <div class="plan-stats">
+      <div class="stat-item">
+        <div class="stat-icon">
+          <mat-icon>schedule</mat-icon>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ plan.duration }}</span>
+          <span class="stat-label">Days</span>
+        </div>
+      </div>
+      <div class="stat-item" *ngIf="plan.dietsCount !== undefined">
+        <div class="stat-icon">
+          <mat-icon>restaurant</mat-icon>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ plan.dietsCount }}</span>
+          <span class="stat-label">Diets</span>
+        </div>
+      </div>
+      <div class="stat-item" *ngIf="plan.progress !== undefined">
+        <div class="stat-icon">
+          <mat-icon>trending_up</mat-icon>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ plan.progress }}%</span>
+          <span class="stat-label">Progress</span>
+        </div>
+      </div>
+      <div class="stat-item" *ngIf="showDates && plan.startDate">
+        <div class="stat-icon">
+          <mat-icon>event</mat-icon>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ formatDate(plan.startDate) }}</span>
+          <span class="stat-label">Start Date</span>
+        </div>
+      </div>
+      <div class="stat-item" *ngIf="showDates && plan.endDate">
+        <div class="stat-icon">
+          <mat-icon>event_available</mat-icon>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ formatDate(plan.endDate) }}</span>
+          <span class="stat-label">End Date</span>
+        </div>
+      </div>
+      <div class="stat-item" *ngIf="plan.avgCaloriesPerDay">
+        <div class="stat-icon">
+          <mat-icon>local_fire_department</mat-icon>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ plan.avgCaloriesPerDay }}</span>
+          <span class="stat-label">Cal/Day</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="plan-footer" *ngIf="showFooter">
+      <button mat-stroked-button (click)="onView($event)" class="view-plan-btn">
+        <mat-icon>visibility</mat-icon>
+        View Details
+      </button>
+      <button mat-raised-button color="primary" (click)="onEdit($event)" class="edit-plan-btn">
+        <mat-icon>edit</mat-icon>
+        Edit
+      </button>
+    </div>
+  </div>
+</div>
+
+

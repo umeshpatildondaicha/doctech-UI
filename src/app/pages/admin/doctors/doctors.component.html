@@ -1,0 +1,27 @@
+<app-page [breadcrumb]="breadcrumb" [isFooter]="false">
+  <div page-body class="doctor-management-page">
+    <!-- Statistics Cards -->
+    <app-admin-stats-card
+      class="admin-stats-card"
+      [stats]="statsCards">
+    </app-admin-stats-card>
+
+    <!-- Grid Component -->
+    <div class="grid-section">
+      <app-grid 
+        [gridOptions]="gridOptions"
+        [rowData]="rowData"
+        [columnDefs]="columnDefs"
+        [height]="'600px'"
+        [animateRows]="true"
+        searchPlaceholder="Search Doctors..."
+        [rightTooltemplateRef]="rightTooltemplate"
+        class="doctors-grid">
+      </app-grid>
+    </div>
+  </div>
+</app-page>
+
+<ng-template #rightTooltemplate>
+  <app-icon [fontIcon]="'add'" [isCovered]="true" (iconClick)="addNewDoctor()"></app-icon>
+</ng-template> 

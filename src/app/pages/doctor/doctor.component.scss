@@ -1,0 +1,615 @@
+.doctor-management-page {
+  padding: 20px;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+// 1. Quick Actions Panel
+.quick-actions-panel {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+
+  .actions-left, .actions-right {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    font-size: 14px;
+
+    &.primary {
+      background: #10b3b3;
+      color: white;
+
+      &:hover {
+        background: #0d8f8f;
+        transform: translateY(-2px);
+      }
+    }
+
+    &.secondary {
+      background: #f8f9fa;
+      color: #495057;
+      border: 1px solid #dee2e6;
+
+      &:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+      }
+    }
+
+    mat-icon {
+      font-size: 18px;
+    }
+  }
+}
+
+// 2. Stats Bar
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+
+  .stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-number {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #6c757d;
+      font-weight: 500;
+    }
+
+    &.active .stat-number {
+      color: #28a745;
+    }
+
+    &.on-leave .stat-number {
+      color: #ffc107;
+    }
+
+    &.inactive .stat-number {
+      color: #dc3545;
+    }
+
+    &.specializations .stat-number {
+      color: #17a2b8;
+    }
+  }
+}
+
+// 3. Filters Section
+.filters-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+  .search-box {
+    position: relative;
+    margin-bottom: 20px;
+
+    mat-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 12px 12px 40px;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+
+      &:focus {
+        outline: none;
+        border-color: #10b3b3;
+        box-shadow: 0 0 0 3px rgba(16, 179, 179, 0.1);
+      }
+    }
+  }
+
+  .filters {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+
+    mat-select {
+      min-width: 150px;
+    }
+
+    .sort-btn {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #e9ecef;
+      }
+    }
+  }
+}
+
+// 4. Bulk Actions
+.bulk-actions {
+  background: #e3f2fd;
+  border: 1px solid #bbdefb;
+  border-radius: 8px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+
+  .bulk-info {
+    display: flex;
+    align-items: center;
+  }
+
+  .bulk-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .bulk-btn {
+    padding: 8px 16px;
+    border: 1px solid #2196f3;
+    background: white;
+    color: #2196f3;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: #2196f3;
+      color: white;
+    }
+
+    &.danger {
+      border-color: #dc3545;
+      color: #dc3545;
+
+      &:hover {
+        background: #dc3545;
+        color: white;
+      }
+    }
+  }
+}
+
+// 5. Doctors Content
+.doctors-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+// Table View
+.table-view {
+  overflow-x: auto;
+
+  .doctors-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th, td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #f1f3f4;
+    }
+
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #495057;
+      font-size: 14px;
+    }
+
+    tr {
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background: #f8f9fa;
+      }
+
+      &.selected {
+        background: #e3f2fd;
+      }
+    }
+
+    .profile-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .profile-pic {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .profile-info {
+        .name {
+          font-weight: 600;
+          color: #212529;
+        }
+
+        .experience {
+          font-size: 12px;
+          color: #6c757d;
+        }
+      }
+    }
+
+    .specialization-tag {
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .availability-badge, .status-badge {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: white;
+    }
+
+    .contact-cell {
+      .phone {
+        font-weight: 500;
+        color: #212529;
+      }
+
+      .email {
+        font-size: 12px;
+        color: #6c757d;
+      }
+    }
+
+    .login-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      mat-icon {
+        font-size: 18px;
+
+        &.logged-in {
+          color: #28a745;
+        }
+
+        &.never-logged {
+          color: #6c757d;
+        }
+      }
+
+      .login-text {
+        font-size: 12px;
+        color: #6c757d;
+      }
+    }
+
+    .actions-cell {
+      .action-menu-btn {
+        color: #6c757d;
+      }
+    }
+  }
+}
+
+// Cards View
+.cards-view {
+  padding: 20px;
+
+  .doctors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  .doctor-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    &.selected {
+      border-color: #2196f3;
+      box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid #f1f3f4;
+
+      .availability-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+    }
+
+    .card-body {
+      padding: 20px;
+      text-align: center;
+
+      .card-profile-pic {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 15px;
+      }
+
+      .doctor-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 5px;
+      }
+
+      .doctor-id {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 15px;
+      }
+
+      .specialization {
+        margin-bottom: 15px;
+
+        .spec-tag {
+          background: #e3f2fd;
+          color: #1976d2;
+          padding: 6px 12px;
+          border-radius: 16px;
+          font-size: 12px;
+          font-weight: 500;
+        }
+      }
+
+      .hospital-info {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        margin-bottom: 15px;
+        color: #6c757d;
+        font-size: 14px;
+      }
+
+      .status-info {
+        margin-bottom: 15px;
+
+        .status-badge {
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: 500;
+          color: white;
+        }
+      }
+
+      .contact-info {
+        margin-bottom: 15px;
+        text-align: left;
+
+        .phone, .email {
+          font-size: 12px;
+          color: #6c757d;
+          margin-bottom: 5px;
+        }
+      }
+
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-bottom: 15px;
+        justify-content: center;
+
+        .tag-chip {
+          font-size: 10px;
+          height: 24px;
+        }
+      }
+
+      .login-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        font-size: 12px;
+        color: #6c757d;
+
+        mat-icon {
+          // font-size: 16px;
+
+          &.logged-in {
+            color: #28a745;
+          }
+
+          &.never-logged {
+            color: #6c757d;
+          }
+        }
+      }
+    }
+
+    .card-actions {
+      display: flex;
+      border-top: 1px solid #f1f3f4;
+
+      .card-btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        color: #6c757d;
+
+        &:hover {
+          background: #f8f9fa;
+        }
+
+        &.danger:hover {
+          background: #f8d7da;
+          color: #dc3545;
+        }
+
+        mat-icon {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+
+  .empty-illustration {
+    margin-bottom: 20px;
+
+    mat-icon {
+      font-size: 64px;
+      color: #6c757d;
+    }
+  }
+
+  h3 {
+    font-size: 24px;
+    color: #212529;
+    margin-bottom: 10px;
+  }
+
+  p {
+    color: #6c757d;
+    margin-bottom: 30px;
+  }
+
+  .primary-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #10b3b3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: #0d8f8f;
+      transform: translateY(-2px);
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .doctor-management-page {
+    padding: 15px;
+  }
+
+  .quick-actions-panel {
+    flex-direction: column;
+    align-items: stretch;
+
+    .actions-left, .actions-right {
+      justify-content: center;
+    }
+  }
+
+  .stats-bar {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .filters-section {
+    .filters {
+      flex-direction: column;
+      align-items: stretch;
+
+      mat-select {
+        min-width: auto;
+      }
+    }
+  }
+
+  .bulk-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cards-view {
+    .doctors-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

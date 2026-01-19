@@ -1,0 +1,141 @@
+.exercise-sets-config-dialog {
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+
+  .exercise-info {
+    padding: 16px 24px;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+
+    .info-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .exercise-name {
+        margin: 0 0 8px 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #495057;
+      }
+
+      .exercise-meta {
+        display: flex;
+        gap: 8px;
+
+        .category-badge,
+        .difficulty-badge {
+          padding: 4px 12px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: 500;
+        }
+
+        .category-badge {
+          background: #e3f2fd;
+          color: #1976d2;
+        }
+
+        .difficulty-badge {
+          background: #f5f5f5;
+          color: #6c757d;
+        }
+      }
+
+      .toggle-edit-btn {
+        color: #6c757d;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  .dialog-content {
+    flex: 1;
+
+    .sets-form {
+      .form-section {
+        .section-title {
+          margin: 0 0 20px 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #2c3e50;
+        }
+
+        .sets-container {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          margin-bottom: 20px;
+
+          .set-item {
+            padding: 20px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+
+            .set-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 16px;
+
+              h4 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: 600;
+                color: #495057;
+              }
+
+              .remove-set {
+                color: #dc3545;
+
+                &:hover {
+                  background: #ffebee;
+                }
+              }
+            }
+
+            .set-fields {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+              gap: 16px;
+              margin-bottom: 12px;
+
+              .field-group {
+                width: 100%;
+
+                mat-icon[matSuffix] {
+                  color: #6c757d;
+                }
+              }
+            }
+
+            .apply-set-btn {
+              width: 100%;
+              margin-top: 8px;
+            }
+          }
+        }
+
+        .sets-actions {
+          display: flex;
+          justify-content: flex-start;
+
+          .add-set-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+        }
+      }
+    }
+  }
+
+}
+
+
+
+

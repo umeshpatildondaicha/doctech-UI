@@ -1,0 +1,447 @@
+.appointment-booking-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+
+  .dialog-content {
+    flex: 1;
+  }
+
+  .doctor-info-card {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+
+    .doctor-avatar {
+      flex-shrink: 0;
+
+      .avatar-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .avatar-placeholder {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6b7280;
+        border: 3px solid white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    .doctor-details {
+      flex: 1;
+
+      .doctor-name {
+        margin: 0 0 4px;
+        font-size: 20px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      .clinic-name {
+        margin: 0 0 2px;
+        font-size: 14px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      .location {
+        margin: 0;
+        font-size: 12px;
+        color: #9ca3af;
+      }
+    }
+  }
+
+  .priority-section {
+    padding: 0.8em 0.5em;
+    border-bottom: 1px solid #e5e7eb;
+
+    .section-title {
+      margin: 0 0 16px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .priority-options {
+      display: flex;
+      gap: 12px;
+
+      .priority-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: white;
+
+        &:hover {
+          border-color: #3b82f6;
+          background: #f8fafc;
+        }
+
+        &.selected {
+          border-color: #3b82f6;
+          background: #eff6ff;
+          color: #1e40af;
+        }
+
+        &.emergency {
+          &.selected {
+            border-color: #ef4444;
+            background: #fef2f2;
+            color: #dc2626;
+          }
+
+          &:hover {
+            border-color: #ef4444;
+            background: #fef2f2;
+          }
+        }
+
+        span {
+          font-weight: 500;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+
+  .time-selection-section {
+    padding: 0.8em 0.5em;
+    border-bottom: 1px solid #e5e7eb;
+
+    .section-title {
+      margin: 0 0 20px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .date-picker {
+      margin-bottom: 20px;
+
+      .date-scroll-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .nav-button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          border: 1px solid #d1d5db;
+          border-radius: 6px;
+          background: white;
+          cursor: pointer;
+          transition: all 0.2s;
+
+          &:hover {
+            border-color: #3b82f6;
+            background: #f8fafc;
+          }
+        }
+
+        .date-list {
+          display: flex;
+          gap: 8px;
+          overflow-x: auto;
+          padding: 4px 0;
+
+          .date-option {
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+
+            &:hover {
+              border-color: #3b82f6;
+              background: #f8fafc;
+            }
+
+            &.selected {
+              border-color: #f59e0b;
+              background: #fef3c7;
+              color: #92400e;
+            }
+          }
+        }
+      }
+    }
+
+
+    .time-slots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+
+      .time-slot {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 14px;
+        font-weight: 500;
+
+        &:hover {
+          border-color: #3b82f6;
+          background: #f8fafc;
+        }
+
+        &.slot-available {
+          color: #374151;
+          border-color: var(--status-success-border);
+          background-color: var(--room-available-bg);
+
+          &:hover {
+            font-weight: 600;
+            transition: font-weight ease-in-out 0.2s;
+          }
+        }
+
+        &.slot-booked {
+          color: #6b7280;
+          border-color: #d1d5db;
+          background: #f9fafb;
+          cursor: not-allowed;
+
+          &:hover {
+            border-color: #d1d5db;
+            background: #f9fafb;
+          }
+        }
+
+        &.slot-selected {
+          color: #10b981;
+          border-color: #10b981;
+          background: #ecfdf5;
+
+          &:hover {
+            border-color: #10b981;
+            background: #ecfdf5;
+          }
+        }
+      }
+    }
+
+    .slot-legend {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #6b7280;
+
+        .legend-color {
+          width: 12px;
+          height: 12px;
+          border-radius: 2px;
+
+          &.booked {
+            background: #6b7280;
+          }
+
+          &.available {
+            background: #d1d5db;
+            border: 1px solid #9ca3af;
+          }
+
+          &.selected {
+            background: #10b981;
+          }
+        }
+      }
+    }
+  }
+
+  .message-section {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #fef3c7;
+
+    .message-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+
+      .info-icon {
+        color: #f59e0b;
+      }
+
+      h4 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #92400e;
+      }
+    }
+
+    .message-text {
+      margin: 0 0 16px;
+      font-size: 14px;
+      color: #92400e;
+    }
+
+    .message-input {
+      width: 100%;
+    }
+  }
+
+
+  .data-sharing-section {
+    padding: 0.8em 0.5em;
+    border-bottom: 1px solid #e5e7eb;
+
+    .data-sharing-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      margin-bottom: 16px;
+
+      h4 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+    }
+
+    .data-sharing-content {
+      .data-sharing-description {
+        margin: 0 0 16px;
+        font-size: 14px;
+        color: #6b7280;
+      }
+
+      .data-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        .data-option {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          background: #f9fafb;
+
+          .data-checkbox {
+            flex-shrink: 0;
+          }
+
+          .option-details {
+            flex: 1;
+
+            .option-label {
+              display: block;
+              font-size: 14px;
+              font-weight: 500;
+              color: #1f2937;
+              margin-bottom: 2px;
+            }
+
+            .option-description {
+              display: block;
+              font-size: 12px;
+              color: #6b7280;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .referral-section {
+    padding: 0.8em 0.5em;
+    border-bottom: 1px solid #e5e7eb;
+
+    .section-title {
+      margin: 0 0 16px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .referral-input {
+      width: 100%;
+    }
+  }
+
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .appointment-booking-dialog {
+
+    .doctor-info-card {
+      padding: 16px 20px;
+
+      .doctor-avatar .avatar-image {
+        width: 50px;
+        height: 50px;
+      }
+
+      .doctor-details .doctor-name {
+        font-size: 18px;
+      }
+    }
+
+    .priority-section,
+    .time-selection-section,
+    .message-section,
+    .data-sharing-section,
+    .referral-section {
+      padding: 16px 20px;
+    }
+
+    .time-slots-grid {
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 8px;
+
+      .time-slot {
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+    }
+
+  }
+}

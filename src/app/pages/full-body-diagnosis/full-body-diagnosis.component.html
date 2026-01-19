@@ -1,0 +1,326 @@
+<div class="full-body-diagnosis-container">
+  <!-- Header with Action Button -->
+  <div class="diagnosis-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h2>Body Diagnosis</h2>
+        <p class="header-subtitle">Click on body parts to add diagnostic comments</p>
+      </div>
+      <div class="header-actions">
+        <app-button
+          *ngIf="!isClickModeEnabled"
+          appearance="raised"
+          color="primary"
+          (btnClick)="toggleClickMode()"
+          class="add-comment-btn">
+          <app-icon fontIcon="add" [size]="18" [color]="'#ffffff'"></app-icon>
+          <span>Add Comment</span>
+        </app-button>
+        <app-button
+          *ngIf="isClickModeEnabled"
+          appearance="stroked"
+          color="warn"
+          (btnClick)="toggleClickMode()"
+          class="remove-click-btn">
+          <app-icon fontIcon="close" [size]="18"></app-icon>
+          <span>Remove Click</span>
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body Diagram Section -->
+  <div class="body-diagram-section">
+    <div class="body-diagram-container">
+      <!-- SVG Body Diagram -->
+      <svg class="body-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Head -->
+        <ellipse
+          id="head"
+          cx="50"
+          cy="8"
+          rx="6"
+          ry="7"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('head').length > 0"
+          (click)="onBodyPartClick('head')"
+        />
+        
+        <!-- Neck -->
+        <rect
+          id="neck"
+          x="48"
+          y="12"
+          width="4"
+          height="4"
+          rx="1"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('neck').length > 0"
+          (click)="onBodyPartClick('neck')"
+        />
+        
+        <!-- Torso -->
+        <ellipse
+          cx="50"
+          cy="35"
+          rx="12"
+          ry="18"
+          class="body-torso"
+        />
+        
+        <!-- Chest Area -->
+        <ellipse
+          id="chest"
+          cx="50"
+          cy="28"
+          rx="8"
+          ry="6"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('chest').length > 0"
+          (click)="onBodyPartClick('chest')"
+        />
+        
+        <!-- Abdomen Area -->
+        <ellipse
+          id="abdomen"
+          cx="50"
+          cy="42"
+          rx="8"
+          ry="8"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('abdomen').length > 0"
+          (click)="onBodyPartClick('abdomen')"
+        />
+        
+        <!-- Left Shoulder -->
+        <ellipse
+          id="left-shoulder"
+          cx="38"
+          cy="22"
+          rx="4"
+          ry="3"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('left-shoulder').length > 0"
+          (click)="onBodyPartClick('left-shoulder')"
+        />
+        
+        <!-- Right Shoulder -->
+        <ellipse
+          id="right-shoulder"
+          cx="62"
+          cy="22"
+          rx="4"
+          ry="3"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('right-shoulder').length > 0"
+          (click)="onBodyPartClick('right-shoulder')"
+        />
+        
+        <!-- Left Arm -->
+        <ellipse cx="35" cy="30" rx="2" ry="12" class="body-limb" />
+        
+        <!-- Left Elbow -->
+        <circle
+          id="left-elbow"
+          cx="33"
+          cy="38"
+          r="2.5"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('left-elbow').length > 0"
+          (click)="onBodyPartClick('left-elbow')"
+        />
+        
+        <!-- Left Forearm -->
+        <ellipse cx="30" cy="45" rx="2" ry="8" class="body-limb" />
+        
+        <!-- Left Hand -->
+        <ellipse
+          id="left-hand"
+          cx="28"
+          cy="50"
+          rx="2.5"
+          ry="3"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('left-hand').length > 0"
+          (click)="onBodyPartClick('left-hand')"
+        />
+        
+        <!-- Right Arm -->
+        <ellipse cx="65" cy="30" rx="2" ry="12" class="body-limb" />
+        
+        <!-- Right Elbow -->
+        <circle
+          id="right-elbow"
+          cx="67"
+          cy="38"
+          r="2.5"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('right-elbow').length > 0"
+          (click)="onBodyPartClick('right-elbow')"
+        />
+        
+        <!-- Right Forearm -->
+        <ellipse cx="70" cy="45" rx="2" ry="8" class="body-limb" />
+        
+        <!-- Right Hand -->
+        <ellipse
+          id="right-hand"
+          cx="72"
+          cy="50"
+          rx="2.5"
+          ry="3"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('right-hand').length > 0"
+          (click)="onBodyPartClick('right-hand')"
+        />
+        
+        <!-- Left Hip -->
+        <ellipse
+          id="left-hip"
+          cx="44"
+          cy="52"
+          rx="3"
+          ry="4"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('left-hip').length > 0"
+          (click)="onBodyPartClick('left-hip')"
+        />
+        
+        <!-- Right Hip -->
+        <ellipse
+          id="right-hip"
+          cx="56"
+          cy="52"
+          rx="3"
+          ry="4"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('right-hip').length > 0"
+          (click)="onBodyPartClick('right-hip')"
+        />
+        
+        <!-- Left Thigh -->
+        <ellipse cx="46" cy="62" rx="2.5" ry="10" class="body-limb" />
+        
+        <!-- Left Knee -->
+        <circle
+          id="left-knee"
+          cx="47"
+          cy="70"
+          r="2.5"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('left-knee').length > 0"
+          (click)="onBodyPartClick('left-knee')"
+        />
+        
+        <!-- Left Shin -->
+        <ellipse cx="46" cy="78" rx="2" ry="8" class="body-limb" />
+        
+        <!-- Left Foot -->
+        <ellipse
+          id="left-foot"
+          cx="45"
+          cy="88"
+          rx="3"
+          ry="2"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('left-foot').length > 0"
+          (click)="onBodyPartClick('left-foot')"
+        />
+        
+        <!-- Right Thigh -->
+        <ellipse cx="54" cy="62" rx="2.5" ry="10" class="body-limb" />
+        
+        <!-- Right Knee -->
+        <circle
+          id="right-knee"
+          cx="53"
+          cy="70"
+          r="2.5"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('right-knee').length > 0"
+          (click)="onBodyPartClick('right-knee')"
+        />
+        
+        <!-- Right Shin -->
+        <ellipse cx="54" cy="78" rx="2" ry="8" class="body-limb" />
+        
+        <!-- Right Foot -->
+        <ellipse
+          id="right-foot"
+          cx="55"
+          cy="88"
+          rx="3"
+          ry="2"
+          class="body-part"
+          [class.clickable]="isClickModeEnabled"
+          [class.has-comments]="getCommentsForBodyPart('right-foot').length > 0"
+          (click)="onBodyPartClick('right-foot')"
+        />
+      </svg>
+
+      <!-- Comment Labels -->
+      <div class="comment-labels">
+        <div
+          *ngFor="let part of bodyParts"
+          class="comment-label"
+          [style.left.%]="part.x"
+          [style.top.%]="part.y"
+          [class.has-comments]="getCommentsForBodyPart(part.id).length > 0"
+          [class.clickable]="isClickModeEnabled">
+          <div class="label-text" *ngIf="getCommentsForBodyPart(part.id).length > 0">
+            {{ getCommentsForBodyPart(part.id).length }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comments List Section -->
+  <div class="comments-section" *ngIf="comments.length > 0">
+    <h3 class="comments-title">Diagnostic Comments</h3>
+    <div class="comments-list">
+      <div *ngFor="let comment of comments" class="comment-card">
+        <div class="comment-header">
+          <div class="comment-body-part">
+            <app-icon fontIcon="location_on" [size]="16" color="var(--primary-color)"></app-icon>
+            <span>{{ getBodyPartName(comment.bodyPart) }}</span>
+          </div>
+          <button
+            mat-icon-button
+            class="delete-comment-btn"
+            (click)="deleteComment(comment.id)"
+            [matTooltip]="'Delete comment'">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+        <div class="comment-content">{{ comment.comment }}</div>
+        <div class="comment-footer">
+          <span class="comment-author">{{ comment.doctorName }}</span>
+          <span class="comment-time">{{ comment.timestamp | date:'short' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="comments.length === 0 && !isClickModeEnabled">
+    <mat-icon class="empty-icon">healing</mat-icon>
+    <p>No diagnostic comments yet. Click "Add Comment" to start adding comments on body parts.</p>
+  </div>
+</div>
+

@@ -1,0 +1,28 @@
+<app-page [breadcrumb]="breadcrumb" [isFooter]="false">
+  <div page-body class="rooms-page">
+    <!-- Page Header -->
+    <app-admin-page-header
+      title="Rooms & Beds"
+      subtitle="Monitor capacity, occupancy and critical ICU availability"
+      [actions]="headerActions"
+      (actionClicked)="onHeaderAction($event)">
+    </app-admin-page-header>
+
+    <!-- Statistics Cards -->
+    <app-admin-stats-card
+      [stats]="statsCards">
+    </app-admin-stats-card>
+
+    <!-- Grid Only; click row to open detailed view dialog -->
+    <div class="grid-wrap">
+      <app-grid
+        [rowData]="rooms"
+        [columnDefs]="columnDefs"
+        [gridOptions]="gridOptions"
+        [searchPlaceholder]="'Search rooms, wings, floors...'"
+        [defaultViewMode]="'list'"
+        (rowClicked)="onView($event)">
+      </app-grid>
+    </div>
+  </div>
+</app-page>

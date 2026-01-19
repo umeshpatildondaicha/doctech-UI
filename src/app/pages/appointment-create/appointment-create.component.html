@@ -1,0 +1,106 @@
+<div class="appointment-create-dialog" [class.view-mode]="isViewMode">
+
+  <!-- Dialog Content -->
+  <div class="dialog-content">
+    <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()" class="form">
+      
+      <div class="section-title-wrapper"><h4 class="section-title">Appointment Details</h4></div>
+      
+      <div class="form-row top-space">
+        <div class="patient-search-section">
+          <label class="form-label" for="patient-search-input">Patient <span class="required">*</span></label>
+          <div class="patient-search-input" [class.error-state]="!selectedPatient && appointmentForm.get('patient_id')?.touched">
+            <app-input 
+              id="patient-search-input"
+              [value]="selectedPatient?.fullName || ''"
+              placeholder="Search and select patient..."
+              [disabled]="false"
+              (click)="openPatientSearch()"
+              (keydown)="onPatientInputKeydown($event)"
+              (input)="onPatientInput($event)"
+              [required]="true"
+              [errorMessage]="getPatientErrorMessage()"
+              [suffixIconName]="'search'"
+              >
+            </app-input>
+          </div>
+          
+          <!-- Patient Selection Required Message -->
+          <div *ngIf="!selectedPatient" class="patient-selection-hint">
+            <app-icon [fontIcon]="'info'" [size]="16"></app-icon>
+            <span>Please select a patient to create an appointment</span>
+          </div>
+          
+          <!-- Patient Details Display -->
+          <div *ngIf="selectedPatient" class="patient-details">
+            <div class="patient-info-card">
+              <div class="patient-header">
+                <div class="patient-avatar">
+                  <app-icon [fontIcon]="'person'" [size]="24"></app-icon>
+                </div>
+                <div class="patient-basic-info">
+                  <h4 class="patient-name">{{ selectedPatient.fullName }}</h4>
+                  <p class="patient-id">ID: {{ selectedPatient.id }}</p>
+                </div>
+                <button type="button" class="change-patient-btn" (click)="openPatientSearch()">
+                  <app-icon [fontIcon]="'edit'" [size]="16"></app-icon>
+                  Change
+                </button>
+              </div>
+              
+              <div class="patient-details-grid">
+                <div class="detail-item" *ngIf="selectedPatient.dateOfBirth">
+                  <span class="detail-label">Age:</span>
+                  <span class="detail-value">{{ calculateAge(selectedPatient.dateOfBirth) }} years</span>
+                </div>
+                <div class="detail-item" *ngIf="selectedPatient.gender">
+                  <span class="detail-label">Gender:</span>
+                  <span class="detail-value">{{ selectedPatient.gender }}</span>
+                </div>
+                <div class="detail-item" *ngIf="selectedPatient.contact">
+                  <span class="detail-label">Contact:</span>
+                  <span class="detail-value">{{ selectedPatient.contact }}</span>
+                </div>
+                <div class="detail-item" *ngIf="selectedPatient.email">
+                  <span class="detail-label">Email:</span>
+                  <span class="detail-value">{{ selectedPatient.email }}</span>
+                </div>
+              </div>
+              
+              <div *ngIf="selectedPatient.medicalHistory?.length" class="medical-info">
+                <h5 class="info-title">Medical History</h5>
+                <div class="info-tags">
+                  <span *ngFor="let condition of selectedPatient.medicalHistory" class="info-tag medical-tag">
+                    {{ condition }}
+                  </span>
+                </div>
+              </div>
+              
+              <div *ngIf="selectedPatient.allergies?.length" class="medical-info">
+                <h5 class="info-title">Allergies</h5>
+                <div class="info-tags">
+                  <span *ngFor="let allergy of selectedPatient.allergies" class="info-tag allergy-tag">
+                    {{ allergy }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row calendar-container-wrapper">
+        <app-calendar 
+          class="calendar-container" 
+          [showNavigation]="true" 
+          [showToday]="true"
+          [events]="calendarEvents"
+          (dateSelected)="onDateSelected($event)"
+          (eventClicked)="onEventClicked($event)">
+        </app-calendar>
+      </div>
+      <div class="form-row">
+        <app-input class="notes-input" [rows]="3" [multiline]="true" label="Notes" formControlName="notes" placeholder="Enter appointment notes"></app-input>
+      </div>
+    </form>
+  </div>
+</div> 

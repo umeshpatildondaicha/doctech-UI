@@ -1,0 +1,109 @@
+<div
+  class="listing-card"
+  [class.clickable]="clickable"
+  [class.compact]="variant === 'compact'"
+  [class.selected]="selected"
+  (click)="onCardClick()"
+  (keydown)="onKeyActivate($event)"
+  [attr.tabindex]="clickable ? 0 : -1"
+  [attr.role]="clickable ? 'button' : null"
+>
+  <div class="card-media">
+    <img *ngIf="imageUrl" [src]="imageUrl" [alt]="alt || title" />
+    <div class="media-placeholder" *ngIf="!imageUrl">
+      <mat-icon>{{ placeholderIcon }}</mat-icon>
+      <span>{{ placeholderText }}</span>
+    </div>
+
+    <div
+      class="card-badge badge-left"
+      *ngIf="topLeftBadge?.text"
+      [ngClass]="topLeftBadge?.className"
+      [ngStyle]="badgeStyle(topLeftBadge) || undefined"
+    >
+      {{ topLeftBadge?.text }}
+    </div>
+
+    <div
+      class="card-badge badge-right"
+      *ngIf="topRightBadge?.text"
+      [ngClass]="topRightBadge?.className"
+      [ngStyle]="badgeStyle(topRightBadge) || undefined"
+    >
+      {{ topRightBadge?.text }}
+    </div>
+
+    <div class="selection-indicator" *ngIf="showSelectionIndicator && selected">
+      <mat-icon>{{ selectionIcon }}</mat-icon>
+    </div>
+  </div>
+
+  <div class="header-actions" *ngIf="headerActions && headerActions.length > 0">
+    <button
+      class="pill-action"
+      *ngFor="let action of headerActions; trackBy: trackByActionId"
+      [class.action-primary]="(action.style || 'neutral') === 'primary'"
+      [class.action-accent]="(action.style || 'neutral') === 'accent'"
+      [class.action-warn]="(action.style || 'neutral') === 'warn'"
+      [disabled]="action.disabled"
+      [matTooltip]="action.tooltip || ''"
+      [matTooltipDisabled]="!action.tooltip"
+      (click)="onActionClick($event, action)"
+    >
+      <mat-icon>{{ action.icon }}</mat-icon>
+      <span>{{ action.label }}</span>
+    </button>
+  </div>
+
+  <div class="card-content">
+    <h3 class="card-title">{{ title }}</h3>
+    <p class="card-description" *ngIf="description">{{ description }}</p>
+
+    <!-- Optional meta (projected) -->
+    <ng-content select="[card-meta]"></ng-content>
+
+    <!-- Optional body (projected) -->
+    <ng-content select="[card-body]"></ng-content>
+
+    <div class="tag-row" *ngIf="tags && tags.length > 0">
+      <span class="tag-chip" *ngFor="let tag of tags; trackBy: trackByTag">{{ tag }}</span>
+    </div>
+
+    <div class="stats-grid" *ngIf="stats && stats.length > 0">
+      <div
+        class="stat-item"
+        *ngFor="let stat of stats; trackBy: trackByStatLabel"
+        [class.full-width]="!!stat.fullWidth"
+      >
+        <mat-icon class="stat-icon" *ngIf="stat.icon">{{ stat.icon }}</mat-icon>
+        <div class="stat-value">
+          {{ stat.value }}<span class="stat-unit" *ngIf="stat.unit">{{ stat.unit }}</span>
+        </div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
+    </div>
+
+    <div
+      class="footer-actions"
+      *ngIf="footerActions && footerActions.length > 0"
+      [class.layout-row]="footerLayout === 'row'"
+      [class.layout-column]="footerLayout === 'column'"
+    >
+      <button
+        class="footer-action"
+        *ngFor="let action of footerActions; trackBy: trackByActionId"
+        [class.action-primary]="(action.style || 'neutral') === 'primary'"
+        [class.action-accent]="(action.style || 'neutral') === 'accent'"
+        [class.action-warn]="(action.style || 'neutral') === 'warn'"
+        [disabled]="action.disabled"
+        [matTooltip]="action.tooltip || ''"
+        [matTooltipDisabled]="!action.tooltip"
+        (click)="onActionClick($event, action)"
+      >
+        <mat-icon>{{ action.icon }}</mat-icon>
+        <span>{{ action.label }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+

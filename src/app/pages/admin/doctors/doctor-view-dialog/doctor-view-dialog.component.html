@@ -1,0 +1,114 @@
+<div class="doctor-view-dialog">
+  <div class="doctor-header">
+    <div class="doctor-avatar-section">
+      <div class="doctor-avatar">
+        <img *ngIf="doctor.profilePic" 
+             [src]="doctor.profilePic" 
+             [alt]="doctor.name"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="avatar-fallback" *ngIf="!doctor.profilePic">
+          <app-icon fontIcon="person" [size]="48" color="var(--text-muted)"></app-icon>
+        </div>
+      </div>
+      <div class="doctor-info">
+        <h2 class="doctor-name">{{ doctor.name }}</h2>
+        <div class="doctor-id">
+          <app-icon fontIcon="assignment_ind" [size]="16" color="var(--primary-color)"></app-icon>
+          <span>{{ doctor.id }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="status-badges">
+      <div class="status-badge" [class]="doctor.status?.toLowerCase()">
+        <app-icon fontIcon="circle" [size]="12" [color]="getStatusColor(doctor.status)"></app-icon>
+        <span>{{ doctor.status }}</span>
+      </div>
+      <div class="status-badge availability" [class]="doctor.availability?.toLowerCase().replace(' ', '-')">
+        <app-icon fontIcon="schedule" [size]="12" [color]="getAvailabilityColor(doctor.availability)"></app-icon>
+        <span>{{ doctor.availability }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="doctor-details">
+    <mat-card class="detail-card">
+      <mat-card-header>
+        <mat-card-title>
+          <app-icon fontIcon="person" [size]="20"></app-icon>
+          Personal Information
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Specialization</span>
+            <span class="detail-value">{{ doctor.specialization || 'Not specified' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Hospital</span>
+            <span class="detail-value">{{ doctor.hospital || 'Not specified' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Phone</span>
+            <span class="detail-value">{{ doctor.phone || 'Not specified' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Email</span>
+            <span class="detail-value">{{ doctor.email || 'Not specified' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Experience</span>
+            <span class="detail-value">{{ doctor.experience || 'Not specified' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Joined Date</span>
+            <span class="detail-value">{{ doctor.joinedDate ? (doctor.joinedDate | date:'mediumDate') : 'Not specified' }}</span>
+          </div>
+          <div class="detail-item" *ngIf="doctor.qualifications">
+            <span class="detail-label">Qualifications</span>
+            <span class="detail-value">{{ doctor.qualifications }}</span>
+          </div>
+          <div class="detail-item" *ngIf="doctor.lastLogin">
+            <span class="detail-label">Last Login</span>
+            <span class="detail-value">{{ doctor.lastLogin | date:'medium' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="detail-card" *ngIf="hasAssociatedHospitals()">
+      <mat-card-header>
+        <mat-card-title>
+          <app-icon fontIcon="business" [size]="20"></app-icon>
+          Associated Hospitals
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="hospitals-list">
+          <div *ngFor="let hospital of getAssociatedHospitals()" class="hospital-item">
+            <app-icon fontIcon="local_hospital" [size]="18" color="var(--primary-color)"></app-icon>
+            <span class="hospital-name">{{ hospital }}</span>
+          </div>
+        </div>
+        <p class="info-text" *ngIf="getAssociatedHospitals().length === 0">
+          No additional hospital associations
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="detail-card" *ngIf="doctor.tags && doctor.tags.length > 0">
+      <mat-card-header>
+        <mat-card-title>
+          <app-icon fontIcon="label" [size]="20"></app-icon>
+          Tags
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="tags-container">
+          <mat-chip *ngFor="let tag of doctor.tags">{{ tag }}</mat-chip>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+

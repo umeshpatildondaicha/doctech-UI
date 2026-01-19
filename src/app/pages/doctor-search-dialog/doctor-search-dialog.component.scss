@@ -1,0 +1,387 @@
+.doctor-search-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+
+  .dialog-content {
+    flex: 1;
+  }
+
+  .dialog-header {
+    padding: 0em 0.5em 0.5em;
+    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #1f2937;
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.2em 0.5em;
+
+      .title-section {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .title-icon {
+          font-size: 24px;
+          color: #3b82f6;
+        }
+
+        .title {
+          margin: 0;
+          font-size: 24px;
+          font-weight: 600;
+          color: #1f2937;
+        }
+      }
+
+      .close-icon {
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background-color: #f3f4f6;
+        }
+      }
+    }
+
+    .patient-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #6b7280;
+
+      .patient-label {
+        font-weight: 500;
+      }
+
+      .patient-name {
+        font-weight: 600;
+        color: #1f2937;
+      }
+    }
+  }
+
+
+  .results-section {
+    flex: 1;
+    overflow-y: auto;
+
+    .results-header {
+
+      .results-title {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: #1f2937;
+
+        .results-count {
+          font-size: 14px;
+          font-weight: 400;
+          color: #6b7280;
+          margin-left: 8px;
+        }
+      }
+    }
+
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      color: #6b7280;
+
+      p {
+        margin-top: 16px;
+        font-size: 16px;
+      }
+    }
+
+    .no-results {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+      color: #6b7280;
+
+      .no-results-icon {
+        color: #d1d5db;
+        margin-bottom: 16px;
+      }
+
+      h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      p {
+        margin: 0;
+        font-size: 14px;
+      }
+    }
+
+    .doctors-grid-container {
+      
+      app-grid {
+        width: 100%;
+      }
+    }
+
+    .doctors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+
+      .doctor-card {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+
+        &:hover {
+          border-color: #3b82f6;
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+          transform: translateY(-2px);
+        }
+
+        &.selected {
+          border-color: #3b82f6;
+          background-color: #eff6ff;
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+
+          &::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 20px;
+            height: 20px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          &::before {
+            content: '✓';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 20px;
+            height: 20px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+          }
+        }
+
+        .card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 16px;
+
+          .availability-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+
+            .availability-text {
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+          }
+
+          .rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #f59e0b;
+          }
+        }
+
+        .card-body {
+          display: flex;
+          gap: 16px;
+          margin-bottom: 16px;
+
+          .doctor-avatar {
+            flex-shrink: 0;
+
+            .avatar-image {
+              width: 60px;
+              height: 60px;
+              border-radius: 50%;
+              object-fit: cover;
+              border: 2px solid #e5e7eb;
+            }
+
+            .avatar-placeholder {
+              width: 60px;
+              height: 60px;
+              border-radius: 50%;
+              background: #e5e7eb;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #6b7280;
+              border: 2px solid #e5e7eb;
+            }
+          }
+
+          .doctor-info {
+            flex: 1;
+            min-width: 0;
+
+            .doctor-name {
+              margin: 0 0 4px;
+              font-size: 18px;
+              font-weight: 600;
+              color: #1f2937;
+            }
+
+            .doctor-id {
+              margin: 0 0 12px;
+              font-size: 12px;
+              color: #6b7280;
+              font-weight: 500;
+            }
+
+            .specialization,
+            .hospital,
+            .experience {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              margin-bottom: 6px;
+              font-size: 14px;
+              color: #374151;
+
+              app-icon {
+                color: #6b7280;
+                flex-shrink: 0;
+              }
+
+              span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              }
+            }
+          }
+        }
+
+        .card-footer {
+          .qualifications {
+            margin-bottom: 12px;
+
+            .qualification-chip {
+              font-size: 11px;
+              height: 24px;
+              margin-right: 6px;
+              margin-bottom: 4px;
+              background-color: #f3f4f6;
+              color: #374151;
+            }
+
+            .more-qualifications {
+              font-size: 12px;
+              color: #6b7280;
+              font-style: italic;
+            }
+          }
+
+          .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+
+            .phone,
+            .email {
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              font-size: 12px;
+              color: #6b7280;
+
+              app-icon {
+                flex-shrink: 0;
+              }
+
+              span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .dialog-footer {
+
+    .footer-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+
+      .cancel-btn {
+        min-width: 100px;
+      }
+
+      .refer-btn {
+        min-width: 140px;
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .doctor-search-dialog {
+    max-height: 95vh;
+
+    .search-section {
+      .search-form {
+        .search-row {
+          flex-direction: column;
+        }
+
+        .filter-row {
+          flex-direction: column;
+          align-items: stretch;
+        }
+      }
+    }
+
+    .results-section {
+      .doctors-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+}

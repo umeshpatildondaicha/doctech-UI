@@ -1,0 +1,98 @@
+<div class="diet-plan-create">
+  <!-- Breadcrumb -->
+  <app-breadcrumb [customBreadcrumbs]="customBreadcrumbs"></app-breadcrumb>
+
+  <!-- Plan Details -->
+  <div class="plan-details-section">
+    <div class="plan-info-form">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="plan-name-field">
+          <mat-label>Plan Name</mat-label>
+          <input matInput [(ngModel)]="newPlan.name" placeholder="e.g., Weekly Mediterranean Plan">
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="description-field">
+        <mat-label>Description</mat-label>
+        <textarea matInput [(ngModel)]="newPlan.description" placeholder="Describe the diet plan goals and requirements"></textarea>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <!-- Weekly Schedule -->
+  <div class="weekly-schedule">
+    <div class="schedule-header">
+      <h3>Weekly Schedule</h3>
+      <div class="schedule-actions">
+        <button mat-stroked-button (click)="addMealTime()" class="add-meal-btn">
+          <mat-icon>add</mat-icon>
+          Add Meal Time
+        </button>
+        <button mat-stroked-button (click)="clearAllSchedules()" class="clear-btn">
+          <mat-icon>clear_all</mat-icon>
+          Clear All
+        </button>
+      </div>
+    </div>
+
+    <!-- Meal Times Row -->
+    <div class="meal-times-row">
+      <div class="day-header"></div>
+      <div class="meal-time-header" *ngFor="let mealTime of mealTimes; let i = index">
+        <div class="meal-time-info">
+          <div class="meal-time-label">{{ mealTime.label }}</div>
+          <div class="meal-time">{{ mealTime.time }}</div>
+        </div>
+        <button mat-icon-button (click)="removeMealTime(i)" class="remove-meal-btn" *ngIf="mealTimes.length > 1">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Days Grid -->
+    <div class="days-grid">
+      <div class="day-column" *ngFor="let day of weekDays; let dayIndex = index">
+        <div class="day-header">
+          <h4>{{ day.name }}</h4>
+          <div class="day-date">{{ day.date }}</div>
+        </div>
+        
+        <div class="day-meals">
+          <div class="meal-slot" *ngFor="let mealTime of mealTimes; let mealIndex = index">
+            <div class="meal-slot-header">
+              <span class="meal-time-label">{{ mealTime.label }}</span>
+            </div>
+            
+            <div class="selected-diets" *ngIf="getSelectedDiets(dayIndex, mealIndex).length > 0">
+              <div class="diet-item" *ngFor="let diet of getSelectedDiets(dayIndex, mealIndex); let dietIndex = index">
+                <div class="diet-info">
+                  <img *ngIf="diet.imageUrl" [src]="diet.imageUrl" [alt]="diet.name" class="diet-thumbnail">
+                  <div class="diet-details">
+                    <div class="diet-name">{{ diet.name }}</div>
+                    <div class="diet-calories">{{ diet.calories }} kcal</div>
+                  </div>
+                </div>
+                <button mat-icon-button (click)="removeDietFromSlot(dayIndex, mealIndex, dietIndex)" class="remove-diet-btn">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            </div>
+            
+            <button mat-stroked-button (click)="openDietSelector(dayIndex, mealIndex)" class="add-diet-btn">
+              <mat-icon>add</mat-icon>
+              Add Diet
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plan Actions -->
+  <div class="plan-actions">
+    <button mat-raised-button color="primary" (click)="saveWeeklyPlan()" class="save-btn">
+      <mat-icon>save</mat-icon>
+      Save Plan
+    </button>
+  </div>
+</div>

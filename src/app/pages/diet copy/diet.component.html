@@ -1,0 +1,487 @@
+<div class="diet-dashboard">
+
+  <!-- Tabs Section -->
+  <mat-tab-group 
+    [selectedIndex]="selectedTabIndex"
+    (selectedIndexChange)="onTabChange($event)"
+    class="diet-tabs"
+  >
+    <!-- Diets Tab -->
+    <mat-tab label="Diets">
+      <div class="tab-content">
+        <!-- Statistics Cards -->
+        <div class="stats-cards">
+          <div class="stat-card total-card">
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>restaurant</mat-icon>
+              </div>
+              <div class="stat-info">
+                <div class="stat-number">{{ dietList.length }}</div>
+                <div class="stat-label">Total Diets</div>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card calories-card">
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>local_fire_department</mat-icon>
+              </div>
+              <div class="stat-info">
+                <div class="stat-number">{{ totalCalories }}</div>
+                <div class="stat-label">Calories</div>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card protein-card">
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>fitness_center</mat-icon>
+              </div>
+              <div class="stat-info">
+                <div class="stat-number">{{ totalProtein }}</div>
+                <div class="stat-label">Protein (g)</div>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card carbs-card">
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>grain</mat-icon>
+              </div>
+              <div class="stat-info">
+                <div class="stat-number">{{ totalCarbs }}</div>
+                <div class="stat-label">Carbs (g)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <!-- Diets Filters -->
+        <div class="diets-filters">
+          <div class="filters-content">
+
+         <!-- View Toggle -->
+          <div class="view-toggle">
+            <button mat-button [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')">
+              <mat-icon>grid_view</mat-icon>
+              Grid View
+            </button>
+            <button mat-button [class.active]="viewMode === 'list'" (click)="setViewMode('list')">
+              <mat-icon>view_list</mat-icon>
+              List View
+            </button>
+          </div>
+
+            <div class="filter-group">
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Diet Type</mat-label>
+                <mat-select [(ngModel)]="selectedDietType" (selectionChange)="onDietTypeChange($event)">
+                  <mat-option value="">All Types</mat-option>
+                  <mat-option value="mediterranean">Mediterranean</mat-option>
+                  <mat-option value="keto">Keto</mat-option>
+                  <mat-option value="vegan">Vegan</mat-option>
+                  <mat-option value="vegetarian">Vegetarian</mat-option>
+                  <mat-option value="paleo">Paleo</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="filter-group search-group">
+              <app-input
+                label="Search diets..."
+                [(ngModel)]="searchQuery"
+                [ngModelOptions]="{standalone: true}"
+                (valueChange)="onSearchChange($event)"
+                placeholder="Search by name, description, or tags"
+                suffixIconName="search"
+                class="search-field">
+              </app-input>
+            </div>
+
+            <div class="filter-actions">
+              <app-button
+                text="Clear"
+                fontIcon="clear_all"
+                color="secondary"
+                appearance="stroked"
+                class="clear-filters-btn"
+                (btnClick)="clearFilters()">
+              </app-button>
+              <app-button
+                text="Add Diet"
+                fontIcon="add"
+                color="primary"
+                appearance="raised"
+                class="add-diet-btn"
+                (btnClick)="onCreateDiet()">
+              </app-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Diet Cards Grid View -->
+        <div class="diet-cards" *ngIf="viewMode === 'grid'">
+    <div class="cards-grid">
+      <div class="diet-card" *ngFor="let diet of filteredDiets" (click)="onViewDiet(diet)">
+        <div class="card-media">
+          <img *ngIf="diet.imageUrl" [src]="diet.imageUrl" [alt]="diet.name">
+          <div class="media-placeholder" *ngIf="!diet.imageUrl">
+            <mat-icon>restaurant</mat-icon>
+            <span>No Image</span>
+          </div>
+          <div class="card-badge" [class]="'badge-' + diet.dietType.toLowerCase()">
+            {{ diet.dietType }}
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="diet-tags">
+            <span class="tag-chip" *ngIf="diet.dietType">{{ diet.dietType }}</span>
+            <span class="tag-chip video-tag" *ngIf="diet.videoUrl" (click)="onVideoClick(diet.videoUrl); $event.stopPropagation()">Video</span>
+            <span class="tag-chip pdf-tag" *ngIf="diet.documentUrl" (click)="onPdfClick(diet.documentUrl); $event.stopPropagation()">PDF</span>
+          </div>
+          <h3 class="diet-name">{{ diet.name }}</h3>
+          <p class="diet-description">{{ diet.description }}</p>
+                  <div class="card-actions">
+          <button mat-button class="action-btn view-btn" (click)="onViewDiet(diet); $event.stopPropagation()">
+            <mat-icon>visibility</mat-icon>
+            View
+          </button>
+          <button mat-button class="action-btn edit-btn" (click)="onEditDiet(diet); $event.stopPropagation()">
+            <mat-icon>edit</mat-icon>
+            Edit
+          </button>
+          <button mat-button class="action-btn delete-btn" (click)="onDeleteDiet(diet); $event.stopPropagation()">
+            <mat-icon>delete</mat-icon>
+            Delete
+          </button>
+        </div>
+
+          <div class="diet-tags-bottom">
+            <span class="tag-chip" *ngFor="let tag of diet.tags">{{ tag }}</span>
+          </div>
+          <div class="nutritional-info">
+            <div class="nutrition-item">
+              <span class="nutrition-value">{{ diet.calories }}</span>
+              <span class="nutrition-label">kcal</span>
+            </div>
+            <div class="nutrition-item">
+              <span class="nutrition-value">{{ diet.protein }}</span>
+              <span class="nutrition-label">Protein</span>
+            </div>
+            <div class="nutrition-item">
+              <span class="nutrition-value">{{ diet.carbs }}</span>
+              <span class="nutrition-label">Carbs</span>
+            </div>
+            <div class="nutrition-item">
+              <span class="nutrition-value">{{ diet.fat }}</span>
+              <span class="nutrition-label">Fat</span>
+            </div>
+            <div class="nutrition-item">
+              <span class="nutrition-value">{{ diet.fiber }}</span>
+              <span class="nutrition-label">Fiber</span>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+        <!-- Diet List View -->
+        <div class="diet-table" *ngIf="viewMode === 'list'">
+    <div class="table-header">
+      <h3>Diet Plans</h3>
+      <p>Manage your diet plans and nutritional information</p>
+    </div>
+    <table mat-table [dataSource]="filteredDiets" class="mat-elevation-z1">
+      <ng-container matColumnDef="image">
+        <th mat-header-cell *matHeaderCellDef>Image</th>
+        <td mat-cell *matCellDef="let diet">
+          <img *ngIf="diet.imageUrl" [src]="diet.imageUrl" [alt]="diet.name" class="diet-thumbnail">
+          <div class="thumbnail-placeholder" *ngIf="!diet.imageUrl">
+            <mat-icon>restaurant</mat-icon>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let diet">
+          <div class="diet-info">
+            <h4>{{ diet.name }}</h4>
+            <p>{{ diet.description }}</p>
+            <div class="diet-tags">
+              <span class="tag-chip" *ngFor="let tag of diet.tags">{{ tag }}</span>
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let diet">
+          <span class="type-badge">{{ diet.dietType }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="calories">
+        <th mat-header-cell *matHeaderCellDef>Calories</th>
+        <td mat-cell *matCellDef="let diet">{{ diet.calories }} kcal</td>
+      </ng-container>
+
+      <ng-container matColumnDef="protein">
+        <th mat-header-cell *matHeaderCellDef>Protein</th>
+        <td mat-cell *matCellDef="let diet">{{ diet.protein }}g</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let diet">
+          <div class="grid-actions">
+            <button mat-icon-button (click)="onViewDiet(diet)" matTooltip="View">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-icon-button (click)="onEditDiet(diet)" matTooltip="Edit">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="onDeleteDiet(diet)" matTooltip="Delete">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+
+    <!-- No Results -->
+    <div class="no-results" *ngIf="filteredDiets.length === 0">
+      <div class="no-results-card">
+        <div class="no-results-content">
+          <mat-icon class="no-results-icon">restaurant</mat-icon>
+          <h3>No diets found</h3>
+          <p>Try adjusting your search criteria or create a new diet plan.</p>
+          <button mat-raised-button color="primary" (click)="onCreateDiet()">
+            <mat-icon>add</mat-icon>
+            Create Diet
+          </button>
+        </div>
+      </div>
+      </div>
+    </mat-tab>
+
+    <!-- Diet Plans Tab -->
+    <mat-tab label="Diet Plans">
+      <div class="tab-content">
+        <!-- Statistics Cards for Diet Plans -->
+        <div class="stats-cards">
+          <div class="stat-card total-card">
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>calendar_today</mat-icon>
+              </div>
+              <div class="stat-info">
+                <div class="stat-number">{{ dietPlans.length }}</div>
+                <div class="stat-label">Total Plans</div>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card active-card">
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>check_circle</mat-icon>
+              </div>
+              <div class="stat-info">
+                <div class="stat-number">{{ getActivePlansCount() }}</div>
+                <div class="stat-label">Active Plans</div>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card weekly-card">
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>date_range</mat-icon>
+              </div>
+              <div class="stat-info">
+                <div class="stat-number">{{ getWeeklyPlansCount() }}</div>
+                <div class="stat-label">Weekly Plans</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Diet Plans Filters -->
+        <div class="diet-plans-filters">
+          <div class="filters-header">
+            <h3>Filter Diet Plans</h3>
+            <div class="results-count">
+              Showing {{ filteredDietPlans.length }} of {{ dietPlans.length }} plans
+            </div>
+          </div>
+          
+          <div class="filters-content">
+            <div class="filter-group">
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Plan Type</mat-label>
+                <mat-select [(ngModel)]="selectedPlanType" (selectionChange)="onPlanTypeChange($event)">
+                  <mat-option value="">All Types</mat-option>
+                  <mat-option value="weekly">Weekly</mat-option>
+                  <mat-option value="monthly">Monthly</mat-option>
+                  <mat-option value="custom">Custom</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="filter-group">
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Status</mat-label>
+                <mat-select [(ngModel)]="selectedPlanStatus" (selectionChange)="onPlanStatusChange($event)">
+                  <mat-option value="">All Status</mat-option>
+                  <mat-option value="active">Active</mat-option>
+                  <mat-option value="inactive">Inactive</mat-option>
+                  <mat-option value="draft">Draft</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="filter-group search-group">
+              <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Search plans...</mat-label>
+                <input matInput [(ngModel)]="planSearchQuery" (input)="onPlanSearchChange($event)" placeholder="Search by name or description">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <div class="filter-actions">
+              <app-button
+                text="Clear Filters"
+                fontIcon="clear_all"
+                color="secondary"
+                appearance="stroked"
+                class="clear-filters-btn"
+                (btnClick)="clearPlanFilters()">
+              </app-button>
+              <app-button
+                text="Create Weekly Plan"
+                fontIcon="add"
+                color="primary"
+                appearance="raised"
+                class="add-plan-btn"
+                (btnClick)="onCreateDietPlan()">
+              </app-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Diet Plans Content -->
+        <div class="diet-plans-content">
+          <div class="plans-grid" *ngIf="filteredDietPlans.length > 0; else noPlans">
+            <div class="plan-card" *ngFor="let plan of filteredDietPlans">
+              <!-- Card Header with Gradient Background -->
+              <div class="plan-header">
+                <div class="plan-header-content">
+                  <div class="plan-badge">
+                    <mat-icon>restaurant_menu</mat-icon>
+                    <span>{{ plan.type }}</span>
+                  </div>
+                  <div class="plan-actions">
+                    <button mat-icon-button (click)="onViewPlan(plan)" matTooltip="View plan" class="action-btn view-btn">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="onEditPlan(plan)" matTooltip="Edit plan" class="action-btn edit-btn">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="onDeletePlan(plan)" matTooltip="Delete plan" class="action-btn delete-btn">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card Body -->
+              <div class="plan-body">
+                <div class="plan-title-section">
+                  <h3 class="plan-name">{{ plan.name }}</h3>
+                  <div class="plan-status" [class]="'status-' + plan.status">
+                    <mat-icon>{{ getStatusIcon(plan.status) }}</mat-icon>
+                    <span>{{ plan.status }}</span>
+                  </div>
+                </div>
+
+                <div class="plan-description" *ngIf="plan.description">
+                  <p>{{ plan.description }}</p>
+                </div>
+
+                <!-- Plan Stats -->
+                <div class="plan-stats">
+                  <div class="stat-item">
+                    <div class="stat-icon">
+                      <mat-icon>schedule</mat-icon>
+                    </div>
+                    <div class="stat-content">
+                      <span class="stat-value">{{ plan.duration }}</span>
+                      <span class="stat-label">Days</span>
+                    </div>
+                  </div>
+                  <div class="stat-item">
+                    <div class="stat-icon">
+                      <mat-icon>restaurant</mat-icon>
+                    </div>
+                    <div class="stat-content">
+                      <span class="stat-value">{{ plan.dietsCount }}</span>
+                      <span class="stat-label">Diets</span>
+                    </div>
+                  </div>
+                  <div class="stat-item" *ngIf="plan.progress">
+                    <div class="stat-icon">
+                      <mat-icon>trending_up</mat-icon>
+                    </div>
+                    <div class="stat-content">
+                      <span class="stat-value">{{ plan.progress }}%</span>
+                      <span class="stat-label">Progress</span>
+                    </div>
+                  </div>
+                </div>
+
+
+
+                <!-- Action Buttons -->
+                <div class="plan-footer">
+                  <button mat-stroked-button (click)="onViewPlan(plan)" class="view-plan-btn">
+                    <mat-icon>visibility</mat-icon>
+                    View Plan
+                  </button>
+                  <button mat-raised-button color="primary" (click)="onEditPlan(plan)" class="edit-plan-btn">
+                    <mat-icon>edit</mat-icon>
+                    Edit
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noPlans>
+            <div class="no-results">
+              <div class="no-results-card">
+                <div class="no-results-content">
+                  <mat-icon class="no-results-icon">calendar_today</mat-icon>
+                  <h3>No diet plans found</h3>
+                  <p>Create your first weekly diet plan to get started.</p>
+                  <button mat-raised-button color="primary" (click)="onCreateDietPlan()">
+                    <mat-icon>add</mat-icon>
+                    Create Weekly Plan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

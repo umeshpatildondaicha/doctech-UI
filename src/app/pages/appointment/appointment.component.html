@@ -1,0 +1,66 @@
+<app-page [breadcrumb]="breadcrumb" [isFooter]="false">
+  <div page-body class="appointment-container">
+
+    <mat-tab-group 
+      [selectedIndex]="selectedTabIndex"
+      (selectedIndexChange)="onTabChange($event)"
+      class="appointment-tabs"
+    >
+
+      <!-- Show All Appointments Tab -->
+      <mat-tab label="Show all appointments">
+        <div class="tab-content">
+          
+          <app-grid
+            [rowData]="allAppointments"
+            [columnDefs]="appointmentColumns"
+            [gridOptions]="appointmentGridOptions"
+            [height]="'500px'"
+            [showHeader]="true"
+            [rightTooltemplateRef]="rightTooltemplateAppointment"
+            [searchPlaceholder]="'Search appointments...'"
+            (rowClicked)="onAppointmentRowClick($event)"
+          ></app-grid>
+        </div>
+      </mat-tab>
+
+      <!-- Pending Appointments Tab -->
+      <mat-tab label="Pending appointments">
+        <div class="tab-content">
+          
+        <app-grid
+          [rowData]="pendingAppointments"
+          [columnDefs]="pendingColumns"
+          [gridOptions]="pendingGridOptions"
+          [height]="'500px'"
+          [showHeader]="true"
+          [rightTooltemplateRef]="rightTooltemplatePending"
+          [searchPlaceholder]="'Search pending appointments...'"
+          (rowClicked)="onPendingRowClick($event)"
+        ></app-grid>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="My Schedule">
+        <div class="tab-content">
+          
+          <app-my-schedule></app-my-schedule>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</app-page>
+
+
+
+<ng-template #rightTooltemplateAppointment>
+    <div class="grid-actions">
+        <app-icon [fontSet]="'material-icons-outlined'" [isCovered]="true" [fontIcon]="'add'" (click)="createAppointment()"></app-icon>
+    </div>
+</ng-template>
+
+<ng-template #rightTooltemplatePending>
+    <div class="grid-actions">
+        <app-icon [fontSet]="'material-icons-outlined'" [isCovered]="true" [fontIcon]="'refresh'" (click)="refreshPending()"></app-icon>
+    </div>
+</ng-template>

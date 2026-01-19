@@ -1,0 +1,505 @@
+.exercise-assignment-dialog {
+  display: flex;
+  flex-direction: column;
+
+  .dialog-content {
+    flex: 1;
+
+    .dialog-body {
+      display: flex;
+      height: 100%;
+      min-height: 500px;
+      max-height: calc(90vh - 200px);
+    }
+  }
+
+  // Left Section: Exercise Selection
+  .exercise-selection-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 100%;
+
+    .selection-controls {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: linear-gradient(180deg, #ffffff 70%, rgba(255,255,255,0.85) 100%);
+      backdrop-filter: saturate(120%) blur(2px);
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+    }
+
+    .browse-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+    }
+
+    .search-inline {
+      margin-bottom: 12px;
+
+      .search-field {
+        width: 100%;
+
+        &.small {
+          ::ng-deep .mat-mdc-text-field-wrapper {
+            background: #f8f9fa;
+            border-radius: 8px;
+            min-height: 36px;
+          }
+          ::ng-deep .mat-mdc-form-field-infix {
+            padding: 6px 10px !important;
+          }
+          ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+            display: none;
+          }
+          ::ng-deep .mat-mdc-form-field-icon-prefix,
+          ::ng-deep .mat-mdc-form-field-icon-suffix,
+          ::ng-deep .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button,
+          ::ng-deep .mat-mdc-icon-button {
+            width: 32px;
+            height: 32px;
+          }
+          ::ng-deep .mat-mdc-form-field-icon-suffix .mat-icon,
+          ::ng-deep .mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+    }
+
+    .browse-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 6px;
+
+      .tab-btn {
+        appearance: none;
+        border: none;
+        background: transparent;
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 12px;
+        color: #475569;
+        font-weight: 600;
+        font-size: 13px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+
+        .tab-count {
+          background: #e2e8f0;
+          color: #334155;
+          font-size: 11px;
+          font-weight: 700;
+          padding: 2px 8px;
+          border-radius: 999px;
+        }
+
+        &:hover {
+          background: #e2e8f0;
+        }
+
+        &.active {
+          color: #0b5ed7;
+          background: linear-gradient(135deg, #e0ecff 0%, #d6e4ff 100%);
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+
+          .tab-count {
+            background: rgba(11, 94, 215, 0.15);
+            color: #0b5ed7;
+          }
+        }
+      }
+    }
+
+    .exercises-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      flex: 1;
+      overflow-y: auto;
+
+      .exercise-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        background: white;
+        border-bottom: 1px solid #e9ecef;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background: #f8f9fa;
+        }
+
+        &.selected {
+          background: #eff6ff;
+        }
+
+        .exercise-item-info {
+          flex: 1;
+
+          .exercise-item-name {
+            margin: 0 0 4px 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+          }
+
+          .exercise-item-meta {
+            margin: 0;
+            font-size: 13px;
+            color: #6c757d;
+          }
+        }
+
+        .exercise-item-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+
+          .view-btn {
+            color: #6c757d;
+
+            &:hover {
+              background: #f8f9fa;
+              color: #2563eb;
+            }
+
+            mat-icon {
+              font-size: 20px;
+              width: 20px;
+              height: 20px;
+            }
+          }
+
+          .check-icon {
+            color: #2563eb;
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+          }
+
+          .add-btn {
+            width: 2em;
+            height: 2em;
+            border-radius: 50%;
+            background: #e3f2fd;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+
+            mat-icon {
+              font-size: 24px;
+              width: 24px;
+              height: 24px;
+            }
+
+            &:hover {
+              background: var(--primary-color-hover);
+              color: white;
+              transform: scale(1.1);
+            }
+          }
+        }
+      }
+    }
+
+    .exercise-groups-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      flex: 1;
+      overflow-y: auto;
+
+      .exercise-group-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        background: white;
+        border-bottom: 1px solid #e9ecef;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background: #f8f9fa;
+        }
+
+        &.selected {
+          background: #eff6ff;
+        }
+
+        .group-info {
+          flex: 1;
+
+          .group-name {
+            margin: 0 0 4px 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+          }
+
+          .group-meta {
+            margin: 0;
+            font-size: 13px;
+            color: #6c757d;
+          }
+        }
+
+        .group-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+
+          .view-btn {
+            color: #6c757d;
+
+            &:hover {
+              background: #f8f9fa;
+              color: #2563eb;
+            }
+
+            mat-icon {
+              font-size: 20px;
+              width: 20px;
+              height: 20px;
+            }
+          }
+
+          .check-icon {
+            color: var(--primary-color);
+          }
+
+          .add-btn {
+            border-radius: 50%;
+            width: 2em;
+            height: 2em;
+            background: #e3f2fd;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+
+
+            &:hover {
+              background: var(--primary-color-hover);
+              color: white;
+              transform: scale(1.1);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Right Section: Assignment Summary
+  .assignment-summary-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    max-width: 400px;
+
+    h3 {
+      margin: 0 0 20px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .summary-content {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .selected-exercises-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+
+      .selected-exercise-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+
+        &:hover {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .exercise-info {
+          flex: 1;
+
+          .exercise-name {
+            margin: 0 0 4px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+          }
+
+          .exercise-meta {
+            margin: 0 0 8px 0;
+            font-size: 12px;
+            color: #6c757d;
+          }
+
+          .sets-info-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+
+            .sets-badge {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              padding: 6px 10px;
+              background: #e7f0ff;
+              border: 1px solid #bfd6ff;
+              border-radius: 6px;
+              font-size: 12px;
+              font-weight: 500;
+              color: #0b5ed7;
+              flex: 1;
+
+              &.no-sets {
+                background: #fef3c7;
+                border-color: #f59e0b;
+                color: #92400e;
+              }
+
+              .sets-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+              }
+
+              .sets-text {
+                font-size: 12px;
+                font-weight: 500;
+              }
+            }
+
+            .edit-sets-btn {
+
+              &:hover {
+                background: rgba(0,123,255,0.1);
+                color: var(--primary-color);
+              }
+            }
+          }
+        }
+
+        .remove-btn {
+          color: #dc3545;
+          flex-shrink: 0;
+
+          &:hover {
+            background: #fff5f5;
+          }
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+      color: #6c757d;
+
+      .empty-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+
+      p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+    }
+  }
+
+}
+
+// Responsive Design
+@media (max-width: 1024px) {
+  .exercise-assignment-dialog {
+    .dialog-content {
+      .dialog-body {
+        flex-direction: column;
+
+        .exercise-selection-section,
+        .assignment-summary-section {
+          border-right: none;
+          border-bottom: 1px solid #e9ecef;
+          max-height: 50%;
+          max-width: 100%;
+        }
+      }
+    }
+  }
+}
+

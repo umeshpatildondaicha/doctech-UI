@@ -1,0 +1,176 @@
+<div class="patient-billing-dashboard" [class.embedded]="embedded">
+  <!-- Header -->
+  <div class="dashboard-header" *ngIf="!embedded">
+    <div class="header-left">
+      <button mat-icon-button (click)="navigateBack()" matTooltip="Back to Billing">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="patient-info">
+        <h2>{{ patientName || 'Patient Billing' }}</h2>
+        <span class="patient-id" *ngIf="patientId">ID: {{ patientId }}</span>
+      </div>
+    </div>
+    <button mat-flat-button color="primary" (click)="openPatientProfileForBilling()">
+      <mat-icon>open_in_new</mat-icon>
+      Open Patient Profile
+    </button>
+  </div>
+
+  <!-- Compact header for embedded mode -->
+  <div class="dashboard-header-compact" *ngIf="embedded">
+    <div class="header-actions-left">
+      <button mat-stroked-button (click)="generateStatement()" [disabled]="invoices.length === 0">
+        <mat-icon>description</mat-icon>
+        Statement
+      </button>
+    </div>
+    <button mat-flat-button color="primary" (click)="createNewInvoice()">
+      <mat-icon>add</mat-icon>
+      New Invoice
+    </button>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <app-card class="summary-card" [dense]="true">
+      <div class="card-label">Total Billed</div>
+      <div class="card-value">{{ currencyFmt(summary.totalBilled) }}</div>
+      <div class="card-meta">{{ summary.invoicesCount }} invoice(s)</div>
+    </app-card>
+    
+    <app-card class="summary-card" [dense]="true">
+      <div class="card-label">Total Paid</div>
+      <div class="card-value paid">{{ currencyFmt(summary.totalPaid) }}</div>
+      <div class="card-progress">
+        <mat-progress-bar 
+          mode="determinate" 
+          [value]="getPaymentProgress()"
+          color="primary">
+        </mat-progress-bar>
+        <span class="progress-text">{{ getPaymentProgress().toFixed(0) }}%</span>
+      </div>
+    </app-card>
+    
+    <app-card class="summary-card" [dense]="true">
+      <div class="card-label">Outstanding</div>
+      <div class="card-value outstanding">{{ currencyFmt(summary.totalOutstanding) }}</div>
+    </app-card>
+    
+    <app-card class="summary-card" [dense]="true">
+      <div class="card-label">Overdue</div>
+      <div class="card-value overdue">{{ currencyFmt(summary.overdue) }}</div>
+    </app-card>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <button *ngIf="!embedded" mat-stroked-button color="primary" (click)="openPatientProfileForBilling()">
+      <mat-icon>open_in_new</mat-icon>
+      Create Invoice (via Profile)
+    </button>
+    <button mat-stroked-button (click)="getTopOutstandingInvoice() ? recordPayment(getTopOutstandingInvoice()!) : null" [disabled]="!getTopOutstandingInvoice()" matTooltip="Record payment for highest balance invoice">
+      <mat-icon>payments</mat-icon>
+      Record Payment
+    </button>
+    <span class="spacer"></span>
+    <div class="filter-chips">
+      <button type="button" class="chip" [class.active]="activeStatus==='ALL'" (click)="applyStatusFilter('ALL')">All</button>
+      <button type="button" class="chip" [class.active]="activeStatus==='UNPAID'" (click)="applyStatusFilter('UNPAID')">Unpaid</button>
+      <button type="button" class="chip" [class.active]="activeStatus==='PARTIALLY_PAID'" (click)="applyStatusFilter('PARTIALLY_PAID')">Partially Paid</button>
+      <button type="button" class="chip" [class.active]="activeStatus==='PAID'" (click)="applyStatusFilter('PAID')">Paid</button>
+      <button type="button" class="chip" [class.active]="activeStatus==='OVERDUE'" (click)="applyStatusFilter('OVERDUE')">Overdue</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="billing-tabs">
+    <!-- Invoices Tab -->
+    <mat-tab label="Invoices">
+      <div class="tab-content">
+        <div class="invoices-section">
+          <app-grid
+            *ngIf="visibleInvoices.length > 0"
+            [rowData]="visibleInvoices"
+            [columnDefs]="columnDefs"
+            [gridOptions]="gridOptions"
+            [showAddButton]="false"
+            [searchPlaceholder]="'Search invoices...'"
+            [height]="embedded ? 'calc(100vh - 560px)' : 'calc(100vh - 460px)'"
+            [width]="'100%'"
+            (rowClicked)="openInvoiceDetails($event)">
+          </app-grid>
+          <app-card *ngIf="visibleInvoices.length === 0 && !loading" class="empty-state">
+            <div class="empty-state-content">
+              <mat-icon class="empty-icon">receipt_long</mat-icon>
+              <h3>No Invoices Found</h3>
+              <p *ngIf="activeStatus === 'ALL'">This patient doesn't have any invoices yet. Create the first invoice to get started.</p>
+              <p *ngIf="activeStatus !== 'ALL'">No invoices match the current filter. Try changing the status filter above.</p>
+              <button mat-stroked-button color="primary" (click)="createNewInvoice()" *ngIf="embedded && activeStatus === 'ALL'">
+                <mat-icon>add</mat-icon>
+                Create First Invoice
+              </button>
+            </div>
+          </app-card>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Items Tab -->
+    <mat-tab label="Items">
+      <div class="tab-content items-tab">
+        <div class="items-section">
+          <app-grid
+            *ngIf="allItems.length > 0"
+            [rowData]="allItems"
+            [columnDefs]="itemsColumnDefs"
+            [gridOptions]="itemsGridOptions"
+            [showAddButton]="false"
+            [searchPlaceholder]="'Search items...'"
+            [height]="embedded ? 'calc(100vh - 560px)' : 'calc(100vh - 460px)'"
+            [width]="'100%'">
+          </app-grid>
+          <app-card *ngIf="allItems.length === 0 && !loading" class="empty-state">
+            <div class="empty-state-content">
+              <mat-icon class="empty-icon">inventory_2</mat-icon>
+              <h3>No Items Found</h3>
+              <p>There are no invoice items for this patient yet.</p>
+              <button mat-stroked-button color="primary" (click)="createNewInvoice()" *ngIf="embedded">
+                <mat-icon>add</mat-icon>
+                Create First Invoice
+              </button>
+            </div>
+          </app-card>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- Payments Tab -->
+    <mat-tab label="Payments">
+      <div class="tab-content payments-tab">
+        <div class="payments-section">
+          <app-grid
+            *ngIf="allPayments.length > 0"
+            [rowData]="allPayments"
+            [columnDefs]="paymentsColumnDefs"
+            [gridOptions]="paymentsGridOptions"
+            [showAddButton]="false"
+            [searchPlaceholder]="'Search payments...'"
+            [height]="embedded ? 'calc(100vh - 560px)' : 'calc(100vh - 460px)'"
+            [width]="'100%'">
+          </app-grid>
+          <app-card *ngIf="allPayments.length === 0 && !loading" class="empty-state">
+            <div class="empty-state-content">
+              <mat-icon class="empty-icon">payments</mat-icon>
+              <h3>No Payments Recorded</h3>
+              <p>No payment records found for this patient. Payments will appear here once recorded.</p>
+              <button mat-stroked-button color="primary" (click)="getTopOutstandingInvoice() ? recordPayment(getTopOutstandingInvoice()!) : null" [disabled]="!getTopOutstandingInvoice()">
+                <mat-icon>add</mat-icon>
+                Record First Payment
+              </button>
+            </div>
+          </app-card>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

@@ -1,0 +1,80 @@
+.tab-config-dialog {
+  .dialog-content {
+
+    p {
+      margin: 0 0 1em 0;
+      color: #666;
+      font-size: 14px;
+    }
+  }
+
+  .tab-config-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .tab-config-item {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    padding: 0.8em;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: var(--secondary-background-color);
+    transition: all 0.2s;
+
+    &:hover {
+      border-color: var(--border-color);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .reorder-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        background: #fff;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover:not(:disabled) {
+          background: #f3f4f6;
+          border-color: #18b6b2;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
+
+    .center {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .tab-label {
+        font-weight: 500;
+        color: #333;
+        font-size: 14px;
+      }
+    }
+
+    .right {
+      display: flex;
+      align-items: center;
+    }
+  }
+}
+

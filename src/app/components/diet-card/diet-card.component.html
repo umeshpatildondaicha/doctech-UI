@@ -1,0 +1,19 @@
+<app-listing-card
+  [title]="diet.name"
+  [description]="diet.description"
+  [imageUrl]="diet.imageUrl"
+  [alt]="diet.name"
+  placeholderIcon="restaurant"
+  placeholderText="No Image"
+  [clickable]="clickable"
+  [topRightBadge]="dietBadge"
+  [headerActions]="headerActions"
+  [tags]="diet.tags || []"
+  [stats]="nutritionStats"
+  [footerActions]="footerActions"
+  footerLayout="column"
+  (cardClick)="onCardClick()"
+  (actionClick)="onListingAction($event)"
+></app-listing-card>
+
+

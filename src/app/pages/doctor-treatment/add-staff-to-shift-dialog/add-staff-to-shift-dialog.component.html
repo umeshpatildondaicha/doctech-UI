@@ -1,0 +1,34 @@
+<div class="add-staff-dialog">
+  <div class="shift-info">
+    <h4>{{ shift?.name }}</h4>
+    <p>{{ shift?.startTime }} - {{ shift?.endTime }}</p>
+  </div>
+
+  <div class="staff-selection">
+    <h3 class="section-title">Select Staff Members</h3>
+    <div class="staff-list">
+      <div
+        *ngFor="let staff of availableStaff"
+        class="staff-item"
+        [class.selected]="isStaffSelected(staff.id)"
+        (click)="toggleStaffSelection(staff.id)">
+        <div class="staff-info">
+          <div class="staff-name">{{ staff.name }}</div>
+          <div class="staff-role">{{ staff.role }} - {{ staff.department }}</div>
+        </div>
+        <app-icon
+          [fontIcon]="isStaffSelected(staff.id) ? 'check_circle' : 'radio_button_unchecked'"
+          [size]="20"
+          [color]="isStaffSelected(staff.id) ? '#3b82f6' : '#9ca3af'">
+        </app-icon>
+      </div>
+      <div *ngIf="availableStaff.length === 0" class="no-staff">
+        All staff members are already assigned to this shift.
+      </div>
+    </div>
+    <div class="selected-staff-summary" *ngIf="selectedStaffIds.length > 0">
+      <strong>{{ selectedStaffIds.length }} staff member(s) selected</strong>
+    </div>
+  </div>
+</div>
+

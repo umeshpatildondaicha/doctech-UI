@@ -1,0 +1,350 @@
+.patient-billing-dashboard {
+  padding: 24px;
+  background: #f5f5f5;
+  min-height: calc(100vh - 64px);
+
+  &.embedded {
+    padding: 1rem;
+    background: transparent;
+    min-height: auto;
+  }
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .patient-info {
+      h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: #1a1a1a;
+      }
+
+      .patient-id {
+        font-size: 13px;
+        color: #666;
+        margin-top: 4px;
+        display: block;
+      }
+
+      &.no-back-button {
+        margin-left: 0;
+      }
+    }
+  }
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  .spacer { flex: 1; }
+
+  .filter-chips {
+    display: flex;
+    gap: 8px;
+
+    .chip {
+      padding: 6px 10px;
+      border-radius: 16px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      font-size: 12px;
+      color: #374151;
+      cursor: pointer;
+    }
+
+    .chip.active {
+      background: #e3f2fd;
+      border-color: #90caf9;
+      color: #1976d2;
+      font-weight: 600;
+    }
+  }
+}
+
+.content-split {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  align-items: start;
+}
+
+.summary-card {
+  padding: 20px; // inner spacing for content (app-card handles outer surface)
+
+  .card-label {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .card-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+
+    &.paid {
+      color: #4caf50;
+    }
+
+    &.outstanding {
+      color: #ff9800;
+    }
+
+    &.overdue {
+      color: #d32f2f;
+    }
+  }
+
+  .card-meta {
+    font-size: 12px;
+    color: #999;
+  }
+
+  .card-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+
+    mat-progress-bar {
+      flex: 1;
+      height: 8px;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: #666;
+      font-weight: 600;
+      min-width: 40px;
+    }
+  }
+}
+
+.invoices-section {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel-card {
+  padding: 16px;
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.panel-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 6px 0;
+
+  strong.paid { color: #2e7d32; }
+  strong.outstanding { color: #ef6c00; }
+  strong.overdue { color: #c62828; }
+}
+
+.full-width {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.invoice-mini {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dashed #e5e7eb;
+
+  &:last-child { border-bottom: none; }
+
+  .mini-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    .mini-title { font-weight: 600; font-size: 13px; }
+    .mini-sub { font-size: 11px; color: #6b7280; }
+  }
+
+  .mini-right {
+    text-align: right;
+    .mini-amount { font-weight: 600; font-size: 13px; }
+    .mini-status { font-size: 11px; color: #6b7280; text-transform: capitalize; }
+    .mini-status.paid { color: #2e7d32; }
+    .mini-status.partially { color: #ef6c00; }
+    .mini-status.unpaid { color: #c62828; }
+  }
+}
+
+.dashboard-header-compact {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 16px;
+
+  .header-actions-left {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    button {
+      height: 40px;
+      font-weight: 500;
+      font-size: 13px;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        margin-right: 6px;
+      }
+    }
+  }
+}
+
+.patient-billing-dashboard.embedded .summary-cards { margin-bottom: 16px; }
+
+// Record Payment Button Styles
+::ng-deep {
+  .record-payment-btn {
+    &:hover {
+      background: #45a049 !important;
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4) !important;
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+}
+
+// Tabs
+.billing-tabs {
+  margin-top: 16px;
+
+  ::ng-deep {
+    .mat-mdc-tab-header {
+      .mat-mdc-tab-label-container {
+        .mat-mdc-tab-list {
+          .mat-mdc-tab-labels {
+            justify-content: center !important;
+            display: flex !important;
+          }
+        }
+      }
+    }
+    
+    // Override patient-profile-container rule for billing tabs
+    .mdc-tab__content {
+      justify-content: center !important;
+    }
+    
+    .mat-mdc-tab-label {
+      .mdc-tab__content {
+        justify-content: center !important;
+      }
+    }
+  }
+
+  .tab-content {
+    padding: 20px 0;
+    min-height: 400px;
+  }
+}
+
+// Items Tab
+.items-tab {
+  .items-section {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Payments Tab
+.payments-tab {
+  .payments-section {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Empty States
+.empty-state {
+  padding: 48px 24px;
+  text-align: center;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
+
+  .empty-state-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+
+    .empty-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      color: #ccc;
+      opacity: 0.5;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      color: #6b7280;
+      max-width: 400px;
+    }
+
+    button {
+      margin-top: 8px;
+    }
+  }
+}

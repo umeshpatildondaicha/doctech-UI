@@ -1,0 +1,159 @@
+<div class="exercise-list-widget">
+  <!-- Filters Section -->
+  <div class="filters-section" *ngIf="config.showFilters">
+    <div class="filters-header">
+      <h3>Filter Exercises</h3>
+      <div class="results-count">
+        Showing {{ getFilteredExercises().length }} of {{ exercises.length }} exercises
+      </div>
+    </div>
+    
+    <div class="filters-content">
+      <div class="filter-group">
+        <label class="filter-label">Category</label>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-select [(ngModel)]="selectedCategory">
+            <mat-option *ngFor="let category of categories" [value]="category.value">
+              {{ category.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Difficulty</label>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-select [(ngModel)]="selectedDifficulty">
+            <mat-option *ngFor="let difficulty of difficulties" [value]="difficulty.value">
+              {{ difficulty.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-group search-group">
+        <label class="filter-label">Search</label>
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search exercises...</mat-label>
+          <input matInput [(ngModel)]="searchQuery" placeholder="Search by name, description, or muscles">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-actions">
+        <button mat-stroked-button (click)="clearFilters()" class="clear-filters-btn">
+          <mat-icon>clear_all</mat-icon>
+          Clear Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exercise Groups View -->
+  <div class="groups-section" *ngIf="config.showGroupView && exerciseGroups && exerciseGroups.length > 0">
+    <div class="groups-header">
+      <h3>Exercise Groups</h3>
+      <p class="groups-count">{{ getFilteredGroups().length }} groups available</p>
+    </div>
+    <div class="groups-grid">
+      <mat-card class="group-card" *ngFor="let group of getFilteredGroups()">
+        <div class="group-card-header">
+          <div class="group-info">
+            <h4 class="group-name">{{ group.name }}</h4>
+            <p class="group-exercise-count">{{ group.exercises?.length || 0 }} exercises</p>
+          </div>
+          <button 
+            mat-stroked-button 
+            color="primary" 
+            (click)="onSelectGroup(group)"
+            *ngIf="config.allowSelection"
+            class="select-group-btn">
+            <mat-icon>add</mat-icon>
+            Add Group
+          </button>
+        </div>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Exercise Cards View -->
+  <div class="exercise-cards-view" *ngIf="viewMode === 'cards'">
+    <div class="cards-grid" *ngIf="getFilteredExercises().length > 0; else noResults">
+      <app-exercise-card 
+        *ngFor="let exercise of getFilteredExercises()"
+        [exercise]="exercise"
+        [showActions]="config.showActions ?? true"
+        [clickable]="!(config.allowSelection ?? false)"
+        [allowSelection]="config.allowSelection ?? false"
+        [isSelected]="isExerciseSelected(exercise)"
+        (cardClick)="onViewExercise(exercise)"
+        (viewClick)="onViewExercise(exercise)"
+        (editClick)="onEditExercise(exercise)"
+        (deleteClick)="onDeleteExercise(exercise)"
+        (selectClick)="onSelectExercise(exercise)">
+      </app-exercise-card>
+    </div>
+  </div>
+
+  <!-- Exercise List View -->
+  <div class="exercise-list-view" *ngIf="viewMode === 'list'">
+    <div class="list-items" *ngIf="getFilteredExercises().length > 0; else noResults">
+      <div 
+        class="list-item" 
+        *ngFor="let exercise of getFilteredExercises()"
+        [class.selected]="isExerciseSelected(exercise)">
+        <div class="item-media">
+          <img *ngIf="exercise.imageUrl" [src]="exercise.imageUrl" [alt]="exercise.name">
+          <div class="media-placeholder" *ngIf="!exercise.imageUrl">
+            <mat-icon>fitness_center</mat-icon>
+          </div>
+        </div>
+        <div class="item-content">
+          <h4 class="item-name">{{ exercise.name }}</h4>
+          <p class="item-description">{{ exercise.description }}</p>
+          <div class="item-meta">
+            <mat-chip class="category-chip">{{ exercise.category }}</mat-chip>
+            <span class="difficulty-text">{{ exercise.difficulty }}</span>
+            <span class="sets-info">{{ getSetsDisplay(exercise) }}</span>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button 
+            *ngIf="config.allowSelection"
+            mat-icon-button 
+            [color]="isExerciseSelected(exercise) ? 'warn' : 'primary'" 
+            (click)="onSelectExercise(exercise)"
+            [matTooltip]="isExerciseSelected(exercise) ? 'Remove' : 'Add'">
+            <mat-icon>{{ isExerciseSelected(exercise) ? 'remove_circle' : 'add_circle' }}</mat-icon>
+          </button>
+          <button 
+            *ngIf="config.showActions && !config.allowSelection"
+            mat-icon-button 
+            color="primary" 
+            (click)="onViewExercise(exercise)"
+            matTooltip="View">
+            <mat-icon>visibility</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Results Template -->
+  <ng-template #noResults>
+    <div class="no-results">
+      <mat-card class="no-results-card">
+        <div class="no-results-content">
+          <mat-icon class="no-results-icon">search_off</mat-icon>
+          <h3>No exercises found</h3>
+          <p>Try adjusting your search criteria or filters</p>
+          <button mat-stroked-button (click)="clearFilters()">
+            Clear Filters
+          </button>
+        </div>
+      </mat-card>
+    </div>
+  </ng-template>
+</div>
+
+

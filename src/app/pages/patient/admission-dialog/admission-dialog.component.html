@@ -1,0 +1,49 @@
+<div class="admission-dialog">
+  <div class="dialog-content">
+    <p>Please fill in the admission details for {{ data.patientName }}:</p>
+    
+    <form [formGroup]="admissionForm" class="admission-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="ward">Ward:</label>
+          <app-selectbox 
+            id="ward"
+            formControlName="ward"
+            [options]="data.wardOptions || []"
+            placeholder="Select Ward">
+          </app-selectbox>
+        </div>
+        <div class="form-group">
+          <label for="room">Room Number:</label>
+          <app-input 
+            id="room"
+            formControlName="room"
+            placeholder="Enter room number">
+          </app-input>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="bed">Bed:</label>
+          <app-selectbox 
+            id="bed"
+            formControlName="bed"
+            [options]="data.bedOptions || []"
+            placeholder="Select Bed">
+          </app-selectbox>
+        </div>
+        <div class="form-group">
+          <label for="attendingDoctor">Attending Doctor:</label>
+          <app-selectbox 
+            id="attendingDoctor"
+            formControlName="attendingDoctor"
+            [options]="data.doctorOptions || []"
+            placeholder="Select Doctor">
+          </app-selectbox>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+

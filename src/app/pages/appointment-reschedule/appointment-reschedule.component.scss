@@ -1,0 +1,368 @@
+.appointment-reschedule-dialog {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+
+  .dialog-content {
+
+    .current-appointment-card {
+      background: var(--secondary-background-color);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      margin-bottom: 24px;
+      overflow: hidden;
+
+      .card-header {
+        padding: 16px 20px;
+        background: var(--surface-color);
+        border-bottom: 1px solid var(--border-color);
+
+        .card-title {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--text-color);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          .card-icon {
+            font-size: 18px;
+            color: var(--primary-color);
+          }
+        }
+      }
+
+      .card-content {
+        padding: 20px;
+
+        .current-info {
+          .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+
+            &:last-child {
+              border-bottom: none;
+            }
+
+            .label {
+              font-weight: 500;
+              color: var(--tertiary-color);
+              font-size: 14px;
+            }
+
+            .value {
+              font-weight: 600;
+              color: var(--text-color);
+              font-size: 14px;
+            }
+          }
+        }
+      }
+    }
+
+    .new-appointment-section {
+      .section-header {
+        margin-bottom: 24px;
+
+        .section-title {
+          margin: 0 0 8px 0;
+          font-size: 18px;
+          font-weight: 600;
+          color: var(--text-color);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          .section-icon {
+            font-size: 20px;
+            color: var(--primary-color);
+          }
+        }
+
+        .section-subtitle {
+          margin: 0;
+          color: var(--tertiary-color);
+          font-size: 14px;
+        }
+      }
+
+      .reschedule-form {
+        .form-section {
+          margin-bottom: 32px;
+
+          .form-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+
+            .form-section-title {
+              margin: 0;
+              font-size: 16px;
+              font-weight: 600;
+              color: var(--text-color);
+            }
+
+            .selected-date {
+              font-size: 14px;
+              color: var(--primary-color);
+              font-weight: 500;
+              background: var(--secondary-background-color);
+              padding: 4px 12px;
+              border-radius: 16px;
+              border: 1px solid var(--primary-color);
+            }
+          }
+
+          .calendar-wrapper {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: var(--primary-shadow);
+
+            .calendar-container {
+              width: 100%;
+            }
+          }
+
+          .time-slots-container {
+            .time-slots-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+              gap: 12px;
+
+              .time-slot {
+                background: var(--surface-color);
+                border: 2px solid var(--border-color);
+                border-radius: 8px;
+                padding: 16px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                position: relative;
+
+                &:hover {
+                  border-color: var(--primary-color);
+                  transform: translateY(-2px);
+                  box-shadow: 0 4px 8px rgba(16, 179, 179, 0.1);
+                }
+
+                &.selected {
+                  border-color: var(--primary-color);
+                  background: var(--secondary-background-color);
+                  box-shadow: 0 4px 12px rgba(16, 179, 179, 0.2);
+                }
+
+                &.conflict {
+                  border-color: #ff9800;
+                  background: #fff8e1;
+
+                  &:hover {
+                    border-color: #f57c00;
+                  }
+
+                  &.selected {
+                    border-color: #f57c00;
+                    background: #fff3e0;
+                  }
+                }
+
+                .slot-time {
+                  font-size: 16px;
+                  font-weight: 600;
+                  color: var(--text-color);
+                  margin-bottom: 8px;
+                }
+
+                .slot-status {
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 4px;
+                  font-size: 12px;
+                  font-weight: 500;
+
+                  .conflict-icon {
+                    font-size: 14px;
+                    color: #ff9800;
+                  }
+
+                  .available-icon {
+                    font-size: 14px;
+                    color: #4caf50;
+                  }
+
+                  span {
+                    color: var(--tertiary-color);
+                  }
+                }
+              }
+            }
+
+            .no-slots-message {
+              text-align: center;
+              padding: 40px 20px;
+              background: var(--secondary-background-color);
+              border-radius: 8px;
+              border: 1px solid var(--border-color);
+
+              .no-slots-icon {
+                font-size: 48px;
+                color: var(--tertiary-color);
+                margin-bottom: 16px;
+              }
+
+              p {
+                margin: 8px 0;
+                color: var(--tertiary-color);
+                font-size: 14px;
+              }
+            }
+          }
+
+          .notes-wrapper {
+            .notes-input {
+              width: 100%;
+            }
+          }
+        }
+
+        .conflict-warning {
+          background: #fff3e0;
+          border: 1px solid #ffcc02;
+          border-radius: 8px;
+          padding: 16px;
+          margin-bottom: 24px;
+
+          .warning-content {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+
+            .warning-icon {
+              font-size: 24px;
+              color: #ff9800;
+              flex-shrink: 0;
+              margin-top: 2px;
+            }
+
+            .warning-text {
+              flex: 1;
+
+              h4 {
+                margin: 0 0 8px 0;
+                font-size: 16px;
+                font-weight: 600;
+                color: #e65100;
+              }
+
+              p {
+                margin: 0;
+                font-size: 14px;
+                color: #bf360c;
+                line-height: 1.5;
+              }
+            }
+          }
+        }
+
+        .summary-section {
+          background: var(--secondary-background-color);
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          overflow: hidden;
+
+          .summary-header {
+            padding: 16px 20px;
+            background: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+
+            .summary-title {
+              margin: 0;
+              font-size: 16px;
+              font-weight: 600;
+              color: var(--text-color);
+              display: flex;
+              align-items: center;
+              gap: 8px;
+
+              .summary-icon {
+                font-size: 18px;
+                color: var(--primary-color);
+              }
+            }
+          }
+
+          .summary-content {
+            padding: 20px;
+
+            .summary-item {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 8px 0;
+              border-bottom: 1px solid var(--border-color);
+
+              &:last-child {
+                border-bottom: none;
+              }
+
+              .summary-label {
+                font-weight: 500;
+                color: var(--tertiary-color);
+                font-size: 14px;
+              }
+
+              .summary-value {
+                font-weight: 600;
+                color: var(--text-color);
+                font-size: 14px;
+                text-align: right;
+                max-width: 60%;
+                word-wrap: break-word;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .appointment-reschedule-dialog {
+    max-width: 95vw;
+    margin: 20px;
+
+
+    .dialog-content {
+
+      .time-slots-container {
+        .time-slots-grid {
+          grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+          gap: 8px;
+
+          .time-slot {
+            padding: 12px 8px;
+
+            .slot-time {
+              font-size: 14px;
+            }
+
+            .slot-status {
+              font-size: 11px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

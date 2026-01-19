@@ -1,0 +1,141 @@
+<div class="prescription-dialog">
+  <div class="dialog-content">
+    <form [formGroup]="prescriptionForm" class="prescription-form">
+      <div class="form-section">
+        <h4>Patient Information</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Patient Name:</label>
+            <span class="patient-info">{{ data.patientName }}</span>
+          </div>
+          <div class="form-group">
+            <label>Patient ID:</label>
+            <span class="patient-info">{{ data.patientId }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h4>Medication Details</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="medicineName">Medicine Name:</label>
+            <app-input 
+              id="medicineName"
+              formControlName="medicineName"
+              placeholder="Enter medicine name">
+            </app-input>
+          </div>
+          <div class="form-group">
+            <label for="dosage">Dosage:</label>
+            <app-input 
+              id="dosage"
+              formControlName="dosage"
+              placeholder="e.g., 500mg, 10ml">
+            </app-input>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="frequency">Frequency:</label>
+            <app-selectbox 
+              id="frequency"
+              formControlName="frequency"
+              [options]="frequencyOptions"
+              placeholder="Select frequency">
+            </app-selectbox>
+          </div>
+          <div class="form-group">
+            <label for="route">Route:</label>
+            <app-selectbox 
+              id="route"
+              formControlName="route"
+              [options]="routeOptions"
+              placeholder="Select route">
+            </app-selectbox>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="duration">Duration:</label>
+            <app-input 
+              id="duration"
+              formControlName="duration"
+              placeholder="e.g., 7 days, 2 weeks, 1 month">
+            </app-input>
+          </div>
+          <div class="form-group">
+            <label for="quantity">Quantity:</label>
+            <app-input 
+              id="quantity"
+              formControlName="quantity"
+              type="number"
+              placeholder="Enter quantity">
+            </app-input>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="instructions">Instructions:</label>
+            <app-input 
+              id="instructions"
+              formControlName="instructions"
+              placeholder="Special instructions for taking the medication">
+            </app-input>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="isSubstitutable">
+              <span class="checkmark"></span>
+              Allow generic substitution
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h4>Diagnosis & Notes</h4>
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="diagnosis">Diagnosis:</label>
+            <app-input 
+              id="diagnosis"
+              formControlName="diagnosis"
+              placeholder="Enter diagnosis or condition">
+            </app-input>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="notes">Additional Notes:</label>
+            <app-input 
+              id="notes"
+              formControlName="notes"
+              placeholder="Any additional notes or precautions">
+            </app-input>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="followUpDate">Follow-up Date:</label>
+            <app-input 
+              id="followUpDate"
+              formControlName="followUpDate"
+              type="date"
+              placeholder="Select follow-up date">
+            </app-input>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+

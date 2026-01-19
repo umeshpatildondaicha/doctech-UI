@@ -1,0 +1,295 @@
+<app-page>
+  <div class="dashboard-page" page-body>
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+      <div>
+        <h2>Doctor Dashboard</h2>
+        <div class="subtitle">Manage your patients, appointments, and messages in one place</div>
+      </div>
+      <div class="header-actions">
+        <app-button
+          [text]="'Book Appointment'"
+          [color]="'primary'"
+          [fontIcon]="'add'"
+          (btnClick)="navigateToBookAppointment()"
+          class="action-btn">
+        </app-button>
+      </div>
+    </div>
+
+  <!-- Stats Cards -->
+  <div class="dashboard-cards">
+    <div class="stat-card card-room" (click)="openDetails('billing')">
+      <div class="stat-icon">
+        <app-icon [fontIcon]="'meeting_room'" [size]="22"></app-icon>
+      </div>
+      <div class="stat-content">
+        <div class="stat-title">Room Availability</div>
+        <div class="stat-value">{{ stats.roomAvailability }}/<span class="stat-secondary">{{ stats.totalRooms }}</span></div>
+        
+      </div>
+    </div>
+
+    <div class="stat-card card-appointment" (click)="navigateToAppointments()">
+      <div class="stat-icon">
+        <app-icon [fontIcon]="'event'" [size]="22"></app-icon>
+      </div>
+      <div class="stat-content">
+        <div class="stat-title">Book Appointment</div>
+        <div class="stat-value">{{ stats.bookAppointment }}</div>
+        
+      </div>
+    </div>
+
+    <div class="stat-card card-patients" (click)="openDetails('patients')">
+      <div class="stat-icon">
+        <app-icon [fontIcon]="'people'" [size]="22"></app-icon>
+      </div>
+      <div class="stat-content">
+        <div class="stat-title">Total Patients</div>
+        <div class="stat-value">{{ stats.totalPatients }}</div>
+        
+      </div>
+    </div>
+
+    <div class="stat-card card-visitors" (click)="openDetails('patients')">
+      <div class="stat-icon">
+        <app-icon [fontIcon]="'trending_up'" [size]="22"></app-icon>
+      </div>
+      <div class="stat-content">
+        <div class="stat-title">Overall Visitors</div>
+        <div class="stat-value">{{ stats.overallVisitors | number }} <span class="stat-growth">+15%</span></div>
+        
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="dashboard-main">
+    <!-- Left Column -->
+    <div class="main-left">
+      <!-- Appointment Requests -->
+      <div class="card requests-card">
+        <div class="card-header">
+          <div>
+            <h3>Appointment Requests</h3>
+            <span class="card-subtitle">{{ appointmentRequests.length }} pending</span>
+          </div>
+        </div>
+
+        <div class="requests-grid-container">
+          <app-grid
+            [gridOptions]="requestGridOptions"
+            [rowData]="requestRowData"
+            [columnDefs]="requestColumns"
+            [showHeader]="false"
+            class="requests-grid-component">
+          </app-grid>
+        </div>
+      </div>
+
+      <!-- Patient Visit Chart -->
+      <div class="card chart-card">
+        <div class="card-header">
+          <div>
+            <h3>Patient Visits</h3>
+            <span class="card-subtitle">This year vs last year</span>
+          </div>
+        </div>
+        <div class="chart-container">
+          @if(isBrowser) {
+            <highcharts-chart
+              [Highcharts]="Highcharts"
+              [options]="patientVisitChartOptions"
+              style="width: 100%; display: block;">
+            </highcharts-chart>
+          } @else {
+            <div class="chart-placeholder">Loading chart...</div>
+          }
+        </div>
+      </div>
+
+      <!-- Revenue Chart -->
+      <div class="card chart-card">
+        <div class="card-header">
+          <div>
+            <h3>Monthly Revenue</h3>
+            <span class="card-subtitle">Last 6 months</span>
+          </div>
+        </div>
+        <div class="chart-container">
+          @if(isBrowser) {
+            <highcharts-chart
+              [Highcharts]="Highcharts"
+              [options]="revenueChartOptions"
+              style="width: 100%; display: block;">
+            </highcharts-chart>
+          } @else {
+            <div class="chart-placeholder">Loading chart...</div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="main-right">
+      <!-- Next Patient -->
+      <div class="card next-patient-card" *ngIf="nextPatient">
+        <div class="card-header">
+          <h3>Next Patient</h3>
+        </div>
+        <div class="next-patient-content">
+          <div class="next-patient-header">
+            <div class="next-patient-avatar">
+              <app-image
+                [src]="nextPatient.avatar || 'assets/avatars/default-avatar.jpg'"
+                [alt]="nextPatient.name"
+                [width]="64"
+                [height]="64"
+                class="avatar-image circle">
+              </app-image>
+            </div>
+            <div class="next-patient-basic-info">
+              <div class="next-patient-name">{{ nextPatient.name }}</div>
+              <div class="next-patient-appointment-time">
+                <app-icon [fontIcon]="'schedule'" [size]="18"></app-icon>
+                <span>{{ nextPatient.appointmentTime }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="next-patient-details-grid">
+            <div class="detail-item">
+              <app-icon [fontIcon]="'person'" [size]="20"></app-icon>
+              <div>
+                <span class="detail-label">Age & Gender</span>
+                <span class="detail-value">{{ nextPatient.age }} years, {{ nextPatient.gender }}</span>
+              </div>
+            </div>
+            <div class="detail-item">
+              <app-icon [fontIcon]="'height'" [size]="20"></app-icon>
+              <div>
+                <span class="detail-label">Height</span>
+                <span class="detail-value">{{ nextPatient.height || 'N/A' }}</span>
+              </div>
+            </div>
+            <div class="detail-item">
+              <app-icon [fontIcon]="'monitor_weight'" [size]="20"></app-icon>
+              <div>
+                <span class="detail-label">Weight</span>
+                <span class="detail-value">{{ nextPatient.weight || 'N/A' }}</span>
+              </div>
+            </div>
+            <div class="detail-item">
+              <app-icon [fontIcon]="'cake'" [size]="20"></app-icon>
+              <div>
+                <span class="detail-label">DOB</span>
+                <span class="detail-value">{{ formatDate(nextPatient.dateOfBirth) }}</span>
+              </div>
+            </div>
+            <div class="detail-item">
+              <app-icon [fontIcon]="'event'" [size]="20"></app-icon>
+              <div>
+                <span class="detail-label">Last Appointment</span>
+                <span class="detail-value">{{ formatDate(nextPatient.lastAppointment || '') }}</span>
+              </div>
+            </div>
+            <div class="detail-item">
+              <app-icon [fontIcon]="'how_to_reg'" [size]="20"></app-icon>
+              <div>
+                <span class="detail-label">Registration Date</span>
+                <span class="detail-value">{{ formatDate(nextPatient.registrationDate) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="next-patient-history" *ngIf="nextPatient.lastDiseases && nextPatient.lastDiseases.length > 0">
+            <div class="history-label">
+              <app-icon [fontIcon]="'history'" [size]="18"></app-icon>
+              <span>Patient History - Last Diseases</span>
+            </div>
+            <div class="disease-tags">
+              <span class="disease-tag" *ngFor="let disease of nextPatient.lastDiseases">{{ disease }}</span>
+            </div>
+          </div>
+
+          <div class="next-patient-reason">
+            <app-icon [fontIcon]="'description'" [size]="20"></app-icon>
+            <span>{{ nextPatient.reason }}</span>
+          </div>
+
+          <div class="next-patient-actions">
+            <app-button
+              [appearance]="'stroked'"
+              [text]="'Call'"
+              [fontIcon]="'phone'"
+              (btnClick)="callPatient(nextPatient.contactNumber)"
+              class="action-btn"
+              *ngIf="nextPatient.contactNumber">
+            </app-button>
+            <app-button
+              [appearance]="'stroked'"
+              [text]="'Chat'"
+              [fontIcon]="'chat'"
+              (btnClick)="openChat(nextPatient.id)"
+              class="action-btn">
+            </app-button>
+            <app-button
+              [appearance]="'stroked'"
+              [text]="'Profile'"
+              [fontIcon]="'person'"
+              [color]="'primary'"
+              (btnClick)="viewPatientProfile()"
+              class="action-btn primary">
+            </app-button>
+          </div>
+        </div>
+      </div>
+
+      
+
+      <!-- Patient Demographics Chart -->
+      <div class="card chart-card">
+        <div class="card-header">
+          <div>
+            <h3>Patient Demographics</h3>
+            <span class="card-subtitle">Age groups</span>
+          </div>
+        </div>
+        <div class="chart-container">
+          @if(isBrowser) {
+            <highcharts-chart
+              [Highcharts]="Highcharts"
+              [options]="patientDemographicsChartOptions"
+              style="width: 100%; display: block;">
+            </highcharts-chart>
+          } @else {
+            <div class="chart-placeholder">Loading chart...</div>
+          }
+        </div>
+      </div>
+
+      <!-- Appointment Status Chart -->
+      <div class="card chart-card">
+        <div class="card-header">
+          <div>
+            <h3>Appointment Status</h3>
+            <span class="card-subtitle">Overview</span>
+          </div>
+        </div>
+        <div class="chart-container">
+          @if(isBrowser) {
+            <highcharts-chart
+              [Highcharts]="Highcharts"
+              [options]="appointmentStatusChartOptions"
+              style="width: 100%; display: block;">
+            </highcharts-chart>
+          } @else {
+            <div class="chart-placeholder">Loading chart...</div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</app-page>

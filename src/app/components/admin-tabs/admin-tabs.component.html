@@ -1,0 +1,30 @@
+<div class="admin-tabs" [class]="'tabs-' + variant + ' tabs-' + size">
+  <div class="tabs-container">
+    <div class="tabs-list">
+      <button 
+        *ngFor="let tab of tabs"
+        type="button"
+        class="tab-item"
+        [class.active]="isActive(tab.id)"
+        [class.disabled]="tab.disabled"
+        [disabled]="tab.disabled"
+        (click)="onTabClick(tab)">
+        
+        <app-icon 
+          *ngIf="tab.icon"
+          [fontIcon]="tab.icon" 
+          [size]="size === 'small' ? 16 : size === 'large' ? 24 : 20">
+        </app-icon>
+        
+        <span class="tab-label">{{ tab.label }}</span>
+        
+        <span 
+          *ngIf="tab.badge"
+          class="tab-badge"
+          [style.background-color]="tab.badgeColor">
+          {{ tab.badge }}
+        </span>
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,23 @@
+<div class="patient-list-container">
+  <div class="header-section">
+    <h2>Patient Records</h2>
+    <a routerLink="/add-patient" class="add-button">Add New Patient</a>
+  </div>
+
+  <div class="table-container">
+    <app-grid
+      class="ag-theme-alpine"
+      [rowData]="rowData"
+      [columnDefs]="columnDefs"
+      style="width: 100%; height: 500px;"
+      [domLayout]="'autoHeight'"
+      [animateRows]="true">
+  </app-grid>
+  </div>
+
+  @if (rowData.length === 0) {
+    <div class="empty-state">
+      <p>No patients found. Add your first patient to get started!</p>
+    </div>
+  }
+</div>

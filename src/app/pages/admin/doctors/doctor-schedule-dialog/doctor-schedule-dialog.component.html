@@ -1,0 +1,88 @@
+<div class="doctor-schedule-dialog">
+  <form [formGroup]="scheduleForm" class="schedule-form">
+    <div class="form-section">
+      <h3 class="section-title">Doctor Information</h3>
+      <div class="form-row">
+        <app-input
+          label="Doctor ID"
+          formControlName="doctorId"
+          [formGroup]="scheduleForm">
+        </app-input>
+        <app-input
+          label="Doctor Name"
+          formControlName="doctorName"
+          [formGroup]="scheduleForm">
+        </app-input>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3 class="section-title">Schedule Configuration</h3>
+      <div class="form-row">
+        <app-selectbox
+          label="Schedule Type"
+          [options]="scheduleTypes"
+          [formGroup]="scheduleForm"
+          formControlName="scheduleType">
+        </app-selectbox>
+        <app-input
+          label="Slot Duration (minutes)"
+          type="number"
+          formControlName="slotDuration"
+          [formGroup]="scheduleForm">
+        </app-input>
+      </div>
+      <div class="form-row">
+        <app-selectbox
+          label="Start Time"
+          [options]="timeSlots"
+          [formGroup]="scheduleForm"
+          formControlName="startTime">
+        </app-selectbox>
+        <app-selectbox
+          label="End Time"
+          [options]="timeSlots"
+          [formGroup]="scheduleForm"
+          formControlName="endTime">
+        </app-selectbox>
+      </div>
+      <div class="form-row">
+        <app-selectbox
+          label="Break Start Time"
+          [options]="timeSlots"
+          [formGroup]="scheduleForm"
+          formControlName="breakStartTime">
+        </app-selectbox>
+        <app-selectbox
+          label="Break End Time"
+          [options]="timeSlots"
+          [formGroup]="scheduleForm"
+          formControlName="breakEndTime">
+        </app-selectbox>
+      </div>
+      <div class="form-row">
+        <app-input
+          label="Max Appointments Per Slot"
+          type="number"
+          formControlName="maxAppointmentsPerSlot"
+          [formGroup]="scheduleForm">
+        </app-input>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3 class="section-title">Working Days</h3>
+      <div class="days-selection">
+        <button
+          type="button"
+          *ngFor="let day of daysOfWeek"
+          class="day-button"
+          [class.selected]="isDaySelected(day)"
+          (click)="toggleDay(day)">
+          {{ day }}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+

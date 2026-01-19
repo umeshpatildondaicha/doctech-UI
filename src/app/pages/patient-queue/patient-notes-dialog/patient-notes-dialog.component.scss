@@ -1,0 +1,19 @@
+.patient-notes-dialog {
+
+  .dialog-message {
+    margin: 0 0 16px 0;
+    color: #666;
+    font-size: 14px;
+  }
+
+  .notes-field {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .notes-textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+}
+

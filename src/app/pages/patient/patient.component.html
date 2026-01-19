@@ -1,0 +1,19 @@
+<div class="patient-page page-body">
+  <div class="patient-content">
+    <app-grid 
+      [gridOptions]="gridOptions"
+      [rowData]="patientData"
+      [columnDefs]="columnDefs"
+      [height]="'600px'"
+      [animateRows]="true"
+      searchPlaceholder="Search Patients..."
+      [rightTooltemplateRef]="rightTooltemplate"
+      class="patient-grid">
+    </app-grid>
+  </div>
+</div>
+
+
+<ng-template #rightTooltemplate>
+  <app-icon [fontIcon]="'add'" [isCovered]="true" (iconClick)="onCreatePatient()"></app-icon>
+</ng-template>

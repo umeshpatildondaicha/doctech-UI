@@ -1,0 +1,123 @@
+.admin-action-bar {
+  display: flex;
+  margin-bottom: var(--spacing-xl);
+  
+  .action-button {
+    transition: var(--transition-fast);
+    
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
+}
+
+// Layout variants
+.layout-horizontal {
+  flex-direction: row;
+  
+  .action-button {
+    margin-right: var(--spacing-md);
+    
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+.layout-vertical {
+  flex-direction: column;
+  
+  .action-button {
+    margin-bottom: var(--spacing-md);
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Alignment variants
+.align-left {
+  justify-content: flex-start;
+}
+
+.align-center {
+  justify-content: center;
+}
+
+.align-right {
+  justify-content: flex-end;
+}
+
+.align-space-between {
+  justify-content: space-between;
+}
+
+// Size variants
+.size-small {
+  gap: var(--spacing-sm);
+  
+  .action-button {
+    margin: 0;
+  }
+}
+
+.size-medium {
+  gap: var(--spacing-md);
+  
+  .action-button {
+    margin: 0;
+  }
+}
+
+.size-large {
+  gap: var(--spacing-lg);
+  
+  .action-button {
+    margin: 0;
+  }
+}
+
+// Full width variant
+.full-width {
+  width: 100%;
+  
+  &.layout-horizontal {
+    .action-button {
+      flex: 1;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 640px) {
+  .admin-action-bar {
+    &.layout-horizontal {
+      flex-direction: column;
+      gap: var(--spacing-sm);
+      
+      .action-button {
+        margin: 0;
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Special styling for action bar variants
+.admin-action-bar.in-card {
+  background: var(--admin-light-bg);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-radius: var(--input-radius);
+  box-shadow: var(--primary-shadow);
+  border: var(--admin-border);
+  margin-bottom: var(--spacing-xl);
+}
+
+.admin-action-bar.toolbar {
+  background: var(--page-background-color);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--button-border-radius);
+  border: var(--primary-border);
+  box-shadow: var(--primary-shadow);
+}

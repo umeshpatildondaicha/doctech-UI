@@ -1,0 +1,245 @@
+<!-- 
+  ICOMOON ICONS USAGE EXAMPLES
+  Copy these examples into your Angular component templates
+-->
+
+<!-- Example 1: Basic Icomoon Icon -->
+<app-icon 
+  iconType="icomoon"
+  icomoonClass="icon-home"
+  [size]="24"
+  color="#667eea"
+></app-icon>
+
+<!-- Example 2: Icomoon Icon with Click Handler -->
+<app-icon 
+  iconType="icomoon"
+  icomoonClass="icon-settings"
+  [size]="20"
+  color="#888"
+  (iconClick)="handleSettingsClick($event)"
+></app-icon>
+
+<!-- Example 3: Icomoon Icon with Cover Style -->
+<app-icon 
+  iconType="icomoon"
+  icomoonClass="icon-user"
+  [size]="24"
+  [isCovered]="true"
+  color="#667eea"
+></app-icon>
+
+<!-- Example 4: Blinking Notification Icon -->
+<app-icon 
+  iconType="icomoon"
+  icomoonClass="icon-notification"
+  [size]="20"
+  [isBlink]="true"
+  color="#e74c3c"
+></app-icon>
+
+<!-- Example 5: Large Icon with Custom Class -->
+<app-icon 
+  iconType="icomoon"
+  icomoonClass="icon-heart"
+  [size]="48"
+  color="#e91e63"
+  class="custom-heart-icon"
+></app-icon>
+
+<!-- Example 6: Icon in Navigation -->
+<div class="nav-item">
+  <app-icon 
+    iconType="icomoon"
+    icomoonClass="icon-menu"
+    [size]="24"
+    color="#ffffff"
+    (iconClick)="toggleMenu()"
+  ></app-icon>
+  <span>Menu</span>
+</div>
+
+<!-- Example 7: Icon Button -->
+<button class="icon-button">
+  <app-icon 
+    iconType="icomoon"
+    icomoonClass="icon-plus"
+    [size]="20"
+    color="#ffffff"
+  ></app-icon>
+  Add New
+</button>
+
+<!-- Example 8: Icon with Counter Badge -->
+<app-icon 
+  iconType="icomoon"
+  icomoonClass="icon-notification"
+  [size]="24"
+  [counter]="5"
+  color="#667eea"
+></app-icon>
+
+<!-- Example 9: Action Icons in a Row -->
+<div class="action-icons">
+  <app-icon 
+    iconType="icomoon"
+    icomoonClass="icon-edit"
+    [size]="18"
+    color="#3498db"
+    (iconClick)="handleEdit()"
+  ></app-icon>
+  <app-icon 
+    iconType="icomoon"
+    icomoonClass="icon-delete"
+    [size]="18"
+    color="#e74c3c"
+    (iconClick)="handleDelete()"
+  ></app-icon>
+</div>
+
+<!-- Example 10: Search Icon in Input -->
+<div class="search-container">
+  <app-icon 
+    iconType="icomoon"
+    icomoonClass="icon-search"
+    [size]="20"
+    color="#888"
+  ></app-icon>
+  <input type="text" placeholder="Search...">
+</div>
+
+<!-- Example 11: Calendar Icon -->
+<app-icon 
+  iconType="icomoon"
+  icomoonClass="icon-calendar"
+  [size]="24"
+  color="#667eea"
+  [isCovered]="true"
+  (iconClick)="openCalendar()"
+></app-icon>
+
+<!-- Example 12: Arrow Icons for Navigation -->
+<div class="pagination">
+  <app-icon 
+    iconType="icomoon"
+    icomoonClass="icon-arrow-left"
+    [size]="20"
+    color="#667eea"
+    (iconClick)="previousPage()"
+  ></app-icon>
+  <span>Page 1 of 10</span>
+  <app-icon 
+    iconType="icomoon"
+    icomoonClass="icon-arrow-right"
+    [size]="20"
+    color="#667eea"
+    (iconClick)="nextPage()"
+  ></app-icon>
+</div>
+
+<!-- Example 13: Close Button -->
+<app-icon 
+  iconType="icomoon"
+  icomoonClass="icon-close"
+  [size]="24"
+  color="#888"
+  (iconClick)="closeDialog()"
+></app-icon>
+
+<!-- Example 14: Contact Icons -->
+<div class="contact-info">
+  <div class="contact-item">
+    <app-icon 
+      iconType="icomoon"
+      icomoonClass="icon-phone"
+      [size]="20"
+      color="#667eea"
+    ></app-icon>
+    <span>+1 234 567 890</span>
+  </div>
+  <div class="contact-item">
+    <app-icon 
+      iconType="icomoon"
+      icomoonClass="icon-email"
+      [size]="20"
+      color="#667eea"
+    ></app-icon>
+    <span>info@shreeclinic.com</span>
+  </div>
+</div>
+
+<!-- Example 15: Status Icons -->
+<div class="status">
+  <app-icon 
+    iconType="icomoon"
+    icomoonClass="icon-check"
+    [size]="18"
+    color="#27ae60"
+    [isCovered]="true"
+  ></app-icon>
+  <span>Completed</span>
+</div>
+
+<!-- 
+  TypeScript Component Example:
+  
+  import { Component } from '@angular/core';
+  
+  @Component({
+    selector: 'app-example',
+    templateUrl: './example.component.html'
+  })
+  export class ExampleComponent {
+    handleSettingsClick(event: Event) {
+      console.log('Settings clicked', event);
+    }
+    
+    toggleMenu() {
+      // Toggle menu logic
+    }
+    
+    handleEdit() {
+      // Edit logic
+    }
+    
+    handleDelete() {
+      // Delete logic
+    }
+    
+    openCalendar() {
+      // Open calendar logic
+    }
+    
+    previousPage() {
+      // Previous page logic
+    }
+    
+    nextPage() {
+      // Next page logic
+    }
+    
+    closeDialog() {
+      // Close dialog logic
+    }
+  }
+-->
+
+<!-- 
+  COMPARING MATERIAL ICONS VS ICOMOON:
+  
+  Material Icon (Default):
+  <app-icon 
+    fontIcon="home"
+    [size]="24"
+    color="#667eea"
+  ></app-icon>
+  
+  Icomoon Icon:
+  <app-icon 
+    iconType="icomoon"
+    icomoonClass="icon-home"
+    [size]="24"
+    color="#667eea"
+  ></app-icon>
+-->
+

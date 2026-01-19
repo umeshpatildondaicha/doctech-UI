@@ -1,0 +1,100 @@
+.doctor-create-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 80vh;
+
+  // Dialog Header
+  .dialog-header {
+    padding: 0;
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+
+      .title-section {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .title-icon {
+          font-size: 24px;
+          color: var(--primary-color);
+        }
+
+        .title {
+          margin: 0;
+          font-size: 20px;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+      }
+
+      .close-button {
+        color: var(--text-secondary);
+        
+        &:hover {
+          background-color: var(--surface-hover);
+        }
+      }
+    }
+  }
+
+  // Dialog Content
+  .dialog-content {
+    flex: 1;
+
+    .form {
+      .form-row {
+        margin-bottom: 24px;
+
+        .form-field {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  // Dialog Footer
+  .dialog-footer {
+    background-color: var(--surface-color);
+    border-top: 1px solid var(--border-color);
+    padding: 16px 24px;
+
+    .footer-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: flex-end;
+
+      .cancel-btn,
+      .submit-btn {
+        display: flex;
+        align-items: center;
+
+        .btn-icon {
+          font-size: 18px;
+        }
+      }
+
+      .cancel-btn {
+        &:hover {
+          background-color: var(--surface-hover);
+        }
+      }
+
+      .submit-btn {
+        &:hover:not(:disabled) {
+          background-color: var(--primary-hover);
+        }
+
+        &:disabled {
+          background-color: var(--disabled-color);
+          color: var(--text-disabled);
+        }
+      }
+    }
+  }
+}
+

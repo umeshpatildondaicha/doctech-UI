@@ -1,0 +1,217 @@
+<div class="exercise-assignment-dialog">
+  <div class="dialog-content">
+    <div class="dialog-body">
+      <!-- Left Section: Exercise Selection -->
+      <div class="exercise-selection-section">
+        <div class="selection-controls">
+          <div class="browse-toolbar">
+            <h3>Browse Exercises</h3>
+          </div>
+
+          <div class="search-inline">
+            <mat-form-field appearance="outline" class="search-field small">
+              <mat-label>Search</mat-label>
+              <input matInput [(ngModel)]="searchQuery" [placeholder]="viewTab === 'exercises' ? 'Search exercises...' : 'Search exercise groups...'">
+              <mat-icon matPrefix>search</mat-icon>
+              <app-button
+                *ngIf="searchQuery"
+                appearance="icon"
+                fontIcon="close"
+                [text]="''"
+                (btnClick)="searchQuery=''"
+                matSuffix>
+              </app-button>
+            </mat-form-field>
+          </div>
+
+          <div class="browse-tabs" role="tablist" aria-label="Exercise selection tabs">
+            <app-button
+              type="button"
+              class="tab-btn"
+              [ngClass]="{'active': viewTab === 'exercises'}"
+              (btnClick)="viewTab = 'exercises'"
+              role="tab"
+              [attr.aria-selected]="viewTab === 'exercises'"
+              appearance="basic"
+              [text]="''">
+              <mat-icon>fitness_center</mat-icon>
+              <span class="tab-label">Exercises</span>
+              <span class="tab-count" *ngIf="getFilteredExercises()?.length">{{ getFilteredExercises().length }}</span>
+            </app-button>
+            <app-button
+              type="button"
+              class="tab-btn"
+              [ngClass]="{'active': viewTab === 'groups'}"
+              (btnClick)="viewTab = 'groups'"
+              role="tab"
+              [attr.aria-selected]="viewTab === 'groups'"
+              appearance="basic"
+              [text]="''">
+              <mat-icon>group_work</mat-icon>
+              <span class="tab-label">Exercise Groups</span>
+              <span class="tab-count" *ngIf="getFilteredGroups()?.length">{{ getFilteredGroups().length }}</span>
+            </app-button>
+          </div>
+        </div>
+
+        <!-- Exercises Tab -->
+        <ng-container *ngIf="viewTab === 'exercises'">
+          <div class="exercises-list">
+            <div 
+              *ngFor="let exercise of getFilteredExercises()" 
+              class="exercise-item"
+              [class.selected]="isExerciseSelected(exercise)"
+              (click)="toggleExerciseSelection(exercise)"
+              (keydown.enter)="toggleExerciseSelection(exercise)"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'Select ' + exercise.name">
+              <div class="exercise-item-info">
+                <h4 class="exercise-item-name">{{ exercise.name }}</h4>
+                <p class="exercise-item-meta">{{ exercise.category }} • {{ exercise.difficulty }} • {{ getSetsDisplay(exercise) }}</p>
+              </div>
+              <div class="exercise-item-actions">
+                <app-button
+                  appearance="icon"
+                  fontIcon="visibility"
+                  class="view-btn"
+                  [text]="''"
+                  (btnClick)="viewExercise(exercise, $event)"
+                  matTooltip="View exercise details">
+                </app-button>
+                <mat-icon 
+                  *ngIf="isExerciseSelected(exercise)" 
+                  class="check-icon">
+                  check_circle
+                </mat-icon>
+                <app-button
+                  *ngIf="!isExerciseSelected(exercise)"
+                  appearance="icon"
+                  fontIcon="add"
+                  class="add-btn"
+                  [text]="''"
+                  (btnClick)="toggleExerciseSelection(exercise); $event.stopPropagation()"
+                  matTooltip="Add exercise">
+                </app-button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Exercise Groups Tab -->
+        <ng-container *ngIf="viewTab === 'groups'">
+          <div class="exercise-groups-list">
+            <div 
+              *ngFor="let group of getFilteredGroups()" 
+              class="exercise-group-item"
+              [class.selected]="isGroupSelected(group)"
+              (click)="selectGroup(group)"
+              (keydown.enter)="selectGroup(group)"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'Select ' + group.groupName">
+              <div class="group-info">
+                <h4 class="group-name">{{ group.groupName }}</h4>
+                <p class="group-meta">{{ group.exercises.length }} exercises • {{ group.category || 'N/A' }} • {{ group.difficulty || 'N/A' }}</p>
+              </div>
+              <div class="group-actions">
+                <app-button
+                  appearance="icon"
+                  fontIcon="visibility"
+                  class="view-btn"
+                  [text]="''"
+                  (btnClick)="viewGroup(group, $event)"
+                  matTooltip="View group details">
+                </app-button>
+                <mat-icon 
+                  *ngIf="isGroupSelected(group)" 
+                  class="check-icon">
+                  check_circle
+                </mat-icon>
+                <app-button
+                  *ngIf="!isGroupSelected(group)"
+                  appearance="icon"
+                  fontIcon="add"
+                  class="add-btn"
+                  [text]="''"
+                  (btnClick)="addGroup(group, $event)"
+                  matTooltip="Add group">
+                </app-button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Right Section: Assignment Summary -->
+      <div class="assignment-summary-section">
+        <h3>Assignment Summary ({{ getSelectedExercisesCount() }})</h3>
+        
+        <div *ngIf="selectedExercises.length > 0" class="summary-content">
+          <!-- Selected Exercises List -->
+          <div class="selected-exercises-list">
+            <div 
+              *ngFor="let exercise of selectedExercises; let i = index" 
+              class="selected-exercise-item">
+              <div class="exercise-info">
+                <h5 class="exercise-name">{{ exercise.name }}</h5>
+                <p class="exercise-meta">{{ exercise.category }} • {{ exercise.difficulty }}</p>
+                <div class="sets-info-display">
+                  <span class="sets-badge" [class.no-sets]="!exercise.sets || exercise.sets.length === 0">
+                    <mat-icon class="sets-icon">repeat</mat-icon>
+                    <span class="sets-text">{{ getSetsDisplay(exercise) }}</span>
+                  </span>
+                  <app-button
+                    appearance="icon"
+                    fontIcon="edit"
+                    class="edit-sets-btn"
+                    [text]="''"
+                    (btnClick)="editExerciseSets(exercise, i)"
+                    matTooltip="Edit Sets">
+                  </app-button>
+                </div>
+              </div>
+              <app-button
+                appearance="icon"
+                fontIcon="delete"
+                class="remove-btn"
+                [text]="''"
+                (btnClick)="removeExercise(i)">
+              </app-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="selectedExercises.length === 0" class="empty-state">
+          <mat-icon class="empty-icon">fitness_center</mat-icon>
+          <p>No exercises selected. Choose exercises from the list to add them.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Date Fields -->
+  <div class="dialog-date-fields">
+    <mat-form-field appearance="outline" class="date-picker">
+      <mat-label>Start Date</mat-label>
+      <input 
+        matInput 
+        [matDatepicker]="pickerStart"
+        [(ngModel)]="assignmentDate">
+      <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+      <mat-datepicker #pickerStart></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="date-picker">
+      <mat-label>Till Date</mat-label>
+      <input 
+        matInput 
+        [matDatepicker]="pickerEnd"
+        [(ngModel)]="endDate"
+        [min]="assignmentDate">
+      <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+      <mat-datepicker #pickerEnd></mat-datepicker>
+    </mat-form-field>
+  </div>
+</div>

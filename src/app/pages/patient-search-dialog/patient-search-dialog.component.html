@@ -1,0 +1,42 @@
+<div class="patient-search-dialog">
+  <!-- Scrollable Content Area -->
+  <div class="dialog-content">
+
+  <!-- Search Results -->
+  <div class="results-section">
+    <div class="results-header">
+      <h3 class="results-title">
+        Available Patients
+        <span class="results-count">({{ searchResults.length }} patients)</span>
+      </h3>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Searching patients...</p>
+    </div>
+
+    <!-- No Results -->
+    <div *ngIf="!isLoading && searchResults.length === 0" class="no-results">
+      <app-icon fontIcon="search_off" [size]="48" class="no-results-icon"></app-icon>
+      <h3>No patients found</h3>
+      <p>Try adjusting your search criteria or filters.</p>
+    </div>
+
+    <!-- Results Grid -->
+    <div *ngIf="!isLoading && searchResults.length > 0" class="patients-grid-container">
+      <app-grid
+        [rowData]="searchResults"
+        [columnDefs]="columnDefs"
+        [gridOptions]="gridOptions"
+        [showHeader]="true"
+        [height]="'400px'"
+        [searchPlaceholder]="'Search patients...'"
+        (rowClicked)="selectPatient($event)"
+        (searchChange)="onGridSearch($event)">
+      </app-grid>
+    </div>
+  </div>
+  </div>
+</div>

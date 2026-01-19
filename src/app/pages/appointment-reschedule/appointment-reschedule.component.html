@@ -1,0 +1,149 @@
+<div class="appointment-reschedule-dialog">
+  <!-- Dialog Content -->
+  <div class="dialog-content">
+    <!-- Current Appointment Info -->
+    <div class="current-appointment-card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <app-icon [fontIcon]="'info'" class="card-icon"></app-icon>
+          Current Appointment
+        </h3>
+      </div>
+      <div class="card-content">
+        <div class="current-info">
+          <div class="info-row">
+            <span class="label">Patient:</span>
+            <span class="value">{{ appointment?.patientName }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Current Date:</span>
+            <span class="value">{{ formatDateTime(appointment?.appointment_date_time) }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Doctor:</span>
+            <span class="value">{{ appointment?.doctorName }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Appointment Selection -->
+    <div class="new-appointment-section">
+      <div class="section-header">
+        <h3 class="section-title">
+          <app-icon [fontIcon]="'event'" class="section-icon"></app-icon>
+          Select New Date & Time
+        </h3>
+        <p class="section-subtitle">Choose a new date and available time slot for the appointment</p>
+      </div>
+
+      <form [formGroup]="rescheduleForm" class="reschedule-form">
+        <!-- Date Selection -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <h4 class="form-section-title">1. Select Date</h4>
+          </div>
+          <div class="calendar-wrapper">
+            <app-calendar 
+              class="calendar-container" 
+              [showNavigation]="true" 
+              [showToday]="true"
+              [events]="calendarEvents"
+              (dateSelected)="onDateSelected($event)"
+              (eventClicked)="onEventClicked($event)">
+            </app-calendar>
+          </div>
+        </div>
+
+        <!-- Time Slot Selection -->
+        <div class="form-section" *ngIf="selectedDate">
+          <div class="form-section-header">
+            <h4 class="form-section-title">2. Select Time Slot</h4>
+            <span class="selected-date">{{ formatDate(selectedDate) }}</span>
+          </div>
+          
+          <div class="time-slots-container">
+            <div class="time-slots-grid" *ngIf="availableTimeSlots.length > 0; else noSlots">
+              <div 
+                class="time-slot" 
+                *ngFor="let slot of availableTimeSlots"
+                [class.selected]="selectedTimeSlot === slot"
+                [class.conflict]="slot.hasConflict"
+                (click)="selectTimeSlot(slot)">
+                <div class="slot-time">{{ slot.time }}</div>
+                <div class="slot-status" *ngIf="slot.hasConflict">
+                  <app-icon [fontIcon]="'warning'" class="conflict-icon"></app-icon>
+                  <span>Conflict</span>
+                </div>
+                <div class="slot-status" *ngIf="!slot.hasConflict">
+                  <app-icon [fontIcon]="'check_circle'" class="available-icon"></app-icon>
+                  <span>Available</span>
+                </div>
+              </div>
+            </div>
+            
+            <ng-template #noSlots>
+              <div class="no-slots-message">
+                <app-icon [fontIcon]="'schedule'" class="no-slots-icon"></app-icon>
+                <p>No available time slots for the selected date.</p>
+                <p>Please select a different date or contact the doctor for availability.</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Conflict Warning -->
+        <div class="conflict-warning" *ngIf="hasConflict">
+          <div class="warning-content">
+            <app-icon [fontIcon]="'warning'" class="warning-icon"></app-icon>
+            <div class="warning-text">
+              <h4>Time Slot Conflict</h4>
+              <p>The selected time slot conflicts with an existing appointment. You can still proceed, but please be aware of the conflict.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <h4 class="form-section-title">3. Reschedule Notes (Optional)</h4>
+          </div>
+          <div class="notes-wrapper">
+            <app-input 
+              class="notes-input" 
+              [rows]="3" 
+              [multiline]="true" 
+              label="Reason for Reschedule" 
+              formControlName="rescheduleReason" 
+              placeholder="Enter the reason for rescheduling this appointment...">
+            </app-input>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary-section" *ngIf="selectedDate && selectedTimeSlot">
+          <div class="summary-header">
+            <h4 class="summary-title">
+              <app-icon [fontIcon]="'summarize'" class="summary-icon"></app-icon>
+              Reschedule Summary
+            </h4>
+          </div>
+          <div class="summary-content">
+            <div class="summary-item">
+              <span class="summary-label">From:</span>
+              <span class="summary-value">{{ formatDateTime(appointment?.appointment_date_time) }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">To:</span>
+              <span class="summary-value">{{ formatNewDateTime() }}</span>
+            </div>
+            <div class="summary-item" *ngIf="rescheduleForm.get('rescheduleReason')?.value">
+              <span class="summary-label">Reason:</span>
+              <span class="summary-value">{{ rescheduleForm.get('rescheduleReason')?.value }}</span>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div> 

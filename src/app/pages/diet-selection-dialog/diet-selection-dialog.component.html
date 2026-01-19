@@ -1,0 +1,147 @@
+<div class="diet-selection-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>restaurant</mat-icon>
+      Select Diets
+    </h2>
+    <button mat-icon-button (click)="onCancel()" class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div mat-dialog-content class="dialog-content">
+    <p class="dialog-description">
+      Choose multiple diets from your available options. Use search and filters to find the perfect diets for this meal.
+    </p>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+      <div class="search-filter">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search diets</mat-label>
+          <input matInput [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Search by name, description, or tags">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="type-filter">
+        <mat-form-field appearance="outline" class="type-field">
+          <mat-label>Diet Type</mat-label>
+          <mat-select [(ngModel)]="selectedDietType" (selectionChange)="onDietTypeChange()">
+            <mat-option value="">All Types</mat-option>
+            <mat-option value="mediterranean">Mediterranean</mat-option>
+            <mat-option value="keto">Keto</mat-option>
+            <mat-option value="vegan">Vegan</mat-option>
+            <mat-option value="vegetarian">Vegetarian</mat-option>
+            <mat-option value="paleo">Paleo</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <button mat-stroked-button (click)="clearFilters()" class="clear-filters-btn">
+        <mat-icon>clear_all</mat-icon>
+        Clear Filters
+      </button>
+    </div>
+
+    <!-- Selection Summary -->
+    <div class="selection-summary" *ngIf="selectedDiets.length > 0">
+      <div class="summary-info">
+        <span class="selected-count">{{ getSelectedCount() }} diets selected</span>
+        <span class="total-calories">{{ getTotalCalories() }} total calories</span>
+      </div>
+      <button mat-stroked-button (click)="selectedDiets = []" class="clear-selection-btn">
+        <mat-icon>clear</mat-icon>
+        Clear Selection
+      </button>
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-info">
+      <span class="results-count">{{ filteredDiets.length }} diets available</span>
+      <div class="select-all-section" *ngIf="filteredDiets.length > 0">
+        <mat-checkbox 
+          [(ngModel)]="selectAll" 
+          (change)="toggleSelectAll()"
+          class="select-all-checkbox">
+          Select All
+        </mat-checkbox>
+      </div>
+    </div>
+
+    <!-- Diets Grid -->
+    <div class="diets-grid" *ngIf="filteredDiets.length > 0; else noResults">
+      <div class="diet-card" 
+           *ngFor="let diet of filteredDiets" 
+           [class.selected]="isDietSelected(diet)">
+        
+        <div class="card-checkbox">
+          <mat-checkbox 
+            [checked]="isDietSelected(diet)"
+            (change)="toggleDietSelection(diet)"
+            class="diet-checkbox">
+          </mat-checkbox>
+        </div>
+
+        <div class="card-media">
+          <img *ngIf="diet.imageUrl" [src]="diet.imageUrl" [alt]="diet.name">
+          <div class="media-placeholder" *ngIf="!diet.imageUrl">
+            <mat-icon>restaurant</mat-icon>
+          </div>
+          <div class="selection-indicator" *ngIf="isDietSelected(diet)">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <div class="diet-type-badge" [style.background-color]="getDietTypeColor(diet.dietType)">
+            <mat-icon>{{ getDietTypeIcon(diet.dietType) }}</mat-icon>
+            {{ diet.dietType }}
+          </div>
+
+          <h3 class="diet-name">{{ diet.name }}</h3>
+          <p class="diet-description">{{ diet.description }}</p>
+
+          <div class="diet-tags" *ngIf="diet.tags && diet.tags.length > 0">
+            <mat-chip *ngFor="let tag of diet.tags" class="tag-chip">
+              {{ tag }}
+            </mat-chip>
+          </div>
+
+          <div class="nutritional-info">
+            <div class="nutrition-item">
+              <span class="nutrition-value">{{ diet.calories }}</span>
+              <span class="nutrition-label">kcal</span>
+            </div>
+            <div class="nutrition-item">
+              <span class="nutrition-value">{{ diet.protein }}g</span>
+              <span class="nutrition-label">Protein</span>
+            </div>
+            <div class="nutrition-item">
+              <span class="nutrition-value">{{ diet.carbs }}g</span>
+              <span class="nutrition-label">Carbs</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noResults>
+      <div class="no-results">
+        <mat-icon class="no-results-icon">search_off</mat-icon>
+        <h3>No diets found</h3>
+        <p>Try adjusting your search criteria or create new diets.</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <div mat-dialog-actions class="dialog-actions">
+    <button mat-stroked-button (click)="onCancel()" class="cancel-btn">
+      Cancel
+    </button>
+    <button mat-raised-button color="primary" (click)="onConfirm()" [disabled]="selectedDiets.length === 0" class="confirm-btn">
+      <mat-icon>check</mat-icon>
+      Select {{ getSelectedCount() }} Diet{{ getSelectedCount() !== 1 ? 's' : '' }}
+    </button>
+  </div>
+</div>

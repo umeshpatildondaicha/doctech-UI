@@ -1,0 +1,233 @@
+<div class="services-page">
+
+  <!-- Service Analytics Dashboard -->
+  <div class="analytics-section" *ngIf="showAnalytics">
+    <div class="analytics-header">
+      <h2>Service Analytics & Performance</h2>
+      <div class="analytics-controls">
+        <app-selectbox
+          [options]="timeRangeOptions"
+          [displayExpr]="'label'"
+          [valueField]="'value'"
+          [data]="selectedTimeRange"
+          (dataChange)="onTimeRangeChange($event)"
+          placeholder="Select time range">
+        </app-selectbox>
+        <app-button [text]="'Export Report'" [color]="'accent'" [fontIcon]="'download'" (btnClick)="exportAnalytics()"></app-button>
+      </div>
+    </div>
+
+    <!-- Service Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card" *ngFor="let stat of serviceStats">
+        <div class="stat-icon" [style.background]="stat.color">
+          <app-icon [fontIcon]="stat.icon" [size]="24"></app-icon>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ stat.value }}</div>
+          <div class="stat-label">{{ stat.label }}</div>
+          <div class="stat-trend" [class.positive]="stat.trend > 0" [class.negative]="stat.trend < 0">
+            <app-icon [fontIcon]="stat.trend > 0 ? 'trending_up' : 'trending_down'" [size]="16"></app-icon>
+            <span>{{ stat.trend > 0 ? '+' : '' }}{{ stat.trend }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Performance Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Service Revenue Trends</h3>
+          <app-button [fontIcon]="'more_vert'" [color]="'accent'"></app-button>
+        </div>
+        <div class="chart-container">
+          <canvas #revenueChart></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Service Popularity</h3>
+          <app-button [fontIcon]="'more_vert'" [color]="'accent'"></app-button>
+        </div>
+        <div class="chart-container">
+          <canvas #popularityChart></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Patient Satisfaction</h3>
+          <app-button [fontIcon]="'more_vert'" [color]="'accent'"></app-button>
+        </div>
+        <div class="chart-container">
+          <canvas #satisfactionChart></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Service Capacity Utilization</h3>
+          <app-button [fontIcon]="'more_vert'" [color]="'accent'"></app-button>
+        </div>
+        <div class="chart-container">
+          <canvas #capacityChart></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Service Recommendations -->
+  <div class="recommendations-section" *ngIf="showRecommendations">
+    <div class="recommendations-header">
+      <h3>AI-Powered Service Recommendations</h3>
+      <app-button [text]="'Hide Recommendations'" [color]="'accent'" (btnClick)="toggleRecommendations()"></app-button>
+    </div>
+    <div class="recommendations-grid">
+      <div class="recommendation-card" *ngFor="let rec of serviceRecommendations">
+        <div class="rec-icon">
+          <app-icon [fontIcon]="rec.icon" [size]="24"></app-icon>
+        </div>
+        <div class="rec-content">
+          <h4>{{ rec.name }}</h4>
+          <p>{{ rec.reason }}</p>
+          <div class="rec-metrics">
+            <span class="rec-score">Match: {{ rec.matchScore }}%</span>
+            <span class="rec-popularity">Popularity: {{ rec.popularity }}%</span>
+          </div>
+        </div>
+        <app-button [text]="'View'" [color]="'primary'" [fontIcon]="'visibility'" (btnClick)="viewService(rec)"></app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Packages Section -->
+  <div class="packages-section" *ngIf="showPackages">
+    <div class="packages-header">
+      <h3>Service Packages & Bundles</h3>
+      <app-button [text]="'Create Package'" [color]="'primary'" [fontIcon]="'add'" (btnClick)="createServicePackage()"></app-button>
+    </div>
+
+    <div class="packages-grid">
+      <div class="package-card" *ngFor="let package of servicePackages">
+        <div class="package-header">
+          <h4>{{ package.name }}</h4>
+          <div class="package-price">${{ package.totalPrice }}</div>
+        </div>
+        <div class="package-services">
+          <div class="package-service" *ngFor="let service of package.services">
+            <app-icon [fontIcon]="service.icon" [size]="16"></app-icon>
+            <span>{{ service.name }}</span>
+            <span class="service-price">${{ service.price }}</span>
+          </div>
+        </div>
+        <div class="package-savings">
+          <span>Save: ${{ package.savings }}</span>
+        </div>
+        <div class="package-actions">
+          <app-button [text]="'Edit'" [color]="'accent'" [fontIcon]="'edit'" (btnClick)="editPackage(package)"></app-button>
+          <app-button [text]="'View'" [color]="'primary'" [fontIcon]="'visibility'" (btnClick)="viewPackage(package)"></app-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Templates Section -->
+  <div class="templates-section" *ngIf="showTemplates">
+    <div class="templates-header">
+      <h3>Service Templates</h3>
+      <app-button [text]="'Create Template'" [color]="'primary'" [fontIcon]="'add'" (btnClick)="createServiceTemplate()"></app-button>
+    </div>
+
+    <div class="templates-grid">
+      <div class="template-card" *ngFor="let template of serviceTemplates">
+        <div class="template-header">
+          <h4>{{ template.name }}</h4>
+          <div class="template-category">{{ template.category }}</div>
+        </div>
+        <div class="template-description">{{ template.description }}</div>
+        <div class="template-fields">
+          <span class="field-count">{{ template.fieldCount }} fields</span>
+          <span class="template-type">{{ template.type }}</span>
+        </div>
+        <div class="template-actions">
+          <app-button [text]="'Use Template'" [color]="'primary'" [fontIcon]="'content_copy'" (btnClick)="useTemplate(template)"></app-button>
+          <app-button [text]="'Edit'" [color]="'accent'" [fontIcon]="'edit'" (btnClick)="editTemplate(template)"></app-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Comparison Tool -->
+  <div class="comparison-section" *ngIf="showComparison">
+    <div class="comparison-header">
+      <h3>Service Comparison</h3>
+      <app-button [text]="'Clear Comparison'" [color]="'accent'" (btnClick)="clearComparison()"></app-button>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="comparison-card" *ngFor="let service of comparisonServices">
+        <div class="comparison-header">
+          <h4>{{ service.name }}</h4>
+          <app-button 
+            [appearance]="'icon'"
+            [color]="'warn'"
+            [fontIcon]="'close'"
+            [class]="'remove-btn'"
+            (btnClick)="removeFromComparison(service)">
+          </app-button>
+        </div>
+        <div class="comparison-details">
+          <div class="detail-row">
+            <span class="label">Price:</span>
+            <span class="value">${{ service.price }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Duration:</span>
+            <span class="value">{{ service.duration }} min</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Rating:</span>
+            <span class="value">{{ service.rating }}/5</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Availability:</span>
+            <span class="value">{{ service.availability }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Services Grid -->
+  <div class="services-grid-section">
+  <app-grid
+    [rowData]="services"
+    [columnDefs]="columnDefs"
+    [gridOptions]="gridOptions"
+      [defaultViewMode]="'list'"
+    [searchPlaceholder]="'Search services...'"
+    [rightTooltemplateRef]="addServiceButtonTemplate">
+  </app-grid>
+  </div>
+
+  <!-- Add Service Button Template -->
+  <ng-template #addServiceButtonTemplate>
+    <div class="add-service-actions">
+    <app-button 
+      [text]="'Add Service'" 
+      [color]="'primary'" 
+      [fontIcon]="'add'"
+        [appearance]="'raised'"
+        [class]="'add-service-btn'"
+        matTooltip="Click to add a new service with full details form"
+        matTooltipPosition="below"
+        matTooltipClass="custom-tooltip"
+      (btnClick)="addNewService()">
+    </app-button>
+    </div>
+  </ng-template>
+
+
+</div> 

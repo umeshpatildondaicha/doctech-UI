@@ -1,0 +1,108 @@
+.admin-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
+  background: var(--admin-card-bg);
+  padding: var(--spacing-lg) var(--spacing-lg);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--primary-shadow);
+  border: var(--admin-border);
+  
+  .header-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    flex: 1;
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      
+      .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        
+        .breadcrumb-item {
+          color: var(--admin-text-muted);
+          font-size: var(--secondary-font-size);
+          font-weight: var(--primary-font-weight);
+          
+          &.clickable {
+            cursor: pointer;
+            transition: var(--transition-fast);
+            
+            &:hover {
+              color: var(--admin-text-primary);
+            }
+          }
+          
+          &.current {
+            color: var(--admin-text-primary);
+            font-weight: var(--primary-font-weight);
+          }
+        }
+        
+        .breadcrumb-separator {
+          color: var(--admin-text-muted);
+          font-size: var(--tertiary-font-size);
+        }
+      }
+    }
+    
+    .title-section {
+              .page-title {
+          margin: 0 0 var(--spacing-xs) 0;
+          color: var(--admin-text-primary);
+          font-size: var(--primary-font-size);
+          font-weight: var(--primary-font-weight);
+          line-height: 1.2;
+        }
+      
+      .page-subtitle {
+        margin: 0;
+        color: var(--admin-text-muted);
+        font-size: var(--secondary-font-size);
+        font-weight: var(--secondary-font-weight);
+        line-height: 1.4;
+      }
+    }
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+    flex-shrink: 0;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .admin-page-header {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-xl);
+    
+    .header-content {
+      .header-left {
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+      }
+      
+      .title-section {
+        .page-title {
+          font-size: var(--font-size-4xl);
+        }
+      }
+    }
+    
+    .header-actions {
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  }
+}

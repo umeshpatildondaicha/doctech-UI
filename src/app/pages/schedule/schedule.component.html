@@ -1,0 +1,446 @@
+<div class="schedule-container">
+  
+  <!-- Compact Statistics Dashboard -->
+  <div class="stats-dashboard">
+    <div class="stat-item">
+      <div class="stat-icon scheduled">
+        <app-icon fontIcon="schedule" [size]="20"></app-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-number">{{ scheduleStats.todayAppointments }}</span>
+        <span class="stat-label">Today</span>
+      </div>
+    </div>
+
+    <div class="stat-item">
+      <div class="stat-icon pending">
+        <app-icon fontIcon="pending" [size]="20"></app-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-number">{{ scheduleStats.pendingApprovals }}</span>
+        <span class="stat-label">Pending</span>
+      </div>
+    </div>
+
+    <div class="stat-item">
+      <div class="stat-icon completed">
+        <app-icon fontIcon="check_circle" [size]="20"></app-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-number">{{ scheduleStats.completedToday }}</span>
+        <span class="stat-label">Completed</span>
+      </div>
+    </div>
+
+    <div class="stat-item">
+      <div class="stat-icon available">
+        <app-icon fontIcon="event_available" [size]="20"></app-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-number">{{ scheduleStats.availableSlots }}</span>
+        <span class="stat-label">{{ isSlotBasedScheduling() ? 'Slots' : 'Available' }}</span>
+      </div>
+    </div>
+
+    <div class="stat-item" *ngIf="isFlexibleScheduling()">
+      <div class="stat-icon flexible">
+        <app-icon fontIcon="queue" [size]="20"></app-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-number">{{ scheduleStats.flexibleAppointmentsRemaining }}</span>
+        <span class="stat-label">Remaining</span>
+      </div>
+    </div>
+
+    <div class="stat-item">
+      <div class="stat-icon patients">
+        <app-icon fontIcon="people" [size]="20"></app-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-number">{{ scheduleStats.totalPatients }}</span>
+        <span class="stat-label">Patients</span>
+      </div>
+    </div>
+
+    <div class="stat-item">
+      <div class="stat-icon wait-time">
+        <app-icon fontIcon="timer" [size]="20"></app-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-number">{{ scheduleStats.averageWaitTime }}m</span>
+        <span class="stat-label">Wait Time</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Next Appointment Card -->
+  <div class="next-appointment-card" *ngIf="scheduleStats.nextAppointment">
+    <div class="pause-indicator" *ngIf="isPatientQueuePaused">
+      <span>Queue Paused</span>
+    </div>
+    <div class="next-appointment-content">
+      <div class="next-appointment-icon">
+        <app-icon fontIcon="access_time" [size]="18"></app-icon>
+      </div>
+      <div class="appointment-time">
+        <span class="time-label">Next</span>
+        <span class="time-value">10:30 AM</span>
+      </div>
+      <div class="patient-info">
+        <span class="patient-name">John Doe</span>
+        <span class="patient-age">35</span>
+      </div>
+      <div class="appointment-type">
+        <span class="type-badge">Consultation</span>
+      </div>
+      <div class="contact-info">
+        <span class="phone-number">📞 +1 (555) 123-4567</span>
+      </div>
+      <div class="appointment-actions">
+        <app-button appearance="basic" size="small" (btnClick)="viewNextAppointment()">
+          <app-icon fontIcon="visibility" [size]="14"></app-icon>
+        </app-button>
+        <app-button appearance="basic" size="small" (btnClick)="callPatient()">
+          <app-icon fontIcon="phone" [size]="14"></app-icon>
+        </app-button>
+        <app-button 
+          appearance="basic" 
+          size="small" 
+          (btnClick)="togglePatientQueue()"
+          [class.paused]="isPatientQueuePaused">
+          <app-icon [fontIcon]="isPatientQueuePaused ? 'play_arrow' : 'pause'" [size]="14"></app-icon>
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- Header Section -->
+  <div class="schedule-header">
+
+
+
+      <!-- View Selection -->
+  <div class="view-selection">
+    <div class="view-tabs">
+      <button 
+        *ngFor="let view of scheduleViews" 
+        class="view-tab" 
+        [class.active]="selectedView === view.id"
+        (click)="onViewChange(view.id)"
+        [matTooltip]="view.description">
+        <app-icon [fontIcon]="view.icon" [size]="18"></app-icon>
+        <span>{{ view.name }}</span>
+      </button>
+    </div>
+  </div>
+
+
+
+    
+         <div class="header-right">
+          <div class="scheduling-type-info">
+            <div class="scheduling-badge">
+              <app-icon [fontIcon]="getSchedulingTypeIcon()" [size]="16"></app-icon>
+              <span>{{ getSchedulingTypeLabel() }}</span>
+            </div>
+          </div>
+       <div class="header-actions">
+         <app-button appearance="basic" (btnClick)="toggleFilters()">
+           <app-icon fontIcon="filter_list" [size]="16"></app-icon>
+           Filters
+         </app-button>
+         
+         <!-- <app-button appearance="basic" (btnClick)="toggleDarkMode()">
+           <app-icon [fontIcon]="isDarkMode ? 'light_mode' : 'dark_mode'" [size]="16"></app-icon>
+         </app-button> -->
+         
+         <app-button appearance="basic" (btnClick)="refreshSchedule()" [disabled]="isLoading">
+           <app-icon fontIcon="refresh" [size]="16"></app-icon>
+         </app-button>
+         
+         <app-button appearance="raised" (btnClick)="createAppointment()">
+           <app-icon fontIcon="add" [size]="16"></app-icon>
+           New Appointment
+         </app-button>
+       </div>
+     </div>
+  </div>
+
+  <!-- Filter Dialog -->
+  <div class="filter-overlay" *ngIf="showFilters" (click)="toggleFilters()">
+    <div class="filter-dialog" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h3>Filter Appointments</h3>
+        <app-icon fontIcon="close" (iconClick)="toggleFilters()"></app-icon>
+      </div>
+      
+      <div class="dialog-content">
+        <form [formGroup]="filterForm" class="filter-form">
+          <div class="filter-row">
+            <mat-form-field>
+              <mat-label>Date Range</mat-label>
+              <input matInput formControlName="dateRange" type="date">
+            </mat-form-field>
+            
+            <mat-form-field>
+              <mat-label>Status</mat-label>
+              <mat-select formControlName="status">
+                <mat-option value="all">All</mat-option>
+                <mat-option value="scheduled">Scheduled</mat-option>
+                <mat-option value="completed">Completed</mat-option>
+                <mat-option value="pending">Pending</mat-option>
+                <mat-option value="canceled">Canceled</mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <mat-form-field>
+              <mat-label>Search</mat-label>
+              <input matInput formControlName="searchTerm" placeholder="Search appointments...">
+            </mat-form-field>
+          </div>
+        </form>
+      </div>
+      
+      <div class="dialog-footer">
+        <app-button appearance="basic" (btnClick)="resetFilters()">Reset</app-button>
+        <app-button appearance="raised" (btnClick)="applyFilters()">Apply Filters</app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="schedule-content">
+    <!-- Timeline View -->
+    <div class="timeline-view" *ngIf="selectedView === 'timeline'">
+      <div class="timeline-header">
+        <div class="time-column-header">
+          <h3>Time</h3>
+        </div>
+        <div class="schedule-column">
+          <app-button appearance="basic" (btnClick)="goToPreviousDay()">
+            <app-icon fontIcon="chevron_left" [size]="20"></app-icon>
+          </app-button>
+
+          <div class="schedule-info">
+            <h3>Today's Schedule</h3>
+            <p>{{ selectedDate | date:'EEEE, MMMM d, y' }}</p>
+            <div class="scheduling-type-display">
+              <app-icon [fontIcon]="getSchedulingTypeIcon()" [size]="16"></app-icon>
+              <span>{{ getSchedulingTypeLabel() }}</span>
+            </div>
+          </div>
+
+          <app-button appearance="basic" (btnClick)="goToNextDay()">
+            <app-icon fontIcon="chevron_right" [size]="20"></app-icon>
+          </app-button>
+        </div>
+      </div>
+
+      <div class="timeline-body">
+        <div class="time-slots">
+          <div class="time-slot-row" *ngFor="let time of timeSlots">
+            <div class="time-label">
+              <span class="time">{{ formatTimeForDisplay(time) }}</span>
+            </div>
+            
+            <div class="appointment-slots">
+              <div class="appointment-slot" 
+                   [class.available]="getTimeSlotForDoctor(time).isAvailable"
+                   [class.break]="getTimeSlotForDoctor(time).isBreak"
+                   [class.conflict]="getTimeSlotForDoctor(time).isConflict"
+                   [class.slot-based]="isSlotBasedScheduling()"
+                   [class.flexible]="isFlexibleScheduling()"
+                   (click)="onTimeSlotClick(time)"
+                   (dragover)="onTimeSlotDragOver($event)"
+                   (drop)="onTimeSlotDrop($event, getTimeSlotForDoctor(time))"
+                   [matTooltip]="getTimeSlotForDoctor(time).conflictReason || ''">
+                
+                <!-- Capacity Info -->
+                <div class="capacity-info" *ngIf="getCapacityInfo(getTimeSlotForDoctor(time))">
+                  <span class="capacity-badge">{{ getCapacityInfo(getTimeSlotForDoctor(time)) }}</span>
+                </div>
+                
+                <div class="appointment-card" 
+                     *ngFor="let appointment of getTimeSlotForDoctor(time).appointments"
+                     [style.background-color]="getStatusColor(appointment.status)"
+                     (click)="viewAppointment(appointment); $event.stopPropagation()"
+                     (contextmenu)="onAppointmentRightClick($event, appointment)"
+                     draggable="true"
+                     (dragstart)="onAppointmentDragStart($event, appointment)">
+                  
+                  <div class="appointment-header">
+                    <span class="patient-name">{{ appointment.patientName }}</span>
+                    <mat-icon [fontIcon]="getStatusIcon(appointment.status)" class="status-icon"></mat-icon>
+                  </div>
+                  
+                  <div class="appointment-details">
+                    <p class="appointment-time">{{ appointment.slotTime }}</p>
+                    <p class="appointment-notes" *ngIf="appointment.notes">
+                      {{ appointment.notes | slice:0:30 }}{{ appointment.notes.length > 30 ? '...' : '' }}
+                    </p>
+                  </div>
+                  
+                  <div class="appointment-actions">
+                    <app-button appearance="basic" size="small" (btnClick)="editAppointment(appointment); $event.stopPropagation()">
+                      <app-icon fontIcon="edit" [size]="14"></app-icon>
+                    </app-button>
+                  </div>
+                </div>
+                
+                <div class="empty-slot" *ngIf="getTimeSlotForDoctor(time).isAvailable && !getTimeSlotForDoctor(time).isBreak">
+                  <app-icon fontIcon="add" [size]="16"></app-icon>
+                  <span>Add Appointment</span>
+                </div>
+                
+                <div class="break-slot" *ngIf="getTimeSlotForDoctor(time).isBreak">
+                  <app-icon fontIcon="restaurant" [size]="16"></app-icon>
+                  <span>Break</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar View -->
+    <div class="calendar-view" *ngIf="selectedView === 'calendar'">
+      <app-calendar 
+        [events]="getCalendarEvents()"
+        [selectedDate]="selectedDate"
+        (dateSelected)="onDateChange($event)">
+      </app-calendar>
+    </div>
+
+    <!-- List View -->
+    <div class="list-view" *ngIf="selectedView === 'list'">
+      <mat-card>
+        <div class="list-header">
+          <h3>Appointments List</h3>
+
+        </div>
+        
+        <div class="appointments-list">
+          <div class="appointment-item" 
+               *ngFor="let appointment of mockAppointments"
+               [style.border-left-color]="getStatusColor(appointment.status)">
+            
+            <div class="appointment-time">
+              <span class="time">{{ appointment.slotTime }}</span>
+              <span class="date">{{ appointment.appointment_date_time | date:'shortDate' }}</span>
+            </div>
+            
+            <div class="appointment-info">
+              <h4>{{ appointment.patientName }}</h4>
+              <p>{{ appointment.doctorName }}</p>
+              <p class="notes" *ngIf="appointment.notes">{{ appointment.notes }}</p>
+            </div>
+            
+            <div class="appointment-status">
+              <mat-chip [style.background-color]="getStatusColor(appointment.status)" 
+                       [style.color]="'white'" [color]="'var(--primary-text-color)'">
+                <app-icon [fontIcon]="getStatusIcon(appointment.status)" [color]="'var(--primary-text-color)'"></app-icon>
+                {{ appointment.status }}
+              </mat-chip>
+            </div>
+            
+            <div class="appointment-actions">
+              <app-button appearance="basic" size="small" (btnClick)="viewAppointment(appointment)">
+                <app-icon fontIcon="visibility" [size]="16"></app-icon>
+              </app-button>
+              <app-button appearance="basic" size="small" (btnClick)="editAppointment(appointment)">
+                <app-icon fontIcon="edit" [size]="16"></app-icon>
+              </app-button>
+              <app-button appearance="basic" size="small" (btnClick)="deleteAppointment(appointment)">
+                <app-icon fontIcon="delete" [size]="16"></app-icon>
+              </app-button>
+            </div>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Board View -->
+    <div class="board-view" *ngIf="selectedView === 'board'">
+      <div class="board-columns">
+        <div class="board-column" *ngFor="let status of ['PENDING', 'SCHEDULED', 'COMPLETED', 'CANCELED']">
+          <div class="column-header">
+            <h3>{{ status }}</h3>
+            <span class="count">{{ getAppointmentsByStatus(status).length }}</span>
+          </div>
+          
+          <div class="column-content">
+            <div class="board-card" 
+                 *ngFor="let appointment of getAppointmentsByStatus(status)"
+                 [style.border-color]="getStatusColor(appointment.status)"
+                 (click)="viewAppointment(appointment)">
+              
+              <div class="card-header">
+                <h4>{{ appointment.patientName }}</h4>
+                <mat-icon [fontIcon]="getStatusIcon(appointment.status)" 
+                         [style.color]="getStatusColor(appointment.status)">
+                </mat-icon>
+              </div>
+              
+              <div class="card-content">
+                <p><strong>Doctor:</strong> {{ appointment.doctorName }}</p>
+                <p><strong>Time:</strong> {{ appointment.slotTime }}</p>
+                <p class="notes" *ngIf="appointment.notes">{{ appointment.notes }}</p>
+              </div>
+              
+              <div class="card-actions">
+                <app-button appearance="basic" size="small" (btnClick)="editAppointment(appointment); $event.stopPropagation()">
+                  <app-icon fontIcon="edit" [size]="14"></app-icon>
+                </app-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Add Dialog -->
+
+  <!-- Settings Dialog -->
+  <div class="settings-overlay" *ngIf="showSettings" (click)="toggleSettings()">
+    <div class="settings-dialog" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h3>Schedule Settings</h3>
+        <app-icon fontIcon="close" (iconClick)="toggleSettings()"></app-icon>
+      </div>
+      
+      <div class="dialog-content">
+        <div class="setting-group">
+          <h4>General Settings</h4>
+          <div class="setting-item">
+            <label>Buffer Time (minutes)</label>
+            <input type="number" [(ngModel)]="scheduleSettings.bufferTime" min="0" max="60">
+          </div>
+          <div class="setting-item">
+            <label>Max Appointments Per Day</label>
+            <input type="number" [(ngModel)]="scheduleSettings.maxAppointmentsPerDay" min="1" max="100">
+          </div>
+        </div>
+        
+        <div class="setting-group">
+          <h4>Automation</h4>
+          <div class="setting-item">
+            <label>Auto Confirm Appointments</label>
+            <mat-slide-toggle [(ngModel)]="scheduleSettings.autoConfirmAppointments"></mat-slide-toggle>
+          </div>
+          <div class="setting-item">
+            <label>Send Reminders</label>
+            <mat-slide-toggle [(ngModel)]="scheduleSettings.sendReminders"></mat-slide-toggle>
+          </div>
+        </div>
+      </div>
+      
+      <div class="dialog-footer">
+        <app-button appearance="basic" (btnClick)="toggleSettings()">Cancel</app-button>
+        <app-button appearance="raised" (btnClick)="updateScheduleSettings()">Save Settings</app-button>
+      </div>
+    </div>
+  </div>
+</div>

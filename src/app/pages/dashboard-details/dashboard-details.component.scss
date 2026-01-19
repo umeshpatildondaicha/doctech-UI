@@ -1,0 +1,23 @@
+$teal: #10b3b3;
+
+.stat-btn {
+    margin-top: 8px;
+    background: $teal;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 18px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    align-self: flex-start;
+  }
+  
+  .stat-btn:hover {
+    background: darken($teal, 8%);
+  }
+
+.dashboard-details-container{
+    height: 100%;
+}
