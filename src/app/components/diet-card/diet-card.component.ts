@@ -63,25 +63,23 @@ export class DietCardComponent {
     };
   }
 
-  get headerActions(): ListingCardAction[] {
-    const actions: ListingCardAction[] = [
-      { id: 'view', label: 'View', icon: 'visibility', style: 'primary', tooltip: 'View diet' }
-    ];
-    if (this.diet?.videoUrl) {
-      actions.push({ id: 'video', label: 'Video', icon: 'play_circle', style: 'accent', tooltip: 'Watch video' });
-    }
-    if (this.diet?.documentUrl) {
-      actions.push({ id: 'pdf', label: 'PDF', icon: 'description', style: 'primary', tooltip: 'View PDF' });
-    }
-    return actions;
+  get goalBadge(): ListingCardBadge {
+    const goal = this.getDietGoalLabel();
+    return {
+      text: goal,
+      backgroundColor: '#6c757d'
+    };
   }
 
-  get footerActions(): ListingCardAction[] {
+  get primaryAction(): ListingCardAction {
+    return { id: 'view', label: 'View Plan', icon: 'visibility', tooltip: 'View diet plan' };
+  }
+
+  get iconActions(): ListingCardAction[] {
     if (!this.showActions) return [];
     return [
-      { id: 'view', label: 'View', icon: 'visibility', style: 'primary', tooltip: 'View diet' },
-      { id: 'edit', label: 'Edit', icon: 'edit', style: 'accent', tooltip: 'Edit diet' },
-      { id: 'delete', label: 'Delete', icon: 'delete', style: 'warn', tooltip: 'Delete diet' }
+      { id: 'edit', label: 'Edit', icon: 'edit', tooltip: 'Edit diet' },
+      { id: 'delete', label: 'Delete', icon: 'delete', tooltip: 'Delete diet' }
     ];
   }
 
@@ -91,8 +89,7 @@ export class DietCardComponent {
       { label: 'Calories', value: this.diet.calories, unit: 'kcal', icon: 'local_fire_department' },
       { label: 'Protein', value: this.diet.protein, unit: 'g', icon: 'fitness_center' },
       { label: 'Carbs', value: this.diet.carbs, unit: 'g', icon: 'grain' },
-      { label: 'Fat', value: this.diet.fat, unit: 'g', icon: 'oil_barrel' },
-      { label: 'Fiber', value: this.diet.fiber, unit: 'g', icon: 'grass', fullWidth: true }
+      { label: 'Fat', value: this.diet.fat, unit: 'g', icon: 'water_drop' }
     ];
   }
 
@@ -116,13 +113,22 @@ export class DietCardComponent {
     }
   }
 
+  private getDietGoalLabel(): string {
+    const tags = (this.diet?.tags || []).map(t => t.toLowerCase());
+    if (tags.some(t => t.includes('high-protein') || t.includes('protein'))) return 'Muscle Gain';
+    if (tags.some(t => t.includes('keto') || t.includes('low-carb'))) return 'Weight Loss';
+    if (tags.some(t => t.includes('diabetic') || t.includes('low-gi'))) return 'Balanced';
+    if (tags.some(t => t.includes('cardiac') || t.includes('low-sodium'))) return 'Low Fat';
+    return 'Balanced';
+  }
+
   private getDietTypeColor(type?: string): string {
     const t = (type || '').toLowerCase();
     switch (t) {
       case 'mediterranean':
         return '#28a745';
       case 'keto':
-        return '#6f42c1';
+        return '#1976d2';
       case 'vegan':
         return '#20c997';
       case 'vegetarian':

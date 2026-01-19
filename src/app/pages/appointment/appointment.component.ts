@@ -14,12 +14,11 @@ import { Mode } from '../../types/mode.type';
 import { AppointmentRescheduleComponent } from '../appointment-reschedule/appointment-reschedule.component';
 import { AppointmentViewComponent } from '../appointment-view/appointment-view.component';
 import { CoreEventService, DialogboxService, DialogFooterAction, PageComponent, BreadcrumbItem } from "@lk/core";
-import { MyScheduleComponent } from '../my-schedule/my-schedule.component';
 
 @Component({
   selector: 'app-appointment',
   standalone: true,
-  imports: [CommonModule, GridComponent, AppButtonComponent, IconComponent, MatTabsModule, CalendarComponent, MyScheduleComponent, PageComponent],
+  imports: [CommonModule, GridComponent, AppButtonComponent, IconComponent, MatTabsModule, CalendarComponent, PageComponent],
   templateUrl: './appointment.component.html',
   styleUrl: './appointment.component.scss'
 })

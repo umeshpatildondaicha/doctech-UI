@@ -12,13 +12,17 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router, ActivatedRoute } from '@angular/router';
-import { GridComponent, DialogboxService, DialogFooterAction, AppInputComponent } from "@lk/core";
-import { AppButtonComponent } from "@lk/core";
-import { IconComponent } from "@lk/core";
+import {
+  AppButtonComponent,
+  AppInputComponent,
+  DialogboxService,
+  DialogFooterAction,
+  GridComponent,
+  IconComponent
+} from "@lk/core";
 import { DietCreateComponent } from '../diet-create/diet-create.component';
 import { Diet } from '../../interfaces/diet.interface';
 import { ColDef } from 'ag-grid-community';
-import { Mode } from '../../types/mode.type';
 
 import { DietSelectionDialogComponent } from '../diet-selection-dialog/diet-selection-dialog.component';
 import { MealTimeDialogComponent } from '../meal-time-dialog/meal-time-dialog.component';
@@ -55,9 +59,17 @@ import { DietPlanCardComponent } from '../../components/diet-plan-card/diet-plan
 })
 export class DietComponent implements OnInit {
   selectedTabIndex = 0;
-  viewMode: 'grid' | 'list' = 'grid';
   searchQuery: string = '';
   selectedDietType: string = '';
+  selectedMealType: string = '';
+
+  mealTypes: { label: string; value: string }[] = [
+    { label: 'All', value: '' },
+    { label: 'Breakfast', value: 'breakfast' },
+    { label: 'Lunch', value: 'lunch' },
+    { label: 'Dinner', value: 'dinner' },
+    { label: 'Snack', value: 'snack' }
+  ];
   
 
   
@@ -81,16 +93,21 @@ export class DietComponent implements OnInit {
   selectedPlanDayIndex: number = new Date().getDay();
 
   // Computed properties for stats
-  get totalCalories(): number {
-    return this.dietList.reduce((sum, diet) => sum + diet.calories, 0);
+  get avgCalories(): number {
+    if (!this.dietList.length) return 0;
+    const sum = this.dietList.reduce((acc, diet) => acc + (diet.calories || 0), 0);
+    return Math.round(sum / this.dietList.length);
   }
 
-  get totalProtein(): number {
-    return this.dietList.reduce((sum, diet) => sum + diet.protein, 0);
+  get avgProtein(): number {
+    if (!this.dietList.length) return 0;
+    const sum = this.dietList.reduce((acc, diet) => acc + (diet.protein || 0), 0);
+    return Math.round(sum / this.dietList.length);
   }
 
-  get totalCarbs(): number {
-    return this.dietList.reduce((sum, diet) => sum + diet.carbs, 0);
+  // Mock (screenshot-style) stat
+  get patientsOnDiets(): number {
+    return 36;
   }
 
   constructor(
@@ -127,10 +144,6 @@ export class DietComponent implements OnInit {
     }
   }
 
-  setViewMode(mode: 'grid' | 'list') {
-    this.viewMode = mode;
-  }
-
   onSearchChange(event: any) {
     this.filterDiets();
   }
@@ -142,6 +155,7 @@ export class DietComponent implements OnInit {
   clearFilters() {
     this.searchQuery = '';
     this.selectedDietType = '';
+    this.selectedMealType = '';
     this.filterDiets();
   }
 
@@ -154,8 +168,12 @@ export class DietComponent implements OnInit {
       
       const matchesType = !this.selectedDietType || 
         diet.dietType.toLowerCase() === this.selectedDietType.toLowerCase();
+
+      const matchesMeal =
+        !this.selectedMealType ||
+        (diet.tags || []).some(tag => tag.toLowerCase() === this.selectedMealType.toLowerCase());
       
-      return matchesSearch && matchesType;
+      return matchesSearch && matchesType && matchesMeal;
     });
   }
 
@@ -402,7 +420,7 @@ export class DietComponent implements OnInit {
 
   onDeleteDiet(diet: Diet) {
     console.log('Delete diet:', diet);
-    // TODO: Implement delete diet functionality with confirmation dialog
+    // Implement delete diet functionality with confirmation dialog
   }
 
   onDietRowClick(event: any) {
@@ -427,36 +445,163 @@ export class DietComponent implements OnInit {
     this.dietPlans = [
       {
         planId: 'plan1',
-        name: 'Weekly Mediterranean Plan',
-        description: 'A balanced 7-day Mediterranean diet plan for healthy eating',
+        name: 'Weekly Mediterranean Diet',
+        description: 'A balanced 7-day diet plan focused on heart health and weight management.',
         type: 'weekly',
         status: 'active',
         duration: 7,
         dietsCount: 21,
-        progress: 75,
+        progress: 72,
+        goal: 'Weight Loss',
+        mealsIncluded: [
+          {
+            title: 'Breakfast',
+            subtitle: 'Oats with fruits & nuts',
+            tags: ['High fiber', 'Heart healthy'],
+            imageUrl: 'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=120&h=120&fit=crop'
+          },
+          {
+            title: 'Lunch',
+            subtitle: 'Grilled vegetables with olive oil',
+            tags: ['Low fat', 'Mediterranean'],
+            imageUrl: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=120&h=120&fit=crop'
+          },
+          {
+            title: 'Dinner',
+            subtitle: 'Baked salmon with quinoa',
+            tags: ['High protein', 'Omega-3'],
+            imageUrl: 'https://images.unsplash.com/photo-1546069901-eacef0df6022?w=120&h=120&fit=crop'
+          },
+          {
+            title: 'Snack',
+            subtitle: 'Greek yogurt with berries',
+            tags: ['High protein', 'Low sugar'],
+            imageUrl: 'https://images.unsplash.com/photo-1514996937319-344454492b37?w=120&h=120&fit=crop'
+          }
+        ],
+        reviewedByName: 'Dr. Umesh',
+        reviewedAt: new Date('2024-10-24T10:30:00'),
         createdAt: new Date('2024-01-15')
       },
       {
         planId: 'plan2',
-        name: 'Keto Weight Loss Plan',
-        description: '4-week ketogenic diet plan for weight loss',
+        name: 'Keto Weight Loss Diet',
+        description: 'A low-carb, high-fat diet plan designed to support fast and healthy weight loss.',
         type: 'monthly',
         status: 'active',
-        duration: 28,
-        dietsCount: 84,
-        progress: 45,
+        duration: 14,
+        dietsCount: 42,
+        progress: 64,
+        goal: 'Weight Loss',
+        mealsIncluded: [
+          {
+            title: 'Breakfast',
+            subtitle: 'Boiled eggs with avocado',
+            tags: ['Low carb', 'High fat'],
+            imageUrl: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=120&h=120&fit=crop'
+          },
+          {
+            title: 'Lunch',
+            subtitle: 'Quinoa salad with vegetables',
+            tags: ['Protein rich', 'Keto friendly'],
+            imageUrl: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=120&h=120&fit=crop'
+          },
+          {
+            title: 'Dinner',
+            subtitle: 'Grilled chicken with greens',
+            tags: ['Low carb', 'High protein'],
+            imageUrl: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=120&h=120&fit=crop'
+          },
+          {
+            title: 'Snack',
+            subtitle: 'Nuts & cheese plate',
+            tags: ['High fat', 'Keto'],
+            imageUrl: 'https://images.unsplash.com/photo-1604909053199-0edc0f6c09e0?w=120&h=120&fit=crop'
+          }
+        ],
+        reviewedByName: 'Dr. Umesh',
+        reviewedAt: new Date('2024-10-24T10:30:00'),
         createdAt: new Date('2024-01-10')
       },
       {
         planId: 'plan3',
-        name: 'Vegan Wellness Plan',
-        description: 'Plant-based diet plan for overall wellness',
+        name: 'Vegan Wellness Diet',
+        description: 'A plant-based diet plan focused on overall wellness and balanced nutrition.',
         type: 'custom',
-        status: 'draft',
-        duration: 14,
-        dietsCount: 42,
-        progress: 0,
+        status: 'active',
+        duration: 7,
+        dietsCount: 21,
+        progress: 78,
+        goal: 'Wellness',
+        mealsIncluded: [
+          {
+            title: 'Breakfast',
+            subtitle: 'Smoothie with banana & chia seeds',
+            tags: ['Plant protein', 'High fiber'],
+            imageUrl: 'https://images.unsplash.com/photo-1553530666-ba11a90a0868?w=120&h=120&fit=crop'
+          },
+          {
+            title: 'Dinner',
+            subtitle: 'Vegetable stir-fry with tofu & brown rice',
+            tags: ['Plant protein', 'Low fat', 'High fiber'],
+            imageUrl: 'https://images.unsplash.com/photo-1604908176997-125f25cc500f?w=120&h=120&fit=crop'
+          },
+          {
+            title: 'Lunch',
+            subtitle: 'Chickpea salad bowl',
+            tags: ['Plant protein', 'Iron rich'],
+            imageUrl: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=120&h=120&fit=crop'
+          },
+          {
+            title: 'Snack',
+            subtitle: 'Hummus with veggies',
+            tags: ['High fiber', 'Low fat'],
+            imageUrl: 'https://images.unsplash.com/photo-1546069901-eacef0df6022?w=120&h=120&fit=crop'
+          }
+        ],
+        reviewedByName: 'Dr. Umesh',
+        reviewedAt: new Date('2024-10-24T10:30:00'),
         createdAt: new Date('2024-01-20')
+      },
+      {
+        planId: 'plan4',
+        name: 'Cardiac Care Diet',
+        description: 'A heart-friendly diet plan designed to manage cholesterol and blood pressure.',
+        type: 'weekly',
+        status: 'active',
+        duration: 7,
+        dietsCount: 21,
+        progress: 72,
+        goal: 'Heart Health',
+        mealsIncluded: [
+          {
+            title: 'Lunch',
+            subtitle: 'Steamed vegetables with olive oil',
+            tags: ['Heart healthy', 'Low fat'],
+            imageUrl: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=120&h=120&fit=crop'
+          },
+          {
+            title: 'Dinner',
+            subtitle: 'Lentil soup with whole-grain roti',
+            tags: ['Low sodium', 'High fiber', 'Heart healthy'],
+            imageUrl: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=120&h=120&fit=crop'
+          },
+          {
+            title: 'Breakfast',
+            subtitle: 'Oatmeal with banana',
+            tags: ['High fiber', 'Low sodium'],
+            imageUrl: 'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=120&h=120&fit=crop'
+          },
+          {
+            title: 'Snack',
+            subtitle: 'Fresh fruit bowl',
+            tags: ['Low fat', 'Heart healthy'],
+            imageUrl: 'https://images.unsplash.com/photo-1519996529931-28324d5a630e?w=120&h=120&fit=crop'
+          }
+        ],
+        reviewedByName: 'Dr. Umesh',
+        reviewedAt: new Date('2024-10-24T10:30:00'),
+        createdAt: new Date('2024-01-22')
       }
     ];
     this.filteredDietPlans = [...this.dietPlans];
@@ -468,6 +613,12 @@ export class DietComponent implements OnInit {
 
   getWeeklyPlansCount(): number {
     return this.dietPlans.filter(plan => plan.type === 'weekly').length;
+  }
+
+  getAvgAdherence(): number {
+    if (!this.dietPlans || this.dietPlans.length === 0) return 0;
+    const total = this.dietPlans.reduce((sum, plan) => sum + (plan?.progress ?? 0), 0);
+    return Math.round(total / this.dietPlans.length);
   }
 
   onPlanTypeChange(event: any) {
@@ -517,13 +668,13 @@ export class DietComponent implements OnInit {
   }
 
   onEditPlan(plan: any) {
-    console.log('Edit plan:', plan);
-    // TODO: Open plan edit dialog
+    // Reuse create page UI for editing
+    this.router.navigate(['/diet-plan-edit', plan.planId], { state: { plan } });
   }
 
   onDeletePlan(plan: any) {
     console.log('Delete plan:', plan);
-    // TODO: Implement plan deletion with confirmation
+    // Implement plan deletion with confirmation
   }
 
   getStatusIcon(status: string): string {

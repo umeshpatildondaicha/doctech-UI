@@ -1,138 +1,166 @@
 <div class="diet-plan-view">
-  <!-- Breadcrumb -->
-  <app-breadcrumb [customBreadcrumbs]="customBreadcrumbs"></app-breadcrumb>
+  <div class="page-shell" *ngIf="dietPlan">
+    <div class="page-header">
+      <div class="title-block">
+        <div class="title-row">
+          <h1 class="title">{{ dietPlan.name }}</h1>
+          <span class="status-pill" [class.active]="isActive">{{ dietPlan.status }}</span>
+        </div>
+        <p class="subtitle">{{ dietPlan.description }}</p>
 
-  <!-- Plan Overview -->
-  <div class="plan-overview" *ngIf="dietPlan">
-    <div class="overview-header">
-      <div class="plan-info">
-        <h1 class="plan-name">{{ dietPlan.name }}</h1>
-        <p class="plan-description">{{ dietPlan.description }}</p>
+        <div class="meta-row">
+          <span class="meta-item">
+            <mat-icon>calendar_today</mat-icon>
+            {{ dietPlan.createdAt | date:'mediumDate' }}
+          </span>
+          <span class="meta-dot">•</span>
+          <span class="meta-item">
+            <mat-icon>schedule</mat-icon>
+            {{ dietPlan.duration }} days
+          </span>
+          <span class="meta-dot">•</span>
+          <span class="meta-item">
+            <mat-icon>restaurant</mat-icon>
+            {{ dietPlan.dietsCount }} diets
+          </span>
+        </div>
       </div>
-      <div class="plan-actions">
-        <button mat-stroked-button (click)="onEdit()" class="edit-btn">
+
+      <div class="actions">
+        <button mat-raised-button color="primary" class="primary-btn" (click)="onEdit()">
           <mat-icon>edit</mat-icon>
           Edit Plan
         </button>
-        <button mat-stroked-button color="warn" (click)="onDelete()" class="delete-btn">
+        <button mat-stroked-button color="warn" (click)="onDelete()">
           <mat-icon>delete</mat-icon>
-          Delete Plan
+          Delete
         </button>
       </div>
     </div>
 
-    <div class="overview-cards">
-      <div class="overview-card">
-        <div class="card-icon">
+    <div class="stats-row">
+      <div class="mini-stat">
+        <div class="mini-icon bg-blue">
           <mat-icon>restaurant</mat-icon>
         </div>
-        <div class="card-content">
-          <div class="card-value">{{ dietPlan.dietsCount }}</div>
-          <div class="card-label">Total Diets</div>
+        <div class="mini-text">
+          <div class="mini-label">Total Diets</div>
+          <div class="mini-value">{{ dietPlan.dietsCount }}</div>
         </div>
       </div>
 
-      <div class="overview-card">
-        <div class="card-icon">
+      <div class="mini-stat">
+        <div class="mini-icon bg-orange">
           <mat-icon>local_fire_department</mat-icon>
         </div>
-        <div class="card-content">
-          <div class="card-value">{{ getTotalCaloriesForPlan() }}</div>
-          <div class="card-label">Total Calories</div>
+        <div class="mini-text">
+          <div class="mini-label">Total Calories</div>
+          <div class="mini-value">{{ getTotalCaloriesForPlan() }}</div>
         </div>
       </div>
 
-      <div class="overview-card">
-        <div class="card-icon">
+      <div class="mini-stat">
+        <div class="mini-icon bg-green">
           <mat-icon>calendar_today</mat-icon>
         </div>
-        <div class="card-content">
-          <div class="card-value">{{ dietPlan.duration }}</div>
-          <div class="card-label">Days</div>
-        </div>
-      </div>
-
-      <div class="overview-card">
-        <div class="card-icon">
-          <mat-icon>trending_up</mat-icon>
-        </div>
-        <div class="card-content">
-          <div class="card-value">{{ dietPlan.progress }}%</div>
-          <div class="card-label">Progress</div>
+        <div class="mini-text">
+          <div class="mini-label">Duration</div>
+          <div class="mini-value">{{ dietPlan.duration }} Days</div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Tabs -->
-  <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)" class="plan-tabs">
-    <!-- Weekly Schedule Tab -->
-    <mat-tab label="Weekly Schedule">
-      <div class="schedule-content">
-        <div class="schedule-grid">
-          <div class="day-column" *ngFor="let day of weekDays; let dayIndex = index">
-            <div class="day-header">
-              <h3>{{ day.name }}</h3>
-              <div class="day-calories">{{ getTotalCaloriesForDay(dayIndex) }} kcal</div>
+    <div class="content-grid">
+      <div class="main-col">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">
+              <h2>Weekly schedule</h2>
+              <p>Pick a day to view meals and diets.</p>
             </div>
-            
-            <div class="day-meals">
-              <div class="meal-slot" *ngFor="let mealTime of mealTimes; let mealIndex = index">
-                <div class="meal-header">
+            <div class="day-total">
+              <span class="kcal">{{ getTotalCaloriesForDay(selectedDayIndex) }}</span>
+              <span class="kcal-label">kcal / day</span>
+            </div>
+          </div>
+
+          <div class="day-picker" role="tablist" aria-label="Select day">
+            <button
+              type="button"
+              class="day-pill"
+              *ngFor="let day of weekDays; let dayIndex = index"
+              [class.active]="dayIndex === selectedDayIndex"
+              (click)="selectDay(dayIndex)"
+              role="tab"
+              [attr.aria-selected]="dayIndex === selectedDayIndex"
+            >
+              <span class="day-abbr">{{ day.date }}</span>
+              <span class="day-kcal">{{ getTotalCaloriesForDay(dayIndex) }} kcal</span>
+            </button>
+          </div>
+
+          <div class="meals">
+            <div class="meal-card" *ngFor="let mealTime of mealTimes; let mealIndex = index">
+              <div class="meal-head">
+                <div class="meal-head-left">
                   <div class="meal-time">{{ mealTime.time }}</div>
                   <div class="meal-label">{{ mealTime.label }}</div>
                 </div>
-                
-                <div class="meal-diets" *ngIf="getSelectedDiets(dayIndex, mealIndex).length > 0">
-                  <div class="diet-item" *ngFor="let diet of getSelectedDiets(dayIndex, mealIndex)">
-                    <div class="diet-image">
-                      <img [src]="diet.imageUrl" [alt]="diet.name" *ngIf="diet.imageUrl">
-                      <div class="image-placeholder" *ngIf="!diet.imageUrl">
-                        <mat-icon>restaurant</mat-icon>
-                      </div>
-                    </div>
-                    <div class="diet-info">
-                      <div class="diet-name">{{ diet.name }}</div>
-                      <div class="diet-calories">{{ diet.calories }} kcal</div>
+                <div class="meal-kcal" *ngIf="getMealCalories(selectedDayIndex, mealIndex) > 0">
+                  {{ getMealCalories(selectedDayIndex, mealIndex) }} kcal
+                </div>
+              </div>
+
+              <div class="diet-list" *ngIf="getSelectedDiets(selectedDayIndex, mealIndex).length > 0; else emptyMeal">
+                <div class="diet-row" *ngFor="let diet of getSelectedDiets(selectedDayIndex, mealIndex)">
+                  <div class="diet-thumb">
+                    <img [src]="diet.imageUrl" [alt]="diet.name" *ngIf="diet.imageUrl" />
+                    <div class="thumb-placeholder" *ngIf="!diet.imageUrl">
+                      <mat-icon>restaurant</mat-icon>
                     </div>
                   </div>
+                  <div class="diet-meta">
+                    <div class="diet-name">{{ diet.name }}</div>
+                    <div class="diet-sub">{{ diet.calories }} kcal</div>
+                  </div>
+                  <mat-icon class="chev">chevron_right</mat-icon>
                 </div>
-                
-                <div class="empty-meal" *ngIf="getSelectedDiets(dayIndex, mealIndex).length === 0">
+              </div>
+
+              <ng-template #emptyMeal>
+                <div class="empty-meal">
                   <mat-icon>restaurant</mat-icon>
                   <span>No diet scheduled</span>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </mat-tab>
-
-    <!-- Nutrition Summary Tab -->
-    <mat-tab label="Nutrition Summary">
-      <div class="nutrition-content">
-        <div class="nutrition-overview">
-          <h3>Weekly Nutrition Overview</h3>
-          <div class="nutrition-stats">
-            <div class="stat-item">
-              <div class="stat-value">{{ getTotalCaloriesForPlan() }}</div>
-              <div class="stat-label">Total Calories</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value">{{ (getTotalCaloriesForPlan() / 7).toFixed(0) }}</div>
-              <div class="stat-label">Avg Daily Calories</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value">{{ dietPlan.dietsCount }}</div>
-              <div class="stat-label">Total Meals</div>
+              </ng-template>
             </div>
           </div>
         </div>
 
-        <div class="daily-breakdown">
-          <h3>Daily Calorie Breakdown</h3>
-          <div class="daily-chart">
+        <div class="section-card">
+          <div class="section-header tight">
+            <div class="section-title">
+              <h2>Nutrition summary</h2>
+              <p>Weekly totals and daily distribution.</p>
+            </div>
+          </div>
+
+          <div class="summary-stats">
+            <div class="summary-tile">
+              <div class="tile-label">Total calories</div>
+              <div class="tile-value">{{ getTotalCaloriesForPlan() }}</div>
+            </div>
+            <div class="summary-tile">
+              <div class="tile-label">Avg daily calories</div>
+              <div class="tile-value">{{ (getTotalCaloriesForPlan() / 7).toFixed(0) }}</div>
+            </div>
+            <div class="summary-tile">
+              <div class="tile-label">Total meals</div>
+              <div class="tile-value">{{ dietPlan.dietsCount }}</div>
+            </div>
+          </div>
+
+          <div class="daily-breakdown">
             <div class="day-bar" *ngFor="let day of weekDays; let dayIndex = index">
               <div class="bar-label">{{ day.name }}</div>
               <div class="bar-container">
@@ -143,41 +171,36 @@
           </div>
         </div>
       </div>
-    </mat-tab>
 
-    <!-- Plan Details Tab -->
-    <mat-tab label="Plan Details">
-      <div class="details-content">
-        <div class="detail-section">
-          <h3>Plan Information</h3>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <span class="detail-label">Plan ID:</span>
-              <span class="detail-value">{{ dietPlan?.planId }}</span>
+      <div class="side-col">
+        <div class="section-card">
+          <div class="section-header tight">
+            <div class="section-title">
+              <h2>Plan details</h2>
+              <p>Quick metadata about this plan.</p>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Created:</span>
-              <span class="detail-value">{{ dietPlan?.createdAt | date:'mediumDate' }}</span>
+          </div>
+
+          <div class="kv">
+            <div class="kv-row">
+              <div class="k">Plan ID</div>
+              <div class="v">{{ dietPlan.planId }}</div>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Type:</span>
-              <span class="detail-value">{{ dietPlan?.type }}</span>
+            <div class="kv-row">
+              <div class="k">Type</div>
+              <div class="v">{{ dietPlan.type }}</div>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Status:</span>
-              <span class="detail-value">{{ dietPlan?.status }}</span>
+            <div class="kv-row">
+              <div class="k">Status</div>
+              <div class="v">{{ dietPlan.status }}</div>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Duration:</span>
-              <span class="detail-value">{{ dietPlan?.duration }} days</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Total Diets:</span>
-              <span class="detail-value">{{ dietPlan?.dietsCount }}</span>
+            <div class="kv-row">
+              <div class="k">Created</div>
+              <div class="v">{{ dietPlan.createdAt | date:'mediumDate' }}</div>
             </div>
           </div>
         </div>
       </div>
-    </mat-tab>
-  </mat-tab-group>
+    </div>
+  </div>
 </div>

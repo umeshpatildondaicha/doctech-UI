@@ -6,7 +6,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 export type ListingCardVariant = 'default' | 'compact';
 export type ListingCardLayout = 'row' | 'column';
-export type ListingCardActionStyle = 'neutral' | 'primary' | 'accent' | 'warn';
 
 export interface ListingCardBadge {
   text: string;
@@ -19,14 +18,12 @@ export interface ListingCardStat {
   value: string | number;
   unit?: string;
   icon?: string;
-  fullWidth?: boolean;
 }
 
 export interface ListingCardAction {
   id: string;
   label: string;
   icon: string;
-  style?: ListingCardActionStyle;
   tooltip?: string;
   hidden?: boolean;
   disabled?: boolean;
@@ -54,20 +51,14 @@ export class ListingCardComponent {
   @Input() topLeftBadge?: ListingCardBadge;
   @Input() topRightBadge?: ListingCardBadge;
 
-  /** Optional pill actions displayed below the image */
-  @Input() headerActions: ListingCardAction[] = [];
-
-  /** Optional tags displayed under the description */
-  @Input() tags: string[] = [];
-
-  /** Optional stats grid displayed at the bottom of the card content */
+  /** Optional stats rendered in a 2-column grid */
   @Input() stats: ListingCardStat[] = [];
 
-  /** Footer actions displayed at the bottom (row/column layouts supported) */
-  @Input() footerActions: ListingCardAction[] = [];
-  @Input() footerLayout: ListingCardLayout = 'row';
+  /** Footer actions */
+  @Input() primaryAction?: ListingCardAction;
+  @Input() iconActions: ListingCardAction[] = [];
 
-  /** Selection indicator overlay (useful for multi-select flows) */
+  /** Selection indicator overlay (for multi-select flows) */
   @Input() showSelectionIndicator: boolean = false;
   @Input() selected: boolean = false;
   @Input() selectionIcon: string = 'check';
@@ -95,7 +86,6 @@ export class ListingCardComponent {
   }
 
   trackByActionId = (_: number, a: ListingCardAction) => a.id;
-  trackByTag = (_: number, t: string) => t;
   trackByStatLabel = (_: number, s: ListingCardStat) => s.label;
 
   badgeStyle(badge?: ListingCardBadge): Record<string, string> | null {

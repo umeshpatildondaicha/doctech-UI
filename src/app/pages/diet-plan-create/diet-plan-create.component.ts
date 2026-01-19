@@ -10,7 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DietSelectionDialogComponent } from '../diet-selection-dialog/diet-selection-dialog.component';
 import { MealTimeDialogComponent } from '../meal-time-dialog/meal-time-dialog.component';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
@@ -36,6 +36,9 @@ import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.comp
   styleUrl: './diet-plan-create.component.scss'
 })
 export class DietPlanCreateComponent implements OnInit {
+  isEditMode = false;
+  editPlanId: string | null = null;
+
   newPlan: any = {
     name: '',
     description: '',
@@ -173,11 +176,126 @@ export class DietPlanCreateComponent implements OnInit {
   ];
 
   constructor(
-    private dialog: MatDialog,
-    private router: Router
+    private readonly dialog: MatDialog,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.editPlanId = this.route.snapshot.params['id'] ?? null;
+    this.isEditMode = !!this.editPlanId;
+
+    if (this.isEditMode && this.editPlanId) {
+      const statePlan = history.state?.plan;
+      const plan = statePlan?.planId ? statePlan : this.getMockPlanForEdit(this.editPlanId);
+      if (plan) {
+        this.loadPlanIntoEditor(plan);
+      }
+
+      this.customBreadcrumbs = [
+        { label: 'Diet Plans', path: '/diet/plans', icon: 'calendar_today' },
+        { label: 'Edit Diet Plan', icon: 'edit', isActive: true }
+      ];
+    }
+  }
+
+  private loadPlanIntoEditor(plan: any): void {
+    this.newPlan.name = plan?.name ?? '';
+    this.newPlan.description = plan?.description ?? '';
+    this.newPlan.schedule = this.normalizeSchedule(plan?.schedule ?? {});
+  }
+
+  private normalizeSchedule(schedule: any): any {
+    const normalized: any = {};
+    for (let dayIndex = 0; dayIndex < this.weekDays.length; dayIndex++) {
+      const dayKey = `day_${dayIndex}`;
+      const daySlots = Array.isArray(schedule?.[dayKey]) ? schedule[dayKey] : [];
+      normalized[dayKey] = [];
+      for (let mealIndex = 0; mealIndex < this.mealTimes.length; mealIndex++) {
+        normalized[dayKey][mealIndex] = Array.isArray(daySlots?.[mealIndex]) ? daySlots[mealIndex] : [];
+      }
+    }
+    return normalized;
+  }
+
+  private getMockPlanForEdit(planId: string): Record<string, unknown> | null {
+    // Minimal mock so edit works in demo mode
+    const pickDiet = (dietId: string) => {
+      const d: any = this.dietList.find(x => x.dietId === dietId);
+      if (!d) return null;
+      return { dietId: d.dietId, name: d.name, calories: d.calories, imageUrl: d.imageUrl };
+    };
+
+    if (planId === 'plan1') {
+      return {
+        planId,
+        name: 'Weekly Mediterranean Plan',
+        description: 'A balanced 7-day Mediterranean diet plan for healthy eating with focus on whole grains, lean proteins, and healthy fats.',
+        schedule: {
+          day_0: [
+            [pickDiet('4')].filter(Boolean),
+            [],
+            [pickDiet('1')].filter(Boolean),
+            [],
+            [pickDiet('6')].filter(Boolean)
+          ]
+        }
+      };
+    }
+
+    if (planId === 'plan2') {
+      return {
+        planId,
+        name: 'Keto Weight Loss Diet',
+        description: 'A low-carb, high-fat diet plan designed to support fast and healthy weight loss.',
+        schedule: {
+          day_0: [
+            [pickDiet('5')].filter(Boolean),
+            [pickDiet('7')].filter(Boolean),
+            [pickDiet('2')].filter(Boolean),
+            [],
+            [pickDiet('6')].filter(Boolean)
+          ]
+        }
+      };
+    }
+
+    if (planId === 'plan3') {
+      return {
+        planId,
+        name: 'Vegan Wellness Diet',
+        description: 'A plant-based diet plan focused on overall wellness and balanced nutrition.',
+        schedule: {
+          day_0: [
+            [pickDiet('4')].filter(Boolean),
+            [],
+            [pickDiet('8')].filter(Boolean),
+            [pickDiet('7')].filter(Boolean),
+            [pickDiet('3')].filter(Boolean)
+          ]
+        }
+      };
+    }
+
+    if (planId === 'plan4') {
+      return {
+        planId,
+        name: 'Cardiac Care Diet',
+        description: 'A heart-friendly diet plan designed to manage cholesterol and blood pressure.',
+        schedule: {
+          day_0: [
+            [pickDiet('4')].filter(Boolean),
+            [],
+            [pickDiet('1')].filter(Boolean),
+            [],
+            [pickDiet('6')].filter(Boolean)
+          ]
+        }
+      };
+    }
+
+    return null;
+  }
 
   addMealTime() {
     console.log('Opening meal time dialog...');
@@ -192,9 +310,8 @@ export class DietPlanCreateComponent implements OnInit {
 
       dialogRef.afterClosed().subscribe(result => {
         console.log('Meal time dialog closed with result:', result);
-        if (result && result.mealTime) {
-          this.mealTimes.push(result.mealTime);
-        }
+        const mealTime = result?.mealTime;
+        if (mealTime) this.mealTimes.push(mealTime);
       });
     } catch (error) {
       console.error('Error opening meal time dialog:', error);
@@ -221,10 +338,7 @@ export class DietPlanCreateComponent implements OnInit {
 
   getSelectedDiets(dayIndex: number, mealIndex: number): any[] {
     const dayKey = `day_${dayIndex}`;
-    if (this.newPlan.schedule[dayKey] && this.newPlan.schedule[dayKey][mealIndex]) {
-      return this.newPlan.schedule[dayKey][mealIndex];
-    }
-    return [];
+    return this.newPlan?.schedule?.[dayKey]?.[mealIndex] ?? [];
   }
 
   openDietSelector(dayIndex: number, mealIndex: number) {
@@ -256,12 +370,12 @@ export class DietPlanCreateComponent implements OnInit {
 
       dialogRef.afterClosed().subscribe(result => {
         console.log('Diet selection dialog closed with result:', result);
-        if (result && result.selectedDiets && result.selectedDiets.length > 0) {
-          // Add all selected diets to the slot
-          result.selectedDiets.forEach((diet: any) => {
-            this.addDietToSlot(dayIndex, mealIndex, diet);
-          });
-        }
+        const selectedDiets = result?.selectedDiets;
+        if (!Array.isArray(selectedDiets) || selectedDiets.length === 0) return;
+        // Add all selected diets to the slot
+        selectedDiets.forEach((diet: any) => {
+          this.addDietToSlot(dayIndex, mealIndex, diet);
+        });
       });
     } catch (error) {
       console.error('Error opening diet selection dialog:', error);
@@ -285,9 +399,7 @@ export class DietPlanCreateComponent implements OnInit {
 
   removeDietFromSlot(dayIndex: number, mealIndex: number, dietIndex: number) {
     const dayKey = `day_${dayIndex}`;
-    if (this.newPlan.schedule[dayKey] && this.newPlan.schedule[dayKey][mealIndex]) {
-      this.newPlan.schedule[dayKey][mealIndex].splice(dietIndex, 1);
-    }
+    this.newPlan?.schedule?.[dayKey]?.[mealIndex]?.splice(dietIndex, 1);
   }
 
   clearAllSchedules() {
@@ -319,7 +431,24 @@ export class DietPlanCreateComponent implements OnInit {
       return;
     }
 
-    // Create the new plan
+    if (this.isEditMode && this.editPlanId) {
+      const updatedPlan = {
+        planId: this.editPlanId,
+        name: this.newPlan.name,
+        description: this.newPlan.description,
+        type: 'weekly',
+        status: 'active',
+        duration: 7,
+        dietsCount: totalDiets,
+        schedule: this.newPlan.schedule,
+        updatedAt: new Date()
+      };
+
+      console.log('Weekly plan updated:', updatedPlan);
+      this.router.navigate(['/diet-plan-view', this.editPlanId]);
+      return;
+    }
+
     const plan = {
       planId: 'plan_' + Date.now(),
       name: this.newPlan.name,
@@ -334,8 +463,6 @@ export class DietPlanCreateComponent implements OnInit {
     };
 
     console.log('Weekly plan created:', plan);
-    
-    // Navigate back to diet page
     this.router.navigate(['/diet']);
   }
 }

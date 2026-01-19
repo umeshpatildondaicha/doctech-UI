@@ -5,40 +5,17 @@
   [alt]="exercise.name"
   placeholderIcon="fitness_center"
   placeholderText="No Image"
-  [clickable]="clickable && !allowSelection"
+  [clickable]="clickable"
   [variant]="variant"
-  [topRightBadge]="categoryBadge"
+  [topLeftBadge]="categoryBadge"
+  [topRightBadge]="difficultyBadge"
+  [stats]="stats"
+  [primaryAction]="primaryAction"
+  [iconActions]="iconActions"
   [showSelectionIndicator]="allowSelection"
   [selected]="isSelected"
-  [footerActions]="footerActions"
-  [footerLayout]="footerLayout"
   (cardClick)="onCardClick()"
   (actionClick)="onListingAction($event)"
 >
-  <div card-meta class="exercise-category">
-    <mat-chip class="category-chip">{{ exercise.category }}</mat-chip>
-    <span class="difficulty-text">{{ exercise.difficulty }}</span>
-  </div>
-
-  <div card-body>
-    <div class="exercise-tags" *ngIf="exercise.tags && exercise.tags.length > 0">
-      <mat-chip class="tag-chip" *ngFor="let tag of exercise.tags">{{ tag }}</mat-chip>
-    </div>
-
-    <div class="exercise-details">
-      <div class="detail-item" *ngIf="exercise.targetMuscles && exercise.targetMuscles.length > 0">
-        <mat-icon>location_on</mat-icon>
-        <span [matTooltip]="getTargetMusclesDisplay()">{{ getTargetMusclesDisplay() }}</span>
-      </div>
-      <div class="detail-item" *ngIf="exercise.equipment && exercise.equipment.length > 0">
-        <mat-icon>fitness_center</mat-icon>
-        <span [matTooltip]="getEquipmentDisplay()">{{ getEquipmentDisplay() }}</span>
-      </div>
-      <div class="detail-item" *ngIf="exercise.sets && exercise.sets.length > 0">
-        <mat-icon>repeat</mat-icon>
-        <span>{{ getSetsDisplay() }}</span>
-      </div>
-    </div>
-  </div>
 </app-listing-card>
 

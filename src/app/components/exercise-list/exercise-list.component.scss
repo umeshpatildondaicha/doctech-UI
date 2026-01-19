@@ -113,10 +113,19 @@
 
     .groups-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 16px;
+      --group-card-width: 280px;
+      grid-template-columns: repeat(
+        auto-fill,
+        minmax(min(var(--group-card-width), 100%), var(--group-card-width))
+      );
+      justify-content: space-between;
+      justify-items: start;
+      align-items: start;
 
       .group-card {
+        width: var(--group-card-width);
+        max-width: 100%;
         background: white;
         border-radius: 12px;
         padding: 20px;
@@ -171,8 +180,20 @@
   .exercise-cards-view {
     .cards-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 24px;
+      --card-width: 280px;
+      grid-template-columns: repeat(
+        auto-fill,
+        minmax(min(var(--card-width), 100%), var(--card-width))
+      );
+      justify-content: space-between;
+      justify-items: start;
+      align-items: start;
+
+      > * {
+        width: var(--card-width);
+        max-width: 100%;
+      }
 
       .exercise-card {
         background: white;
@@ -565,11 +586,13 @@
     }
 
     .exercise-cards-view .cards-grid {
-      grid-template-columns: 1fr;
+      --card-width: 100%;
+      justify-content: stretch;
     }
 
     .groups-section .groups-grid {
-      grid-template-columns: 1fr;
+      --group-card-width: 100%;
+      justify-content: stretch;
     }
   }
 }

@@ -66,8 +66,8 @@ export class ExerciseAssignmentDialogComponent implements OnInit, OnDestroy {
 
   dialogRef = inject(MatDialogRef<ExerciseAssignmentDialogComponent>);
   data = inject<ExerciseAssignmentDialogData>(DIALOG_DATA_TOKEN);
-  private dialogService = inject(DialogboxService);
-  private destroy$ = new Subject<void>();
+  private readonly dialogService = inject(DialogboxService);
+  private readonly destroy$ = new Subject<void>();
 
   constructor() {}
 
@@ -131,10 +131,10 @@ export class ExerciseAssignmentDialogComponent implements OnInit, OnDestroy {
     return [
       {
         groupId: 'GROUP001',
-        groupName: 'Post-Knee Surgery Rehab',
-        description: 'Complete rehabilitation program for post-knee surgery recovery',
-        category: 'Rehabilitation',
-        difficulty: 'Beginner',
+        groupName: 'Core Stability',
+        description: 'Core strengthening exercises for better stability and posture',
+        category: 'strength',
+        difficulty: 'beginner',
         exercises: [
           {
             exerciseId: 'EX001',
@@ -178,10 +178,10 @@ export class ExerciseAssignmentDialogComponent implements OnInit, OnDestroy {
       },
       {
         groupId: 'GROUP002',
-        groupName: 'Low-Impact Cardio',
-        description: 'Low impact cardiovascular exercises',
-        category: 'Cardio',
-        difficulty: 'Beginner',
+        groupName: 'Core Stability',
+        description: 'Core strengthening exercises for better stability and posture',
+        category: 'strength',
+        difficulty: 'beginner',
         exercises: [
           {
             exerciseId: 'EX003',
@@ -357,7 +357,7 @@ export class ExerciseAssignmentDialogComponent implements OnInit, OnDestroy {
 
   toggleExerciseSelection(exercise: Exercise): void {
     const index = this.selectedExercises.findIndex(ex => ex.exerciseId === exercise.exerciseId);
-    if (index !== -1) {
+    if (index >= 0) {
       this.selectedExercises.splice(index, 1);
     } else {
       // Create a deep copy of the exercise with its sets

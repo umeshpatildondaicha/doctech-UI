@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -96,6 +96,12 @@ interface ScheduleStats {
   styleUrls: ['./my-schedule.component.scss']
 })
 export class MyScheduleComponent implements OnInit {
+  /**
+   * When embedded inside another page (e.g. Schedule),
+   * avoid overriding the global breadcrumb/title.
+   */
+  @Input() embedded = false;
+
   selectedTabIndex = 0;
   
   // Schedule configuration
@@ -159,15 +165,16 @@ export class MyScheduleComponent implements OnInit {
     private eventService: CoreEventService,
     private router: Router
   ) {
-    this.eventService.setBreadcrumb({
-      label: 'My Schedule',
-      icon: 'schedule'
-    });
-    
     this.initFilterForm();
   }
 
   ngOnInit() {
+    if (!this.embedded) {
+      this.eventService.setBreadcrumb({
+        label: 'My Schedule',
+        icon: 'schedule'
+      });
+    }
     this.initializeTimingGrid();
     this.loadTimingData();
     this.calculateStats();

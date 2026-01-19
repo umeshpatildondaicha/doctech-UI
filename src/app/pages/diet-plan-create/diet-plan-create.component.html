@@ -92,7 +92,7 @@
   <div class="plan-actions">
     <button mat-raised-button color="primary" (click)="saveWeeklyPlan()" class="save-btn">
       <mat-icon>save</mat-icon>
-      Save Plan
+      {{ isEditMode ? 'Update Plan' : 'Save Plan' }}
     </button>
   </div>
 </div>

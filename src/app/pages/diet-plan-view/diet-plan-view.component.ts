@@ -6,7 +6,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatTabsModule } from '@angular/material/tabs';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
 
 @Component({
@@ -19,7 +18,6 @@ import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.comp
     MatCardModule,
     MatChipsModule,
     MatProgressBarModule,
-    MatTabsModule,
     BreadcrumbComponent
   ],
   templateUrl: './diet-plan-view.component.html',
@@ -28,7 +26,7 @@ import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.comp
 export class DietPlanViewComponent implements OnInit {
   planId: string = '';
   dietPlan: any = null;
-  selectedTabIndex = 0;
+  selectedDayIndex = 0;
 
   customBreadcrumbs = [
     { label: 'Diet Plans', path: '/diet/plans', icon: 'calendar_today' },
@@ -54,13 +52,17 @@ export class DietPlanViewComponent implements OnInit {
   ];
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router
+    private readonly route: ActivatedRoute,
+    private readonly router: Router
   ) {}
 
   ngOnInit() {
     this.planId = this.route.snapshot.params['id'];
     this.loadDietPlan();
+  }
+
+  get isActive(): boolean {
+    return (this.dietPlan?.status || '').toLowerCase() === 'active';
   }
 
   loadDietPlan() {
@@ -145,10 +147,12 @@ export class DietPlanViewComponent implements OnInit {
 
   getSelectedDiets(dayIndex: number, mealIndex: number): any[] {
     const dayKey = `day_${dayIndex}`;
-    if (this.dietPlan.schedule[dayKey] && this.dietPlan.schedule[dayKey][mealIndex]) {
-      return this.dietPlan.schedule[dayKey][mealIndex];
-    }
-    return [];
+    return this.dietPlan?.schedule?.[dayKey]?.[mealIndex] ?? [];
+  }
+
+  getMealCalories(dayIndex: number, mealIndex: number): number {
+    const diets = this.getSelectedDiets(dayIndex, mealIndex);
+    return diets.reduce((sum, diet) => sum + (diet.calories || 0), 0);
   }
 
   getTotalCaloriesForDay(dayIndex: number): number {
@@ -168,17 +172,17 @@ export class DietPlanViewComponent implements OnInit {
     return totalCalories;
   }
 
+  selectDay(dayIndex: number): void {
+    this.selectedDayIndex = dayIndex;
+  }
+
   onEdit() {
-    console.log('Edit plan:', this.dietPlan);
-    // TODO: Navigate to edit page or open edit dialog
+    // Reuse the create page UI for editing
+    this.router.navigate(['/diet-plan-edit', this.planId], { state: { plan: this.dietPlan } });
   }
 
   onDelete() {
     console.log('Delete plan:', this.dietPlan);
-    // TODO: Show confirmation dialog and delete plan
-  }
-
-  onTabChange(event: any) {
-    this.selectedTabIndex = event.index;
+    // Show confirmation dialog and delete plan
   }
 }

@@ -14,8 +14,7 @@ import { ChatComponent } from './pages/chat/chat.component';
 import { PatientQueueComponent } from './pages/patient-queue/patient-queue.component';
 import { DoctorTreatmentComponent } from './pages/doctor-treatment/doctor-treatment.component';
 
-import { ProfileComponent } from "@lk/template";
-import { SettingsComponent } from "@lk/template";
+import { ProfileComponent, SettingsComponent } from "@lk/template";
 import { LoginComponent } from './pages/login/login.component';
 import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard.component';
 import { DoctorsComponent } from './pages/admin/doctors/doctors.component';
@@ -113,5 +112,6 @@ export const routes: Routes = [
   { path: 'patient-create', component: PatientCreateComponent, canActivate: [AuthGuard] },
   { path: 'diet-plan-view/:id', component: DietPlanViewComponent, canActivate: [AuthGuard], data: { breadcrumb: 'View Diet Plan', breadcrumbIcon: 'visibility' } },
   { path: 'diet-plan-create', component: DietPlanCreateComponent, canActivate: [AuthGuard], data: { breadcrumb: 'Create Diet Plan', breadcrumbIcon: 'add_circle' } },
+  { path: 'diet-plan-edit/:id', component: DietPlanCreateComponent, canActivate: [AuthGuard], data: { breadcrumb: 'Edit Diet Plan', breadcrumbIcon: 'edit' } },
   { path: '**', redirectTo: '/dashboard' }
 ];

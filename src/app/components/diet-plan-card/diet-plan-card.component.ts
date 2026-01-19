@@ -20,6 +20,17 @@ export interface DietPlan {
   assignmentType?: 'weekly' | 'individual';
   avgCaloriesPerDay?: number;
   keyNutrients?: string[];
+  goal?: string;
+  mealsIncluded?: DietPlanMealPreview[];
+  reviewedByName?: string;
+  reviewedAt?: Date;
+}
+
+export interface DietPlanMealPreview {
+  title: string;
+  subtitle?: string;
+  tags?: string[];
+  imageUrl?: string;
 }
 
 @Component({
@@ -38,42 +49,26 @@ export class DietPlanCardComponent {
   @Input() plan!: DietPlan;
   @Input() showActions: boolean = true;
   @Input() showFooter: boolean = true;
-  @Input() showDates: boolean = false; // For assigned plans
-  @Input() dateFormatter?: (date: Date) => string;
 
   @Output() cardClick = new EventEmitter<DietPlan>();
   @Output() viewClick = new EventEmitter<DietPlan>();
   @Output() editClick = new EventEmitter<DietPlan>();
   @Output() deleteClick = new EventEmitter<DietPlan>();
+  @Output() addMealClick = new EventEmitter<DietPlan>();
 
-  getStatusIcon(status: string): string {
-    switch (status.toLowerCase()) {
-      case 'active':
-        return 'check_circle';
-      case 'completed':
-        return 'done';
-      case 'inactive':
-        return 'cancel';
-      case 'draft':
-        return 'edit';
-      default:
-        return 'info';
-    }
-  }
-
-  formatDate(date: Date | undefined): string {
-    if (!date) return '';
-    if (this.dateFormatter) {
-      return this.dateFormatter(date);
-    }
-    const d = new Date(date);
-    const month = (d.getMonth() + 1).toString().padStart(2, '0');
-    const day = d.getDate().toString().padStart(2, '0');
-    return `${month}/${day}`;
+  get isActive(): boolean {
+    return (this.plan?.status || '').toLowerCase() === 'active';
   }
 
   onCardClick(): void {
     this.cardClick.emit(this.plan);
+  }
+
+  onKeyActivate(event: KeyboardEvent): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.onCardClick();
+    }
   }
 
   onView(event: Event): void {
@@ -89,6 +84,23 @@ export class DietPlanCardComponent {
   onDelete(event: Event): void {
     event.stopPropagation();
     this.deleteClick.emit(this.plan);
+  }
+
+  onAddMeal(event: Event): void {
+    event.stopPropagation();
+    this.addMealClick.emit(this.plan);
+  }
+
+  formatReviewedAt(date?: Date): string {
+    if (!date) return '';
+    const d = new Date(date);
+    const month = d.toLocaleString(undefined, { month: 'short' });
+    const day = d.getDate();
+    const hours = d.getHours();
+    const mins = d.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const hr12 = ((hours + 11) % 12) + 1;
+    return `${month} ${day}, ${hr12}:${mins} ${ampm}`;
   }
 }
 

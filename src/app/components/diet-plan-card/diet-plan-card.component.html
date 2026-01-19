@@ -1,106 +1,92 @@
-<div class="plan-card" (click)="onCardClick()">
-  <!-- Card Header with Gradient Background -->
-  <div class="plan-header">
-    <div class="plan-header-content">
-      <div class="plan-badge">
-        <mat-icon>restaurant_menu</mat-icon>
-        <span>{{ plan.planId ? plan.type : (plan.assignmentType === 'weekly' ? 'Weekly Plan' : 'Individual') }}</span>
+<div class="diet-plan-card">
+  <button type="button" class="card-top" (click)="onCardClick()" (keydown)="onKeyActivate($event)">
+    <div class="card-header">
+      <h3 class="card-title">{{ plan.name }}</h3>
+      <span class="status-pill" [class.active]="isActive">{{ plan.status }}</span>
+    </div>
+
+    <p class="card-description" *ngIf="plan.description">{{ plan.description }}</p>
+
+    <div class="divider"></div>
+
+    <div class="stats-grid">
+      <div class="stat">
+        <mat-icon class="stat-icon">groups</mat-icon>
+        <div class="stat-text">
+          <div class="stat-label">Duration</div>
+          <div class="stat-value">{{ plan.duration }} Days</div>
+        </div>
       </div>
-      <div class="plan-actions" *ngIf="showActions">
-        <button mat-icon-button (click)="onView($event)" matTooltip="View plan" class="action-btn view-btn">
-          <mat-icon>visibility</mat-icon>
-        </button>
-        <button mat-icon-button (click)="onEdit($event)" matTooltip="Edit plan" class="action-btn edit-btn">
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button mat-icon-button (click)="onDelete($event)" matTooltip="Delete plan" class="action-btn delete-btn">
-          <mat-icon>delete</mat-icon>
-        </button>
+
+      <div class="stat">
+        <mat-icon class="stat-icon">schedule</mat-icon>
+        <div class="stat-text">
+          <div class="stat-label">Total Diets</div>
+          <div class="stat-value">{{ plan.dietsCount || 0 }} Diets</div>
+        </div>
+      </div>
+
+      <div class="stat">
+        <mat-icon class="stat-icon">my_location</mat-icon>
+        <div class="stat-text">
+          <div class="stat-label">Goal</div>
+          <div class="stat-value">{{ plan.goal || '—' }}</div>
+        </div>
+      </div>
+
+      <div class="stat">
+        <mat-icon class="stat-icon">calendar_month</mat-icon>
+        <div class="stat-text">
+          <div class="stat-label">Progress</div>
+          <div class="stat-value">{{ plan.progress ?? 0 }}%</div>
+        </div>
+      </div>
+    </div>
+  </button>
+
+  <div class="meals-section">
+    <div class="meals-header">
+      <div class="meals-title">Meals Included</div>
+    </div>
+
+    <div class="meal-list" *ngIf="plan.mealsIncluded && plan.mealsIncluded.length > 0">
+      <div class="meal-item" *ngFor="let meal of plan.mealsIncluded">
+        <div class="meal-thumb">
+          <img *ngIf="meal.imageUrl" [src]="meal.imageUrl" [alt]="meal.title" />
+          <div class="thumb-placeholder" *ngIf="!meal.imageUrl">
+            <mat-icon>restaurant</mat-icon>
+          </div>
+        </div>
+        <div class="meal-content">
+          <div class="meal-name">{{ meal.title }}</div>
+          <div class="meal-subtitle" *ngIf="meal.subtitle">{{ meal.subtitle }}</div>
+          <div class="meal-tags" *ngIf="meal.tags && meal.tags.length > 0">
+            {{ meal.tags.join('  •  ') }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Card Body -->
-  <div class="plan-body">
-    <div class="plan-title-section">
-      <h3 class="plan-name">{{ plan.name }}</h3>
-      <div class="plan-status" [class]="'status-' + plan.status.toLowerCase()">
-        <mat-icon>{{ getStatusIcon(plan.status) }}</mat-icon>
-        <span>{{ plan.status }}</span>
+  <div class="card-footer" *ngIf="showFooter">
+    <div class="reviewed">
+      <div class="reviewed-label">Reviewed By</div>
+      <div class="reviewed-meta">
+        {{ plan.reviewedByName || '—' }}
+        <span class="dot" *ngIf="plan.reviewedAt">•</span>
+        <span class="reviewed-date" *ngIf="plan.reviewedAt">{{ formatReviewedAt(plan.reviewedAt) }}</span>
       </div>
     </div>
 
-    <div class="plan-description" *ngIf="plan.description">
-      <p>{{ plan.description }}</p>
-    </div>
-
-    <!-- Plan Stats -->
-    <div class="plan-stats">
-      <div class="stat-item">
-        <div class="stat-icon">
-          <mat-icon>schedule</mat-icon>
-        </div>
-        <div class="stat-content">
-          <span class="stat-value">{{ plan.duration }}</span>
-          <span class="stat-label">Days</span>
-        </div>
-      </div>
-      <div class="stat-item" *ngIf="plan.dietsCount !== undefined">
-        <div class="stat-icon">
-          <mat-icon>restaurant</mat-icon>
-        </div>
-        <div class="stat-content">
-          <span class="stat-value">{{ plan.dietsCount }}</span>
-          <span class="stat-label">Diets</span>
-        </div>
-      </div>
-      <div class="stat-item" *ngIf="plan.progress !== undefined">
-        <div class="stat-icon">
-          <mat-icon>trending_up</mat-icon>
-        </div>
-        <div class="stat-content">
-          <span class="stat-value">{{ plan.progress }}%</span>
-          <span class="stat-label">Progress</span>
-        </div>
-      </div>
-      <div class="stat-item" *ngIf="showDates && plan.startDate">
-        <div class="stat-icon">
-          <mat-icon>event</mat-icon>
-        </div>
-        <div class="stat-content">
-          <span class="stat-value">{{ formatDate(plan.startDate) }}</span>
-          <span class="stat-label">Start Date</span>
-        </div>
-      </div>
-      <div class="stat-item" *ngIf="showDates && plan.endDate">
-        <div class="stat-icon">
-          <mat-icon>event_available</mat-icon>
-        </div>
-        <div class="stat-content">
-          <span class="stat-value">{{ formatDate(plan.endDate) }}</span>
-          <span class="stat-label">End Date</span>
-        </div>
-      </div>
-      <div class="stat-item" *ngIf="plan.avgCaloriesPerDay">
-        <div class="stat-icon">
-          <mat-icon>local_fire_department</mat-icon>
-        </div>
-        <div class="stat-content">
-          <span class="stat-value">{{ plan.avgCaloriesPerDay }}</span>
-          <span class="stat-label">Cal/Day</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="plan-footer" *ngIf="showFooter">
-      <button mat-stroked-button (click)="onView($event)" class="view-plan-btn">
+    <div class="footer-actions" *ngIf="showActions">
+      <button mat-icon-button (click)="onView($event)" matTooltip="View">
         <mat-icon>visibility</mat-icon>
-        View Details
       </button>
-      <button mat-raised-button color="primary" (click)="onEdit($event)" class="edit-plan-btn">
+      <button mat-icon-button (click)="onEdit($event)" matTooltip="Edit">
         <mat-icon>edit</mat-icon>
-        Edit
+      </button>
+      <button mat-icon-button (click)="onDelete($event)" matTooltip="Delete">
+        <mat-icon>delete</mat-icon>
       </button>
     </div>
   </div>

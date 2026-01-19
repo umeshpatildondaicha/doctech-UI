@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -18,11 +18,82 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormsModule } from '@angular/forms';
-import { GridComponent, AppButtonComponent, IconComponent, CalendarComponent, CoreEventService, DialogboxService, DialogFooterAction } from '@lk/core';
+import { AppButtonComponent, IconComponent, CalendarComponent, CoreEventService, DialogboxService, DialogFooterAction } from '@lk/core';
 import { AppointmentCreateComponent } from '../appointment-create/appointment-create.component';
 import { AppointmentViewComponent } from '../appointment-view/appointment-view.component';
-import { QuickAddDialogComponent } from '../quick-add-dialog/quick-add-dialog.component';
+import { PatientSearchDialogComponent, PatientSearchResult } from '../patient-search-dialog/patient-search-dialog.component';
 import { Appointment } from '../../interfaces/appointment.interface';
+import { AppCardComponent } from '../../core/components/app-card/app-card.component';
+import { AppCardActionsDirective } from '../../core/components/app-card/app-card-actions.directive';
+
+type TimingPriorityTab = 'p4' | 'p3' | 'p2' | 'p1';
+
+type Weekday = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
+
+interface TimingBreak {
+  label: string;
+  start: string; // HH:MM
+  end: string;   // HH:MM
+}
+
+interface WeeklyRule {
+  start: string; // HH:MM
+  end: string;   // HH:MM
+  breaks: TimingBreak[];
+}
+
+interface TimingOverride {
+  date: string; // YYYY-MM-DD
+  start: string; // HH:MM
+  end: string; // HH:MM
+  breaks: TimingBreak[];
+}
+
+interface ForecastDay {
+  date: Date;
+  priority: TimingPriorityTab;
+  label: string;
+}
+
+interface ThisWeekScheduleCard {
+  weekday: Weekday;
+  date: Date;
+  dateLabel: string; // e.g. "Dec 15"
+  hasSchedule: boolean;
+  start?: string;
+  end?: string;
+  patternLabel?: string;
+  durationMin?: number;
+  totalSlots?: number;
+  isToday: boolean;
+}
+
+type TimingsMode = 'view' | 'manage';
+
+interface ManageLeaveItem {
+  label: string;
+  rangeLabel: string;     // "Dec 15 – Dec 20, 2024"
+  durationLabel: string;  // "6 Days"
+}
+
+interface ManageSpecificDayItem {
+  label: string;
+  dateLabel: string;      // "Nov 30"
+  rangeLabel: string;     // "Dec 15 – Dec 20, 2024"
+}
+
+interface ManageWeeklyRoutineItem {
+  label: string;
+  timeLabel: string;      // "09:00 AM – 01:00 PM"
+  days: Weekday[];
+  partiallyOverridden?: boolean;
+}
+
+interface ManageBaseAvailabilityItem {
+  label: string;
+  timeLabel: string;
+  note?: string;
+}
 
 interface ScheduleStats {
   todayAppointments: number;
@@ -41,6 +112,31 @@ interface ScheduleView {
   name: string;
   icon: string;
   description: string;
+}
+
+interface ScheduleWeekDay {
+  date: Date;
+  weekdayShort: string; // Mon, Tue...
+  dayNumber: number;
+  isSelected: boolean;
+}
+
+interface ScheduleSummaryStats {
+  totalSlots: number;
+  booked: number;
+  available: number;
+  break: number;
+}
+
+interface ScheduleAvailabilityInfo {
+  mode: 'slots' | 'flexible';
+  // slots mode
+  availableTimes?: string[]; // HH:MM (24h) from timeSlots
+  maxPerSlot?: number;
+  // flexible mode
+  maxPerDay?: number;
+  bookedToday?: number;
+  remainingToday?: number;
 }
 
 interface TimeSlot {
@@ -133,24 +229,90 @@ interface DoctorSchedule {
     FormsModule,
     AppButtonComponent,
     IconComponent,
-    CalendarComponent
+    CalendarComponent,
+    AppCardComponent,
+    AppCardActionsDirective
   ],
   templateUrl: './schedule.component.html',
   styleUrls: ['./schedule.component.scss']
 })
 export class ScheduleComponent implements OnInit {
+  activeSection: 'schedule' | 'timings' = 'schedule';
+  timingsTab: TimingPriorityTab = 'p4';
+  forecastDays = 15;
+  readonly weekdays: Weekday[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  timingsMode: TimingsMode = 'view';
+
+  // Timings (P4 standard / P3 weekly / P2 overrides / P1 leave)
+  timingsDaily = {
+    start: '09:00',
+    end: '17:00',
+    slotDuration: 30
+  };
+  timingsBreaks: TimingBreak[] = [
+    { label: 'Lunch Break', start: '13:30', end: '14:00' }
+  ];
+  // Weekly rules are meant to be optional (one schedule per weekday).
+  // If a rule exists for a weekday, it overrides the daily timing for that weekday.
+  timingsWeeklyRules: Record<Weekday, WeeklyRule | null> = {
+    Monday: null,
+    Tuesday: null,
+    Wednesday: null,
+    Thursday: null,
+    Friday: null,
+    // Example scenarios requested:
+    // - Every Saturday: 4 hours, lunch + tea breaks
+    Saturday: {
+      start: '09:00',
+      end: '13:00',
+      breaks: [
+        { label: 'Lunch Break', start: '11:00', end: '11:30' },
+        { label: 'Tea Break', start: '12:15', end: '12:30' }
+      ]
+    },
+    // - Every Sunday: 2 hours, 1 hour break
+    Sunday: {
+      start: '10:00',
+      end: '12:00',
+      breaks: [{ label: 'Break', start: '11:00', end: '12:00' }]
+    }
+  };
+  timingsOverrides: TimingOverride[] = [];
+  timingsLeaveDates: string[] = [];
+  expandedWeekday: Weekday | null = null;
+  overrideDraft: TimingOverride = { date: '', start: '14:00', end: '19:00', breaks: [] };
+  isEditingOverride = false;
+  selectedWeeklyDay: Weekday = 'Monday';
+  selectedOverrideDate: string | null = null;
+  thisWeekScheduleCards: ThisWeekScheduleCard[] = [];
+
+  // Timings management (admin) mock data
+  manageLeaves: ManageLeaveItem[] = [
+    { label: 'Medical Conference', rangeLabel: 'Dec 15 – Dec 20, 2024', durationLabel: '6 Days' }
+  ];
+  manageSpecificDays: ManageSpecificDayItem[] = [
+    { label: 'Evening Gala (Limited)', dateLabel: 'Nov 30', rangeLabel: 'Dec 15 – Dec 20, 2024' }
+  ];
+  manageWeeklyRoutines: ManageWeeklyRoutineItem[] = [
+    { label: 'Main Consultation', timeLabel: '09:00 AM – 01:00 PM', days: ['Monday', 'Wednesday', 'Friday'], partiallyOverridden: true },
+    { label: 'Weekend Telehealth', timeLabel: '10:00 AM – 12:00 PM', days: ['Saturday'] }
+  ];
+  manageBaseAvailability: ManageBaseAvailabilityItem[] = [
+    { label: 'General Availability', timeLabel: '05:00 PM – 08:00 PM', note: 'Overridden by Higher Priority' }
+  ];
+
+  timingsForecast: ForecastDay[] = [];
+  filteredTimingsForecast: ForecastDay[] = [];
+
   // View Management
-  selectedView: string = 'timeline';
   selectedDate: Date = new Date();
   calendarViews = ['month', 'week', 'day', 'agenda'];
-  
-  // Schedule Views
-  scheduleViews: ScheduleView[] = [
-    { id: 'timeline', name: 'Timeline', icon: 'schedule', description: 'Horizontal timeline view' },
-    { id: 'calendar', name: 'Calendar', icon: 'calendar_month', description: 'Calendar grid view' },
-    { id: 'list', name: 'List', icon: 'list', description: 'List view' },
-    { id: 'board', name: 'Board', icon: 'dashboard', description: 'Kanban board view' }
-  ];
+
+  // Schedule (top bar UI)
+  scheduleWeekStrip: ScheduleWeekDay[] = [];
+  scheduleSearch = '';
+  scheduleSummary: ScheduleSummaryStats = { totalSlots: 0, booked: 0, available: 0, break: 0 };
+  scheduleAvailability: ScheduleAvailabilityInfo = { mode: 'slots', availableTimes: [] };
 
   // Statistics
   scheduleStats: ScheduleStats = {
@@ -284,10 +446,10 @@ export class ScheduleComponent implements OnInit {
   ];
 
   constructor(
-    private dialogService: DialogboxService,
-    private fb: FormBuilder,
-    private eventService: CoreEventService,
-    private router: Router
+    private readonly dialogService: DialogboxService,
+    private readonly fb: FormBuilder,
+    private readonly eventService: CoreEventService,
+    private readonly router: Router
   ) {
     this.eventService.setBreadcrumb({
       label: 'Schedule',
@@ -298,9 +460,425 @@ export class ScheduleComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Demo-friendly: default to the first mocked appointment date (if present)
+    this.selectedDate = new Date(this.mockAppointments[0]?.appointment_date_time ?? new Date());
+
     this.generateTimeSlots();
     this.loadDoctorSchedule();
     this.setupRealTimeUpdates();
+    this.seedTimingsDemoData();
+    this.recomputeTimingsForecast();
+    this.initTimingsSelections();
+    this.buildThisWeekScheduleCards();
+
+    this.rebuildScheduleWeekStrip();
+    this.recomputeScheduleSummary();
+    this.recomputeScheduleAvailability();
+  }
+
+  setSection(section: 'schedule' | 'timings'): void {
+    this.activeSection = section;
+  }
+
+  setTimingsMode(mode: TimingsMode): void {
+    this.timingsMode = mode;
+  }
+
+  setTimingsTab(tab: TimingPriorityTab): void {
+    this.timingsTab = tab;
+    this.filteredTimingsForecast = this.timingsForecast.filter(d => d.priority === this.timingsTab);
+    if (tab === 'p3' || tab === 'p2') this.initTimingsSelections();
+  }
+
+  private initTimingsSelections(): void {
+    // Weekly: default to first weekday that has a rule, otherwise Monday
+    const firstWeekly = this.weekdays.find(d => !!this.timingsWeeklyRules[d]) ?? 'Monday';
+    this.selectedWeeklyDay = firstWeekly;
+
+    // Overrides: default to first override date (sorted), otherwise null
+    this.selectedOverrideDate = this.timingsOverrides[0]?.date ?? null;
+  }
+
+  private getWeekStartMonday(base: Date): Date {
+    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+    // JS: Sunday=0 ... Saturday=6. Convert so Monday=0 ... Sunday=6.
+    const day = (d.getDay() + 6) % 7;
+    d.setDate(d.getDate() - day);
+    return d;
+  }
+
+  private formatMonthDay(d: Date): string {
+    const month = d.toLocaleString(undefined, { month: 'short' });
+    return `${month} ${d.getDate()}`;
+  }
+
+  private isSameDay(a: Date, b: Date): boolean {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  buildThisWeekScheduleCards(): void {
+    const today = new Date();
+    const weekStart = this.getWeekStartMonday(today);
+
+    const isWorkingDay = (day: Weekday) =>
+      day === 'Monday' || day === 'Tuesday' || day === 'Wednesday' || day === 'Thursday' || day === 'Friday';
+
+    const cards: ThisWeekScheduleCard[] = [];
+    for (const [i, weekday] of this.weekdays.entries()) {
+      const date = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + i);
+      const dateKey = date.toISOString().slice(0, 10);
+
+      // Priority selection for actual schedule block (P1 > P2 > P3 > P4)
+      const isLeave = this.timingsLeaveDates.includes(dateKey);
+      const override = this.timingsOverrides.find(o => o.date === dateKey) ?? null;
+      const weekly = this.timingsWeeklyRules[weekday];
+
+      if (isLeave) {
+        cards.push({
+          weekday,
+          date,
+          dateLabel: this.formatMonthDay(date),
+          hasSchedule: false,
+          isToday: this.isSameDay(date, today)
+        });
+        continue;
+      }
+
+      if (override) {
+        const ov = this.getOverrideOverview(override);
+        cards.push({
+          weekday,
+          date,
+          dateLabel: this.formatMonthDay(date),
+          hasSchedule: true,
+          start: override.start,
+          end: override.end,
+          patternLabel: 'Date Override',
+          durationMin: this.timingsDaily.slotDuration,
+          totalSlots: ov.totalSlots,
+          isToday: this.isSameDay(date, today)
+        });
+        continue;
+      }
+
+      if (weekly) {
+        const wov = this.getWeeklyOverview(weekday);
+        cards.push({
+          weekday,
+          date,
+          dateLabel: this.formatMonthDay(date),
+          hasSchedule: true,
+          start: weekly.start,
+          end: weekly.end,
+          patternLabel: 'Weekly Pattern',
+          durationMin: this.timingsDaily.slotDuration,
+          totalSlots: wov?.totalSlots ?? 0,
+          isToday: this.isSameDay(date, today)
+        });
+        continue;
+      }
+
+      if (isWorkingDay(weekday)) {
+        const dov = this.getDailyOverview();
+        cards.push({
+          weekday,
+          date,
+          dateLabel: this.formatMonthDay(date),
+          hasSchedule: true,
+          start: this.timingsDaily.start,
+          end: this.timingsDaily.end,
+          patternLabel: 'Daily Timing',
+          durationMin: this.timingsDaily.slotDuration,
+          totalSlots: dov.totalSlots,
+          isToday: this.isSameDay(date, today)
+        });
+        continue;
+      }
+
+      // Weekend without weekly rule
+      cards.push({
+        weekday,
+        date,
+        dateLabel: this.formatMonthDay(date),
+        hasSchedule: false,
+        isToday: this.isSameDay(date, today)
+      });
+    }
+
+    this.thisWeekScheduleCards = cards;
+  }
+
+  selectWeeklyDay(day: Weekday): void {
+    this.selectedWeeklyDay = day;
+  }
+
+  selectOverrideDate(date: string): void {
+    this.selectedOverrideDate = date;
+  }
+
+  getSelectedWeeklyRule(): WeeklyRule | null {
+    return this.timingsWeeklyRules[this.selectedWeeklyDay];
+  }
+
+  getSelectedOverride(): TimingOverride | null {
+    if (!this.selectedOverrideDate) return null;
+    return this.timingsOverrides.find(o => o.date === this.selectedOverrideDate) ?? null;
+  }
+
+  getWeeklyDaysWithRules(): Weekday[] {
+    return this.weekdays.filter(d => !!this.timingsWeeklyRules[d]);
+  }
+
+  getWeekdayAbbr(day: Weekday): string {
+    switch (day) {
+      case 'Monday':
+        return 'MON';
+      case 'Tuesday':
+        return 'TUE';
+      case 'Wednesday':
+        return 'WED';
+      case 'Thursday':
+        return 'THU';
+      case 'Friday':
+        return 'FRI';
+      case 'Saturday':
+        return 'SAT';
+      case 'Sunday':
+      default:
+        return 'SUN';
+    }
+  }
+
+  // ---- Manage UI actions (mock) ----
+  addManageItem(scope: 'p1' | 'p2' | 'p3' | 'p4'): void {
+    // Hook this to dialogs / backend later
+    if (scope === 'p1') this.manageLeaves = [...this.manageLeaves, { label: 'New Leave', rangeLabel: 'Dec 22 – Dec 22, 2024', durationLabel: '1 Day' }];
+    if (scope === 'p2') this.manageSpecificDays = [...this.manageSpecificDays, { label: 'New Override', dateLabel: 'Dec 26', rangeLabel: 'Dec 26, 2024' }];
+    if (scope === 'p3') this.manageWeeklyRoutines = [...this.manageWeeklyRoutines, { label: 'New Weekly Routine', timeLabel: '09:00 AM – 10:00 AM', days: ['Tuesday'] }];
+    if (scope === 'p4') this.manageBaseAvailability = [...this.manageBaseAvailability, { label: 'New Base Availability', timeLabel: '10:00 AM – 11:00 AM' }];
+  }
+
+  deleteManageItem(scope: 'p1' | 'p2' | 'p3' | 'p4', index: number): void {
+    if (scope === 'p1') this.manageLeaves = this.manageLeaves.filter((_, i) => i !== index);
+    if (scope === 'p2') this.manageSpecificDays = this.manageSpecificDays.filter((_, i) => i !== index);
+    if (scope === 'p3') this.manageWeeklyRoutines = this.manageWeeklyRoutines.filter((_, i) => i !== index);
+    if (scope === 'p4') this.manageBaseAvailability = this.manageBaseAvailability.filter((_, i) => i !== index);
+  }
+
+  // ----- P3 Weekly Rules -----
+  toggleWeeklyRuleExpanded(day: Weekday): void {
+    this.expandedWeekday = this.expandedWeekday === day ? null : day;
+  }
+
+  enableWeeklyRule(day: Weekday): void {
+    if (this.timingsWeeklyRules[day]) return;
+    this.timingsWeeklyRules[day] = { start: '10:00', end: '12:00', breaks: [] };
+    this.recomputeTimingsForecast();
+  }
+
+  removeWeeklyRule(day: Weekday): void {
+    this.timingsWeeklyRules[day] = null;
+    if (this.expandedWeekday === day) this.expandedWeekday = null;
+    this.recomputeTimingsForecast();
+  }
+
+  addWeeklyBreak(day: Weekday): void {
+    const rule = this.timingsWeeklyRules[day];
+    if (!rule) return;
+    rule.breaks.push({ label: 'Break', start: '12:00', end: '12:15' });
+    this.recomputeTimingsForecast();
+  }
+
+  removeWeeklyBreak(day: Weekday, idx: number): void {
+    const rule = this.timingsWeeklyRules[day];
+    if (!rule) return;
+    rule.breaks.splice(idx, 1);
+    this.recomputeTimingsForecast();
+  }
+
+  // ----- P2 Date Overrides -----
+  startNewOverride(): void {
+    this.isEditingOverride = false;
+    this.overrideDraft = { date: '', start: '14:00', end: '19:00', breaks: [] };
+  }
+
+  editOverride(ov: TimingOverride): void {
+    this.isEditingOverride = true;
+    this.overrideDraft = {
+      date: ov.date,
+      start: ov.start,
+      end: ov.end,
+      breaks: ov.breaks.map(b => ({ ...b }))
+    };
+  }
+
+  saveOverride(): void {
+    const date = (this.overrideDraft.date || '').trim();
+    if (!date) return;
+
+    // Enforce one override per date: update existing if present, otherwise insert.
+    const idx = this.timingsOverrides.findIndex(o => o.date === date);
+    const next: TimingOverride = {
+      date,
+      start: this.overrideDraft.start,
+      end: this.overrideDraft.end,
+      breaks: this.overrideDraft.breaks.map(b => ({ ...b }))
+    };
+    if (idx >= 0) this.timingsOverrides[idx] = next;
+    else this.timingsOverrides = [next, ...this.timingsOverrides].sort((a, b) => a.date.localeCompare(b.date));
+
+    this.startNewOverride();
+    this.recomputeTimingsForecast();
+  }
+
+  deleteOverride(date: string): void {
+    this.timingsOverrides = this.timingsOverrides.filter(o => o.date !== date);
+    if (this.overrideDraft.date === date) this.startNewOverride();
+    this.recomputeTimingsForecast();
+  }
+
+  addOverrideBreak(): void {
+    this.overrideDraft.breaks.push({ label: 'Break', start: '16:00', end: '16:15' });
+  }
+
+  removeOverrideBreak(idx: number): void {
+    this.overrideDraft.breaks.splice(idx, 1);
+  }
+
+  // ----- P1 Leave Management -----
+  addLeaveDate(date: string): void {
+    const key = (date || '').trim();
+    if (!key) return;
+    if (this.timingsLeaveDates.includes(key)) return;
+    this.timingsLeaveDates = [...this.timingsLeaveDates, key].sort((a, b) => a.localeCompare(b));
+    this.recomputeTimingsForecast();
+  }
+
+  removeLeaveDate(date: string): void {
+    this.timingsLeaveDates = this.timingsLeaveDates.filter(d => d !== date);
+    this.recomputeTimingsForecast();
+  }
+
+  private seedTimingsDemoData(): void {
+    // Demo-only: show some overrides/leaves in next 15 days
+    const today = new Date();
+    const toKey = (d: Date) => d.toISOString().slice(0, 10);
+    const addDays = (d: Date, days: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + days);
+
+    this.timingsOverrides = [
+      {
+        date: toKey(addDays(today, 1)),
+        start: '14:00',
+        end: '19:00',
+        breaks: [{ label: 'Tea Break', start: '16:30', end: '16:45' }]
+      }
+    ];
+    this.timingsLeaveDates = [toKey(addDays(today, 5)), toKey(addDays(today, 6))];
+  }
+
+  recomputeTimingsForecast(): void {
+    const today = new Date();
+    const days: ForecastDay[] = [];
+    for (let i = 0; i < this.forecastDays; i++) {
+      const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+      const key = d.toISOString().slice(0, 10);
+      const weekday = d.toLocaleString(undefined, { weekday: 'long' });
+      let priority: TimingPriorityTab = 'p4';
+      let label = 'P4 STANDARD';
+
+      if (this.timingsLeaveDates.includes(key)) {
+        priority = 'p1';
+        label = 'P1 LEAVE';
+      } else if (this.timingsOverrides.some(o => o.date === key)) {
+        priority = 'p2';
+        label = 'P2 OVERRIDE';
+      } else if (this.timingsWeeklyRules[weekday as Weekday]) {
+        priority = 'p3';
+        label = 'P3 WEEKLY';
+      }
+
+      days.push({ date: d, priority, label });
+    }
+    this.timingsForecast = days;
+    this.filteredTimingsForecast = this.timingsForecast.filter(d => d.priority === this.timingsTab);
+    this.buildThisWeekScheduleCards();
+  }
+
+  getAppliedDaysCount(priority: TimingPriorityTab): number {
+    return this.timingsForecast.filter(d => d.priority === priority).length;
+  }
+
+  getPriorityCode(priority: TimingPriorityTab): string {
+    switch (priority) {
+      case 'p1':
+        return 'P1';
+      case 'p2':
+        return 'P2';
+      case 'p3':
+        return 'P3';
+      case 'p4':
+      default:
+        return 'P4';
+    }
+  }
+
+  getSelectedPriorityAppliedText(): string {
+    const count = this.filteredTimingsForecast.length;
+    const code = this.getPriorityCode(this.timingsTab);
+    const dayLabel = count === 1 ? 'day' : 'days';
+    return `${code} is applied for next ${count} ${dayLabel}`;
+  }
+
+  getForecastDateParts(d: Date): { month: string; day: string; weekday: string } {
+    const month = d.toLocaleString(undefined, { month: 'short' });
+    const day = d.getDate().toString();
+    const weekday = d.toLocaleString(undefined, { weekday: 'long' });
+    return { month, day, weekday };
+  }
+
+  private toMinutes(t: string): number {
+    const parts = (t || '').split(':');
+    const hh = Number.parseInt(parts[0] || '0', 10);
+    const mm = Number.parseInt(parts[1] || '0', 10);
+    return (Number.isFinite(hh) ? hh : 0) * 60 + (Number.isFinite(mm) ? mm : 0);
+  }
+
+  private minutesToTime(totalMinutes: number): string {
+    const safe = Math.max(0, Math.floor(totalMinutes));
+    const hh = Math.floor(safe / 60).toString().padStart(2, '0');
+    const mm = (safe % 60).toString().padStart(2, '0');
+    return `${hh}:${mm}`;
+  }
+
+  private computeTimingOverview(start: string, end: string, breaks: TimingBreak[]): { totalSlots: number; first: string; last: string } {
+    // Simple calc for demo: duration / slotDuration (ignores breaks overlap edge-cases)
+    const startMin = this.toMinutes(start);
+    const endMin = this.toMinutes(end);
+    const breakMinutes = (breaks || []).reduce(
+      (sum, b) => sum + Math.max(0, this.toMinutes(b.end) - this.toMinutes(b.start)),
+      0
+    );
+    const totalMinutes = Math.max(0, endMin - startMin - breakMinutes);
+    const slot = this.timingsDaily.slotDuration;
+    const totalSlots = slot > 0 ? Math.floor(totalMinutes / slot) : 0;
+    const first = start;
+    const lastMin = startMin + Math.max(0, (totalSlots - 1) * slot);
+    const last = this.minutesToTime(lastMin);
+    return { totalSlots, first, last };
+  }
+
+  getDailyOverview(): { totalSlots: number; first: string; last: string } {
+    return this.computeTimingOverview(this.timingsDaily.start, this.timingsDaily.end, this.timingsBreaks);
+  }
+
+  getWeeklyOverview(day: Weekday): { totalSlots: number; first: string; last: string } | null {
+    const rule = this.timingsWeeklyRules[day];
+    if (!rule) return null;
+    return this.computeTimingOverview(rule.start, rule.end, rule.breaks);
+  }
+
+  getOverrideOverview(o: TimingOverride): { totalSlots: number; first: string; last: string } {
+    return this.computeTimingOverview(o.start, o.end, o.breaks);
   }
 
   private initFilterForm() {
@@ -353,20 +931,14 @@ export class ScheduleComponent implements OnInit {
 
   private calculateFlexibleAvailability(): number {
     const maxPerDay = this.doctorSchedule.maxAppointmentsPerDay || 20;
-    const todayAppointments = this.mockAppointments.filter(apt => 
-      apt.doctor_id === this.doctorInfo.doctorId && 
-      apt.status !== 'CANCELED'
-    ).length;
+    const todayAppointments = this.getDoctorAppointmentsForSelectedDate().filter(apt => apt.status !== 'CANCELED').length;
     
     return Math.max(0, maxPerDay - todayAppointments);
   }
 
   private calculateFlexibleAppointmentsRemaining(): number {
     const maxPerDay = this.doctorSchedule.maxAppointmentsPerDay || 20;
-    const todayAppointments = this.mockAppointments.filter(apt => 
-      apt.doctor_id === this.doctorInfo.doctorId && 
-      apt.status !== 'CANCELED'
-    ).length;
+    const todayAppointments = this.getDoctorAppointmentsForSelectedDate().filter(apt => apt.status !== 'CANCELED').length;
     
     return Math.max(0, maxPerDay - todayAppointments);
   }
@@ -395,19 +967,17 @@ export class ScheduleComponent implements OnInit {
   }
 
   private generateTimeSlotsForDoctor(): TimeSlot[] {
+    const todaysAppointments = this.getDoctorAppointmentsForSelectedDate();
     return this.timeSlots.map(time => {
-      const appointment = this.mockAppointments.find(apt => 
-        apt.doctor_id === this.doctorInfo.doctorId && 
-        apt.slotTime === this.formatTimeForDisplay(time)
-      );
+      const appointmentsInSlot = todaysAppointments.filter(apt => apt.slotTime === this.formatTimeForDisplay(time));
       
       const conflicts = this.checkConflicts(time);
       const slotInfo = this.getSlotInfo(time);
       
       return {
         time,
-        appointments: appointment ? [appointment] : [],
-        isAvailable: !appointment && conflicts.length === 0 && slotInfo.isAvailable,
+        appointments: appointmentsInSlot,
+        isAvailable: conflicts.length === 0 && slotInfo.isAvailable,
         isBreak: this.isBreakTime(time),
         isConflict: conflicts.length > 0,
         conflictReason: conflicts.length > 0 ? conflicts[0].message : undefined,
@@ -428,10 +998,7 @@ export class ScheduleComponent implements OnInit {
       
       // Check if time is within working hours and not during breaks
       if (timeMinutes >= startMinutes && timeMinutes < endMinutes && !this.isBreakTime(time)) {
-        const appointmentsInSlot = this.mockAppointments.filter(apt => 
-          apt.doctor_id === this.doctorInfo.doctorId && 
-          apt.slotTime === this.formatTimeForDisplay(time)
-        ).length;
+        const appointmentsInSlot = this.getDoctorAppointmentsForSelectedDate().filter(apt => apt.slotTime === this.formatTimeForDisplay(time)).length;
         
         const maxPerSlot = this.doctorSchedule.maxAppointmentsPerSlot || 1;
         
@@ -445,10 +1012,7 @@ export class ScheduleComponent implements OnInit {
       return { isAvailable: false };
     } else {
       // For flexible scheduling, check if we haven't reached daily limit
-      const todayAppointments = this.mockAppointments.filter(apt => 
-        apt.doctor_id === this.doctorInfo.doctorId && 
-        apt.status !== 'CANCELED'
-      ).length;
+      const todayAppointments = this.getDoctorAppointmentsForSelectedDate().filter(apt => apt.status !== 'CANCELED').length;
       
       const maxPerDay = this.doctorSchedule.maxAppointmentsPerDay || 20;
       
@@ -482,10 +1046,7 @@ export class ScheduleComponent implements OnInit {
     }
     
     // Check for overlapping appointments
-    const existingAppointment = this.mockAppointments.find(apt => 
-      apt.doctor_id === this.doctorInfo.doctorId && 
-      apt.slotTime === this.formatTimeForDisplay(time)
-    );
+    const existingAppointment = this.getDoctorAppointmentsForSelectedDate().find(apt => apt.slotTime === this.formatTimeForDisplay(time));
     
     if (existingAppointment) {
       conflicts.push({
@@ -511,7 +1072,8 @@ export class ScheduleComponent implements OnInit {
     const timeTotalMinutes = timeHour * 60 + timeMinutes;
     
     for (const apt of this.mockAppointments) {
-      if (apt.doctor_id === this.doctorInfo.doctorId) {
+      const aptDate = new Date(apt.appointment_date_time);
+      if (apt.doctor_id === this.doctorInfo.doctorId && aptDate.toDateString() === this.selectedDate.toDateString()) {
         const aptTime = this.parseTimeToMinutes(apt.slotTime || '');
         const timeDiff = Math.abs(timeTotalMinutes - aptTime);
         
@@ -572,14 +1134,130 @@ export class ScheduleComponent implements OnInit {
     };
   }
 
-  // View Management
-  onViewChange(view: string) {
-    this.selectedView = view;
-  }
-
   onDateChange(date: Date) {
     this.selectedDate = date;
     this.loadDoctorSchedule(); // Reload data for new date
+    this.rebuildScheduleWeekStrip();
+    this.recomputeScheduleSummary();
+    this.recomputeScheduleAvailability();
+  }
+
+  selectScheduleDate(date: Date): void {
+    this.onDateChange(date);
+  }
+
+  getScheduleListAppointments(): Appointment[] {
+    const q = this.scheduleSearch.trim().toLowerCase();
+    const selectedKey = this.selectedDate.toDateString();
+
+    const list = this.mockAppointments.filter(a => {
+      const aptDate = new Date(a.appointment_date_time);
+      if (aptDate.toDateString() !== selectedKey) return false;
+      if (!q) return true;
+      return (a.patientName ?? '').toLowerCase().includes(q);
+    });
+
+    return list.sort((a, b) => this.parseTimeToMinutes(a.slotTime ?? '') - this.parseTimeToMinutes(b.slotTime ?? ''));
+  }
+
+  getAvailabilityTimeChips(limit = 10): string[] {
+    if (this.scheduleAvailability.mode !== 'slots') return [];
+    const times = this.scheduleAvailability.availableTimes ?? [];
+    return times.slice(0, limit);
+  }
+
+  getAvailabilityExtraCount(limit = 10): number {
+    if (this.scheduleAvailability.mode !== 'slots') return 0;
+    const total = (this.scheduleAvailability.availableTimes ?? []).length;
+    return Math.max(0, total - limit);
+  }
+
+  openQuickAddAt(time24h: string): void {
+    this.startQuickAddFlow(time24h);
+  }
+
+  openNextAvailableSlot(): void {
+    const next = this.getSuggestedTimes()[0];
+    if (next) this.startQuickAddFlow(next);
+  }
+
+  private rebuildScheduleWeekStrip(): void {
+    const base = new Date(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDate());
+    const weekStart = this.getWeekStartMonday(base);
+    const selectedKey = base.toDateString();
+
+    this.scheduleWeekStrip = this.weekdays.map((w, i) => {
+      const d = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + i);
+      const weekdayShort = d.toLocaleString(undefined, { weekday: 'short' });
+      return {
+        date: d,
+        weekdayShort,
+        dayNumber: d.getDate(),
+        isSelected: d.toDateString() === selectedKey
+      };
+    });
+  }
+
+  private recomputeScheduleSummary(): void {
+    const slots = this.timeSlots;
+    let totalSlots = 0;
+    let booked = 0;
+    let available = 0;
+    let breakCount = 0;
+
+    for (const t of slots) {
+      const s = this.getTimeSlotForDoctor(t);
+      totalSlots += 1;
+      if (s.isBreak) {
+        breakCount += 1;
+        continue;
+      }
+      // For slot-based mode, "available" means the slot still has remaining capacity,
+      // even if it already has some appointments.
+      if (s.isAvailable) {
+        available += 1;
+        continue;
+      }
+      if ((s.appointments?.length ?? 0) > 0) booked += 1;
+    }
+
+    this.scheduleSummary = { totalSlots, booked, available, break: breakCount };
+  }
+
+  private recomputeScheduleAvailability(): void {
+    if (this.isSlotBasedScheduling()) {
+      const times = this.timeSlots.filter(t => {
+        const s = this.getTimeSlotForDoctor(t);
+        return s.isAvailable && !s.isBreak;
+      });
+
+      this.scheduleAvailability = {
+        mode: 'slots',
+        availableTimes: times,
+        maxPerSlot: this.doctorSchedule.maxAppointmentsPerSlot || 1
+      };
+      return;
+    }
+
+    const maxPerDay = this.doctorSchedule.maxAppointmentsPerDay || 20;
+    const bookedToday = this.getDoctorAppointmentsForSelectedDate().filter(a => a.status !== 'CANCELED').length;
+    const remainingToday = Math.max(0, maxPerDay - bookedToday);
+
+    this.scheduleAvailability = {
+      mode: 'flexible',
+      maxPerDay,
+      bookedToday,
+      remainingToday
+    };
+  }
+
+  private getDoctorAppointmentsForSelectedDate(): Appointment[] {
+    const selectedKey = this.selectedDate.toDateString();
+    return this.mockAppointments.filter(a => {
+      if (a.doctor_id !== this.doctorInfo.doctorId) return false;
+      const d = new Date(a.appointment_date_time);
+      return d.toDateString() === selectedKey;
+    });
   }
 
   // Navigation
@@ -925,28 +1603,29 @@ export class ScheduleComponent implements OnInit {
   onTimeSlotClick(time: string) {
     const timeSlot = this.getTimeSlotForDoctor(time);
     if (timeSlot.isAvailable && !timeSlot.isBreak) {
-      this.showQuickAddDialog(time);
+      this.startQuickAddFlow(time);
     } else if (timeSlot.isConflict) {
       this.showConflictWarning(timeSlot.conflictReason || 'Time slot has conflicts');
     }
   }
 
-  showQuickAddDialog(time: string) {
-    const dialogRef = this.dialogService.openDialog(QuickAddDialogComponent, {
-      title: 'Quick Add Appointment',
-      data: {
-        selectedTime: time,
-        templates: this.scheduleTemplates,
-        formatTimeForDisplay: (t: string) => this.formatTimeForDisplay(t)
-      },
+  private startQuickAddFlow(time: string): void {
+    const footerActions: DialogFooterAction[] = [
+      { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
+      { id: 'select', text: 'Select Patient', color: 'primary', appearance: 'raised', fontIcon: 'person_add' }
+    ];
+
+    const pickPatientRef = this.dialogService.openDialog(PatientSearchDialogComponent, {
+      title: 'Select Patient',
+      data: {},
       width: '70%',
-      height: '70%'
+      footerActions
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result?.template) {
-        this.quickAddAppointment(result.template, result.selectedTime);
-      }
+    pickPatientRef.afterClosed().subscribe((result) => {
+      const patient = result?.patient as PatientSearchResult | null | undefined;
+      if (!patient) return;
+      this.createAppointmentForSlot(time, patient);
     });
   }
 
@@ -955,26 +1634,33 @@ export class ScheduleComponent implements OnInit {
     alert(`Cannot schedule: ${message}`);
   }
 
-  quickAddAppointment(template: ScheduleTemplate, time: string) {
+  private patientIdToNumber(id: string): number {
+    const digits = id.replace(/\D+/g, '');
+    const n = Number.parseInt(digits || '0', 10);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  private createAppointmentForSlot(time: string, patient: PatientSearchResult): void {
     if (time) {
-      // Create appointment with template
       const newAppointment: Appointment = {
         appointment_id: this.mockAppointments.length + 1,
-        patient_id: 0,
+        patient_id: this.patientIdToNumber(patient.id),
         appointment_date_time: `${this.selectedDate.toISOString().split('T')[0]}T${time}:00`,
-        notes: `Quick ${template.name.toLowerCase()} appointment`,
+        notes: 'Appointment created from schedule',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         doctor_id: this.doctorInfo.doctorId,
         slot_id: 0,
         status: 'SCHEDULED',
-        patientName: 'New Patient',
+        patientName: patient.fullName,
         doctorName: this.doctorInfo.doctorName,
         slotTime: this.formatTimeForDisplay(time)
       };
       
       this.mockAppointments.push(newAppointment);
       this.loadDoctorSchedule();
+      this.recomputeScheduleSummary();
+      this.recomputeScheduleAvailability();
     }
   }
 
@@ -1004,7 +1690,7 @@ export class ScheduleComponent implements OnInit {
   reserveEmergencySlot() {
     const emergencyTime = this.getSuggestedTimes()[0];
     if (emergencyTime) {
-      this.showQuickAddDialog(emergencyTime);
+      this.startQuickAddFlow(emergencyTime);
     }
   }
 
