@@ -1,14 +1,30 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { SidebarComponent, TopbarComponent, RightSidebarComponent } from '@lk/template';
-import { AuthService } from '@lk/core';
+import { SidebarComponent, TopbarComponent, RightSidebarComponent, TemplateComponent } from '@lk/template';
+import { AppButtonComponent, AuthService } from '@lk/core';
 import { Subject, takeUntil, filter } from 'rxjs';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
+
+export interface PatientQueueItem {
+  id: string;
+  name: string;
+  status: 'waiting' | 'in-progress' | 'completed' | 'cancelled';
+  priority: 'low' | 'medium' | 'high' | 'emergency';
+  estimatedTime: string;
+  avatar?: string;
+  reason: string;
+  room?: string;
+}
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, SidebarComponent, TopbarComponent, RightSidebarComponent],
+  imports: [RouterOutlet, CommonModule, SidebarComponent, TopbarComponent, RightSidebarComponent, MatIconModule, AppButtonComponent, MatChipsModule, MatDividerModule,
+    TemplateComponent
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -22,6 +38,60 @@ export class AppComponent implements OnInit, OnDestroy {
   isAuthInitialized = false; // Track if auth state has been initialized
   viewMode: 'login' | 'main' = 'login'; // Explicit property instead of getter
   private destroy$ = new Subject<void>();
+
+    // Keep these methods and data for backward compatibility if needed
+    patientQueue: PatientQueueItem[] = [
+      {
+        id: '1',
+        name: 'John Doe',
+        status: 'waiting',
+        priority: 'medium',
+        estimatedTime: '10:30 AM',
+        reason: 'Regular checkup',
+        room: '101',
+        avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
+      },
+      {
+        id: '2',
+        name: 'Sarah Smith',
+        status: 'in-progress',
+        priority: 'high',
+        estimatedTime: '10:45 AM',
+        reason: 'Follow-up consultation',
+        room: '102',
+        avatar: 'https://randomuser.me/api/portraits/women/2.jpg'
+      },
+      {
+        id: '3',
+        name: 'Mike Johnson',
+        status: 'waiting',
+        priority: 'low',
+        estimatedTime: '11:00 AM',
+        reason: 'Prescription refill',
+        room: '103',
+        avatar: 'https://randomuser.me/api/portraits/men/3.jpg'
+      },
+      {
+        id: '4',
+        name: 'Emily Davis',
+        status: 'waiting',
+        priority: 'emergency',
+        estimatedTime: 'ASAP',
+        reason: 'Chest pain',
+        room: '104',
+        avatar: 'https://randomuser.me/api/portraits/women/4.jpg'
+      },
+      {
+        id: '5',
+        name: 'Robert Wilson',
+        status: 'completed',
+        priority: 'medium',
+        estimatedTime: '10:15 AM',
+        reason: 'Blood test results',
+        room: '105',
+        avatar: 'https://randomuser.me/api/portraits/men/5.jpg'
+      }
+    ];
 
   constructor(
     private authService: AuthService,
@@ -184,5 +254,66 @@ export class AppComponent implements OnInit, OnDestroy {
 
   closeRightSidebar() {
     this.rightSidebarOpened = false;
+  }
+
+
+  getStatusColor(status: string): string {
+    switch (status) {
+      case 'waiting': return '#ff9800';
+      case 'in-progress': return '#2196f3';
+      case 'completed': return '#4caf50';
+      case 'cancelled': return '#f44336';
+      default: return '#888';
+    }
+  }
+
+  getPriorityColor(priority: string): string {
+    switch (priority) {
+      case 'low': return '#4caf50';
+      case 'medium': return '#ff9800';
+      case 'high': return '#f44336';
+      case 'emergency': return '#9c27b0';
+      default: return '#888';
+    }
+  }
+
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case 'waiting': return 'schedule';
+      case 'in-progress': return 'play_circle';
+      case 'completed': return 'check_circle';
+      case 'cancelled': return 'cancel';
+      default: return 'help';
+    }
+  }
+
+  getPriorityIcon(priority: string): string {
+    switch (priority) {
+      case 'low': return 'arrow_downward';
+      case 'medium': return 'remove';
+      case 'high': return 'arrow_upward';
+      case 'emergency': return 'warning';
+      default: return 'help';
+    }
+  }
+
+  getFilteredPatients(status?: string): PatientQueueItem[] {
+    if (!status) return this.patientQueue;
+    return this.patientQueue.filter(patient => patient.status === status);
+  }
+
+  getStatusCount(status: string): number {
+    return this.patientQueue.filter(patient => patient.status === status).length;
+  }
+
+  onPatientClick(patient: PatientQueueItem) {
+    console.log('Patient clicked:', patient);
+    // Handle patient selection
+  }
+  onClose() {
+    this.closeRightSidebar();
+  }
+  onOpenPatientQueue(event: any) {
+    this.rightSidebarOpened = true;
   }
 }
