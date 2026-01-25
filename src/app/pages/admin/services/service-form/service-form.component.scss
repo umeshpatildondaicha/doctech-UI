@@ -518,3 +518,17 @@
     }
   }
 }
+.code-input-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.code-input-group app-input {
+  flex: 1;
+}
+
+.code-input-group app-button {
+  flex-shrink: 0;
+}
+

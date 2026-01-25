@@ -6,11 +6,13 @@ import {
   type HeaderAction
 } from '../../../components';
 import { GridComponent, StatusCellRendererComponent, PageComponent, BreadcrumbItem } from '@lk/core';
+import { ConfirmDialogComponentComponent } from './confirm-dialog-component/confirm-dialog-component.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-schemes',
   standalone: true,
-  imports: [CommonModule, AdminPageHeaderComponent, GridComponent, PageComponent],
+  imports: [CommonModule,ConfirmDialogComponentComponent, AdminPageHeaderComponent, GridComponent, PageComponent],
   templateUrl: './schemes.component.html',
   styleUrl: './schemes.component.scss'
 })
@@ -18,6 +20,8 @@ export class SchemesComponent implements OnInit {
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Schemes', route: '/admin/schemes', icon: 'local_activity', isActive: true }
   ];
+
+  constructor(private dialog :MatDialog){}
   // Grid configuration
   columnDefs: ColDef[] = [];
   gridOptions: any = {};
@@ -234,9 +238,17 @@ export class SchemesComponent implements OnInit {
   }
 
   deleteScheme(scheme: any) {
-    if (confirm(`Are you sure you want to delete "${scheme.name}"?`)) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponentComponent, {
+    width: '400px',
+    panelClass : 'custom-dialog-container',
+    data: scheme
+  });
+
+  dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+    if (confirmed) {
       this.schemes = this.schemes.filter(s => s.id !== scheme.id);
       console.log('Deleted scheme:', scheme);
     }
-  }
+  });
+}
 } 

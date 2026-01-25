@@ -2,8 +2,8 @@
 
   <!-- Service Analytics Dashboard -->
   <div class="analytics-section" *ngIf="showAnalytics">
-    <div class="analytics-header">
-      <h2>Service Analytics & Performance</h2>
+    <!-- <div class="analytics-header">
+      <h3>Service Analytics & Performance</h3>
       <div class="analytics-controls">
         <app-selectbox
           [options]="timeRangeOptions"
@@ -15,7 +15,7 @@
         </app-selectbox>
         <app-button [text]="'Export Report'" [color]="'accent'" [fontIcon]="'download'" (btnClick)="exportAnalytics()"></app-button>
       </div>
-    </div>
+    </div> -->
 
     <!-- Service Statistics Cards -->
     <div class="stats-grid">
@@ -97,7 +97,8 @@
             <span class="rec-popularity">Popularity: {{ rec.popularity }}%</span>
           </div>
         </div>
-        <app-button [text]="'View'" [color]="'primary'" [fontIcon]="'visibility'" (btnClick)="viewService(rec)"></app-button>
+        <app-button [text]="'View'" [color]="'primary'" [fontIcon]="'visibility'"
+          (btnClick)="viewService(rec)"></app-button>
       </div>
     </div>
   </div>
@@ -106,7 +107,8 @@
   <div class="packages-section" *ngIf="showPackages">
     <div class="packages-header">
       <h3>Service Packages & Bundles</h3>
-      <app-button [text]="'Create Package'" [color]="'primary'" [fontIcon]="'add'" (btnClick)="createServicePackage()"></app-button>
+      <app-button [text]="'Create Package'" [color]="'primary'" [fontIcon]="'add'"
+        (btnClick)="createServicePackage()"></app-button>
     </div>
 
     <div class="packages-grid">
@@ -126,8 +128,10 @@
           <span>Save: ${{ package.savings }}</span>
         </div>
         <div class="package-actions">
-          <app-button [text]="'Edit'" [color]="'accent'" [fontIcon]="'edit'" (btnClick)="editPackage(package)"></app-button>
-          <app-button [text]="'View'" [color]="'primary'" [fontIcon]="'visibility'" (btnClick)="viewPackage(package)"></app-button>
+          <app-button [text]="'Edit'" [color]="'accent'" [fontIcon]="'edit'"
+            (btnClick)="editPackage(package)"></app-button>
+          <app-button [text]="'View'" [color]="'primary'" [fontIcon]="'visibility'"
+            (btnClick)="viewPackage(package)"></app-button>
         </div>
       </div>
     </div>
@@ -137,7 +141,8 @@
   <div class="templates-section" *ngIf="showTemplates">
     <div class="templates-header">
       <h3>Service Templates</h3>
-      <app-button [text]="'Create Template'" [color]="'primary'" [fontIcon]="'add'" (btnClick)="createServiceTemplate()"></app-button>
+      <app-button [text]="'Create Template'" [color]="'primary'" [fontIcon]="'add'"
+        (btnClick)="createServiceTemplate()"></app-button>
     </div>
 
     <div class="templates-grid">
@@ -152,8 +157,10 @@
           <span class="template-type">{{ template.type }}</span>
         </div>
         <div class="template-actions">
-          <app-button [text]="'Use Template'" [color]="'primary'" [fontIcon]="'content_copy'" (btnClick)="useTemplate(template)"></app-button>
-          <app-button [text]="'Edit'" [color]="'accent'" [fontIcon]="'edit'" (btnClick)="editTemplate(template)"></app-button>
+          <app-button [text]="'Use Template'" [color]="'primary'" [fontIcon]="'content_copy'"
+            (btnClick)="useTemplate(template)"></app-button>
+          <app-button [text]="'Edit'" [color]="'accent'" [fontIcon]="'edit'"
+            (btnClick)="editTemplate(template)"></app-button>
         </div>
       </div>
     </div>
@@ -170,11 +177,7 @@
       <div class="comparison-card" *ngFor="let service of comparisonServices">
         <div class="comparison-header">
           <h4>{{ service.name }}</h4>
-          <app-button 
-            [appearance]="'icon'"
-            [color]="'warn'"
-            [fontIcon]="'close'"
-            [class]="'remove-btn'"
+          <app-button [appearance]="'icon'" [color]="'warn'" [fontIcon]="'close'" [class]="'remove-btn'"
             (btnClick)="removeFromComparison(service)">
           </app-button>
         </div>
@@ -199,35 +202,28 @@
       </div>
     </div>
   </div>
-
+  <!-- .............................................................................................................................. -->
   <!-- Services Grid -->
   <div class="services-grid-section">
-  <app-grid
-    [rowData]="services"
+    <h2>Hospital Services</h2>
+    <app-grid [rowData]="services" 
     [columnDefs]="columnDefs"
-    [gridOptions]="gridOptions"
+     [gridOptions]="gridOptions"
       [defaultViewMode]="'list'"
-    [searchPlaceholder]="'Search services...'"
-    [rightTooltemplateRef]="addServiceButtonTemplate">
-  </app-grid>
+      [searchPlaceholder]="'Search services...'"
+       [rightTooltemplateRef]="addServiceButtonTemplate">
+    </app-grid>
   </div>
 
   <!-- Add Service Button Template -->
   <ng-template #addServiceButtonTemplate>
     <div class="add-service-actions">
-    <app-button 
-      [text]="'Add Service'" 
-      [color]="'primary'" 
-      [fontIcon]="'add'"
-        [appearance]="'raised'"
-        [class]="'add-service-btn'"
-        matTooltip="Click to add a new service with full details form"
-        matTooltipPosition="below"
-        matTooltipClass="custom-tooltip"
-      (btnClick)="addNewService()">
-    </app-button>
+      <app-button [text]="'Add Service'" [color]="'primary'" [fontIcon]="'add'" [appearance]="'raised'"
+        [class]="'add-service-btn'" matTooltip="Click to add a new service with full details form"
+        matTooltipPosition="below" matTooltipClass="custom-tooltip" (btnClick)="addNewService()">
+      </app-button>
     </div>
   </ng-template>
 
 
-</div> 
+</div>

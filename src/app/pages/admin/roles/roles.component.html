@@ -12,8 +12,8 @@
   <app-admin-tabs
     [tabs]="tabs"
     [activeTabId]="activeTab"
-    variant="pills"
     size="medium"
+    variant="line"
     (tabChanged)="onTabChange($event)">
   </app-admin-tabs>
 
@@ -725,8 +725,11 @@
   </div>
 
   <!-- Staff Details Drawer -->
-  <div class="drawer-overlay" *ngIf="showStaffDetails" (click)="closeStaffDetails()">
-    <div class="drawer-content" (click)="$event.stopPropagation()">
+ 
+</div>
+</app-page>
+ <div class="dialog-overlay" *ngIf="showStaffDetails" (click)="closeStaffDetails()">
+    <div class="dialog-box" (click)="$event.stopPropagation()">
       <div class="drawer-header">
         <h2>Staff Details</h2>
         <app-button 
@@ -824,5 +827,3 @@
       </div>
     </div>
   </div>
-</div>
-</app-page>

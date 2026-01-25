@@ -347,18 +347,22 @@
                     </div>
                     
                     <div class="bed-actions">
-                      <app-button 
+                      <div class="action-btn-wrapper" (click)="editBed(room ,bed);$event.stopPropagation()">
+                       <app-button 
                         [fontIcon]="'edit'" 
                         [color]="'accent'"
-                        (btnClick)="editBed(room, bed); $event.stopPropagation()"
+                        
                         class="action-btn">
                       </app-button>
-                      <app-button 
+                      </div>
+                     <div class="action-btn-wrapper" (click)="deleteBed(room, bed); $event.stopPropagation()">
+                       <app-button 
                         [fontIcon]="'delete'" 
                         [color]="'warn'"
-                        (btnClick)="deleteBed(room, bed); $event.stopPropagation()"
                         class="action-btn">
                       </app-button>
+                     </div>
+                     
                     </div>
                   </div>
                   

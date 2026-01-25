@@ -90,23 +90,34 @@
       justify-content: center;
       
       &:hover {
-        background: var(--page-background-color);
+        background: var(--hover-secondary-background-color);
         color: var(--text-secondary);
       }
       
       &.active {
         background: var(--gradient-primary);
         color: white;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        // box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        ::ng-deep app-icon,
+          ::ng-deep app-icon * {
+            color: #fff !important;
+            fill: #fff !important;
+          }
+
+          box-shadow: 0 2px 8px rgba(16, 179, 179, 0.3);
+
+          app-icon {
+            color: #ffffff;
+          }
       }
       
-      app-icon {
-        transition: var(--transition-base);
-      }
+      // app-icon {
+      //   transition: var(--transition-base);
+      // }
       
-      &.active app-icon {
-        transform: scale(1.1);
-      }
+      // &.active app-icon {
+      //   transform: scale(1.1);
+      // }
     }
   }
 }
@@ -685,7 +696,7 @@
           .staff-checkbox {
             width: 16px;
             height: 16px;
-            accent-color: #3b82f6;
+            accent-color: var(--bg-card);
           }
         }
         
@@ -1798,4 +1809,121 @@
       }
     }
   }
+}
+/* =========================
+   STAFF DETAILS DIALOG
+   ========================= */
+
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  background-color: #272f3b;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 2147483647; 
+  isolation: isolate;
+}
+
+.dialog-box {
+  
+  width: 600px;
+  max-width: calc(100vw - 32px);
+  max-height: 90vh;
+
+  background: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+
+  overflow-y: auto;
+}
+
+/* Header */
+.dialog-box .drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+
+  h2 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+  }
+}
+
+/* Content */
+.dialog-box .staff-details-content {
+  padding: var(--spacing-lg);
+}
+
+/* Profile */
+.staff-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  text-align: center;
+}
+
+.profile-avatar {
+  position: relative;
+}
+
+.status-badge {
+  display: inline-block;
+  margin-top: var(--spacing-sm);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  width: fit-content;
+}
+
+/* Sections */
+.info-section {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
+
+  h4 {
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+  }
+}
+
+/* Assigned doctors */
+.assigned-doctor-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: 6px 0;
+}
+
+/* Attendance */
+.attendance-today {
+  display: grid;
+  gap: var(--spacing-sm);
+}
+
+/* =========================
+   FIX FOR HEADER / BLUE BAR
+   ========================= */
+
+.bulk-actions-toolbar,
+.app-admin-page-header {
+  position: static/fixed;
+  z-index: 10000; // 
 }

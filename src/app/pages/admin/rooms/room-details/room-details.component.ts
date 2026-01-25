@@ -129,7 +129,8 @@ export class RoomDetailsComponent implements OnInit {
 
     const dialogRef = this.dialogService.openDialog(PatientDetailsDialogComponent, {
       title: 'Patient Details',
-      width: '500px',
+      width: '700px',
+      height: '800px',
       maxWidth: '90vw',
       data: {
         bed: bed,

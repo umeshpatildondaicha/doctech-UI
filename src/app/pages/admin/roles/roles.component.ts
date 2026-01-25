@@ -390,6 +390,7 @@ export class RolesComponent implements OnInit {
   closeStaffDetails() {
     this.showStaffDetails = false;
     this.selectedStaff = null;
+    document.body.style.overflow = 'auto';
   }
 
   assignStaffToDoctor(staffId: number, doctorId: number) {

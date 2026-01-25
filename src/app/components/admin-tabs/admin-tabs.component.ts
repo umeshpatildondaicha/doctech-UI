@@ -21,7 +21,7 @@ export interface TabItem {
 export class AdminTabsComponent {
   @Input() tabs: TabItem[] = [];
   @Input() activeTabId: string = '';
-  @Input() variant: 'pills' | 'underline' | 'background' = 'pills';
+  @Input() variant: 'pills' | 'underline' | 'background'|'line' = 'line';
   @Input() size: 'small' | 'medium' | 'large' = 'medium';
   
   @Output() tabChanged = new EventEmitter<string>();

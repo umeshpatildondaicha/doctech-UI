@@ -4,11 +4,11 @@
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
 
-  // Dark theme support
-  &.dark-theme {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-    color: #ecf0f1;
-  }
+  // // Dark theme support
+  // &.dark-theme {
+  //   background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  //   color: #ecf0f1;
+  // }
 }
 
 // Top-level Schedule/Timings switcher
@@ -19,7 +19,7 @@
   padding: 8px;
   margin: 12px 0 14px;
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  // border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 999px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
   backdrop-filter: blur(10px);
@@ -85,7 +85,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 10px;
-  border-radius: 999px;
+  // border-radius: 999px;
   font-weight: var(--font-weight-semibold, 600);
   font-size: var(--font-size-sm, 13px);
   color: #334155;
@@ -105,7 +105,7 @@
 
 .week-strip-card {
   background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  // border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 12px;
   padding: 10px;
 }
@@ -147,7 +147,7 @@
   &.active {
     background: #10b981;
     border-color: #10b981;
-    box-shadow: 0 10px 24px rgba(16, 185, 129, 0.22);
+    // box-shadow: 0 10px 24px rgba(16, 185, 129, 0.22);
 
     .wd,
     .dn {
@@ -165,7 +165,7 @@
 
 .ov-card {
   background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  // border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 12px;
   padding: 14px 16px;
   display: flex;
@@ -174,8 +174,8 @@
 }
 
 .ov-ico {
-  width: 44px;
-  height: 44px;
+  // width: 44px;
+  // height: 44px;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
@@ -183,11 +183,11 @@
   flex: 0 0 auto;
   border: 1px solid rgba(0, 0, 0, 0.06);
 
-  mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-  }
+  // mat-icon {
+  //   font-size: 20px;
+  //   width: 20px;
+  //   height: 20px;
+  // }
 
   &.blue { background: #e0f2fe; color: #0284c7; }
   &.orange { background: #ffedd5; color: #ea580c; }
@@ -201,7 +201,7 @@
 
 .sched-ov-label {
   font-weight: var(--font-weight-semibold, 600);
-  font-size: var(--font-size-sm, 13px);
+  font-size: var(--font-size-sm, 15px);
   color: #64748b;
 }
 
@@ -220,7 +220,7 @@
   padding: 10px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+//  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .search-box {
@@ -671,7 +671,7 @@
   &.active {
     background: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+   // box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
   }
 }
 
@@ -691,7 +691,7 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  color: #6b7280;
+  // color: #6b7280;
   font-weight: 800;
   font-size: var(--font-size-sm, 13px);
 }
@@ -707,7 +707,7 @@
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  background: #9ca3af;
+  // background: #9ca3af;
 }
 
 .logic-item.p1 { color: #dc2626; }

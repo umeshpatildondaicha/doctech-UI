@@ -6,10 +6,10 @@
   height: 100%;
 
   // Dashboard Header
-    .dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     background: var(--admin-card-bg);
     border-radius: var(--card-border-radius);
     padding: var(--spacing-xl);
@@ -48,39 +48,41 @@
       align-items: center;
       gap: var(--spacing-xl);
 
-              .header-actions {
-          display: flex;
-          gap: var(--spacing-sm);
+      .header-actions {
+        display: flex;
+        gap: var(--spacing-sm);
 
-          .refresh-btn, .notifications-btn, .settings-btn {
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition-base);
-
-    &:hover {
-              transform: scale(1.1);
-            }
-          }
-        }
-
-              .user-avatar {
+        .refresh-btn,
+        .notifications-btn,
+        .settings-btn {
+          border-radius: 50%;
           display: flex;
           align-items: center;
-          gap: var(--spacing-sm);
+          justify-content: center;
+          transition: var(--transition-base);
 
-          .avatar-placeholder {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--admin-gradient-neutral);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--admin-text-secondary);
-            box-shadow: var(--primary-shadow);
+          &:hover {
+            transform: scale(1.1);
           }
+        }
+      }
+
+      .user-avatar {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+
+        .avatar-placeholder {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: var(--admin-gradient-neutral);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--admin-text-secondary);
+          box-shadow: var(--primary-shadow);
+        }
 
         .user-info {
           display: flex;
@@ -105,7 +107,7 @@
   // Navigation Tabs
   .navigation-tabs {
     margin-bottom: var(--spacing-lg);
-    
+
     .tabs-container {
       display: flex;
       background: var(--admin-card-bg);
@@ -116,7 +118,7 @@
       gap: var(--spacing-xs);
       width: 100%;
       box-sizing: border-box;
-      
+
       .tab-item {
         display: flex;
         align-items: center;
@@ -130,32 +132,40 @@
         background: transparent;
         border: none;
         font-family: var(--primary-font-family);
-        font-size: var(--font-size-sm);
+        font-size: var(--font-size-base);
         flex: 1;
         justify-content: center;
         white-space: nowrap;
-        
+
         &:hover {
           background: var(--admin-hover-bg);
           color: var(--admin-text-secondary);
           transform: translateY(-1px);
         }
-        
+
         &.active {
           background: var(--primary-color);
-          color: white;
+          color: #fff;
+          font-size: var(--font-size-2xl);
+          ::ng-deep app-icon,
+          ::ng-deep app-icon * {
+            color: #fff !important;
+            fill: #fff !important;
+          }
+
           box-shadow: 0 2px 8px rgba(16, 179, 179, 0.3);
-          
+
           app-icon {
-            color: white;
+            color: #ffffff;
           }
         }
-        
+
         app-icon {
-          color: inherit;
+          color: #2f2f2f;
+          font-size: var(--font-size-lg);
           transition: var(--transition-base);
         }
-        
+
         span {
           font-weight: var(--font-weight-medium);
         }
@@ -167,13 +177,13 @@
   .tab-content {
     .tab-panel {
       min-height: 400px;
-      
+
       .tab-content-placeholder {
         display: flex;
         align-items: center;
         justify-content: center;
         min-height: 500px;
-        
+
         .placeholder-card {
           text-align: center;
           background: var(--admin-card-bg);
@@ -182,26 +192,26 @@
           border: var(--admin-border);
           box-shadow: var(--primary-shadow);
           max-width: 400px;
-          
+
           app-icon {
             color: var(--admin-text-muted);
             margin-bottom: var(--spacing-xl);
           }
-          
+
           h2 {
             margin: 0 0 var(--spacing-md) 0;
             color: var(--admin-text-primary);
             font-size: var(--font-size-4xl);
             font-weight: var(--font-weight-bold);
           }
-          
+
           p {
             margin: 0 0 var(--spacing-xl) 0;
             color: var(--admin-text-secondary);
             font-size: var(--font-size-base);
             line-height: 1.5;
           }
-          
+
           .navigate-btn {
             min-width: 200px;
           }
@@ -340,7 +350,8 @@
     max-width: 100%;
     box-sizing: border-box;
 
-    .content-left, .content-right {
+    .content-left,
+    .content-right {
       display: flex;
       flex-direction: column;
       gap: var(--spacing-lg);
@@ -662,7 +673,7 @@
 @media (max-width: 1200px) {
   .admin-dashboard {
     padding: var(--spacing-md);
-    
+
     .dashboard-content {
       grid-template-columns: 1fr;
       gap: var(--spacing-md);
@@ -672,7 +683,7 @@
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: var(--spacing-md);
     }
-    
+
     .navigation-tabs .tabs-container {
       .tab-item span {
         display: none;
@@ -702,8 +713,8 @@
 
         .user-avatar {
           order: 1;
-    flex-direction: column;
-    text-align: center;
+          flex-direction: column;
+          text-align: center;
         }
       }
     }
@@ -711,11 +722,11 @@
     .navigation-tabs .tabs-container {
       flex-wrap: wrap;
       gap: var(--spacing-xs);
-      
+
       .tab-item {
         flex: 1;
         min-width: calc(50% - var(--spacing-xs));
-        
+
         span {
           display: inline;
           font-size: var(--font-size-xs);
@@ -773,7 +784,9 @@
     }
 
     .dashboard-content .dashboard-card {
-      .card-header, .card-content {
+
+      .card-header,
+      .card-content {
         padding: var(--spacing-lg);
       }
 
@@ -783,4 +796,4 @@
       }
     }
   }
-} 
+}

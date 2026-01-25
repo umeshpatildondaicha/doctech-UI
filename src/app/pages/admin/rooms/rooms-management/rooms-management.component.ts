@@ -461,6 +461,7 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
   }
 
   deleteBed(room: any, bed: any) {
+    console.log('Delete bed:', bed.id);
     if (confirm(`Are you sure you want to delete bed ${bed.id}?`)) {
       const bedIndex = room.beds.findIndex((b: any) => b.id === bed.id);
       if (bedIndex > -1) {
