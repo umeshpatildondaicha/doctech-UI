@@ -7,37 +7,23 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { AppInputComponent } from "@lk/core";
-import { AppSelectboxComponent } from "@lk/core";
-import { AppButtonComponent } from "@lk/core";
-import { IconComponent } from "@lk/core";
-import { DialogboxService } from "@lk/core";
+import { 
+  AppInputComponent,
+  AppSelectboxComponent,
+  AppButtonComponent,
+  IconComponent,
+  DialogboxService,
+  DialogFooterAction,
+  GridComponent,
+  StatusCellRendererComponent,
+  ExtendedGridOptions
+} from "@lk/core";
 import { Router } from '@angular/router';
-import { ServiceDetailsDialogComponent } from './service-details-dialog/service-details-dialog.component';
 import { ServiceFormComponent } from './service-form/service-form.component';
-import { DialogFooterAction } from '@lk/core';
-import { GridComponent } from "@lk/core";
-import { StatusCellRendererComponent } from "@lk/core";
 import { ColDef } from 'ag-grid-community';
 import { 
   AdminPageHeaderComponent
 } from '../../../components';
-
-// Extended GridOptions interface
-interface ExtendedGridOptions {
-  menuActions?: Array<{
-    title: string;
-    icon: string;
-    click: (param: any) => void;
-  }>;
-  filterConfig?: {
-    fields?: Array<{ label: string; value: string; inputType: 'select' | 'input' | 'number' | 'date' | 'boolean' }>;
-    valuesMap?: { [key: string]: any[] };
-    operatorsMap?: { [key: string]: Array<{ label: string; value: string }> };
-    initialFilters?: Array<{ field: string; operator: string; value: any; valueTo?: any; inputType: any }>;
-    logic?: 'AND' | 'OR';
-  };
-}
 
 interface Service {
   id: number;
@@ -468,23 +454,59 @@ export class ServicesComponent implements OnInit, AfterViewInit {
         }
       ],
       filterConfig: {
-        fields: [
-          { label: 'Service Name', value: 'name', inputType: 'input' },
-          { label: 'Department', value: 'department', inputType: 'select' },
-          { label: 'Category', value: 'category', inputType: 'select' },
-          { label: 'Price', value: 'price', inputType: 'number' },
-          { label: 'Availability', value: 'availability', inputType: 'select' },
-          { label: 'Rating', value: 'rating', inputType: 'number' },
-          { label: 'Duration', value: 'duration', inputType: 'number' },
-          { label: 'Consultation Type', value: 'consultationType', inputType: 'select' }
-        ],
-        valuesMap: {
-          'department': ['Internal Medicine', 'Cardiology', 'Dermatology', 'Neurology', 'Orthopedics', 'Pediatrics', 'Radiology', 'Urology', 'Rehabilitation'],
-          'category': ['consultation', 'therapy', 'diagnostic', 'surgical'],
-          'availability': ['Available', 'Limited', 'Unavailable'],
-          'consultationType': ['Consultation', 'Therapy', 'Diagnostic']
-        },
-        logic: 'AND'
+        filterConfig: [
+          { label: 'Service Name', key: 'name', type: 'input' },
+          { 
+            label: 'Department', 
+            key: 'department', 
+            type: 'select',
+            optionList: [
+              { name: 'Internal Medicine', value: 'Internal Medicine' },
+              { name: 'Cardiology', value: 'Cardiology' },
+              { name: 'Dermatology', value: 'Dermatology' },
+              { name: 'Neurology', value: 'Neurology' },
+              { name: 'Orthopedics', value: 'Orthopedics' },
+              { name: 'Pediatrics', value: 'Pediatrics' },
+              { name: 'Radiology', value: 'Radiology' },
+              { name: 'Urology', value: 'Urology' },
+              { name: 'Rehabilitation', value: 'Rehabilitation' }
+            ]
+          },
+          { 
+            label: 'Category', 
+            key: 'category', 
+            type: 'select',
+            optionList: [
+              { name: 'Consultation', value: 'consultation' },
+              { name: 'Therapy', value: 'therapy' },
+              { name: 'Diagnostic', value: 'diagnostic' },
+              { name: 'Surgical', value: 'surgical' }
+            ]
+          },
+          { label: 'Price', key: 'price', type: 'input' },
+          { 
+            label: 'Availability', 
+            key: 'availability', 
+            type: 'select',
+            optionList: [
+              { name: 'Available', value: 'Available' },
+              { name: 'Limited', value: 'Limited' },
+              { name: 'Unavailable', value: 'Unavailable' }
+            ]
+          },
+          { label: 'Rating', key: 'rating', type: 'input' },
+          { label: 'Duration', key: 'duration', type: 'input' },
+          { 
+            label: 'Consultation Type', 
+            key: 'consultationType', 
+            type: 'select',
+            optionList: [
+              { name: 'Consultation', value: 'Consultation' },
+              { name: 'Therapy', value: 'Therapy' },
+              { name: 'Diagnostic', value: 'Diagnostic' }
+            ]
+          }
+        ]
       }
     };
   }

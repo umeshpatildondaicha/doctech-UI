@@ -152,33 +152,55 @@ export class TasksListDialogComponent implements OnInit, OnDestroy {
 
     this.gridOptions = {
       rowHeight: 50,
-        headerHeight: 40,
-        filterConfig: {
-          fields: [
-            { label: 'Status', value: 'completed', inputType: 'select' },
-            { label: 'Task Title', value: 'title', inputType: 'input' },
-            { label: 'Due Date', value: 'due', inputType: 'date' },
-            { label: 'Priority', value: 'priority', inputType: 'select' },
-            { label: 'Type', value: 'taskType', inputType: 'select' }
-          ]
-        },
+      headerHeight: 40,
+      filterConfig: {
+        filterConfig: [
+          { 
+            label: 'Status', 
+            key: 'completed', 
+            type: 'select',
+            optionList: [
+              { name: 'Completed', value: true },
+              { name: 'Pending', value: false }
+            ]
+          },
+          { label: 'Task Title', key: 'title', type: 'input' },
+          { label: 'Due Date', key: 'due', type: 'daterangetimepicker' },
+          { 
+            label: 'Priority', 
+            key: 'priority', 
+            type: 'select',
+            optionList: [
+              { name: 'Urgent', value: 'URGENT' },
+              { name: 'High', value: 'HIGH' },
+              { name: 'Medium', value: 'MEDIUM' },
+              { name: 'Low', value: 'LOW' }
+            ]
+          },
+          { 
+            label: 'Type', 
+            key: 'taskType', 
+            type: 'select'
+          }
+        ]
+      },
       pagination: true,
       paginationPageSize: 20,
       paginationPageSizeSelector: [10, 20, 50, 100],
       suppressRowClickSelection: false,
       animateRows: true,
-          menuActions: [
-            {
-              title: 'Complete',
-              icon: 'check_circle',
-              click: (param: any) => this.completeTask(param.data)
-            },
-            {
-              title: 'Delete',
-              icon: 'delete',
-              click: (param: any) => this.deleteTask(param.data)
-            }
-          ]
+      menuActions: [
+        {
+          title: 'Complete',
+          icon: 'check_circle',
+          click: (param: any) => this.completeTask(param.data)
+        },
+        {
+          title: 'Delete',
+          icon: 'delete',
+          click: (param: any) => this.deleteTask(param.data)
+        }
+      ]
     };
   }
 
