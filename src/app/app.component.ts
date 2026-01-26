@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { SidebarComponent, TopbarComponent, RightSidebarComponent, PageComponent, } from '@lk/template';
+import { SidebarComponent, TopbarComponent, RightSidebarComponent, TemplateComponent, } from '@lk/template';
 import { AppButtonComponent, AuthService } from '@lk/core';
 import { Subject, takeUntil, filter } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,7 +23,7 @@ export interface PatientQueueItem {
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, CommonModule, SidebarComponent, TopbarComponent, RightSidebarComponent, MatIconModule, AppButtonComponent, MatChipsModule, MatDividerModule,
-    PageComponent
+    TemplateComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
