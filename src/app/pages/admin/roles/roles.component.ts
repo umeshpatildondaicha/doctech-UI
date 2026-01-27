@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { AppButtonComponent, AppInputComponent, AppSelectboxComponent, IconComponent, CheckboxComponent, DialogboxService, PageComponent, BreadcrumbItem } from '@lk/core';
+import { AppButtonComponent, AppInputComponent, AppSelectboxComponent, IconComponent, CheckboxComponent, DialogboxService, PageComponent, BreadcrumbItem, TabComponent, TabsComponent } from '@lk/core';
 import { 
   AdminPageHeaderComponent, 
   AdminStatsCardComponent, 
@@ -76,6 +76,8 @@ interface Doctor {
     AppInputComponent,
     AppSelectboxComponent,
     IconComponent,
+    TabComponent,
+    TabsComponent,
     CheckboxComponent,
     AdminPageHeaderComponent,
     AdminStatsCardComponent,
@@ -88,6 +90,7 @@ interface Doctor {
 export class RolesComponent implements OnInit {
   // State Management
   activeTab: 'overview' | 'permissions' | 'staff' | 'assignments' | 'attendance' = 'overview';
+  selectedTabIndex = 0;
   selectedRole: Role | null = null;
   selectedStaff: Staff | null = null;
   showStaffDetails = false;
@@ -370,6 +373,7 @@ export class RolesComponent implements OnInit {
 
   // Tab Management
   setActiveTab(tab: 'overview' | 'permissions' | 'staff' | 'assignments' | 'attendance') {
+    console.log('Setting active tab to:', tab);
     this.activeTab = tab;
     if (tab === 'permissions' && !this.selectedRole && this.roles.length > 0) {
       this.selectedRole = this.roles[0];
@@ -648,7 +652,7 @@ export class RolesComponent implements OnInit {
   }
 
   onTabChange(tabId: string) {
-    this.setActiveTab(tabId as any);
+    this.setActiveTab(tabId as 'overview' | 'permissions' | 'staff' | 'assignments' | 'attendance');
   }
 
   getAttendancePercentage(): number {

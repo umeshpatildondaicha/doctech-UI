@@ -408,7 +408,7 @@ export class AuthService {
     // Determine expected credentials by userType if provided, otherwise infer by email
     const expectedByType = loginRequest.userType ? mockCredentials[loginRequest.userType] : undefined;
     const inferredType = !loginRequest.userType
-      ? (Object.keys(mockCredentials) as Array<keyof typeof mockCredentials>).find(
+      ? (Object.keys(mockCredentials) as unknown as Array<keyof typeof mockCredentials>).find(
           (t) => mockCredentials[t].email === loginRequest.email
         )
       : loginRequest.userType;
