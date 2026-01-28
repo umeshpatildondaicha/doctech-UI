@@ -74,13 +74,12 @@
       <h3 class="section-title">Working Days</h3>
       <div class="days-selection">
         @for (day of daysOfWeek; track day) {
-          <button
-            type="button"
-            class="day-button"
-            [class.selected]="isDaySelected(day)"
-            (click)="toggleDay(day)">
-            {{ day }}
-          </button>
+          <app-button
+          class="day-button"
+          [text]="day"
+          [class.selected]="isDaySelected(day)"
+          (btnClick)="toggleDay(day)"
+          ></app-button>
         }
       </div>
     </div>

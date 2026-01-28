@@ -12,10 +12,16 @@
           <!-- Quick Template Chips -->
           <div class="quick-templates">
             @for (template of templates; track template) {
-              <button type="button" mat-stroked-button class="chip" (click)="addTemplate(template)" [disabled]="readonlyMode">
+              <app-button
+              [fontIcon]="getTemplateIcon(template.id)"
+              [text]="template.name"
+              [disabled]="readonlyMode"
+              (btnClick)="addTemplate(template)"
+              ></app-button>
+              <!-- <button type="button" mat-stroked-button class="chip" (click)="addTemplate(template)" [disabled]="readonlyMode">
                 <mat-icon>{{ getTemplateIcon(template.id) }}</mat-icon>
                 {{ template.name }}
-              </button>
+              </button> -->
             }
           </div>
 
@@ -41,10 +47,17 @@
               <mat-label>Tax %</mat-label>
               <input matInput type="number" min="0" max="100" formControlName="taxRate" />
             </mat-form-field>
-            <button mat-flat-button color="primary" type="button" (click)="addNewItem()" [disabled]="readonlyMode">
+            <app-button
+            [fontIcon]="'add'"
+            [color]="'primary'"
+            title="Add"
+            (btnClick)="addNewItem()"
+            [disabled]="readonlyMode"
+            ></app-button>
+            <!-- <button mat-flat-button color="primary" type="button" (click)="addNewItem()" [disabled]="readonlyMode">
               <mat-icon>add</mat-icon>
               Add
-            </button>
+            </button> -->
           </div>
         </div>
       </div>
@@ -89,7 +102,14 @@
                   <div class="item-total">
                     Total: <strong>₹ {{ (g.value.quantity * g.value.unitPrice - (g.value.discount || 0)) * (1 + (g.value.taxRate || 0)/100) | number:'1.2-2' }}</strong>
                   </div>
-                  <button
+                  <app-button
+                  [fontIcon]="'delete'"
+                  [color]="'warn'"
+                  title="Remove"
+                  (btnClick)="removeItem(i)"
+                  [disabled]="readonlyMode"
+                  ></app-button>
+                  <!-- <button
                     mat-icon-button
                     type="button"
                     color="warn"
@@ -97,7 +117,7 @@
                     [disabled]="readonlyMode"
                     matTooltip="Remove item">
                     <mat-icon>delete</mat-icon>
-                  </button>
+                  </button> -->
                 </div>
               </div>
             }

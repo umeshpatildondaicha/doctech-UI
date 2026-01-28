@@ -3,17 +3,34 @@
     {{ data.isStatement ? 'Statement Preview' : 'Invoice Preview' }}
   </div>
   <span class="spacer"></span>
-  <button mat-stroked-button (click)="downloadPdf()" matTooltip="Download as PDF">
+  <app-button
+  [fontIcon]="'download'"
+  title="Download as PDF"
+  (btnClick)="downloadPdf()"
+  ></app-button>
+  <!-- <button mat-stroked-button (click)="downloadPdf()" matTooltip="Download as PDF">
     <mat-icon>download</mat-icon>
     Download
-  </button>
-  <button mat-flat-button color="primary" (click)="print()" matTooltip="Print">
+  </button> -->
+  <app-button
+  [fontIcon]="'print'"
+  title="print"
+  (btnClick)="print()"
+  [color]="'primary'"
+  ></app-button>
+  <!-- <button mat-flat-button color="primary" (click)="print()" matTooltip="Print">
     <mat-icon>print</mat-icon>
     Print
-  </button>
-  <button mat-icon-button (click)="close()" matTooltip="Close">
+  </button> -->
+  <app-button
+  [fontIcon]="'close'"
+  title="Close"
+  (btnClick)="close()"
+  [color]="'primary'">
+</app-button>
+  <!-- <button mat-icon-button (click)="close()" matTooltip="Close">
     <mat-icon>close</mat-icon>
-  </button>
+  </button> -->
 </div>
 
 <div class="preview-body">

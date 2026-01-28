@@ -11,7 +11,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { AppInputComponent } from "@lk/core";
+import { AppButtonComponent, AppInputComponent } from "@lk/core";
 import { AppSelectboxComponent } from "@lk/core";
 import { DIALOG_DATA_TOKEN } from "@lk/core";
 import { Exercise, ExerciseSet } from '../../interfaces/exercise.interface';
@@ -33,7 +33,9 @@ import { Subject, takeUntil, filter } from 'rxjs';
     MatDividerModule,
     MatTooltipModule,
     AppInputComponent,
-    AppSelectboxComponent
+    AppSelectboxComponent,
+    AppButtonComponent
+
 ],
     templateUrl: './exercise-create.component.html',
     styleUrl: './exercise-create.component.scss'

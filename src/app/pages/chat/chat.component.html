@@ -11,9 +11,16 @@
     [class.sidebar-collapsed]="isMainSidebarCollapsed">
     <div class="sidebar-header">
       @if (!isMobile) {
-        <button class="toggle-btn" (click)="togglePatientList()">
+        <app-button
+        [fontIcon]="'close'"
+        title="Close"
+        (btnClick)="togglePatientList()"
+        
+        ></app-button>
+
+        <!-- <button class="toggle-btn" (click)="togglePatientList()">
           <span class="material-icons">close</span>
-        </button>
+        </button> -->
       }
     </div>
 
@@ -132,10 +139,16 @@
         <!-- Chat Header - Always visible -->
         <div class="chat-header">
           <div class="chat-header-left">
-            <button class="patients-toggle-btn" (click)="togglePatientList()" title="Toggle Patient List">
+            <app-button
+            class="patients-toggle-btn"
+            [fontIcon]="'people'"
+            title="Toggle Patient List"
+            (btnClick)="togglePatientList()"
+            ></app-button>
+            <!-- <button class="patients-toggle-btn" (click)="togglePatientList()" title="Toggle Patient List">
               <span class="material-icons">people</span>
               <span class="toggle-text">Patients</span>
-            </button>
+            </button> -->
 
             @if (currentSession) {
               <div class="chat-header-info">
@@ -175,15 +188,24 @@
 
             @if (currentSession) {
               <div class="chat-actions">
-                <button class="action-btn" title="Voice Call">
-                  <span class="material-icons">call</span>
-                </button>
-                <button class="action-btn" title="Video Call">
-                  <span class="material-icons">videocam</span>
-                </button>
-                <button class="action-btn" title="More Options">
-                  <span class="material-icons">more_vert</span>
-                </button>
+                <app-button
+                class="action-btn"
+                [fontIcon]="'call'"
+                title="Voice Call">
+              </app-button>
+              
+              <app-button
+                class="action-btn"
+                [fontIcon]="'videocam'"
+                title="Video Call">
+              </app-button>
+              
+              <app-button
+                class="action-btn"
+                [fontIcon]="'more_vert'"
+                title="More Options">
+              </app-button>
+              
               </div>
             }
           </div>
@@ -220,9 +242,11 @@
                             <span class="file-name">{{ message.fileName }}</span>
                             <span class="file-size">{{ formatFileSize(message.fileSize || 0) }}</span>
                           </div>
-                          <button class="download-btn" title="Download">
-                            <span class="material-icons">download</span>
-                          </button>
+                          <app-button
+                          class="download-btn"
+                          [fontIcon]="'download'"
+                          title="Download">
+                        </app-button>
                         </div>
                       </div>
                     }
@@ -255,17 +279,23 @@
                     <div class="file-preview">
                       <span class="material-icons file-icon">{{ getFileIcon(file.type) }}</span>
                       <span class="file-name">{{ file.name }}</span>
-                      <button class="remove-file-btn" (click)="removeFile(file)">
-                        <span class="material-icons">close</span>
-                      </button>
+                      <app-button
+                      class="remove-file-btn"
+                      [fontIcon]="'close'"
+                      title="Remove File"
+                      (btnClick)="removeFile(file)"
+                      ></app-button>
                     </div>
                   }
                 </div>
               }
               <div class="input-container">
-                <button class="attach-btn" (click)="fileInput.click()">
-                  <span class="material-icons">attach_file</span>
-                </button>
+                <app-button
+                class="attach-btn"
+                [fontIcon]="'attach_file'"
+                title="Attach File"
+                (btnClick)="fileInput.click()"
+                ></app-button>
                 <div class="text-input-container">
                   <textarea
                     [(ngModel)]="newMessage"
@@ -275,11 +305,18 @@
                     rows="1">
                   </textarea>
                 </div>
-                <button class="send-btn"
+                <app-button
+                class="send-btn"
+                [fontIcon]="'send'"
+                title="Send Message"
+                (btnClick)="sendMessage()"
+                [disabled]="!newMessage.trim()&&selectedFiles.length ===0"
+                ></app-button>
+                <!-- <button class="send-btn"
                   [disabled]="!newMessage.trim() && selectedFiles.length === 0"
                   (click)="sendMessage()">
                   <span class="material-icons">send</span>
-                </button>
+                </button> -->
               </div>
               <input #fileInput
                 type="file"

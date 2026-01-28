@@ -96,22 +96,42 @@
         <div class="tab-content items-tab">
           <!-- Item Categories -->
           <div class="item-categories">
-            <button mat-stroked-button class="category-chip active">
-              <mat-icon>medical_services</mat-icon>
-              Consultation
-            </button>
-            <button mat-stroked-button class="category-chip">
-              <mat-icon>healing</mat-icon>
-              Standard Procedure
-            </button>
-            <button mat-stroked-button class="category-chip">
-              <mat-icon>science</mat-icon>
-              Lab Work
-            </button>
-            <button mat-stroked-button class="category-chip">
-              <mat-icon>event</mat-icon>
-              Follow-up Visit
-            </button>
+            <app-button
+            class="category-chip"
+            [fontIcon]="'medical_services'"
+            [text]="'Consultation'"
+            (btnClick)="onCategoryClick('Consultation')"
+            [appearance]="'stroked'"
+            [color]="'primary'"
+           
+            ></app-button>
+            <app-button
+            class="category-chip"
+            [fontIcon]="'healing'"
+            [text]="'Standard Procedure'"
+            (btnClick)="onCategoryClick('Standard Procedure')"
+            [appearance]="'stroked'"
+            [color]="'primary'"
+          
+            ></app-button>
+            <app-button
+            class="category-chip"
+            [fontIcon]="'science'"
+            [text]="'Lab Work'"
+            (btnClick)="onCategoryClick('Lab Work')"
+            [appearance]="'stroked'"
+            [color]="'primary'"
+           
+            ></app-button>
+            <app-button
+            class="category-chip"
+            [fontIcon]="'event'"
+            [text]="'Follow-up Visit'"
+            (btnClick)="onCategoryClick('Follow-up Visit')"
+            [appearance]="'stroked'"
+            [color]="'primary'"
+           
+            ></app-button>
           </div>
           <!-- Items Table -->
           <div class="items-table">
@@ -166,17 +186,20 @@
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Actions</th>
                 <td mat-cell *matCellDef="let item">
-                  <button
-                    mat-icon-button
-                    color="primary"
-                    (click)="recordItemPayment(item)"
-                    [disabled]="getItemBalance(item) <= 0"
-                    matTooltip="Record Payment">
-                    <mat-icon>payments</mat-icon>
-                  </button>
-                  <button mat-icon-button color="warn" matTooltip="Remove">
-                    <mat-icon>delete</mat-icon>
-                  </button>
+                  <app-button
+                  [fontIcon]="'payments'"
+                  [color]="'primary'"
+                  title="Record Payment"
+                  [disabled]="getItemBalance(item) <= 0"
+                  (btnClick)="recordItemPayment(item)">
+                </app-button>
+                
+                <app-button
+                  [fontIcon]="'delete'"
+                  [color]="'warn'"
+                  title="Remove">
+                </app-button>
+                
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="['description', 'qty', 'rate', 'discount', 'tax', 'total', 'paid', 'balance', 'actions']"></tr>
@@ -197,10 +220,13 @@
               <mat-label>Rate</mat-label>
               <input matInput type="number" />
             </mat-form-field>
-            <button mat-flat-button color="primary">
-              <mat-icon>add</mat-icon>
-              Add Item
-            </button>
+            <app-button
+            [fontIcon]="'add'"
+            [color]="'primary'"
+           title="Add Item"
+            [appearance]="'raised'"
+            ></app-button>
+  
           </div>
           <!-- Totals Summary -->
           <div class="totals-summary">
@@ -327,10 +353,13 @@
           <div class="no-files">
             <mat-icon>folder_open</mat-icon>
             <p>No files attached</p>
-            <button mat-stroked-button>
-              <mat-icon>upload</mat-icon>
-              Upload File
-            </button>
+            <app-button
+            [fontIcon]="'upload'"
+            [text]="'Upload File'"
+            [appearance]="'stroked'"
+            [color]="'primary'"
+            ></app-button>
+           
           </div>
         </div>
       </mat-tab>

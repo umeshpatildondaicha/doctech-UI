@@ -9,6 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AppButtonComponent, IconComponent, DialogboxService, DialogFooterAction, AppInputComponent, DIALOG_DATA_TOKEN } from '@lk/core';
 import { Subject, takeUntil } from 'rxjs';
+import { DatePipe } from '@angular/common';
 
 export interface BodyPartComment {
   id: string;
@@ -30,7 +31,9 @@ export interface BodyPartComment {
     FormsModule,
     ReactiveFormsModule,
     AppButtonComponent,
-    IconComponent
+    IconComponent,
+    DatePipe
+
 ],
     templateUrl: './full-body-diagnosis.component.html',
     styleUrl: './full-body-diagnosis.component.scss'

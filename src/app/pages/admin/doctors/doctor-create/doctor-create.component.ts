@@ -15,7 +15,7 @@ import { Subject, takeUntil, filter, combineLatest } from 'rxjs';
 
 import { Doctor } from '../../../../interfaces/doctor.interface';
 import { HttpService } from '../../../../services/http.service';
-import { DIALOG_DATA_TOKEN } from '@lk/core';
+import { AppButtonComponent, DIALOG_DATA_TOKEN } from '@lk/core';
 
 @Component({
     selector: 'app-admin-doctor-create',
@@ -31,7 +31,8 @@ import { DIALOG_DATA_TOKEN } from '@lk/core';
     MatSelectModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    MatTabsModule
+    MatTabsModule,
+    AppButtonComponent
 ]
 })
 export class AdminDoctorCreateComponent implements OnInit, OnDestroy {

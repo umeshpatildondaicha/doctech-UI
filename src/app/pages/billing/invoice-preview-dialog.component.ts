@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Invoice } from '../../interfaces/billing.interface';
+import { AppButtonComponent } from '@lk/core';
 
 export interface InvoicePreviewData {
   invoice: Invoice;
@@ -40,7 +41,7 @@ export interface InvoicePreviewData {
 
 @Component({
     selector: 'app-invoice-preview-dialog',
-    imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule, MatTooltipModule, DatePipe, CurrencyPipe],
+    imports: [CommonModule, MatDialogModule,AppButtonComponent, MatButtonModule, MatIconModule, MatTooltipModule, DatePipe, CurrencyPipe],
     templateUrl: './invoice-preview-dialog.component.html',
     styleUrl: './invoice-preview-dialog.component.scss'
 })

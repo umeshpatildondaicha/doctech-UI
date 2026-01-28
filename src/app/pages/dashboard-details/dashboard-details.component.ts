@@ -6,12 +6,12 @@ import { ColDef } from 'ag-grid-community';
 import { Patient } from '../../interfaces/patient.interface';
 import { Appointment } from '../../interfaces/appointment.interface';
 import { Billing } from '../../interfaces/billing.interface';
-import { IconComponent } from "@lk/core";
+import { AppButtonComponent, IconComponent } from "@lk/core";
 import { GridComponent } from "@lk/core";
 
 @Component({
     selector: 'app-dashboard-details',
-    imports: [AgGridModule, IconComponent, MatDialogModule, GridComponent],
+    imports: [AgGridModule, IconComponent, MatDialogModule, GridComponent,AppButtonComponent],
     templateUrl: './dashboard-details.component.html',
     styleUrl: './dashboard-details.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush

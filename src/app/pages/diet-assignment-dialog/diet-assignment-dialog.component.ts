@@ -13,6 +13,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { Diet } from '../../interfaces/diet.interface';
+import { AppButtonComponent } from '@lk/core';
 
 export interface DietAssignmentDialogData {
   patientName: string;
@@ -59,7 +60,8 @@ export interface AssignedDietPlan {
     MatNativeDateModule,
     MatRadioModule,
     MatCardModule,
-    MatTooltipModule
+    MatTooltipModule,
+    AppButtonComponent
 ],
     templateUrl: './diet-assignment-dialog.component.html',
     styleUrl: './diet-assignment-dialog.component.scss'

@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
-import { DIALOG_DATA_TOKEN, AppInputComponent, AppSelectboxComponent, AppButtonComponent } from "@lk/core";
+import { DIALOG_DATA_TOKEN, AppInputComponent, AppSelectboxComponent } from "@lk/core";
 import { Subject, takeUntil, filter } from 'rxjs';
 
 export interface PrescriptionDialogData {
@@ -16,7 +16,7 @@ export interface PrescriptionDialogData {
     ReactiveFormsModule,
     AppInputComponent,
     AppSelectboxComponent,
-    AppButtonComponent
+   
 ],
     templateUrl: './prescription-dialog.component.html',
     styleUrls: ['./prescription-dialog.component.scss']

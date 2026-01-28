@@ -45,10 +45,16 @@
                     <h4 class="patient-name">{{ selectedPatient.fullName }}</h4>
                     <p class="patient-id">ID: {{ selectedPatient.id }}</p>
                   </div>
-                  <button type="button" class="change-patient-btn" (click)="openPatientSearch()">
+                  <app-button
+                  class="change-patient-btn"
+                  [fontIcon]="'edit'"
+                  [text]="'change'"
+                  (btnClick)="openPatientSearch()"
+                  ></app-button>
+                  <!-- <button type="button" class="change-patient-btn" (click)="openPatientSearch()">
                     <app-icon [fontIcon]="'edit'" [size]="16"></app-icon>
                     Change
-                  </button>
+                  </button> -->
                 </div>
                 <div class="patient-details-grid">
                   @if (selectedPatient.dateOfBirth) {

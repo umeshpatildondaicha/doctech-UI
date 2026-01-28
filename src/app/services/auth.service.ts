@@ -19,7 +19,7 @@ import {
   AuthState, 
   UserType,
   AccountStatus 
-} from '../interfaces/auth.interface';
+} from '@lk/core';
 
 /**
  * Service responsible for handling all authentication-related operations

@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { DialogboxService, DialogFooterAction } from '@lk/core';
+import { AppButtonComponent, DialogboxService, DialogFooterAction } from '@lk/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
@@ -39,7 +39,8 @@ import { BillingStatusRendererComponent } from './billing-status-renderer.compon
         MatFormFieldModule,
         MatInputModule,
         ReactiveFormsModule,
-        BillingStatusRendererComponent
+        BillingStatusRendererComponent,
+        AppButtonComponent
     ],
     templateUrl: './invoice-detail.component.html',
     styleUrl: './invoice-detail.component.scss'
@@ -315,4 +316,5 @@ export class InvoiceDetailComponent implements OnInit {
       }
     });
   }
+  onCategoryClick(category:string):void{}
 }

@@ -5,10 +5,11 @@ import { ChatService } from '../../services/chat.service';
 import { ChatSession, ChatMessage, ChatFilter } from '../../interfaces/chat.interface';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { AppButtonComponent } from '@lk/core';
 
 @Component({
     selector: 'app-chat',
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule,AppButtonComponent],
     templateUrl: './chat.component.html',
     styleUrls: ['./chat.component.scss']
 })

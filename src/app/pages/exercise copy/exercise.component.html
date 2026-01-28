@@ -1,11 +1,7 @@
 <div class="exercise-dashboard">
 
   <!-- Tabs Section -->
-  <mat-tab-group
-    [selectedIndex]="selectedTabIndex"
-    (selectedIndexChange)="onTabChange($event)"
-    class="exercise-tabs"
-    >
+  <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)" class="exercise-tabs">
     <!-- Individual Tab (screenshot-style label) -->
     <mat-tab label="Individual">
       <div class="tab-content">
@@ -52,7 +48,7 @@
             <mat-select [(ngModel)]="selectedCategory" (selectionChange)="onCategoryChange($event)">
               <mat-option value="all">All Categories</mat-option>
               @for (category of categories; track category) {
-                <mat-option [value]="category.value">{{ category.label }}</mat-option>
+              <mat-option [value]="category.value">{{ category.label }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
@@ -61,47 +57,44 @@
             <mat-select [(ngModel)]="selectedDifficulty" (selectionChange)="onDifficultyChange($event)">
               <mat-option value="all">Any Level</mat-option>
               @for (difficulty of difficulties; track difficulty) {
-                <mat-option [value]="difficulty.value">{{ difficulty.label }}</mat-option>
+              <mat-option [value]="difficulty.value">{{ difficulty.label }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
 
-          <button class="clear-link" type="button" (click)="clearFilters()">Clear Filters</button>
+          <app-button class="clear-link" [fontIcon]="'clear_all'" title="Clear Filters"
+            (btnClick)="clearFilters()"></app-button>
+          <!-- <button class="clear-link" type="button" (click)="clearFilters()">Clear Filters</button> -->
 
-          <button mat-raised-button color="primary" class="add-btn" (click)="onAddExercise()">
-            <mat-icon>add</mat-icon>
-            Add Exercise
-          </button>
+          <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Exercise'" [color]="'primary'"
+            (btnClick)="onAddExercise()"></app-button>
         </div>
 
         <!-- Exercise Cards Grid -->
         @if (getFilteredExercises().length > 0) {
-          <div class="cards-grid">
-            @for (exercise of getFilteredExercises(); track exercise) {
-              <app-exercise-card
-                [exercise]="exercise"
-                [showActions]="true"
-                [clickable]="true"
-                (cardClick)="onViewExercise({data: exercise})"
-                (viewClick)="onViewExercise({data: exercise})"
-                (editClick)="onEditExercise({data: exercise})"
-                (deleteClick)="onDeleteExercise({data: exercise})">
-              </app-exercise-card>
-            }
-          </div>
+        <div class="cards-grid">
+          @for (exercise of getFilteredExercises(); track exercise) {
+          <app-exercise-card [exercise]="exercise" [showActions]="true" [clickable]="true"
+            (cardClick)="onViewExercise({data: exercise})" (viewClick)="onViewExercise({data: exercise})"
+            (editClick)="onEditExercise({data: exercise})" (deleteClick)="onDeleteExercise({data: exercise})">
+          </app-exercise-card>
+          }
+        </div>
         } @else {
-          <div class="no-results">
-            <mat-card class="no-results-card">
-              <div class="no-results-content">
-                <mat-icon class="no-results-icon">search_off</mat-icon>
-                <h3>No exercises found</h3>
-                <p>Try adjusting your search criteria or filters</p>
-                <button mat-raised-button color="primary" (click)="clearFilters()">
+        <div class="no-results">
+          <mat-card class="no-results-card">
+            <div class="no-results-content">
+              <mat-icon class="no-results-icon">search_off</mat-icon>
+              <h3>No exercises found</h3>
+              <p>Try adjusting your search criteria or filters</p>
+              <app-button class="clear-link" [fontIcon]="'clear_all'" title="Clear Filters"
+                (btnClick)="clearFilters()"></app-button>
+              <!-- <button mat-raised-button color="primary" (click)="clearFilters()">
                   Clear Filters
-                </button>
-              </div>
-            </mat-card>
-          </div>
+                </button> -->
+            </div>
+          </mat-card>
+        </div>
         }
 
         <!-- Table View -->
@@ -164,9 +157,9 @@
             <mat-select [(ngModel)]="selectedGroupCategory" (selectionChange)="onGroupCategoryChange()">
               <mat-option value="">All Categories</mat-option>
               @for (category of groupCategories; track category) {
-                <mat-option [value]="category.value">
-                  {{ category.label }}
-                </mat-option>
+              <mat-option [value]="category.value">
+                {{ category.label }}
+              </mat-option>
               }
             </mat-select>
           </mat-form-field>
@@ -175,126 +168,126 @@
             <mat-select [(ngModel)]="selectedGroupDifficulty" (selectionChange)="onGroupDifficultyChange()">
               <mat-option value="">Any Level</mat-option>
               @for (difficulty of groupDifficulties; track difficulty) {
-                <mat-option [value]="difficulty.value">
-                  {{ difficulty.label }}
-                </mat-option>
+              <mat-option [value]="difficulty.value">
+                {{ difficulty.label }}
+              </mat-option>
               }
             </mat-select>
           </mat-form-field>
+          <app-button class="clear-link" [fontIcon]="'clear_all'" title="Clear Filters"
+            (btnClick)="clearGroupFilters()"></app-button>
+          <!-- <button class="clear-link" type="button" (click)="clearGroupFilters()">Clear Filters</button> -->
+          <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Group'" [color]="'primary'"
+            (btnClick)="onAddExerciseGroup()">
+          </app-button>
 
-          <button class="clear-link" type="button" (click)="clearGroupFilters()">Clear Filters</button>
-
-          <button mat-raised-button color="primary" class="add-btn" (click)="onAddExerciseGroup()">
-            <mat-icon>add</mat-icon>
-            Add Group
-          </button>
         </div>
 
         <!-- Groups Cards -->
         <div class="groups-cards">
           @if (getFilteredGroups().length > 0) {
-            <div class="cards-grid">
-              @for (group of getFilteredGroups(); track group) {
-                <mat-card class="group-card">
-                  <!-- Group Header -->
-                  <div class="card-header">
-                    <div class="group-info">
-                      <h3 class="group-name">{{ group.groupName }}</h3>
-                      <div class="group-meta">
-                        <span class="category-badge">{{ group.category || 'Uncategorized' }}</span>
-                        @if (group.difficulty) {
-                          <span class="difficulty-badge" [class]="'difficulty-' + group.difficulty.toLowerCase()">
-                            {{ group.difficulty }}
-                          </span>
-                        }
-                      </div>
-                    </div>
-                    <div class="group-actions">
-                      <button mat-icon-button (click)="onViewGroup({data: group})" matTooltip="View group details">
-                        <mat-icon>visibility</mat-icon>
-                      </button>
-                      <button mat-icon-button (click)="onEditGroup({data: group})" matTooltip="Edit group">
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                      <button mat-icon-button color="warn" (click)="onDeleteGroup({data: group})" matTooltip="Delete group">
-                        <mat-icon>delete</mat-icon>
-                      </button>
-                    </div>
+          <div class="cards-grid">
+            @for (group of getFilteredGroups(); track group) {
+            <mat-card class="group-card">
+              <!-- Group Header -->
+              <div class="card-header">
+                <div class="group-info">
+                  <h3 class="group-name">{{ group.groupName }}</h3>
+                  <div class="group-meta">
+                    <span class="category-badge">{{ group.category || 'Uncategorized' }}</span>
+                    @if (group.difficulty) {
+                    <span class="difficulty-badge" [class]="'difficulty-' + group.difficulty.toLowerCase()">
+                      {{ group.difficulty }}
+                    </span>
+                    }
                   </div>
-                  <!-- Group Description -->
-                  @if (group.description) {
-                    <div class="group-description">
-                      <p>{{ group.description }}</p>
-                    </div>
-                  }
-                  <!-- Exercises Preview -->
-                  <div class="exercises-preview">
-                    <h4 class="subsection-title">Exercises ({{ group.exercises.length }})</h4>
-                    <div class="exercises-scroll">
-                      <div class="exercise-cards">
-                        @for (exercise of group.exercises; track exercise) {
-                          <div class="exercise-mini-card">
-                            <!-- Media Section -->
-                            <div class="media-section">
-                              @if (!exercise.media || exercise.media.length === 0) {
-                                <div class="media-placeholder">
-                                  <mat-icon>fitness_center</mat-icon>
-                                </div>
-                              }
-                              @if (exercise.media && exercise.media.length > 0) {
-                                <img
-                                  [src]="exercise.media[0]"
-                                  [alt]="exercise.name + ' exercise'"
-                                  class="exercise-media">
-                              }
-                              <div class="media-overlay"></div>
-                            </div>
-                            <!-- Content Section -->
-                            <div class="mini-card-content">
-                              <div class="exercise-info">
-                                <span class="exercise-name">{{ exercise.name }}</span>
-                                <span class="exercise-category">{{ exercise.category }}</span>
-                              </div>
-                              <div class="exercise-meta">
-                                <span class="difficulty-badge" [class]="'difficulty-' + exercise.difficulty.toLowerCase()">
-                                  {{ exercise.difficulty }}
-                                </span>
-                                <mat-icon class="exercise-icon">fitness_center</mat-icon>
-                              </div>
-                            </div>
-                          </div>
-                        }
-                      </div>
-                    </div>
-                  </div>
-                  <!-- Group Stats -->
-                  <div class="group-stats">
-                    <div class="stat-item">
-                      <mat-icon>fitness_center</mat-icon>
-                      <span>{{ group.exercises.length }} exercises</span>
-                    </div>
-                    <div class="stat-item">
-                      <mat-icon>schedule</mat-icon>
-                      <span>Created {{ getTimeAgo(group.createdAt) }}</span>
-                    </div>
-                  </div>
-                </mat-card>
-              }
-            </div>
-          } @else {
-            <div class="no-groups">
-              <mat-card class="no-groups-card">
-                <div class="no-groups-content">
-                  <mat-icon class="no-groups-icon">group_work</mat-icon>
-                  <h3>No exercise groups found</h3>
-                  <p>Create your first exercise group to get started</p>
-                  <button mat-raised-button color="primary" (click)="onAddExerciseGroup()">
-                    <mat-icon>add</mat-icon>
-                    Create First Group
-                  </button>
                 </div>
-              </mat-card>
-            </div>
+                <div class="group-actions">
+                  <app-button [fontIcon]="'visibility'" [appearance]="'icon'" matTooltip="View group details"
+                    (btnClick)="onViewGroup({ data: group })">
+                  </app-button>
+
+                  <app-button [fontIcon]="'edit'" [appearance]="'icon'" matTooltip="Edit group"
+                    (btnClick)="onEditGroup({ data: group })">
+                  </app-button>
+
+                  <app-button [fontIcon]="'delete'" [appearance]="'icon'" [color]="'warn'" matTooltip="Delete group"
+                    (btnClick)="onDeleteGroup({ data: group })">
+                  </app-button>
+
+                </div>
+              </div>
+              <!-- Group Description -->
+              @if (group.description) {
+              <div class="group-description">
+                <p>{{ group.description }}</p>
+              </div>
+              }
+              <!-- Exercises Preview -->
+              <div class="exercises-preview">
+                <h4 class="subsection-title">Exercises ({{ group.exercises.length }})</h4>
+                <div class="exercises-scroll">
+                  <div class="exercise-cards">
+                    @for (exercise of group.exercises; track exercise) {
+                    <div class="exercise-mini-card">
+                      <!-- Media Section -->
+                      <div class="media-section">
+                        @if (!exercise.media || exercise.media.length === 0) {
+                        <div class="media-placeholder">
+                          <mat-icon>fitness_center</mat-icon>
+                        </div>
+                        }
+                        @if (exercise.media && exercise.media.length > 0) {
+                        <img [src]="exercise.media[0]" [alt]="exercise.name + ' exercise'" class="exercise-media">
+                        }
+                        <div class="media-overlay"></div>
+                      </div>
+                      <!-- Content Section -->
+                      <div class="mini-card-content">
+                        <div class="exercise-info">
+                          <span class="exercise-name">{{ exercise.name }}</span>
+                          <span class="exercise-category">{{ exercise.category }}</span>
+                        </div>
+                        <div class="exercise-meta">
+                          <span class="difficulty-badge" [class]="'difficulty-' + exercise.difficulty.toLowerCase()">
+                            {{ exercise.difficulty }}
+                          </span>
+                          <mat-icon class="exercise-icon">fitness_center</mat-icon>
+                        </div>
+                      </div>
+                    </div>
+                    }
+                  </div>
+                </div>
+              </div>
+              <!-- Group Stats -->
+              <div class="group-stats">
+                <div class="stat-item">
+                  <mat-icon>fitness_center</mat-icon>
+                  <span>{{ group.exercises.length }} exercises</span>
+                </div>
+                <div class="stat-item">
+                  <mat-icon>schedule</mat-icon>
+                  <span>Created {{ getTimeAgo(group.createdAt) }}</span>
+                </div>
+              </div>
+            </mat-card>
+            }
+          </div>
+          } @else {
+          <div class="no-groups">
+            <mat-card class="no-groups-card">
+              <div class="no-groups-content">
+                <mat-icon class="no-groups-icon">group_work</mat-icon>
+                <h3>No exercise groups found</h3>
+                <p>Create your first exercise group to get started</p>
+                <app-button [fontIcon]="'add'" [text]="'Create First Group'" [color]="'primary'"
+                  (btnClick)="onAddExerciseGroup()">
+                </app-button>
+
+              </div>
+            </mat-card>
+          </div>
           }
         </div>
 

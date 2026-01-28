@@ -21,5 +21,11 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button matButton [mat-dialog-close]="true" class="stat-btn" cdkFocusInitial>Close</button>
+  <app-button
+  [fontIcon]="'close'"
+  [text]="'Close'"
+  [color]="'primary'"
+  (btnClick)="close()"
+  ></app-button>
+  <!-- <button matButton [mat-dialog-close]="true" class="stat-btn" cdkFocusInitial>Close</button> -->
 </mat-dialog-actions>

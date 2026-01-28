@@ -2,7 +2,7 @@ import { Component, Inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { DIALOG_DATA_TOKEN } from '@lk/core';
+import { AppButtonComponent, DIALOG_DATA_TOKEN } from '@lk/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -43,7 +43,8 @@ export interface InvoiceTemplate {
         MatNativeDateModule,
         MatDividerModule,
         MatTooltipModule,
-        MatRadioModule
+        MatRadioModule,
+        AppButtonComponent
     ],
     templateUrl: './invoice-form.component.html',
     styleUrl: './invoice-form.component.scss'

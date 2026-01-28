@@ -113,19 +113,26 @@
           <div class="media-upload">
             <label class="upload-label">Upload Media (image / gif / video)</label>
             <input type="file" multiple accept="image/*,video/*" (change)="onFileSelected($event)" class="file-input">
-            <button type="button" mat-stroked-button class="upload-btn">
-              <mat-icon>cloud_upload</mat-icon>
-              Choose files
-            </button>
+            <app-button
+            type="button"
+            class="upload-btn"
+            [fontIcon]="'cloud_upload'"
+            [text]="'Choose files'"
+            [appearance]="'stroked'"
+          ></app-button>
 
             @if (selectedFiles.length > 0) {
               <div class="selected-files">
                 @for (file of selectedFiles; track file; let i = $index) {
                   <div class="file-item">
                     <span class="file-name">{{ file.name }}</span>
-                    <button type="button" mat-icon-button (click)="removeFile(i)" class="remove-file">
-                      <mat-icon>close</mat-icon>
-                    </button>
+                    <app-button
+                    type="button"
+                    class="remove-file"
+                    [fontIcon]="'close'"
+                    [appearance]="'icon'"
+                    (btnClick)="removeFile(i)"
+                  ></app-button>
                   </div>
                 }
               </div>
@@ -143,9 +150,13 @@
               <div class="set-header">
                 <h4>Set {{ i + 1 }}</h4>
                 @if (setsArray.length > 1) {
-                  <button type="button" mat-icon-button (click)="removeSet(i)" class="remove-set">
-                    <mat-icon>delete</mat-icon>
-                  </button>
+                  <app-button
+                  type="button"
+                  class="remove-set"
+                  [fontIcon]="'delete'"
+                  [appearance]="'icon'"
+                  (btnClick)="removeSet(i)"
+                ></app-button>
                 }
               </div>
               <div class="set-fields">
@@ -166,9 +177,12 @@
                   <input type="text" formControlName="tempo" class="text-input">
                 </div>
               </div>
-              <button type="button" mat-stroked-button (click)="applySetToAll(i)" class="apply-set-btn">
-                Apply set{{ i + 1 }} → all
-              </button>
+              <app-button
+              type="button"
+              class="apply-set-btn"
+              [text]="'Apply set' + (i + 1) + ' → all'"
+              (btnClick)="applySetToAll(i)"
+            ></app-button>
             </div>
           }
         </div>

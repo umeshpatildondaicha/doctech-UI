@@ -22,15 +22,14 @@ export interface PatientQueueItem {
 @Component({
     selector: 'app-root',
     imports: [
-        RouterOutlet,
-        CommonModule,
-        SidebarComponent,
-        TopbarComponent,
-        MatIconModule,
-        AppButtonComponent,
-        MatChipsModule,
-        MatDividerModule
-    ],
+    RouterOutlet,
+    CommonModule,
+    SidebarComponent,
+    TopbarComponent,
+    MatIconModule,
+    MatChipsModule,
+    MatDividerModule
+],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss'
 })

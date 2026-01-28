@@ -22,8 +22,24 @@
       <span>All billing actions are recorded automatically in patient history.</span>
     </div>
     <div class="info-actions">
-      <button mat-stroked-button (click)="onMainTabChanged('payments')">Record Payment</button>
-      <button mat-stroked-button (click)="openPatientProfile()" matTooltip="Statements are generated from patient profile billing">
+      <app-button
+      class="record-payment-btn"
+      [fontIcon]="'payments'"
+      [text]="'Record Payment'"
+      (btnClick)="onMainTabChanged('payments')"
+      [appearance]="'stroked'"
+      [color]="'primary'"
+      ></app-button>
+      <!-- <button mat-stroked-button (click)="onMainTabChanged('payments')">Record Payment</button> -->
+      <app-button
+      class="view-statement-btn"
+      [fontIcon]="'visibility'"
+      [text]="'View Statement'"
+      (btnClick)="openPatientProfile()"
+      [appearance]="'stroked'"
+      [color]="'primary'"
+      ></app-button>
+      <!-- <button mat-stroked-button (click)="openPatientProfile()" matTooltip="Statements are generated from patient profile billing">
         View Statement
       </button>
     </div>

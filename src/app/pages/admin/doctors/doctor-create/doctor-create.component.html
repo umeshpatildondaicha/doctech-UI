@@ -12,13 +12,11 @@
   <div class="connection-status" [class.connected]="backendConnected" [class.disconnected]="!backendConnected">
     <mat-icon>{{ backendConnected ? 'wifi' : 'wifi_off' }}</mat-icon>
     <span>{{ backendConnected ? 'Backend Connected' : 'Backend Disconnected' }}</span>
-    <button mat-button
-      (click)="testBackendConnection()"
-      class="test-connection-btn"
-      [disabled]="isLoading">
-      <mat-icon>refresh</mat-icon>
-      Test Connection
-    </button>
+    <app-button
+    [text]="'Test Connection'"
+    (btnClick) ="testBackendConnection()"
+    [disabled]="isLoading"
+    class="test-connection-btn"></app-button>
   </div>
 
   <!-- Tab Navigation -->
@@ -273,10 +271,16 @@
                                           placeholder="Enter custom certification name"
                                           (keyup.enter)="addCustomCertification()">
                                           <mat-hint>Press Enter to add custom certification</mat-hint>
-                                          <button mat-icon-button matSuffix (click)="addCustomCertification()"
+                                          <app-button
+                                          class="add-custom-certification-btn"
+                                          [text]="'Add'"
+                                          (btnClick)="addCustomCertification()"
+                                          [disabled]="!customCertification.trim()"
+                                          ></app-button>
+                                          <!-- <button mat-icon-button matSuffix (click)="addCustomCertification()"
                                             [disabled]="!customCertification.trim()">
                                             <mat-icon>add_circle</mat-icon>
-                                          </button>
+                                          </button> -->
                                         </mat-form-field>
                                       </div>
 

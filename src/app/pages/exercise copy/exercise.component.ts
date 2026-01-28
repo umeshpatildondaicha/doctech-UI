@@ -12,7 +12,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
-import { GridComponent, DialogboxService, DialogFooterAction, AppInputComponent } from "@lk/core";
+import { GridComponent, DialogboxService, DialogFooterAction, AppInputComponent, AppButtonComponent } from "@lk/core";
 import { ExerciseSet, Exercise, ExerciseStats } from '../../interfaces/exercise.interface';
 import { IconComponent } from "@lk/core";
 import { ExerciseCreateComponent } from '../exercise-create/exercise-create.component';
@@ -27,6 +27,7 @@ import { ExerciseCardComponent } from '../../components/exercise-card/exercise-c
     MatDialogModule,
     MatCardModule,
     MatButtonModule,
+    AppButtonComponent,
     MatIconModule,
     MatInputModule,
     MatFormFieldModule,

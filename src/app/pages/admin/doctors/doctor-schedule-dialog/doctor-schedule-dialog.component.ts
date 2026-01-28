@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { DIALOG_DATA_TOKEN, AppInputComponent, AppSelectboxComponent } from "@lk/core";
+import { DIALOG_DATA_TOKEN, AppInputComponent, AppSelectboxComponent, AppButtonComponent } from "@lk/core";
 import { Subject, takeUntil, filter } from 'rxjs';
 
 export interface DoctorScheduleDialogData {
@@ -22,7 +22,8 @@ export interface DoctorScheduleDialogData {
     MatDatepickerModule,
     MatNativeDateModule,
     AppInputComponent,
-    AppSelectboxComponent
+    AppSelectboxComponent,
+    AppButtonComponent
 ],
     templateUrl: './doctor-schedule-dialog.component.html',
     styleUrls: ['./doctor-schedule-dialog.component.scss']

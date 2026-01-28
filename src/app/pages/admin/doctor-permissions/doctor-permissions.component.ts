@@ -16,13 +16,14 @@ import { MatChipsModule } from '@angular/material/chips';
 
 import { CatalogService, ServiceCatalogItem, FeatureCatalogItem } from '../../../services/catalog.service';
 import { DoctorFeatureService } from '../../../services/doctor-feature.service';
-import { AuthService, PageComponent, BreadcrumbItem } from "@lk/core";
+import { AuthService, PageComponent, BreadcrumbItem, AppButtonComponent } from "@lk/core";
 
 @Component({
     selector: 'app-doctor-permissions',
     imports: [
     FormsModule,
     ReactiveFormsModule,
+    AppButtonComponent,
     RouterModule,
     MatInputModule,
     MatButtonModule,

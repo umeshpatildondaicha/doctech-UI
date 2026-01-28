@@ -3,9 +3,15 @@
   @if (!embedded) {
     <div class="dashboard-header">
       <div class="header-left">
-        <button mat-icon-button (click)="navigateBack()" matTooltip="Back to Billing">
+        <app-button
+        [fontIcon]="'arrow_back'"
+        title="Back to Billing"
+        (btnClick)="navigateBack()"
+        [color]="'primary'">
+      </app-button>
+        <!-- <button mat-icon-button (click)="navigateBack()" matTooltip="Back to Billing">
           <mat-icon>arrow_back</mat-icon>
-        </button>
+        </button> -->
         <div class="patient-info">
           <h2>{{ patientName || 'Patient Billing' }}</h2>
           @if (patientId) {
@@ -13,10 +19,13 @@
           }
         </div>
       </div>
-      <button mat-flat-button color="primary" (click)="openPatientProfileForBilling()">
-        <mat-icon>open_in_new</mat-icon>
-        Open Patient Profile
-      </button>
+      <app-button
+      [fontIcon]="'open_in_new'"
+      title="Open Patient Profile"
+      (btnClick)="openPatientProfileForBilling()"
+      [color]="'primary'">
+    </app-button>
+      
     </div>
   }
 
@@ -24,15 +33,24 @@
   @if (embedded) {
     <div class="dashboard-header-compact">
       <div class="header-actions-left">
-        <button mat-stroked-button (click)="generateStatement()" [disabled]="invoices.length === 0">
+        <app-button
+        [fontIcon]="'description'"
+        title="statement"
+        (btnClick)="generateStatement()"
+        [disabled]="invoices.length === 0"
+        ></app-button>
+        <!-- <button mat-stroked-button (click)="generateStatement()" [disabled]="invoices.length === 0">
           <mat-icon>description</mat-icon>
           Statement
-        </button>
+        </button> -->
       </div>
-      <button mat-flat-button color="primary" (click)="createNewInvoice()">
-        <mat-icon>add</mat-icon>
-        New Invoice
-      </button>
+      <app-button
+      [fontIcon]="'add'"
+      title="New Invoice"
+      (btnClick)="createNewInvoice()"
+      [color]="'primary'">
+    </app-button>
+      
     </div>
   }
 
@@ -71,22 +89,64 @@
   <!-- Quick Actions -->
   <div class="quick-actions">
     @if (!embedded) {
-      <button mat-stroked-button color="primary" (click)="openPatientProfileForBilling()">
-        <mat-icon>open_in_new</mat-icon>
-        Create Invoice (via Profile)
-      </button>
+      <app-button
+       [fontIcon]="'open_in_new'"
+       [text]="'Create Invoice (via Profile)'"
+       [color]="'primary'"
+       (btnClick)="openPatientProfileForBilling()">
+</app-button>
+
     }
-    <button mat-stroked-button (click)="getTopOutstandingInvoice() ? recordPayment(getTopOutstandingInvoice()!) : null" [disabled]="!getTopOutstandingInvoice()" matTooltip="Record payment for highest balance invoice">
-      <mat-icon>payments</mat-icon>
-      Record Payment
-    </button>
+    <app-button
+    [fontIcon]="'payments'"
+    [text]="'Record Payment'"
+    title="Record payment for highest balance invoice"
+    [disabled]="!getTopOutstandingInvoice()"
+    (btnClick)="recordPayment(getTopOutstandingInvoice()!)">
+  </app-button>
+  
     <span class="spacer"></span>
     <div class="filter-chips">
-      <button type="button" class="chip" [class.active]="activeStatus==='ALL'" (click)="applyStatusFilter('ALL')">All</button>
-      <button type="button" class="chip" [class.active]="activeStatus==='UNPAID'" (click)="applyStatusFilter('UNPAID')">Unpaid</button>
-      <button type="button" class="chip" [class.active]="activeStatus==='PARTIALLY_PAID'" (click)="applyStatusFilter('PARTIALLY_PAID')">Partially Paid</button>
-      <button type="button" class="chip" [class.active]="activeStatus==='PAID'" (click)="applyStatusFilter('PAID')">Paid</button>
-      <button type="button" class="chip" [class.active]="activeStatus==='OVERDUE'" (click)="applyStatusFilter('OVERDUE')">Overdue</button>
+      <app-button
+      class="chip"
+      [text]="'All'"
+      [class.active]="activeStatus === 'ALL'"
+      
+      (btnClick)="applyStatusFilter('ALL')">
+    </app-button>
+    
+    <app-button
+      class="chip"
+      [text]="'Unpaid'"
+      [class.active]="activeStatus === 'UNPAID'"
+      
+      (btnClick)="applyStatusFilter('UNPAID')">
+    </app-button>
+    
+    <app-button
+      class="chip"
+      [text]="'Partially Paid'"
+      [class.active]="activeStatus === 'PARTIALLY_PAID'"
+      [appearance]="'stroked'"
+      (btnClick)="applyStatusFilter('PARTIALLY_PAID')">
+    </app-button>
+    
+    <app-button
+      class="chip"
+      [text]="'Paid'"
+      [class.active]="activeStatus === 'PAID'"
+      
+      (btnClick)="applyStatusFilter('PAID')">
+    </app-button>
+    
+    <app-button
+      class="chip"
+      [text]="'Overdue'"
+      [class.active]="activeStatus === 'OVERDUE'"
+      
+      (btnClick)="applyStatusFilter('OVERDUE')">
+    </app-button>
+    
     </div>
   </div>
 
@@ -120,10 +180,16 @@
                   <p>No invoices match the current filter. Try changing the status filter above.</p>
                 }
                 @if (embedded && activeStatus === 'ALL') {
-                  <button mat-stroked-button color="primary" (click)="createNewInvoice()">
+                  <app-button
+                  [fontIcon]="'add'"
+                  [text]="'Create First Invoice'"
+                  [color]="'primary'"
+                  [appearance]="'stroked'"
+                  (btnClick)="createNewInvoice()"></app-button>
+                  <!-- <button mat-stroked-button color="primary" (click)="createNewInvoice()">
                     <mat-icon>add</mat-icon>
                     Create First Invoice
-                  </button>
+                  </button> -->
                 }
               </div>
             </app-card>
@@ -154,10 +220,16 @@
                 <h3>No Items Found</h3>
                 <p>There are no invoice items for this patient yet.</p>
                 @if (embedded) {
-                  <button mat-stroked-button color="primary" (click)="createNewInvoice()">
+                  <app-button
+                  [fontIcon]="'add'"
+                  [text]="'Create First Invoice'"
+                  [color]="'primary'"
+                  [appearance]="'stroked'"
+                  (btnClick)="createNewInvoice()"></app-button>
+                  <!-- <button mat-stroked-button color="primary" (click)="createNewInvoice()">
                     <mat-icon>add</mat-icon>
                     Create First Invoice
-                  </button>
+                  </button> -->
                 }
               </div>
             </app-card>
@@ -187,10 +259,17 @@
                 <mat-icon class="empty-icon">payments</mat-icon>
                 <h3>No Payments Recorded</h3>
                 <p>No payment records found for this patient. Payments will appear here once recorded.</p>
-                <button mat-stroked-button color="primary" (click)="getTopOutstandingInvoice() ? recordPayment(getTopOutstandingInvoice()!) : null" [disabled]="!getTopOutstandingInvoice()">
+                <app-button
+                [fontIcon]="'add'"
+                [text]="'Record First Payment'"
+                [color]="'primary'"
+                [appearance]="'stroked'"
+                (btnClick)="getTopOutstandingInvoice()?recordPayment(getTopOutstandingInvoice()!):null"
+                [disabled]="!getTopOutstandingInvoice()"></app-button>
+                <!-- <button mat-stroked-button color="primary" (click)="getTopOutstandingInvoice() ? recordPayment(getTopOutstandingInvoice()!) : null" [disabled]="!getTopOutstandingInvoice()">
                   <mat-icon>add</mat-icon>
                   Record First Payment
-                </button>
+                </button> -->
               </div>
             </app-card>
           }

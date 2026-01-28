@@ -10,7 +10,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTableModule } from '@angular/material/table';
-import { GridComponent, ExtendedGridOptions, DialogboxService, DialogFooterAction } from "@lk/core";
+import { GridComponent, ExtendedGridOptions, DialogboxService, DialogFooterAction, AppButtonComponent } from "@lk/core";
 import { ColDef } from 'ag-grid-community';
 import { BillingService } from '../../services/billing.service';
 import { Invoice, PaymentRecord, InvoiceItem } from '../../interfaces/billing.interface';
@@ -30,6 +30,7 @@ const FORCE_DEMO_PATIENT_BILLING = false;
     imports: [
     RouterModule,
     MatButtonModule,
+    AppButtonComponent,
     MatIconModule,
     MatTabsModule,
     MatProgressBarModule,

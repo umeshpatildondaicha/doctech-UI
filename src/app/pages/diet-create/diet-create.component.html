@@ -10,9 +10,15 @@
             alt="Diet image"
             class="diet-main-image"
             (error)="onImageError($event)">
-            <button mat-button class="close-overlay-btn" (click)="onCancel()">
+            <app-button
+            class="close-overlay-btn"
+            [fontIcon]="'close'"
+            [text]="'Close'"
+            (btnClick)="onCancel()"
+            ></app-button>
+            <!-- <button mat-button class="close-overlay-btn" (click)="onCancel()">
               Close
-            </button>
+            </button> -->
           </div>
           <!-- Content Grid -->
           <div class="diet-content-grid">
@@ -71,12 +77,26 @@
               </div>
               <!-- Action Buttons -->
               <div class="action-buttons">
-                <button mat-stroked-button class="action-btn edit-btn" (click)="onEdit()">
+                <app-button
+                class="action-btn edit-btn"
+                [fontIcon]="'edit'"
+                title="Edit"
+                (btnClick)="onEdit()"
+                [appearance]="'stroked'"
+                ></app-button>
+                <!-- <button mat-stroked-button class="action-btn edit-btn" (click)="onEdit()">
                   Edit
-                </button>
-                <button mat-stroked-button class="action-btn delete-btn" (click)="onDelete()">
+                </button> -->
+                <app-button
+                class="action-btn delete-btn"
+                [fontIcon]="'delete'"
+                title="Delete"
+                (btnClick)="onDelete()"
+                [appearance]="'stroked'"
+                ></app-button>
+                <!-- <button mat-stroked-button class="action-btn delete-btn" (click)="onDelete()">
                   Delete
-                </button>
+                </button> -->
               </div>
             </div>
           </div>
@@ -267,19 +287,28 @@
             <!-- Ingredients Section -->
             <div class="section-title">
               <h4>Ingredients</h4>
-              <button mat-stroked-button type="button" (click)="addIngredient()" class="add-ingredient-btn">
-                <mat-icon>add</mat-icon>
-                <span class="add-ingredient-btn-text">Add Ingredient</span>
-              </button>
+              <app-button
+              class="add-ingredient-btn"
+              [fontIcon]="'add'"
+              [text]="'Add Ingredient'"
+              [appearance]="'stroked'"
+              (btnClick)="addIngredient()">
+            </app-button>
+            
             </div>
             <div class="ingredients-container" formArrayName="ingredients">
               @for (ingredient of ingredientsArray.controls; track ingredient; let i = $index) {
                 <div class="ingredient-item" [formGroupName]="i">
                   <div class="ingredient-header">
                     <h5>Ingredient {{ i + 1 }}</h5>
-                    <button mat-icon-button type="button" (click)="removeIngredient(i)" color="warn" class="remove-ingredient-btn">
-                      <mat-icon>delete</mat-icon>
-                    </button>
+                    <app-button
+                    class="remove-ingredient-btn"
+                    [fontIcon]="'delete'"
+                    [color]="'warn'"
+                    [appearance]="'icon'"
+                    (btnClick)="removeIngredient(i)">
+                  </app-button>
+                  
                   </div>
                   <div class="ingredient-fields">
                     <div class="form-field-group">

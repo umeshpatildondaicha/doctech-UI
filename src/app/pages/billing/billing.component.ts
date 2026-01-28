@@ -3,7 +3,7 @@ import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { ColDef } from 'ag-grid-community';
-import { ExtendedGridOptions, GridComponent } from "@lk/core";
+import { AppButtonComponent, ExtendedGridOptions, GridComponent } from "@lk/core";
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -65,7 +65,8 @@ const FORCE_DEMO_BILLING_DATA = false;
     AppCardComponent,
     AdminPageHeaderComponent,
     AdminStatsCardComponent,
-    AdminTabsComponent
+    AdminTabsComponent,
+    AppButtonComponent
 ],
     templateUrl: './billing.component.html',
     styleUrl: './billing.component.scss'
