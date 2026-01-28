@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -32,27 +32,26 @@ import { DietPlanCardComponent } from '../../components/diet-plan-card/diet-plan
 @Component({
     selector: 'app-diet',
     imports: [
-        CommonModule,
-        FormsModule,
-        MatTabsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatButtonModule,
-        MatIconModule,
-        MatTableModule,
-        MatTooltipModule,
-        MatProgressBarModule,
-        MatDialogModule,
-        GridComponent,
-        AppButtonComponent,
-        AppInputComponent,
-        IconComponent,
-        DietSelectionDialogComponent,
-        MealTimeDialogComponent,
-        DietCardComponent,
-        DietPlanCardComponent
-    ],
+    FormsModule,
+    MatTabsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    MatTooltipModule,
+    MatProgressBarModule,
+    MatDialogModule,
+    GridComponent,
+    AppButtonComponent,
+    AppInputComponent,
+    IconComponent,
+    DietSelectionDialogComponent,
+    MealTimeDialogComponent,
+    DietCardComponent,
+    DietPlanCardComponent
+],
     templateUrl: './diet.component.html',
     styleUrl: './diet.component.scss'
 })

@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { DIALOG_DATA_TOKEN } from "@lk/core";
@@ -14,7 +14,7 @@ export interface ConfirmDialogData {
 
 @Component({
     selector: 'app-confirm-dialog',
-    imports: [CommonModule, MatButtonModule, AppButtonComponent],
+    imports: [MatButtonModule, AppButtonComponent],
     template: `
     <div class="confirm-dialog">
       <div class="dialog-content">

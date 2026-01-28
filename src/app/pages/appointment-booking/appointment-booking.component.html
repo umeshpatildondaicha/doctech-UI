@@ -2,179 +2,189 @@
   <!-- Scrollable Content Area -->
   <div class="dialog-content">
     <!-- Doctor Information Card -->
-  <div class="doctor-info-card">
-    <div class="doctor-avatar">
-      <img 
-        *ngIf="data.doctorImage && !doctorImageError"
-        [src]="data.doctorImage" 
-        [alt]="data.doctorName"
-        class="avatar-image"
-        (error)="onDoctorImageError()">
-      <div
-        *ngIf="!data.doctorImage || doctorImageError"
-        class="avatar-placeholder">
-        <app-icon fontIcon="person" [size]="32"></app-icon>
-      </div>
-    </div>
-    <div class="doctor-details">
-      <h3 class="doctor-name">{{ data.doctorName }}</h3>
-      <p class="clinic-name">{{ data.doctorHospital }}</p>
-      <p class="location">{{ data.doctorLocation }}</p>
-    </div>
-  </div>
-
-  <!-- Priority Selection -->
-  <div class="priority-section">
-    <h3 class="section-title">Appointment Priority</h3>
-    <div class="priority-options">
-      <div 
-        class="priority-option"
-        [class.selected]="selectedPriority === 'normal'"
-        (click)="onPriorityChange('normal')">
-        <app-icon fontIcon="schedule" [size]="20" [style.color]="getPriorityColor('normal')"></app-icon>
-        <span>Normal</span>
-      </div>
-      <div 
-        class="priority-option"
-        [class.selected]="selectedPriority === 'urgent'"
-        (click)="onPriorityChange('urgent')">
-        <app-icon fontIcon="warning" [size]="20" [style.color]="getPriorityColor('urgent')"></app-icon>
-        <span>Urgent</span>
-      </div>
-      <div 
-        class="priority-option emergency"
-        [class.selected]="selectedPriority === 'emergency'"
-        (click)="onPriorityChange('emergency')">
-        <app-icon fontIcon="report" [size]="20" [style.color]="getPriorityColor('emergency')"></app-icon>
-        <span>Emergency</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Date and Time Selection -->
-  <div class="time-selection-section">
-    <h3 class="section-title">Select a Date & Time Slot</h3>
-    
-    <!-- Date Picker -->
-    <div class="date-picker">
-      <div class="date-scroll-container">
-        <button class="nav-button" (click)="onDateSelect(availableDates[0])">
-          <app-icon fontIcon="chevron_left" [size]="20"></app-icon>
-        </button>
-        <div class="date-list">
-          <div 
-            *ngFor="let date of availableDates" 
-            class="date-option"
-            [class.selected]="selectedDate.toDateString() === date.toDateString()"
-            (click)="onDateSelect(date)">
-            {{ formatDate(date) }}
+    <div class="doctor-info-card">
+      <div class="doctor-avatar">
+        @if (data.doctorImage && !doctorImageError) {
+          <img
+            [src]="data.doctorImage"
+            [alt]="data.doctorName"
+            class="avatar-image"
+            (error)="onDoctorImageError()">
+        }
+        @if (!data.doctorImage || doctorImageError) {
+          <div
+            class="avatar-placeholder">
+            <app-icon fontIcon="person" [size]="32"></app-icon>
           </div>
-        </div>
-        <button class="nav-button" (click)="onDateSelect(availableDates[availableDates.length - 1])">
-          <app-icon fontIcon="chevron_right" [size]="20"></app-icon>
-        </button>
+        }
+      </div>
+      <div class="doctor-details">
+        <h3 class="doctor-name">{{ data.doctorName }}</h3>
+        <p class="clinic-name">{{ data.doctorHospital }}</p>
+        <p class="location">{{ data.doctorLocation }}</p>
       </div>
     </div>
 
+    <!-- Priority Selection -->
+    <div class="priority-section">
+      <h3 class="section-title">Appointment Priority</h3>
+      <div class="priority-options">
+        <div
+          class="priority-option"
+          [class.selected]="selectedPriority === 'normal'"
+          (click)="onPriorityChange('normal')">
+          <app-icon fontIcon="schedule" [size]="20" [style.color]="getPriorityColor('normal')"></app-icon>
+          <span>Normal</span>
+        </div>
+        <div
+          class="priority-option"
+          [class.selected]="selectedPriority === 'urgent'"
+          (click)="onPriorityChange('urgent')">
+          <app-icon fontIcon="warning" [size]="20" [style.color]="getPriorityColor('urgent')"></app-icon>
+          <span>Urgent</span>
+        </div>
+        <div
+          class="priority-option emergency"
+          [class.selected]="selectedPriority === 'emergency'"
+          (click)="onPriorityChange('emergency')">
+          <app-icon fontIcon="report" [size]="20" [style.color]="getPriorityColor('emergency')"></app-icon>
+          <span>Emergency</span>
+        </div>
+      </div>
+    </div>
 
-    <!-- Time Slots Grid -->
-    <div class="time-slots-grid">
-      <div 
-        *ngFor="let slot of currentTimeSlots"
-        class="time-slot"
-        [class]="getSlotStatusClass(slot)"
-        (click)="onTimeSlotSelect(slot)">
-        <app-icon 
-          [fontIcon]="getSlotStatusIcon(slot)" 
-          [size]="16"
-          [style.color]="slot.status === 'selected' ? '#10b981' : slot.status === 'booked' ? '#6b7280' : '#374151'">
+    <!-- Date and Time Selection -->
+    <div class="time-selection-section">
+      <h3 class="section-title">Select a Date & Time Slot</h3>
+
+      <!-- Date Picker -->
+      <div class="date-picker">
+        <div class="date-scroll-container">
+          <button class="nav-button" (click)="onDateSelect(availableDates[0])">
+            <app-icon fontIcon="chevron_left" [size]="20"></app-icon>
+          </button>
+          <div class="date-list">
+            @for (date of availableDates; track date) {
+              <div
+                class="date-option"
+                [class.selected]="selectedDate.toDateString() === date.toDateString()"
+                (click)="onDateSelect(date)">
+                {{ formatDate(date) }}
+              </div>
+            }
+          </div>
+          <button class="nav-button" (click)="onDateSelect(availableDates[availableDates.length - 1])">
+            <app-icon fontIcon="chevron_right" [size]="20"></app-icon>
+          </button>
+        </div>
+      </div>
+
+
+      <!-- Time Slots Grid -->
+      <div class="time-slots-grid">
+        @for (slot of currentTimeSlots; track slot) {
+          <div
+            class="time-slot"
+            [class]="getSlotStatusClass(slot)"
+            (click)="onTimeSlotSelect(slot)">
+            <app-icon
+              [fontIcon]="getSlotStatusIcon(slot)"
+              [size]="16"
+              [style.color]="slot.status === 'selected' ? '#10b981' : slot.status === 'booked' ? '#6b7280' : '#374151'">
+            </app-icon>
+            <span>{{ slot.time }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Slot Status Legend -->
+      <div class="slot-legend">
+        <div class="legend-item">
+          <div class="legend-color booked"></div>
+          <span>Booked</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color available"></div>
+          <span>Available</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color selected"></div>
+          <span>Selected</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message Section (shown when no slots available) -->
+    @if (showMessageSection) {
+      <div class="message-section">
+        <div class="message-header">
+          <app-icon fontIcon="info" [size]="20" class="info-icon"></app-icon>
+          <h4>No available slots</h4>
+        </div>
+        <p class="message-text">
+          No slots are available for the selected date and time period.
+          You can send a message to the doctor requesting an appointment.
+        </p>
+        <app-input
+          label="Message to Doctor"
+          formControlName="message"
+          placeholder="Please explain your urgency and preferred timing..."
+          [multiline]="true"
+          [rows]="3"
+          class="message-input">
+        </app-input>
+      </div>
+    }
+
+
+    <!-- Data Sharing Section -->
+    <div class="data-sharing-section">
+      <div class="data-sharing-header" (click)="onDataSharingToggle()">
+        <h4>Share Patient Data</h4>
+        <app-icon
+          [fontIcon]="showDataSharingSection ? 'expand_less' : 'expand_more'"
+          [size]="20">
         </app-icon>
-        <span>{{ slot.time }}</span>
       </div>
-    </div>
 
-    <!-- Slot Status Legend -->
-    <div class="slot-legend">
-      <div class="legend-item">
-        <div class="legend-color booked"></div>
-        <span>Booked</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-color available"></div>
-        <span>Available</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-color selected"></div>
-        <span>Selected</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Message Section (shown when no slots available) -->
-  <div class="message-section" *ngIf="showMessageSection">
-    <div class="message-header">
-      <app-icon fontIcon="info" [size]="20" class="info-icon"></app-icon>
-      <h4>No available slots</h4>
-    </div>
-    <p class="message-text">
-      No slots are available for the selected date and time period. 
-      You can send a message to the doctor requesting an appointment.
-    </p>
-    <app-input
-      label="Message to Doctor"
-      formControlName="message"
-      placeholder="Please explain your urgency and preferred timing..."
-      [multiline]="true"
-      [rows]="3"
-      class="message-input">
-    </app-input>
-  </div>
-
-
-  <!-- Data Sharing Section -->
-  <div class="data-sharing-section">
-    <div class="data-sharing-header" (click)="onDataSharingToggle()">
-      <h4>Share Patient Data</h4>
-      <app-icon 
-        [fontIcon]="showDataSharingSection ? 'expand_less' : 'expand_more'" 
-        [size]="20">
-      </app-icon>
-    </div>
-    
-    <div class="data-sharing-content" *ngIf="showDataSharingSection">
-      <p class="data-sharing-description">
-        Select which patient data you want to share with {{ data.doctorName }}:
-      </p>
-      
-      <div class="data-options">
-        <div 
-          *ngFor="let option of dataSharingOptions"
-          class="data-option">
-          <mat-checkbox
-            [checked]="appointmentForm.get('sharedData')?.get(option.key)?.value"
-            (change)="onDataOptionChange(option.key, $event.checked)"
-            class="data-checkbox">
-          </mat-checkbox>
-          <div class="option-details">
-            <span class="option-label">{{ option.label }}</span>
-            <span class="option-description">{{ option.description }}</span>
+      @if (showDataSharingSection) {
+        <div class="data-sharing-content">
+          <p class="data-sharing-description">
+            Select which patient data you want to share with {{ data.doctorName }}:
+          </p>
+          <div class="data-options">
+            @for (option of dataSharingOptions; track option) {
+              <div
+                class="data-option">
+                <mat-checkbox
+                  [checked]="appointmentForm.get('sharedData')?.get(option.key)?.value"
+                  (change)="onDataOptionChange(option.key, $event.checked)"
+                  class="data-checkbox">
+                </mat-checkbox>
+                <div class="option-details">
+                  <span class="option-label">{{ option.label }}</span>
+                  <span class="option-description">{{ option.description }}</span>
+                </div>
+              </div>
+            }
           </div>
         </div>
-      </div>
+      }
     </div>
-  </div>
 
-  <!-- Referral Notes (if applicable) -->
-  <div class="referral-section" *ngIf="data.isReferral">
-    <h4 class="section-title">Referral Notes</h4>
-    <app-input
-      label="Additional Notes"
-      formControlName="referralNotes"
-      placeholder="Add any additional notes for the referral..."
-      [multiline]="true"
-      [rows]="2"
-      class="referral-input">
-    </app-input>
-  </div>
+    <!-- Referral Notes (if applicable) -->
+    @if (data.isReferral) {
+      <div class="referral-section">
+        <h4 class="section-title">Referral Notes</h4>
+        <app-input
+          label="Additional Notes"
+          formControlName="referralNotes"
+          placeholder="Add any additional notes for the referral..."
+          [multiline]="true"
+          [rows]="2"
+          class="referral-input">
+        </app-input>
+      </div>
+    }
   </div>
 </div>

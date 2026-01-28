@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
@@ -15,13 +15,12 @@ import {
 @Component({
     selector: 'app-exercise-card',
     imports: [
-        CommonModule,
-        MatButtonModule,
-        MatIconModule,
-        MatChipsModule,
-        MatTooltipModule,
-        ListingCardComponent
-    ],
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatTooltipModule,
+    ListingCardComponent
+],
     templateUrl: './exercise-card.component.html',
     styleUrl: './exercise-card.component.scss'
 })

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,15 +16,14 @@ export interface DoctorScheduleDialogData {
 @Component({
     selector: 'app-doctor-schedule-dialog',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        AppInputComponent,
-        AppSelectboxComponent
-    ],
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    AppInputComponent,
+    AppSelectboxComponent
+],
     templateUrl: './doctor-schedule-dialog.component.html',
     styleUrls: ['./doctor-schedule-dialog.component.scss']
 })

@@ -50,67 +50,76 @@
     </div>
 
     <div class="sidebar-content">
-      <div class="status-section" *ngFor="let status of ['waiting', 'in-progress', 'completed']">
-        <div class="status-header" *ngIf="getStatusCount(status) > 0">
-          <div class="status-title">
-            <mat-icon [style.color]="getStatusColor(status)">{{ getStatusIcon(status) }}</mat-icon>
-            <span>{{ status | titlecase }}</span>
-            <span class="count-badge">{{ getStatusCount(status) }}</span>
-          </div>
-        </div>
-
-        <div class="patient-list">
-          <div
-            *ngFor="let patient of getFilteredPatients(status)"
-            class="patient-item"
-            (click)="onPatientClick(patient)"
-          >
-            <div class="patient-avatar">
-              <img
-                *ngIf="patient.avatar"
-                [src]="patient.avatar"
-                [alt]="patient.name"
-                class="avatar-img"
-              />
+      @for (status of ['waiting', 'in-progress', 'completed']; track status) {
+        <div class="status-section">
+          @if (getStatusCount(status) > 0) {
+            <div class="status-header">
+              <div class="status-title">
+                <mat-icon [style.color]="getStatusColor(status)">{{ getStatusIcon(status) }}</mat-icon>
+                <span>{{ status | titlecase }}</span>
+                <span class="count-badge">{{ getStatusCount(status) }}</span>
+              </div>
+            </div>
+          }
+          <div class="patient-list">
+            @for (patient of getFilteredPatients(status); track patient) {
               <div
-                *ngIf="!patient.avatar"
-                class="avatar-placeholder"
-                [style.background-color]="getPriorityColor(patient.priority)"
-              >
-                {{ patient.name.charAt(0) }}
+                class="patient-item"
+                (click)="onPatientClick(patient)"
+                >
+                <div class="patient-avatar">
+                  @if (patient.avatar) {
+                    <img
+                      [src]="patient.avatar"
+                      [alt]="patient.name"
+                      class="avatar-img"
+                      />
+                  }
+                  @if (!patient.avatar) {
+                    <div
+                      class="avatar-placeholder"
+                      [style.background-color]="getPriorityColor(patient.priority)"
+                      >
+                      {{ patient.name.charAt(0) }}
+                    </div>
+                  }
+                </div>
+                <div class="patient-info">
+                  <div class="patient-name">{{ patient.name }}</div>
+                  <div class="patient-details">
+                    <span class="patient-reason">{{ patient.reason }}</span>
+                    @if (patient.room) {
+                      <span class="patient-room">• Room {{ patient.room }}</span>
+                    }
+                  </div>
+                  <div class="patient-time">{{ patient.estimatedTime }}</div>
+                </div>
+                <div class="patient-priority">
+                  <mat-chip
+                    [style.background-color]="getPriorityColor(patient.priority)"
+                    [style.color]="'white'"
+                    class="priority-chip"
+                    >
+                    <mat-icon class="priority-icon">{{ getPriorityIcon(patient.priority) }}</mat-icon>
+                    {{ patient.priority | titlecase }}
+                  </mat-chip>
+                </div>
               </div>
-            </div>
-
-            <div class="patient-info">
-              <div class="patient-name">{{ patient.name }}</div>
-              <div class="patient-details">
-                <span class="patient-reason">{{ patient.reason }}</span>
-                <span class="patient-room" *ngIf="patient.room">• Room {{ patient.room }}</span>
-              </div>
-              <div class="patient-time">{{ patient.estimatedTime }}</div>
-            </div>
-
-            <div class="patient-priority">
-              <mat-chip
-                [style.background-color]="getPriorityColor(patient.priority)"
-                [style.color]="'white'"
-                class="priority-chip"
-              >
-                <mat-icon class="priority-icon">{{ getPriorityIcon(patient.priority) }}</mat-icon>
-                {{ patient.priority | titlecase }}
-              </mat-chip>
-            </div>
+            }
           </div>
+          @if (getStatusCount(status) > 0 && status !== 'completed') {
+            <mat-divider></mat-divider>
+          }
         </div>
+      }
 
-        <mat-divider *ngIf="getStatusCount(status) > 0 && status !== 'completed'"></mat-divider>
-      </div>
-
-      <div class="empty-state" *ngIf="patientQueue.length === 0">
-        <mat-icon class="empty-icon">people_outline</mat-icon>
-        <p>No patients in queue</p>
-        <span>All patients have been attended to</span>
-      </div>
+      @if (patientQueue.length === 0) {
+        <div class="empty-state">
+          <mat-icon class="empty-icon">people_outline</mat-icon>
+          <p>No patients in queue</p>
+          <span>All patients have been attended to</span>
+        </div>
+      }
     </div>
   </aside>
 }

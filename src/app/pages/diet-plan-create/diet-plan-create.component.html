@@ -38,53 +38,64 @@
     <!-- Meal Times Row -->
     <div class="meal-times-row">
       <div class="day-header"></div>
-      <div class="meal-time-header" *ngFor="let mealTime of mealTimes; let i = index">
-        <div class="meal-time-info">
-          <div class="meal-time-label">{{ mealTime.label }}</div>
-          <div class="meal-time">{{ mealTime.time }}</div>
+      @for (mealTime of mealTimes; track mealTime; let i = $index) {
+        <div class="meal-time-header">
+          <div class="meal-time-info">
+            <div class="meal-time-label">{{ mealTime.label }}</div>
+            <div class="meal-time">{{ mealTime.time }}</div>
+          </div>
+          @if (mealTimes.length > 1) {
+            <button mat-icon-button (click)="removeMealTime(i)" class="remove-meal-btn">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
         </div>
-        <button mat-icon-button (click)="removeMealTime(i)" class="remove-meal-btn" *ngIf="mealTimes.length > 1">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+      }
     </div>
 
     <!-- Days Grid -->
     <div class="days-grid">
-      <div class="day-column" *ngFor="let day of weekDays; let dayIndex = index">
-        <div class="day-header">
-          <h4>{{ day.name }}</h4>
-          <div class="day-date">{{ day.date }}</div>
-        </div>
-        
-        <div class="day-meals">
-          <div class="meal-slot" *ngFor="let mealTime of mealTimes; let mealIndex = index">
-            <div class="meal-slot-header">
-              <span class="meal-time-label">{{ mealTime.label }}</span>
-            </div>
-            
-            <div class="selected-diets" *ngIf="getSelectedDiets(dayIndex, mealIndex).length > 0">
-              <div class="diet-item" *ngFor="let diet of getSelectedDiets(dayIndex, mealIndex); let dietIndex = index">
-                <div class="diet-info">
-                  <img *ngIf="diet.imageUrl" [src]="diet.imageUrl" [alt]="diet.name" class="diet-thumbnail">
-                  <div class="diet-details">
-                    <div class="diet-name">{{ diet.name }}</div>
-                    <div class="diet-calories">{{ diet.calories }} kcal</div>
-                  </div>
+      @for (day of weekDays; track day; let dayIndex = $index) {
+        <div class="day-column">
+          <div class="day-header">
+            <h4>{{ day.name }}</h4>
+            <div class="day-date">{{ day.date }}</div>
+          </div>
+          <div class="day-meals">
+            @for (mealTime of mealTimes; track mealTime; let mealIndex = $index) {
+              <div class="meal-slot">
+                <div class="meal-slot-header">
+                  <span class="meal-time-label">{{ mealTime.label }}</span>
                 </div>
-                <button mat-icon-button (click)="removeDietFromSlot(dayIndex, mealIndex, dietIndex)" class="remove-diet-btn">
-                  <mat-icon>close</mat-icon>
+                @if (getSelectedDiets(dayIndex, mealIndex).length > 0) {
+                  <div class="selected-diets">
+                    @for (diet of getSelectedDiets(dayIndex, mealIndex); track diet; let dietIndex = $index) {
+                      <div class="diet-item">
+                        <div class="diet-info">
+                          @if (diet.imageUrl) {
+                            <img [src]="diet.imageUrl" [alt]="diet.name" class="diet-thumbnail">
+                          }
+                          <div class="diet-details">
+                            <div class="diet-name">{{ diet.name }}</div>
+                            <div class="diet-calories">{{ diet.calories }} kcal</div>
+                          </div>
+                        </div>
+                        <button mat-icon-button (click)="removeDietFromSlot(dayIndex, mealIndex, dietIndex)" class="remove-diet-btn">
+                          <mat-icon>close</mat-icon>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+                <button mat-stroked-button (click)="openDietSelector(dayIndex, mealIndex)" class="add-diet-btn">
+                  <mat-icon>add</mat-icon>
+                  Add Diet
                 </button>
               </div>
-            </div>
-            
-            <button mat-stroked-button (click)="openDietSelector(dayIndex, mealIndex)" class="add-diet-btn">
-              <mat-icon>add</mat-icon>
-              Add Diet
-            </button>
+            }
           </div>
         </div>
-      </div>
+      }
     </div>
   </div>
 

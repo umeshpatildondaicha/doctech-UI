@@ -7,28 +7,33 @@
   <div class="staff-selection">
     <h3 class="section-title">Select Staff Members</h3>
     <div class="staff-list">
-      <div
-        *ngFor="let staff of availableStaff"
-        class="staff-item"
-        [class.selected]="isStaffSelected(staff.id)"
-        (click)="toggleStaffSelection(staff.id)">
-        <div class="staff-info">
-          <div class="staff-name">{{ staff.name }}</div>
-          <div class="staff-role">{{ staff.role }} - {{ staff.department }}</div>
+      @for (staff of availableStaff; track staff) {
+        <div
+          class="staff-item"
+          [class.selected]="isStaffSelected(staff.id)"
+          (click)="toggleStaffSelection(staff.id)">
+          <div class="staff-info">
+            <div class="staff-name">{{ staff.name }}</div>
+            <div class="staff-role">{{ staff.role }} - {{ staff.department }}</div>
+          </div>
+          <app-icon
+            [fontIcon]="isStaffSelected(staff.id) ? 'check_circle' : 'radio_button_unchecked'"
+            [size]="20"
+            [color]="isStaffSelected(staff.id) ? '#3b82f6' : '#9ca3af'">
+          </app-icon>
         </div>
-        <app-icon
-          [fontIcon]="isStaffSelected(staff.id) ? 'check_circle' : 'radio_button_unchecked'"
-          [size]="20"
-          [color]="isStaffSelected(staff.id) ? '#3b82f6' : '#9ca3af'">
-        </app-icon>
-      </div>
-      <div *ngIf="availableStaff.length === 0" class="no-staff">
-        All staff members are already assigned to this shift.
-      </div>
+      }
+      @if (availableStaff.length === 0) {
+        <div class="no-staff">
+          All staff members are already assigned to this shift.
+        </div>
+      }
     </div>
-    <div class="selected-staff-summary" *ngIf="selectedStaffIds.length > 0">
-      <strong>{{ selectedStaffIds.length }} staff member(s) selected</strong>
-    </div>
+    @if (selectedStaffIds.length > 0) {
+      <div class="selected-staff-summary">
+        <strong>{{ selectedStaffIds.length }} staff member(s) selected</strong>
+      </div>
+    }
   </div>
 </div>
 

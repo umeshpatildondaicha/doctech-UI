@@ -73,14 +73,15 @@
     <div class="form-section">
       <h3 class="section-title">Working Days</h3>
       <div class="days-selection">
-        <button
-          type="button"
-          *ngFor="let day of daysOfWeek"
-          class="day-button"
-          [class.selected]="isDaySelected(day)"
-          (click)="toggleDay(day)">
-          {{ day }}
-        </button>
+        @for (day of daysOfWeek; track day) {
+          <button
+            type="button"
+            class="day-button"
+            [class.selected]="isDaySelected(day)"
+            (click)="toggleDay(day)">
+            {{ day }}
+          </button>
+        }
       </div>
     </div>
   </form>

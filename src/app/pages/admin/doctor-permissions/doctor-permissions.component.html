@@ -1,137 +1,159 @@
 <app-page [breadcrumb]="breadcrumb" [isFooter]="false">
-<div page-body class="permissions-page">
-  <!-- Page Header -->
-  <div class="page-header">
-    <div class="header-content">
-      <div>
-        <h1>Manage Doctor Permissions</h1>
-        <p class="subtitle">Focus on one service at a time with this minimalist, accordion-style view.</p>
+  <div page-body class="permissions-page">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <div>
+          <h1>Manage Doctor Permissions</h1>
+          <p class="subtitle">Focus on one service at a time with this minimalist, accordion-style view.</p>
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <mat-form-field class="doctor-select-field">
+          <mat-label>Select Doctor</mat-label>
+          <mat-select [formControl]="doctorSelectControl" placeholder="Choose a doctor">
+            <mat-select-trigger>
+              {{ selectedDoctorName || 'Select Doctor' }}
+            </mat-select-trigger>
+            @for (doctor of doctors; track doctor) {
+              <mat-option [value]="doctor.id">
+                <div class="doctor-option">
+                  <span class="doctor-name">{{ doctor.name }}</span>
+                  <span class="doctor-specialty">{{ doctor.specialty || 'No specialty' }}</span>
+                </div>
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="search-field">
+          <mat-label>Search services or features...</mat-label>
+          <input matInput [formControl]="servicesFilterControl">
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" class="save-btn" (click)="saveChanges()">
+          Save Changes
+        </button>
       </div>
     </div>
 
-    <div class="controls-row">
-      <mat-form-field class="doctor-select-field">
-        <mat-label>Select Doctor</mat-label>
-        <mat-select [formControl]="doctorSelectControl" placeholder="Choose a doctor">
-          <mat-select-trigger>
-            {{ selectedDoctorName || 'Select Doctor' }}
-          </mat-select-trigger>
-          <mat-option *ngFor="let doctor of doctors" [value]="doctor.id">
-            <div class="doctor-option">
-              <span class="doctor-name">{{ doctor.name }}</span>
-              <span class="doctor-specialty">{{ doctor.specialty || 'No specialty' }}</span>
-            </div>
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field class="search-field">
-        <mat-label>Search services or features...</mat-label>
-        <input matInput [formControl]="servicesFilterControl">
-        <mat-icon matPrefix>search</mat-icon>
-      </mat-form-field>
-
-      <button mat-raised-button color="primary" class="save-btn" (click)="saveChanges()">
-        Save Changes
-      </button>
-    </div>
-  </div>
-
-  <!-- Services Accordion -->
-  <div class="services-accordion">
-    <div class="loading-state" *ngIf="selectedDoctorId && isLoadingServices">
-      <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
-      <p>Loading services...</p>
-    </div>
-
-    <div class="empty-state" *ngIf="selectedDoctorId && !isLoadingServices && filteredServices.length === 0">
-      <mat-icon>inventory_2</mat-icon>
-      <h3>No services found</h3>
-      <p>Try adjusting your search criteria</p>
-    </div>
-
-    <div class="empty-state" *ngIf="!selectedDoctorId">
-      <mat-icon>person_add</mat-icon>
-      <h3>Select a Doctor</h3>
-      <p>Choose a doctor from the dropdown above to manage their permissions</p>
-    </div>
-
-    <!-- Service Accordion Items -->
-    <mat-accordion *ngIf="selectedDoctorId && !isLoadingServices && filteredServices.length > 0" class="accordion-container">
-      <mat-expansion-panel 
-        *ngFor="let service of filteredServices"
-        (opened)="onToggleServicePanel(service.id, true)"
-        (closed)="onToggleServicePanel(service.id, false)"
-        [expanded]="expandedServiceIds.has(service.id)"
-        class="service-panel"
-      >
-        <mat-expansion-panel-header class="service-panel-header">
-          <mat-panel-title>
-            <div class="service-header-content">
-              <div class="service-icon-box">
-                <mat-icon class="service-icon">settings</mat-icon>
-              </div>
-              <div class="service-title-info">
-                <span class="service-title">{{ service.name }}</span>
-                <span class="service-status" *ngIf="featuresByServiceId.has(service.id)">
-                  {{ getEnabledFeatureCount(service.id) }} of {{ (featuresByServiceId.get(service.id) || []).length }} features enabled
-                </span>
-              </div>
-            </div>
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-
-        <!-- Panel Content -->
-        <div class="panel-content">
-          <!-- Actions Toolbar -->
-          <div class="actions-toolbar" *ngIf="selectedDoctorId">
-            <button class="grant-all-btn" (click)="grantAllInService(service.id)">
-              Grant All
-            </button>
-            <button class="revoke-all-btn" (click)="revokeAllInService(service.id)">
-              Revoke All
-            </button>
-          </div>
-
-          <!-- Loading State -->
-          <div class="loading-state small" *ngIf="loadingFeatureServiceIds.has(service.id)">
-            <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
-            <p>Loading features...</p>
-          </div>
-
-          <!-- Features List -->
-          <div class="features-list" *ngIf="!loadingFeatureServiceIds.has(service.id)">
-            <div class="feature-item" *ngFor="let feature of (featuresByServiceId.get(service.id) || [])">
-              <div class="feature-info">
-                <span class="feature-name">{{ feature.name }}</span>
-                <span class="subscription-locked" *ngIf="isFeatureLocked(feature.id)">
-                  <mat-icon class="lock-icon">lock</mat-icon>
-                  <span class="locked-tag">Subscription Locked</span>
-                </span>
-              </div>
-              <div class="feature-toggle-wrapper">
-                <mat-slide-toggle
-                  color="primary"
-                  [checked]="isFeatureGranted(feature.id)"
-                  (change)="toggleFeature($event, feature)"
-                  [disabled]="updatingFeatureIds.has(feature.id) || !selectedDoctorId || isFeatureLocked(feature.id)"
-                ></mat-slide-toggle>
-                <mat-spinner 
-                  *ngIf="updatingFeatureIds.has(feature.id)" 
-                  diameter="18" 
-                  class="feature-spinner"
-                ></mat-spinner>
-              </div>
-            </div>
-
-            <div class="empty-state small" *ngIf="(featuresByServiceId.get(service.id) || []).length === 0">
-              <mat-icon>extension_off</mat-icon>
-              <p>No features available for this service</p>
-            </div>
-          </div>
+    <!-- Services Accordion -->
+    <div class="services-accordion">
+      @if (selectedDoctorId && isLoadingServices) {
+        <div class="loading-state">
+          <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+          <p>Loading services...</p>
         </div>
-      </mat-expansion-panel>
-    </mat-accordion>
+      }
+
+      @if (selectedDoctorId && !isLoadingServices && filteredServices.length === 0) {
+        <div class="empty-state">
+          <mat-icon>inventory_2</mat-icon>
+          <h3>No services found</h3>
+          <p>Try adjusting your search criteria</p>
+        </div>
+      }
+
+      @if (!selectedDoctorId) {
+        <div class="empty-state">
+          <mat-icon>person_add</mat-icon>
+          <h3>Select a Doctor</h3>
+          <p>Choose a doctor from the dropdown above to manage their permissions</p>
+        </div>
+      }
+
+      <!-- Service Accordion Items -->
+      @if (selectedDoctorId && !isLoadingServices && filteredServices.length > 0) {
+        <mat-accordion class="accordion-container">
+          @for (service of filteredServices; track service) {
+            <mat-expansion-panel
+              (opened)="onToggleServicePanel(service.id, true)"
+              (closed)="onToggleServicePanel(service.id, false)"
+              [expanded]="expandedServiceIds.has(service.id)"
+              class="service-panel"
+              >
+              <mat-expansion-panel-header class="service-panel-header">
+                <mat-panel-title>
+                  <div class="service-header-content">
+                    <div class="service-icon-box">
+                      <mat-icon class="service-icon">settings</mat-icon>
+                    </div>
+                    <div class="service-title-info">
+                      <span class="service-title">{{ service.name }}</span>
+                      @if (featuresByServiceId.has(service.id)) {
+                        <span class="service-status">
+                          {{ getEnabledFeatureCount(service.id) }} of {{ (featuresByServiceId.get(service.id) || []).length }} features enabled
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <!-- Panel Content -->
+              <div class="panel-content">
+                <!-- Actions Toolbar -->
+                @if (selectedDoctorId) {
+                  <div class="actions-toolbar">
+                    <button class="grant-all-btn" (click)="grantAllInService(service.id)">
+                      Grant All
+                    </button>
+                    <button class="revoke-all-btn" (click)="revokeAllInService(service.id)">
+                      Revoke All
+                    </button>
+                  </div>
+                }
+                <!-- Loading State -->
+                @if (loadingFeatureServiceIds.has(service.id)) {
+                  <div class="loading-state small">
+                    <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+                    <p>Loading features...</p>
+                  </div>
+                }
+                <!-- Features List -->
+                @if (!loadingFeatureServiceIds.has(service.id)) {
+                  <div class="features-list">
+                    @for (feature of (featuresByServiceId.get(service.id) || []); track feature) {
+                      <div class="feature-item">
+                        <div class="feature-info">
+                          <span class="feature-name">{{ feature.name }}</span>
+                          @if (isFeatureLocked(feature.id)) {
+                            <span class="subscription-locked">
+                              <mat-icon class="lock-icon">lock</mat-icon>
+                              <span class="locked-tag">Subscription Locked</span>
+                            </span>
+                          }
+                        </div>
+                        <div class="feature-toggle-wrapper">
+                          <mat-slide-toggle
+                            color="primary"
+                            [checked]="isFeatureGranted(feature.id)"
+                            (change)="toggleFeature($event, feature)"
+                            [disabled]="updatingFeatureIds.has(feature.id) || !selectedDoctorId || isFeatureLocked(feature.id)"
+                          ></mat-slide-toggle>
+                          @if (updatingFeatureIds.has(feature.id)) {
+                            <mat-spinner
+                              diameter="18"
+                              class="feature-spinner"
+                            ></mat-spinner>
+                          }
+                        </div>
+                      </div>
+                    }
+                    @if ((featuresByServiceId.get(service.id) || []).length === 0) {
+                      <div class="empty-state small">
+                        <mat-icon>extension_off</mat-icon>
+                        <p>No features available for this service</p>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </mat-expansion-panel>
+          }
+        </mat-accordion>
+      }
+    </div>
   </div>
-</div>
 </app-page>

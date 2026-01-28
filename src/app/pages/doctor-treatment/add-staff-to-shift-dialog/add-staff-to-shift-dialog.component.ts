@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatDialogRef } from '@angular/material/dialog';
 import { DIALOG_DATA_TOKEN, AppButtonComponent, IconComponent } from "@lk/core";
 import { Subject, takeUntil, filter } from 'rxjs';
@@ -13,10 +13,9 @@ export interface AddStaffToShiftDialogData {
 @Component({
     selector: 'app-add-staff-to-shift-dialog',
     imports: [
-        CommonModule,
-        AppButtonComponent,
-        IconComponent
-    ],
+    AppButtonComponent,
+    IconComponent
+],
     templateUrl: './add-staff-to-shift-dialog.component.html',
     styleUrls: ['./add-staff-to-shift-dialog.component.scss']
 })

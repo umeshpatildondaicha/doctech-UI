@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,7 +15,7 @@ export interface NewMedicationDialogData {
 
 @Component({
     selector: 'app-new-medication-dialog',
-    imports: [CommonModule, FormsModule, MatButtonModule, MatIconModule],
+    imports: [FormsModule, MatButtonModule, MatIconModule],
     templateUrl: './new-medication-dialog.component.html',
     styleUrls: ['./new-medication-dialog.component.scss']
 })

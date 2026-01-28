@@ -1,358 +1,339 @@
-<div class="invoice-detail" *ngIf="invoice">
-  <!-- Header Section -->
-  <div class="invoice-header">
-    <div class="header-left">
-      <button mat-icon-button (click)="onBack()" [matTooltip]="inDialog ? 'Close' : 'Back'">
-        <mat-icon>{{ inDialog ? 'close' : 'arrow_back' }}</mat-icon>
-      </button>
-      <div class="invoice-info">
-        <h2>Invoice {{ invoice.invoiceNo }}</h2>
-        <div class="patient-info">
-          <span class="patient-name">{{ invoice.patientName }}</span>
-          <span class="patient-id">ID: {{ invoice.patientId }}</span>
+@if (invoice) {
+  <div class="invoice-detail">
+    <!-- Header Section -->
+    <div class="invoice-header">
+      <div class="header-left">
+        <button mat-icon-button (click)="onBack()" [matTooltip]="inDialog ? 'Close' : 'Back'">
+          <mat-icon>{{ inDialog ? 'close' : 'arrow_back' }}</mat-icon>
+        </button>
+        <div class="invoice-info">
+          <h2>Invoice {{ invoice.invoiceNo }}</h2>
+          <div class="patient-info">
+            <span class="patient-name">{{ invoice.patientName }}</span>
+            <span class="patient-id">ID: {{ invoice.patientId }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button mat-icon-button (click)="downloadPdf()" matTooltip="Download PDF">
+          <mat-icon>download</mat-icon>
+        </button>
+        <button mat-icon-button (click)="printInvoice()" matTooltip="Print Invoice">
+          <mat-icon>print</mat-icon>
+        </button>
+        <button mat-stroked-button (click)="editInvoice()">
+          <mat-icon>edit</mat-icon>
+          Edit
+        </button>
+      </div>
+    </div>
+    <!-- Invoice Meta -->
+    <div class="invoice-meta">
+      <div class="meta-card">
+        <div class="meta-item">
+          <span class="label">Status</span>
+          <app-billing-status-renderer [status]="invoice.status"></app-billing-status-renderer>
+        </div>
+        <div class="meta-item">
+          <span class="label">Issued Date</span>
+          <span class="value">{{ invoice.date | date:'d MMM yyyy' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="label">Due Date</span>
+          <span class="value" [class.overdue]="isOverdue()">
+            {{ invoice.dueDate | date:'d MMM yyyy' }}
+            @if (isOverdue()) {
+              <span class="overdue-badge">{{ getDaysOverdue() }}d overdue</span>
+            }
+          </span>
         </div>
       </div>
     </div>
-    <div class="header-right">
-      <button mat-icon-button (click)="downloadPdf()" matTooltip="Download PDF">
-        <mat-icon>download</mat-icon>
-      </button>
-      <button mat-icon-button (click)="printInvoice()" matTooltip="Print Invoice">
-        <mat-icon>print</mat-icon>
-      </button>
-      <button mat-stroked-button (click)="editInvoice()">
-        <mat-icon>edit</mat-icon>
-        Edit
-      </button>
-    </div>
-  </div>
-
-  <!-- Invoice Meta -->
-  <div class="invoice-meta">
-    <div class="meta-card">
-      <div class="meta-item">
-        <span class="label">Status</span>
-        <app-billing-status-renderer [status]="invoice.status"></app-billing-status-renderer>
-      </div>
-      <div class="meta-item">
-        <span class="label">Issued Date</span>
-        <span class="value">{{ invoice.date | date:'d MMM yyyy' }}</span>
-      </div>
-      <div class="meta-item">
-        <span class="label">Due Date</span>
-        <span class="value" [class.overdue]="isOverdue()">
-          {{ invoice.dueDate | date:'d MMM yyyy' }}
-          <span *ngIf="isOverdue()" class="overdue-badge">{{ getDaysOverdue() }}d overdue</span>
-        </span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Payment Summary -->
-  <div class="payment-summary">
-    <div class="payment-card">
-      <div class="payment-item">
-        <span class="label">Total</span>
-        <span class="value total">{{ currencyFmt(invoice.total) }}</span>
-      </div>
-      <div class="payment-item">
-        <span class="label">Paid</span>
-        <span class="value paid">{{ currencyFmt(invoice.amountPaid || 0) }}</span>
-      </div>
-      <div class="payment-item">
-        <span class="label">Balance</span>
-        <span class="value balance">{{ currencyFmt(invoice.balanceDue || 0) }}</span>
-      </div>
-      <mat-progress-bar 
-        mode="determinate" 
-        [value]="getPaymentProgress()"
-        color="primary"
-        class="payment-progress">
-      </mat-progress-bar>
-    </div>
-    <div class="payment-actions">
-      <button mat-flat-button color="primary" (click)="recordPayment()">
-        <mat-icon>payments</mat-icon>
-        Record Payment
-      </button>
-      <button mat-stroked-button (click)="editInvoice()">
-        <mat-icon>add</mat-icon>
-        Add Item
-      </button>
-      <button mat-stroked-button (click)="printInvoice()">
-        <mat-icon>print</mat-icon>
-        Print / Share
-      </button>
-      <button mat-icon-button>
-        <mat-icon>more_vert</mat-icon>
-      </button>
-    </div>
-  </div>
-
-  <!-- Tabs -->
-  <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="invoice-tabs">
-    <!-- Items Tab -->
-    <mat-tab label="Items">
-      <div class="tab-content items-tab">
-        <!-- Item Categories -->
-        <div class="item-categories">
-          <button mat-stroked-button class="category-chip active">
-            <mat-icon>medical_services</mat-icon>
-            Consultation
-          </button>
-          <button mat-stroked-button class="category-chip">
-            <mat-icon>healing</mat-icon>
-            Standard Procedure
-          </button>
-          <button mat-stroked-button class="category-chip">
-            <mat-icon>science</mat-icon>
-            Lab Work
-          </button>
-          <button mat-stroked-button class="category-chip">
-            <mat-icon>event</mat-icon>
-            Follow-up Visit
-          </button>
+    <!-- Payment Summary -->
+    <div class="payment-summary">
+      <div class="payment-card">
+        <div class="payment-item">
+          <span class="label">Total</span>
+          <span class="value total">{{ currencyFmt(invoice.total) }}</span>
         </div>
-
-        <!-- Items Table -->
-        <div class="items-table">
-          <table mat-table [dataSource]="invoice.items" class="items-table-content">
-            <ng-container matColumnDef="description">
-              <th mat-header-cell *matHeaderCellDef>Description</th>
-              <td mat-cell *matCellDef="let item">{{ item.description }}</td>
+        <div class="payment-item">
+          <span class="label">Paid</span>
+          <span class="value paid">{{ currencyFmt(invoice.amountPaid || 0) }}</span>
+        </div>
+        <div class="payment-item">
+          <span class="label">Balance</span>
+          <span class="value balance">{{ currencyFmt(invoice.balanceDue || 0) }}</span>
+        </div>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="getPaymentProgress()"
+          color="primary"
+          class="payment-progress">
+        </mat-progress-bar>
+      </div>
+      <div class="payment-actions">
+        <button mat-flat-button color="primary" (click)="recordPayment()">
+          <mat-icon>payments</mat-icon>
+          Record Payment
+        </button>
+        <button mat-stroked-button (click)="editInvoice()">
+          <mat-icon>add</mat-icon>
+          Add Item
+        </button>
+        <button mat-stroked-button (click)="printInvoice()">
+          <mat-icon>print</mat-icon>
+          Print / Share
+        </button>
+        <button mat-icon-button>
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </div>
+    </div>
+    <!-- Tabs -->
+    <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="invoice-tabs">
+      <!-- Items Tab -->
+      <mat-tab label="Items">
+        <div class="tab-content items-tab">
+          <!-- Item Categories -->
+          <div class="item-categories">
+            <button mat-stroked-button class="category-chip active">
+              <mat-icon>medical_services</mat-icon>
+              Consultation
+            </button>
+            <button mat-stroked-button class="category-chip">
+              <mat-icon>healing</mat-icon>
+              Standard Procedure
+            </button>
+            <button mat-stroked-button class="category-chip">
+              <mat-icon>science</mat-icon>
+              Lab Work
+            </button>
+            <button mat-stroked-button class="category-chip">
+              <mat-icon>event</mat-icon>
+              Follow-up Visit
+            </button>
+          </div>
+          <!-- Items Table -->
+          <div class="items-table">
+            <table mat-table [dataSource]="invoice.items" class="items-table-content">
+              <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef>Description</th>
+                <td mat-cell *matCellDef="let item">{{ item.description }}</td>
+              </ng-container>
+              <ng-container matColumnDef="qty">
+                <th mat-header-cell *matHeaderCellDef>Qty</th>
+                <td mat-cell *matCellDef="let item">{{ item.quantity }}</td>
+              </ng-container>
+              <ng-container matColumnDef="rate">
+                <th mat-header-cell *matHeaderCellDef>Rate</th>
+                <td mat-cell *matCellDef="let item">{{ currencyFmt(item.unitPrice) }}</td>
+              </ng-container>
+              <ng-container matColumnDef="discount">
+                <th mat-header-cell *matHeaderCellDef>Discount</th>
+                <td mat-cell *matCellDef="let item">{{ currencyFmt(item.discount || 0) }}</td>
+              </ng-container>
+              <ng-container matColumnDef="tax">
+                <th mat-header-cell *matHeaderCellDef>Tax</th>
+                <td mat-cell *matCellDef="let item">{{ item.taxRate || 0 }}%</td>
+              </ng-container>
+              <ng-container matColumnDef="total">
+                <th mat-header-cell *matHeaderCellDef>Total</th>
+                <td mat-cell *matCellDef="let item">
+                  <strong>{{ currencyFmt(getItemTotal(item)) }}</strong>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="paid">
+                <th mat-header-cell *matHeaderCellDef>Paid</th>
+                <td mat-cell *matCellDef="let item">
+                  <span class="paid-amount">{{ currencyFmt(item.amountPaid || 0) }}</span>
+                  <div class="item-progress">
+                    <mat-progress-bar
+                      mode="determinate"
+                      [value]="getItemTotal(item) > 0 ? ((item.amountPaid || 0) / getItemTotal(item) * 100) : 0"
+                      color="primary">
+                    </mat-progress-bar>
+                  </div>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="balance">
+                <th mat-header-cell *matHeaderCellDef>Balance</th>
+                <td mat-cell *matCellDef="let item">
+                  <span [class.overdue]="getItemBalance(item) > 0">
+                    {{ currencyFmt(getItemBalance(item)) }}
+                  </span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let item">
+                  <button
+                    mat-icon-button
+                    color="primary"
+                    (click)="recordItemPayment(item)"
+                    [disabled]="getItemBalance(item) <= 0"
+                    matTooltip="Record Payment">
+                    <mat-icon>payments</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" matTooltip="Remove">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="['description', 'qty', 'rate', 'discount', 'tax', 'total', 'paid', 'balance', 'actions']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['description', 'qty', 'rate', 'discount', 'tax', 'total', 'paid', 'balance', 'actions']"></tr>
+            </table>
+          </div>
+          <!-- Add Item Form -->
+          <div class="add-item-section">
+            <mat-form-field appearance="outline">
+              <mat-label>Enter item description</mat-label>
+              <input matInput placeholder="e.g., Dressing, Consultation fees" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Qty</mat-label>
+              <input matInput type="number" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Rate</mat-label>
+              <input matInput type="number" />
+            </mat-form-field>
+            <button mat-flat-button color="primary">
+              <mat-icon>add</mat-icon>
+              Add Item
+            </button>
+          </div>
+          <!-- Totals Summary -->
+          <div class="totals-summary">
+            <div class="total-row">
+              <span>Subtotal:</span>
+              <strong>{{ currencyFmt(invoice.subTotal) }}</strong>
+            </div>
+            <div class="total-row">
+              <span>Tax (10%):</span>
+              <strong>{{ currencyFmt(invoice.taxTotal) }}</strong>
+            </div>
+            <div class="total-row grand-total">
+              <span>Total:</span>
+              <strong>{{ currencyFmt(invoice.total) }}</strong>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+      <!-- Payments Tab -->
+      <mat-tab label="Payments">
+        <div class="tab-content payments-tab">
+          <table mat-table [dataSource]="payments" class="payments-table">
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let payment">{{ payment.date | date:'d MMM yyyy HH:mm' }}</td>
             </ng-container>
-
-            <ng-container matColumnDef="qty">
-              <th mat-header-cell *matHeaderCellDef>Qty</th>
-              <td mat-cell *matCellDef="let item">{{ item.quantity }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="rate">
-              <th mat-header-cell *matHeaderCellDef>Rate</th>
-              <td mat-cell *matCellDef="let item">{{ currencyFmt(item.unitPrice) }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="discount">
-              <th mat-header-cell *matHeaderCellDef>Discount</th>
-              <td mat-cell *matCellDef="let item">{{ currencyFmt(item.discount || 0) }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="tax">
-              <th mat-header-cell *matHeaderCellDef>Tax</th>
-              <td mat-cell *matCellDef="let item">{{ item.taxRate || 0 }}%</td>
-            </ng-container>
-
-            <ng-container matColumnDef="total">
-              <th mat-header-cell *matHeaderCellDef>Total</th>
-              <td mat-cell *matCellDef="let item">
-                <strong>{{ currencyFmt(getItemTotal(item)) }}</strong>
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>Amount</th>
+              <td mat-cell *matCellDef="let payment">
+                <strong>{{ currencyFmt(payment.amount) }}</strong>
               </td>
             </ng-container>
-
-            <ng-container matColumnDef="paid">
-              <th mat-header-cell *matHeaderCellDef>Paid</th>
-              <td mat-cell *matCellDef="let item">
-                <span class="paid-amount">{{ currencyFmt(item.amountPaid || 0) }}</span>
-                <div class="item-progress">
-                  <mat-progress-bar 
-                    mode="determinate" 
-                    [value]="getItemTotal(item) > 0 ? ((item.amountPaid || 0) / getItemTotal(item) * 100) : 0"
-                    color="primary">
-                  </mat-progress-bar>
-                </div>
+            <ng-container matColumnDef="method">
+              <th mat-header-cell *matHeaderCellDef>Method</th>
+              <td mat-cell *matCellDef="let payment">
+                <mat-chip>{{ payment.method }}</mat-chip>
               </td>
             </ng-container>
-
-            <ng-container matColumnDef="balance">
-              <th mat-header-cell *matHeaderCellDef>Balance</th>
-              <td mat-cell *matCellDef="let item">
-                <span [class.overdue]="getItemBalance(item) > 0">
-                  {{ currencyFmt(getItemBalance(item)) }}
-                </span>
-              </td>
+            <ng-container matColumnDef="reference">
+              <th mat-header-cell *matHeaderCellDef>Reference</th>
+              <td mat-cell *matCellDef="let payment">{{ payment.reference || '-' }}</td>
             </ng-container>
-
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>Actions</th>
-              <td mat-cell *matCellDef="let item">
-                <button 
-                  mat-icon-button 
-                  color="primary"
-                  (click)="recordItemPayment(item)"
-                  [disabled]="getItemBalance(item) <= 0"
-                  matTooltip="Record Payment">
-                  <mat-icon>payments</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" matTooltip="Remove">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
+            <ng-container matColumnDef="notes">
+              <th mat-header-cell *matHeaderCellDef>Notes</th>
+              <td mat-cell *matCellDef="let payment">{{ payment.notes || '-' }}</td>
             </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="['description', 'qty', 'rate', 'discount', 'tax', 'total', 'paid', 'balance', 'actions']"></tr>
-            <tr mat-row *matRowDef="let row; columns: ['description', 'qty', 'rate', 'discount', 'tax', 'total', 'paid', 'balance', 'actions']"></tr>
+            <tr mat-header-row *matHeaderRowDef="displayedPaymentColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedPaymentColumns"></tr>
           </table>
-        </div>
-
-        <!-- Add Item Form -->
-        <div class="add-item-section">
-          <mat-form-field appearance="outline">
-            <mat-label>Enter item description</mat-label>
-            <input matInput placeholder="e.g., Dressing, Consultation fees" />
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Qty</mat-label>
-            <input matInput type="number" />
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Rate</mat-label>
-            <input matInput type="number" />
-          </mat-form-field>
-          <button mat-flat-button color="primary">
-            <mat-icon>add</mat-icon>
-            Add Item
-          </button>
-        </div>
-
-        <!-- Totals Summary -->
-        <div class="totals-summary">
-          <div class="total-row">
-            <span>Subtotal:</span>
-            <strong>{{ currencyFmt(invoice.subTotal) }}</strong>
-          </div>
-          <div class="total-row">
-            <span>Tax (10%):</span>
-            <strong>{{ currencyFmt(invoice.taxTotal) }}</strong>
-          </div>
-          <div class="total-row grand-total">
-            <span>Total:</span>
-            <strong>{{ currencyFmt(invoice.total) }}</strong>
-          </div>
-        </div>
-      </div>
-    </mat-tab>
-
-    <!-- Payments Tab -->
-    <mat-tab label="Payments">
-      <div class="tab-content payments-tab">
-        <table mat-table [dataSource]="payments" class="payments-table">
-          <ng-container matColumnDef="date">
-            <th mat-header-cell *matHeaderCellDef>Date</th>
-            <td mat-cell *matCellDef="let payment">{{ payment.date | date:'d MMM yyyy HH:mm' }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="amount">
-            <th mat-header-cell *matHeaderCellDef>Amount</th>
-            <td mat-cell *matCellDef="let payment">
-              <strong>{{ currencyFmt(payment.amount) }}</strong>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="method">
-            <th mat-header-cell *matHeaderCellDef>Method</th>
-            <td mat-cell *matCellDef="let payment">
-              <mat-chip>{{ payment.method }}</mat-chip>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="reference">
-            <th mat-header-cell *matHeaderCellDef>Reference</th>
-            <td mat-cell *matCellDef="let payment">{{ payment.reference || '-' }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="notes">
-            <th mat-header-cell *matHeaderCellDef>Notes</th>
-            <td mat-cell *matCellDef="let payment">{{ payment.notes || '-' }}</td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedPaymentColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedPaymentColumns"></tr>
-        </table>
-
-        <div *ngIf="payments.length === 0" class="no-payments">
-          <mat-icon>receipt_long</mat-icon>
-          <p>No payments recorded yet</p>
-        </div>
-      </div>
-    </mat-tab>
-
-    <!-- Summary Tab -->
-    <mat-tab label="Summary">
-      <div class="tab-content summary-tab">
-        <mat-card class="summary-card">
-          <h3>Invoice Summary</h3>
-          <div class="summary-row">
-            <span>Subtotal:</span>
-            <strong>{{ currencyFmt(invoice.subTotal) }}</strong>
-          </div>
-          <div class="summary-row">
-            <span>Discount:</span>
-            <strong>{{ currencyFmt(invoice.discountTotal) }}</strong>
-          </div>
-          <div class="summary-row">
-            <span>Tax:</span>
-            <strong>{{ currencyFmt(invoice.taxTotal) }}</strong>
-          </div>
-          <div class="summary-row grand-total">
-            <span>Total:</span>
-            <strong>{{ currencyFmt(invoice.total) }}</strong>
-          </div>
-        </mat-card>
-
-        <mat-card class="summary-card">
-          <h3>Patient Information</h3>
-          <div class="info-row">
-            <span>Name:</span>
-            <span>{{ invoice.patientName }}</span>
-          </div>
-          <div class="info-row">
-            <span>Patient ID:</span>
-            <span>{{ invoice.patientId }}</span>
-          </div>
-        </mat-card>
-
-        <mat-card class="summary-card" *ngIf="invoice.notes">
-          <h3>Notes</h3>
-          <p>{{ invoice.notes }}</p>
-        </mat-card>
-      </div>
-    </mat-tab>
-
-    <!-- Activity Tab -->
-    <mat-tab label="Activity">
-      <div class="tab-content activity-tab">
-        <div class="activity-list">
-          <div class="activity-item">
-            <mat-icon>payment</mat-icon>
-            <div class="activity-content">
-              <div class="activity-title">Payment recorded</div>
-              <div class="activity-time">2 hours ago</div>
+          @if (payments.length === 0) {
+            <div class="no-payments">
+              <mat-icon>receipt_long</mat-icon>
+              <p>No payments recorded yet</p>
             </div>
-            <span class="activity-amount">{{ currencyFmt(600) }}</span>
-          </div>
-          <div class="activity-item">
-            <mat-icon>edit</mat-icon>
-            <div class="activity-content">
-              <div class="activity-title">Invoice created</div>
-              <div class="activity-time">{{ invoice.date | date:'d MMM yyyy HH:mm' }}</div>
+          }
+        </div>
+      </mat-tab>
+      <!-- Summary Tab -->
+      <mat-tab label="Summary">
+        <div class="tab-content summary-tab">
+          <mat-card class="summary-card">
+            <h3>Invoice Summary</h3>
+            <div class="summary-row">
+              <span>Subtotal:</span>
+              <strong>{{ currencyFmt(invoice.subTotal) }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Discount:</span>
+              <strong>{{ currencyFmt(invoice.discountTotal) }}</strong>
+            </div>
+            <div class="summary-row">
+              <span>Tax:</span>
+              <strong>{{ currencyFmt(invoice.taxTotal) }}</strong>
+            </div>
+            <div class="summary-row grand-total">
+              <span>Total:</span>
+              <strong>{{ currencyFmt(invoice.total) }}</strong>
+            </div>
+          </mat-card>
+          <mat-card class="summary-card">
+            <h3>Patient Information</h3>
+            <div class="info-row">
+              <span>Name:</span>
+              <span>{{ invoice.patientName }}</span>
+            </div>
+            <div class="info-row">
+              <span>Patient ID:</span>
+              <span>{{ invoice.patientId }}</span>
+            </div>
+          </mat-card>
+          @if (invoice.notes) {
+            <mat-card class="summary-card">
+              <h3>Notes</h3>
+              <p>{{ invoice.notes }}</p>
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+      <!-- Activity Tab -->
+      <mat-tab label="Activity">
+        <div class="tab-content activity-tab">
+          <div class="activity-list">
+            <div class="activity-item">
+              <mat-icon>payment</mat-icon>
+              <div class="activity-content">
+                <div class="activity-title">Payment recorded</div>
+                <div class="activity-time">2 hours ago</div>
+              </div>
+              <span class="activity-amount">{{ currencyFmt(600) }}</span>
+            </div>
+            <div class="activity-item">
+              <mat-icon>edit</mat-icon>
+              <div class="activity-content">
+                <div class="activity-title">Invoice created</div>
+                <div class="activity-time">{{ invoice.date | date:'d MMM yyyy HH:mm' }}</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </mat-tab>
-
-    <!-- Files Tab -->
-    <mat-tab label="Files">
-      <div class="tab-content files-tab">
-        <div class="no-files">
-          <mat-icon>folder_open</mat-icon>
-          <p>No files attached</p>
-          <button mat-stroked-button>
-            <mat-icon>upload</mat-icon>
-            Upload File
-          </button>
+      </mat-tab>
+      <!-- Files Tab -->
+      <mat-tab label="Files">
+        <div class="tab-content files-tab">
+          <div class="no-files">
+            <mat-icon>folder_open</mat-icon>
+            <p>No files attached</p>
+            <button mat-stroked-button>
+              <mat-icon>upload</mat-icon>
+              Upload File
+            </button>
+          </div>
         </div>
-      </div>
-    </mat-tab>
-  </mat-tab-group>
-</div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+}

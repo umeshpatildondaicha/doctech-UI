@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MatDialogContainer } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -22,18 +22,17 @@ import { DIALOG_DATA_TOKEN } from '@lk/core';
     templateUrl: './doctor-create.component.html',
     styleUrl: './doctor-create.component.scss',
     imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MatIconModule,
-        MatChipsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatButtonModule,
-        MatProgressSpinnerModule,
-        MatTabsModule
-    ]
+    FormsModule,
+    ReactiveFormsModule,
+    MatIconModule,
+    MatChipsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    MatTabsModule
+]
 })
 export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<AdminDoctorCreateComponent>);

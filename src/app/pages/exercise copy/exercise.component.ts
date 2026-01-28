@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
@@ -23,26 +23,25 @@ import { ExerciseCardComponent } from '../../components/exercise-card/exercise-c
 @Component({
     selector: 'app-exercise',
     imports: [
-        CommonModule,
-        MatTabsModule,
-        MatDialogModule,
-        MatCardModule,
-        MatButtonModule,
-        MatIconModule,
-        MatInputModule,
-        MatFormFieldModule,
-        MatChipsModule,
-        MatBadgeModule,
-        MatMenuModule,
-        MatTooltipModule,
-        MatSelectModule,
-        GridComponent,
-        IconComponent,
-        FormsModule,
-        ReactiveFormsModule,
-        ExerciseCardComponent,
-        AppInputComponent
-    ],
+    MatTabsModule,
+    MatDialogModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatChipsModule,
+    MatBadgeModule,
+    MatMenuModule,
+    MatTooltipModule,
+    MatSelectModule,
+    GridComponent,
+    IconComponent,
+    FormsModule,
+    ReactiveFormsModule,
+    ExerciseCardComponent,
+    AppInputComponent
+],
     templateUrl: './exercise.component.html',
     styleUrl: './exercise.component.scss'
 })

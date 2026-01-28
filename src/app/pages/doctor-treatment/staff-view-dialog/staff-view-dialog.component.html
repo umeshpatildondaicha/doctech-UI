@@ -11,7 +11,7 @@
             <app-icon fontIcon="edit" [size]="14" [color]="'#fff'"></app-icon>
           </button>
         </div>
-        
+
         <div class="profile-info">
           <h2 class="staff-name">{{ staff.name }}</h2>
           <p class="staff-role">{{ staff.role }}</p>
@@ -107,7 +107,9 @@
             <div class="table-col">{{ staff.shift }}</div>
             <div class="table-col">
               {{ staff.nextShift ? (staff.nextShift | date:'dd MMM yyyy') : 'Ongoing' }}
-              <span *ngIf="staff.nextShift"> → {{ staff.nextShift | date:'dd MMM yyyy' }}</span>
+              @if (staff.nextShift) {
+                <span> → {{ staff.nextShift | date:'dd MMM yyyy' }}</span>
+              }
             </div>
             <div class="table-col">
               <span class="status-dot" [style.background-color]="getStatusColor(staff.status)"></span>

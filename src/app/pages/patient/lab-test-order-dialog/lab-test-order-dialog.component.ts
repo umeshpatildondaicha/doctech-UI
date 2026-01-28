@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,11 +16,10 @@ export interface LabTestOrderDialogData {
 @Component({
     selector: 'app-lab-test-order-dialog',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        AppInputComponent,
-        AppSelectboxComponent
-    ],
+    ReactiveFormsModule,
+    AppInputComponent,
+    AppSelectboxComponent
+],
     templateUrl: './lab-test-order-dialog.component.html',
     styleUrls: ['./lab-test-order-dialog.component.scss']
 })

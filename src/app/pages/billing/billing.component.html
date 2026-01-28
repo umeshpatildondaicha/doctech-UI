@@ -6,9 +6,11 @@
     (actionClicked)="onHeaderAction($event)">
   </app-admin-page-header>
 
-  <div class="demo-pill" *ngIf="isDemoData">
-    Demo data (backend not connected)
-  </div>
+  @if (isDemoData) {
+    <div class="demo-pill">
+      Demo data (backend not connected)
+    </div>
+  }
 
   <!-- Summary Cards -->
   <app-admin-stats-card [stats]="statCards"></app-admin-stats-card>
@@ -36,69 +38,77 @@
   </app-admin-tabs>
 
   <!-- Invoices -->
-  <div *ngIf="activeMainTab === 'invoices'">
-    <app-admin-tabs
-      [tabs]="statusTabs"
-      [activeTabId]="activeStatus"
-      variant="pills"
-      size="small"
-      (tabChanged)="onStatusTabChanged($event)">
-    </app-admin-tabs>
-
-    <div class="grid-wrapper">
-      <app-grid
-        [rowData]="visibleInvoices"
-        [columnDefs]="columnDefs"
-        [gridOptions]="gridOptions"
-        [showAddButton]="false"
-        [searchPlaceholder]="'Search invoices...'"
-        [height]="'calc(100vh - 520px)'"
-        [width]="'100%'"
-        (rowClicked)="onRowClick($event)">
-      </app-grid>
+  @if (activeMainTab === 'invoices') {
+    <div>
+      <app-admin-tabs
+        [tabs]="statusTabs"
+        [activeTabId]="activeStatus"
+        variant="pills"
+        size="small"
+        (tabChanged)="onStatusTabChanged($event)">
+      </app-admin-tabs>
+      <div class="grid-wrapper">
+        <app-grid
+          [rowData]="visibleInvoices"
+          [columnDefs]="columnDefs"
+          [gridOptions]="gridOptions"
+          [showAddButton]="false"
+          [searchPlaceholder]="'Search invoices...'"
+          [height]="'calc(100vh - 520px)'"
+          [width]="'100%'"
+          (rowClicked)="onRowClick($event)">
+        </app-grid>
+      </div>
+      @if (!loading && visibleInvoices.length === 0) {
+        <div class="empty">
+          No invoices found.
+          <button mat-stroked-button color="primary" (click)="applyStatusFilter('ALL')">Clear filter</button>
+        </div>
+      }
     </div>
-
-    <div *ngIf="!loading && visibleInvoices.length === 0" class="empty">
-      No invoices found.
-      <button mat-stroked-button color="primary" (click)="applyStatusFilter('ALL')">Clear filter</button>
-    </div>
-  </div>
+  }
 
   <!-- Payments -->
-  <div *ngIf="activeMainTab === 'payments'">
-    <div class="grid-wrapper">
-      <app-grid
-        [rowData]="allPayments"
-        [columnDefs]="paymentsColumnDefs"
-        [gridOptions]="paymentsGridOptions"
-        [showAddButton]="false"
-        [searchPlaceholder]="'Search payments...'"
-        [height]="'calc(100vh - 520px)'"
-        [width]="'100%'">
-      </app-grid>
+  @if (activeMainTab === 'payments') {
+    <div>
+      <div class="grid-wrapper">
+        <app-grid
+          [rowData]="allPayments"
+          [columnDefs]="paymentsColumnDefs"
+          [gridOptions]="paymentsGridOptions"
+          [showAddButton]="false"
+          [searchPlaceholder]="'Search payments...'"
+          [height]="'calc(100vh - 520px)'"
+          [width]="'100%'">
+        </app-grid>
+      </div>
+      @if (!loading && allPayments.length === 0) {
+        <div class="empty">
+          No payments found.
+        </div>
+      }
     </div>
-
-    <div *ngIf="!loading && allPayments.length === 0" class="empty">
-      No payments found.
-    </div>
-  </div>
+  }
 
   <!-- Items / Services -->
-  <div *ngIf="activeMainTab === 'items'">
-    <div class="grid-wrapper">
-      <app-grid
-        [rowData]="allItems"
-        [columnDefs]="itemsColumnDefs"
-        [gridOptions]="itemsGridOptions"
-        [showAddButton]="false"
-        [searchPlaceholder]="'Search items/services...'"
-        [height]="'calc(100vh - 520px)'"
-        [width]="'100%'">
-      </app-grid>
+  @if (activeMainTab === 'items') {
+    <div>
+      <div class="grid-wrapper">
+        <app-grid
+          [rowData]="allItems"
+          [columnDefs]="itemsColumnDefs"
+          [gridOptions]="itemsGridOptions"
+          [showAddButton]="false"
+          [searchPlaceholder]="'Search items/services...'"
+          [height]="'calc(100vh - 520px)'"
+          [width]="'100%'">
+        </app-grid>
+      </div>
+      @if (!loading && allItems.length === 0) {
+        <div class="empty">
+          No items found.
+        </div>
+      }
     </div>
-
-    <div *ngIf="!loading && allItems.length === 0" class="empty">
-      No items found.
-    </div>
-  </div>
+  }
 </div>

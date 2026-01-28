@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -30,22 +30,21 @@ interface ExerciseGroup {
 @Component({
     selector: 'app-exercise-set-create',
     imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatButtonModule,
-        MatIconModule,
-        MatDialogModule,
-        MatChipsModule,
-        MatTooltipModule,
-        AppButtonComponent,
-        AppInputComponent,
-        AppSelectboxComponent,
-        IconComponent
-    ],
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDialogModule,
+    MatChipsModule,
+    MatTooltipModule,
+    AppButtonComponent,
+    AppInputComponent,
+    AppSelectboxComponent,
+    IconComponent
+],
     templateUrl: './exercise-set-create.component.html',
     styleUrl: './exercise-set-create.component.scss'
 })

@@ -24,21 +24,25 @@
       <mat-form-field appearance="outline" class="meal-time-field">
         <mat-label>Time</mat-label>
         <mat-select [(ngModel)]="mealTime.time">
-          <mat-option *ngFor="let time of timeOptions" [value]="time">
-            {{ time }}
-          </mat-option>
+          @for (time of timeOptions; track time) {
+            <mat-option [value]="time">
+              {{ time }}
+            </mat-option>
+          }
         </mat-select>
         <mat-hint>Select the time for this meal</mat-hint>
       </mat-form-field>
     </div>
 
-    <div class="preview-section" *ngIf="mealTime.label && mealTime.time">
-      <h4>Preview</h4>
-      <div class="preview-card">
-        <div class="preview-time">{{ mealTime.time }}</div>
-        <div class="preview-label">{{ mealTime.label }}</div>
+    @if (mealTime.label && mealTime.time) {
+      <div class="preview-section">
+        <h4>Preview</h4>
+        <div class="preview-card">
+          <div class="preview-time">{{ mealTime.time }}</div>
+          <div class="preview-label">{{ mealTime.label }}</div>
+        </div>
       </div>
-    </div>
+    }
   </div>
 
   <div mat-dialog-actions class="dialog-actions">

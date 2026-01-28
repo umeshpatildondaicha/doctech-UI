@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
@@ -50,25 +50,24 @@ interface DoctorStats {
 @Component({
     selector: 'app-doctor',
     imports: [
-        CommonModule,
-        FormsModule,
-        MatSelectModule,
-        MatInputModule,
-        MatButtonModule,
-        MatChipsModule,
-        MatIconModule,
-        MatTabsModule,
-        MatCardModule,
-        MatBadgeModule,
-        MatTooltipModule,
-        MatMenuModule,
-        MatCheckboxModule,
-        MatProgressBarModule,
-        IconComponent,
-        AppInputComponent,
-        AppButtonComponent,
-        AppSelectboxComponent
-    ],
+    FormsModule,
+    MatSelectModule,
+    MatInputModule,
+    MatButtonModule,
+    MatChipsModule,
+    MatIconModule,
+    MatTabsModule,
+    MatCardModule,
+    MatBadgeModule,
+    MatTooltipModule,
+    MatMenuModule,
+    MatCheckboxModule,
+    MatProgressBarModule,
+    IconComponent,
+    AppInputComponent,
+    AppButtonComponent,
+    AppSelectboxComponent
+],
     templateUrl: './doctor.component.html',
     styleUrl: './doctor.component.scss'
 })

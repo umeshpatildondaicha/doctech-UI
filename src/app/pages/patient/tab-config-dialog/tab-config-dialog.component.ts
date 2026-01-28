@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -22,12 +22,11 @@ export interface TabConfigDialogData {
 @Component({
     selector: 'app-tab-config-dialog',
     imports: [
-        CommonModule,
-        FormsModule,
-        MatSlideToggleModule,
-        IconComponent,
-        AppButtonComponent
-    ],
+    FormsModule,
+    MatSlideToggleModule,
+    IconComponent,
+    AppButtonComponent
+],
     templateUrl: './tab-config-dialog.component.html',
     styleUrls: ['./tab-config-dialog.component.scss']
 })

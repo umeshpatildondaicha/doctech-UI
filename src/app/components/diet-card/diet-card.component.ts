@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Diet } from '../../interfaces/diet.interface';
 import {
   ListingCardAction,
@@ -11,9 +11,8 @@ import {
 @Component({
     selector: 'app-diet-card',
     imports: [
-        CommonModule,
-        ListingCardComponent
-    ],
+    ListingCardComponent
+],
     templateUrl: './diet-card.component.html',
     styleUrl: './diet-card.component.scss'
 })

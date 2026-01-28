@@ -117,15 +117,19 @@
               <mat-icon>cloud_upload</mat-icon>
               Choose files
             </button>
-            
-            <div class="selected-files" *ngIf="selectedFiles.length > 0">
-              <div class="file-item" *ngFor="let file of selectedFiles; let i = index">
-                <span class="file-name">{{ file.name }}</span>
-                <button type="button" mat-icon-button (click)="removeFile(i)" class="remove-file">
-                  <mat-icon>close</mat-icon>
-                </button>
+
+            @if (selectedFiles.length > 0) {
+              <div class="selected-files">
+                @for (file of selectedFiles; track file; let i = $index) {
+                  <div class="file-item">
+                    <span class="file-name">{{ file.name }}</span>
+                    <button type="button" mat-icon-button (click)="removeFile(i)" class="remove-file">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                }
               </div>
-            </div>
+            }
           </div>
         </div>
       </div>
@@ -134,42 +138,41 @@
       <div class="form-section">
         <h3 class="section-title">Sets Configuration</h3>
         <div class="sets-container" formArrayName="sets">
-          <div class="set-item" *ngFor="let set of setsArray.controls; let i = index" [formGroupName]="i">
-            <div class="set-header">
-              <h4>Set {{ i + 1 }}</h4>
-              <button type="button" mat-icon-button (click)="removeSet(i)" *ngIf="setsArray.length > 1" class="remove-set">
-                <mat-icon>delete</mat-icon>
+          @for (set of setsArray.controls; track set; let i = $index) {
+            <div class="set-item" [formGroupName]="i">
+              <div class="set-header">
+                <h4>Set {{ i + 1 }}</h4>
+                @if (setsArray.length > 1) {
+                  <button type="button" mat-icon-button (click)="removeSet(i)" class="remove-set">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </div>
+              <div class="set-fields">
+                <div class="field-group">
+                  <label>Reps</label>
+                  <input type="number" formControlName="reps" min="1" class="number-input">
+                </div>
+                <div class="field-group">
+                  <label>Hold Time (sec)</label>
+                  <input type="number" formControlName="holdTime" min="0" class="number-input">
+                </div>
+                <div class="field-group">
+                  <label>Rest Time (sec)</label>
+                  <input type="number" formControlName="restTime" min="0" class="number-input">
+                </div>
+                <div class="field-group">
+                  <label>Tempo</label>
+                  <input type="text" formControlName="tempo" class="text-input">
+                </div>
+              </div>
+              <button type="button" mat-stroked-button (click)="applySetToAll(i)" class="apply-set-btn">
+                Apply set{{ i + 1 }} → all
               </button>
             </div>
-            
-            <div class="set-fields">
-              <div class="field-group">
-                <label>Reps</label>
-                <input type="number" formControlName="reps" min="1" class="number-input">
-              </div>
-              
-              <div class="field-group">
-                <label>Hold Time (sec)</label>
-                <input type="number" formControlName="holdTime" min="0" class="number-input">
-              </div>
-              
-              <div class="field-group">
-                <label>Rest Time (sec)</label>
-                <input type="number" formControlName="restTime" min="0" class="number-input">
-              </div>
-              
-              <div class="field-group">
-                <label>Tempo</label>
-                <input type="text" formControlName="tempo" class="text-input">
-              </div>
-            </div>
-            
-            <button type="button" mat-stroked-button (click)="applySetToAll(i)" class="apply-set-btn">
-              Apply set{{ i + 1 }} → all
-            </button>
-          </div>
+          }
         </div>
-        
+
         <div class="sets-actions">
           <button type="button" mat-stroked-button color="primary" (click)="addSet()" class="add-set-btn">
             <mat-icon>add</mat-icon>
@@ -179,4 +182,4 @@
       </div>
     </form>
   </div>
-</div> 
+</div>

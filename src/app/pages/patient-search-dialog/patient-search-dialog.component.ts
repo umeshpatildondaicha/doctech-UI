@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatDialogRef } from '@angular/material/dialog';
 import { DIALOG_DATA_TOKEN } from "@lk/core";
 import { filter } from 'rxjs';
@@ -43,21 +43,20 @@ export interface PatientSearchDialogData {
 @Component({
     selector: 'app-patient-search-dialog',
     imports: [
-        CommonModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatButtonModule,
-        MatIconModule,
-        MatCardModule,
-        MatChipsModule,
-        MatProgressSpinnerModule,
-        MatTooltipModule,
-        AppInputComponent,
-        AppButtonComponent,
-        AppSelectboxComponent,
-        IconComponent,
-        GridComponent
-    ],
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    AppInputComponent,
+    AppButtonComponent,
+    AppSelectboxComponent,
+    IconComponent,
+    GridComponent
+],
     templateUrl: './patient-search-dialog.component.html',
     styleUrls: ['./patient-search-dialog.component.scss']
 })

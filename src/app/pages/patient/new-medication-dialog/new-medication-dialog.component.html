@@ -25,30 +25,30 @@
         <div class="form-field">
           <label>Timing</label>
           <div class="timing-pills">
-            <button 
+            <button
               type="button"
-              class="pill" 
+              class="pill"
               [class.active]="formData.timing === 'Morning'"
               (click)="setTiming('Morning')">
               Morning
             </button>
-            <button 
+            <button
               type="button"
-              class="pill" 
+              class="pill"
               [class.active]="formData.timing === 'Afternoon'"
               (click)="setTiming('Afternoon')">
               Afternoon
             </button>
-            <button 
+            <button
               type="button"
-              class="pill" 
+              class="pill"
               [class.active]="formData.timing === 'Evening'"
               (click)="setTiming('Evening')">
               Evening
             </button>
-            <button 
+            <button
               type="button"
-              class="pill" 
+              class="pill"
               [class.active]="formData.timing === 'Night'"
               (click)="setTiming('Night')">
               Night
@@ -72,32 +72,40 @@
           <textarea rows="3" [(ngModel)]="formData.currentSymptoms" placeholder="Describe symptoms"></textarea>
         </div>
       </div>
-      <div class="form-actions" *ngIf="mode === 'create'">
-        <button mat-stroked-button (click)="onAddToCart()" [disabled]="!isFormValid">Add to Cart</button>
-      </div>
-    </div>
-    <div class="summary-area" *ngIf="mode === 'create'">
-      <h4>Requested Medications Summary</h4>
-      <div class="summary-list">
-        <div class="summary-item" *ngFor="let med of selectedMedicines">
-          <div class="summary-main">
-            <div class="summary-title">{{ med.name }}</div>
-            <div class="summary-sub">{{ med.dosage }} • {{ med.frequency }}</div>
-          </div>
-          <div class="summary-actions">
-            <button mat-icon-button (click)="onEditMedicine(med)">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button (click)="onRemoveMedicine(med.id)">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
+      @if (mode === 'create') {
+        <div class="form-actions">
+          <button mat-stroked-button (click)="onAddToCart()" [disabled]="!isFormValid">Add to Cart</button>
         </div>
-        <div *ngIf="selectedMedicines.length === 0" class="empty-summary">
-          <p>No medicines added yet. Fill the form and click "Add to Cart" to add medicines.</p>
+      }
+    </div>
+    @if (mode === 'create') {
+      <div class="summary-area">
+        <h4>Requested Medications Summary</h4>
+        <div class="summary-list">
+          @for (med of selectedMedicines; track med) {
+            <div class="summary-item">
+              <div class="summary-main">
+                <div class="summary-title">{{ med.name }}</div>
+                <div class="summary-sub">{{ med.dosage }} • {{ med.frequency }}</div>
+              </div>
+              <div class="summary-actions">
+                <button mat-icon-button (click)="onEditMedicine(med)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button (click)="onRemoveMedicine(med.id)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+          @if (selectedMedicines.length === 0) {
+            <div class="empty-summary">
+              <p>No medicines added yet. Fill the form and click "Add to Cart" to add medicines.</p>
+            </div>
+          }
         </div>
       </div>
-    </div>
+    }
   </div>
 </div>
 

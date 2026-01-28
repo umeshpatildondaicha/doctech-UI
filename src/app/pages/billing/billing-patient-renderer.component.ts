@@ -1,16 +1,18 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-billing-patient-renderer',
-    imports: [CommonModule],
+    imports: [],
     template: `
     <div class="cell-two-line">
       <div class="primary clickable" (click)="navigateToPatient($event)">{{ name }}</div>
-      <div class="secondary" *ngIf="sub">{{ sub }}</div>
+      @if (sub) {
+        <div class="secondary">{{ sub }}</div>
+      }
     </div>
-  `,
+    `,
     styles: [`
     :host {
       display: flex;

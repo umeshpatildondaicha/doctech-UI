@@ -8,7 +8,7 @@
       (click)="setSection('schedule')"
       role="tab"
       [attr.aria-selected]="activeSection === 'schedule'"
-    >
+      >
       <app-icon fontIcon="schedule" [size]="18"></app-icon>
       <span>Schedule</span>
     </button>
@@ -19,13 +19,13 @@
       (click)="setSection('timings')"
       role="tab"
       [attr.aria-selected]="activeSection === 'timings'"
-    >
+      >
       <app-icon fontIcon="access_time" [size]="18"></app-icon>
       <span>Timings</span>
     </button>
   </div>
 
-  <ng-container *ngIf="activeSection === 'schedule'; else timingsSection">
+  @if (activeSection === 'schedule') {
     <!-- Schedule Top (screenshot-style) -->
     <div class="schedule-top">
       <div class="schedule-top-head">
@@ -41,22 +41,21 @@
           </div>
         </div>
       </div>
-
       <div class="week-strip-card">
         <div class="week-strip" aria-label="Week day selector">
-          <button
-            type="button"
-            class="week-day-btn"
-            *ngFor="let d of scheduleWeekStrip"
-            [class.active]="d.isSelected"
-            (click)="selectScheduleDate(d.date)"
-          >
-            <div class="wd">{{ d.weekdayShort }}</div>
-            <div class="dn">{{ d.dayNumber }}</div>
-          </button>
+          @for (d of scheduleWeekStrip; track d) {
+            <button
+              type="button"
+              class="week-day-btn"
+              [class.active]="d.isSelected"
+              (click)="selectScheduleDate(d.date)"
+              >
+              <div class="wd">{{ d.weekdayShort }}</div>
+              <div class="dn">{{ d.dayNumber }}</div>
+            </button>
+          }
         </div>
       </div>
-
       <div class="overview-row" aria-label="Schedule summary">
         <div class="ov-card">
           <div class="ov-ico blue"><mat-icon>schedule</mat-icon></div>
@@ -87,14 +86,12 @@
           </div>
         </div>
       </div>
-
       <div class="filter-strip">
         <div class="search-box">
           <mat-icon class="search-ico">search</mat-icon>
           <input type="text" placeholder="Search Patient name" [(ngModel)]="scheduleSearch" />
         </div>
       </div>
-
       <!-- Actions -->
       <div class="schedule-secondary">
         <div class="header-actions">
@@ -112,735 +109,740 @@
         </div>
       </div>
     </div>
-
-  <!-- Filter Dialog -->
-  <div class="filter-overlay" *ngIf="showFilters" (click)="toggleFilters()">
-    <div class="filter-dialog" (click)="$event.stopPropagation()">
-      <div class="dialog-header">
-        <h3>Filter Appointments</h3>
-        <app-icon fontIcon="close" (iconClick)="toggleFilters()"></app-icon>
-      </div>
-      
-      <div class="dialog-content">
-        <form [formGroup]="filterForm" class="filter-form">
-          <div class="filter-row">
-            <mat-form-field>
-              <mat-label>Date Range</mat-label>
-              <input matInput formControlName="dateRange" type="date">
-            </mat-form-field>
-            
-            <mat-form-field>
-              <mat-label>Status</mat-label>
-              <mat-select formControlName="status">
-                <mat-option value="all">All</mat-option>
-                <mat-option value="scheduled">Scheduled</mat-option>
-                <mat-option value="completed">Completed</mat-option>
-                <mat-option value="pending">Pending</mat-option>
-                <mat-option value="canceled">Canceled</mat-option>
-              </mat-select>
-            </mat-form-field>
-            
-            <mat-form-field>
-              <mat-label>Search</mat-label>
-              <input matInput formControlName="searchTerm" placeholder="Search appointments...">
-            </mat-form-field>
+    <!-- Filter Dialog -->
+    @if (showFilters) {
+      <div class="filter-overlay" (click)="toggleFilters()">
+        <div class="filter-dialog" (click)="$event.stopPropagation()">
+          <div class="dialog-header">
+            <h3>Filter Appointments</h3>
+            <app-icon fontIcon="close" (iconClick)="toggleFilters()"></app-icon>
           </div>
-        </form>
-      </div>
-      
-      <div class="dialog-footer">
-        <app-button appearance="basic" (btnClick)="resetFilters()">Reset</app-button>
-        <app-button appearance="raised" (btnClick)="applyFilters()">Apply Filters</app-button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Content Area -->
-  <div class="schedule-content">
-    <!-- Single best view: Appointments listing -->
-    <div class="sched-list-card">
-      <div class="sched-list-head">
-        <div class="sched-list-title">
-          <h3>Appointments</h3>
-          <p>{{ selectedDate | date:'EEEE, MMM d, y' }}</p>
+          <div class="dialog-content">
+            <form [formGroup]="filterForm" class="filter-form">
+              <div class="filter-row">
+                <mat-form-field>
+                  <mat-label>Date Range</mat-label>
+                  <input matInput formControlName="dateRange" type="date">
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label>Status</mat-label>
+                  <mat-select formControlName="status">
+                    <mat-option value="all">All</mat-option>
+                    <mat-option value="scheduled">Scheduled</mat-option>
+                    <mat-option value="completed">Completed</mat-option>
+                    <mat-option value="pending">Pending</mat-option>
+                    <mat-option value="canceled">Canceled</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label>Search</mat-label>
+                  <input matInput formControlName="searchTerm" placeholder="Search appointments...">
+                </mat-form-field>
+              </div>
+            </form>
+          </div>
+          <div class="dialog-footer">
+            <app-button appearance="basic" (btnClick)="resetFilters()">Reset</app-button>
+            <app-button appearance="raised" (btnClick)="applyFilters()">Apply Filters</app-button>
+          </div>
         </div>
-        <div class="sched-list-meta">
-          <span class="sched-count">{{ getScheduleListAppointments().length }} item(s)</span>
-        </div>
       </div>
-
-      <div class="sched-list-body">
-        <div class="sched-availability" *ngIf="isSlotBasedScheduling(); else dayCapacity">
-          <div class="avail-left">
-            <div class="avail-title">Available slots</div>
-            <div class="avail-sub">
-              {{ scheduleSummary.available }} available
-              <span class="dot-sep">•</span>
-              {{ doctorSchedule.maxAppointmentsPerSlot || 1 }} per slot
+    }
+    <!-- Main Content Area -->
+    <div class="schedule-content">
+      <!-- Single best view: Appointments listing -->
+      <div class="sched-list-card">
+        <div class="sched-list-head">
+          <div class="sched-list-title">
+            <h3>Appointments</h3>
+            <p>{{ selectedDate | date:'EEEE, MMM d, y' }}</p>
+          </div>
+          <div class="sched-list-meta">
+            <span class="sched-count">{{ getScheduleListAppointments().length }} item(s)</span>
+          </div>
+        </div>
+        <div class="sched-list-body">
+          @if (isSlotBasedScheduling()) {
+            <div class="sched-availability">
+              <div class="avail-left">
+                <div class="avail-title">Available slots</div>
+                <div class="avail-sub">
+                  {{ scheduleSummary.available }} available
+                  <span class="dot-sep">•</span>
+                  {{ doctorSchedule.maxAppointmentsPerSlot || 1 }} per slot
+                </div>
+              </div>
+              @if (scheduleSummary.available > 0) {
+                <div class="avail-right">
+                  <div class="time-chips">
+                    @for (t of getAvailabilityTimeChips(10); track t) {
+                      <button
+                        type="button"
+                        class="time-chip"
+                        (click)="openQuickAddAt(t)"
+                        >
+                        {{ formatTimeForDisplay(t) }}
+                      </button>
+                    }
+                    @if (getAvailabilityExtraCount(10) > 0) {
+                      <span class="time-chip more">+{{ getAvailabilityExtraCount(10) }} more</span>
+                    }
+                  </div>
+                </div>
+              } @else {
+                <div class="avail-empty">No open slots for this date.</div>
+              }
             </div>
-          </div>
-          <div class="avail-right" *ngIf="scheduleSummary.available > 0; else noSlots">
-            <div class="time-chips">
+          } @else {
+            <div class="sched-availability">
+              <div class="avail-left">
+                <div class="avail-title">Daily capacity</div>
+                <div class="avail-sub">
+                  {{ scheduleAvailability.remainingToday ?? 0 }} remaining
+                  <span class="dot-sep">•</span>
+                  {{ (scheduleAvailability.bookedToday ?? 0) }}/{{ (scheduleAvailability.maxPerDay ?? 0) }} booked
+                </div>
+              </div>
+              <div class="avail-right">
+                <span class="cap-pill">{{ scheduleAvailability.remainingToday ?? 0 }} slots left</span>
+                <button type="button" class="cap-add-btn" (click)="openNextAvailableSlot()" [disabled]="(scheduleAvailability.remainingToday ?? 0) <= 0">
+                  Add patient
+                </button>
+              </div>
+            </div>
+          }
+          @if (getScheduleListAppointments().length > 0) {
+            @for (appointment of getScheduleListAppointments(); track appointment) {
               <button
                 type="button"
-                class="time-chip"
-                *ngFor="let t of getAvailabilityTimeChips(10)"
-                (click)="openQuickAddAt(t)"
-              >
-                {{ formatTimeForDisplay(t) }}
-              </button>
-              <span class="time-chip more" *ngIf="getAvailabilityExtraCount(10) > 0">+{{ getAvailabilityExtraCount(10) }} more</span>
-            </div>
-          </div>
-          <ng-template #noSlots>
-            <div class="avail-empty">No open slots for this date.</div>
-          </ng-template>
-        </div>
-
-        <ng-template #dayCapacity>
-          <div class="sched-availability">
-            <div class="avail-left">
-              <div class="avail-title">Daily capacity</div>
-              <div class="avail-sub">
-                {{ scheduleAvailability.remainingToday ?? 0 }} remaining
-                <span class="dot-sep">•</span>
-                {{ (scheduleAvailability.bookedToday ?? 0) }}/{{ (scheduleAvailability.maxPerDay ?? 0) }} booked
-              </div>
-            </div>
-            <div class="avail-right">
-              <span class="cap-pill">{{ scheduleAvailability.remainingToday ?? 0 }} slots left</span>
-              <button type="button" class="cap-add-btn" (click)="openNextAvailableSlot()" [disabled]="(scheduleAvailability.remainingToday ?? 0) <= 0">
-                Add patient
-              </button>
-            </div>
-          </div>
-        </ng-template>
-
-        <ng-container *ngIf="getScheduleListAppointments().length > 0; else noApts">
-          <button
-            type="button"
-            class="apt-row"
-            *ngFor="let appointment of getScheduleListAppointments()"
-            (click)="viewAppointment(appointment)"
-          >
-            <div class="apt-left">
-              <div class="time-pill">{{ appointment.slotTime }}</div>
-            </div>
-
-            <div class="apt-mid">
-              <div class="apt-title">
-                <span class="apt-name">{{ appointment.patientName }}</span>
-                <span class="apt-doctor">{{ appointment.doctorName }}</span>
-              </div>
-              <div class="apt-sub" *ngIf="appointment.notes">{{ appointment.notes }}</div>
-            </div>
-
-            <div class="apt-right">
-              <span class="status-pill" [style.background-color]="getStatusColor(appointment.status)">
-                <mat-icon class="st-ico" [fontIcon]="getStatusIcon(appointment.status)"></mat-icon>
-                {{ appointment.status }}
-              </span>
-              <span class="row-actions" (click)="$event.stopPropagation()">
-                <button mat-icon-button type="button" aria-label="View" (click)="viewAppointment(appointment)"><mat-icon>visibility</mat-icon></button>
-                <button mat-icon-button type="button" aria-label="Edit" (click)="editAppointment(appointment)"><mat-icon>edit</mat-icon></button>
-                <button mat-icon-button type="button" aria-label="Delete" (click)="deleteAppointment(appointment)"><mat-icon>delete</mat-icon></button>
-              </span>
-            </div>
-          </button>
-        </ng-container>
-
-        <ng-template #noApts>
-          <div class="sched-empty">
-            <div class="empty-ico"><mat-icon>event_busy</mat-icon></div>
-            <div class="empty-title">No appointments found</div>
-            <div class="empty-sub">Try another date or search by patient name.</div>
-          </div>
-        </ng-template>
-      </div>
-    </div>
-  </div>
-
-  <!-- Quick Add Dialog -->
-
-  <!-- Settings Dialog -->
-  <div class="settings-overlay" *ngIf="showSettings" (click)="toggleSettings()">
-    <div class="settings-dialog" (click)="$event.stopPropagation()">
-      <div class="dialog-header">
-        <h3>Schedule Settings</h3>
-        <app-icon fontIcon="close" (iconClick)="toggleSettings()"></app-icon>
-      </div>
-      
-      <div class="dialog-content">
-        <div class="setting-group">
-          <h4>General Settings</h4>
-          <div class="setting-item">
-            <label>Buffer Time (minutes)</label>
-            <input type="number" [(ngModel)]="scheduleSettings.bufferTime" min="0" max="60">
-          </div>
-          <div class="setting-item">
-            <label>Max Appointments Per Day</label>
-            <input type="number" [(ngModel)]="scheduleSettings.maxAppointmentsPerDay" min="1" max="100">
-          </div>
-        </div>
-        
-        <div class="setting-group">
-          <h4>Automation</h4>
-          <div class="setting-item">
-            <label>Auto Confirm Appointments</label>
-            <mat-slide-toggle [(ngModel)]="scheduleSettings.autoConfirmAppointments"></mat-slide-toggle>
-          </div>
-          <div class="setting-item">
-            <label>Send Reminders</label>
-            <mat-slide-toggle [(ngModel)]="scheduleSettings.sendReminders"></mat-slide-toggle>
-          </div>
-        </div>
-      </div>
-      
-      <div class="dialog-footer">
-        <app-button appearance="basic" (btnClick)="toggleSettings()">Cancel</app-button>
-        <app-button appearance="raised" (btnClick)="updateScheduleSettings()">Save Settings</app-button>
-      </div>
-    </div>
-  </div>
-</ng-container>
-
-<ng-template #timingsSection>
-  <div class="timings-shell">
-    <div class="timings-grid">
-      <div class="timings-card">
-        <div class="card-head">
-          <div class="card-title">
-            <h3>Timings</h3>
-            <p>Configure doctor availability and preview how rules apply for the next {{ forecastDays }} days.</p>
-          </div>
-        </div>
-
-        <div class="mode-tabs" role="tablist" aria-label="Timings mode">
-          <button type="button" class="mode-tab" [class.active]="timingsMode === 'view'" (click)="setTimingsMode('view')" role="tab" [attr.aria-selected]="timingsMode === 'view'">
-            View
-          </button>
-          <button type="button" class="mode-tab" [class.active]="timingsMode === 'manage'" (click)="setTimingsMode('manage')" role="tab" [attr.aria-selected]="timingsMode === 'manage'">
-            Manage
-          </button>
-        </div>
-
-        <ng-container *ngIf="timingsMode === 'view'; else manageTimings">
-          <div class="priority-tabs in-card" role="tablist" aria-label="Timing priorities">
-            <button type="button" class="priority-tab" [class.active]="timingsTab === 'p4'" (click)="setTimingsTab('p4')">
-              <span class="tab-label">Daily Timing</span>
-              <span class="p-pill p4">P4</span>
-            </button>
-            <button type="button" class="priority-tab" [class.active]="timingsTab === 'p3'" (click)="setTimingsTab('p3')">
-              <span class="tab-label">Weekly Rules</span>
-              <span class="p-pill p3">P3</span>
-            </button>
-            <button type="button" class="priority-tab" [class.active]="timingsTab === 'p2'" (click)="setTimingsTab('p2')">
-              <span class="tab-label">Date Override</span>
-              <span class="p-pill p2">P2</span>
-            </button>
-            <button type="button" class="priority-tab" [class.active]="timingsTab === 'p1'" (click)="setTimingsTab('p1')">
-              <span class="tab-label">Leave Management</span>
-              <span class="p-pill p1">P1</span>
-            </button>
-          </div>
-
-          <div class="timings-card-grid">
-            <!-- Left: Configuration -->
-            <div class="config-pane">
-              <div class="pane-head">
-                <h4>Shift Configuration</h4>
-              </div>
-
-            <!-- P4: Daily -->
-            <div class="config-body" *ngIf="timingsTab === 'p4'">
-              <div class="note">
-                Shift configuration is read-only. Changes can only be made by an admin through priority rules.
-              </div>
-
-              <div class="readonly-grid">
-                <div class="ro-field">
-                  <div class="ro-label">Start Time</div>
-                  <div class="ro-value">{{ timingsDaily.start }}</div>
+                class="apt-row"
+                (click)="viewAppointment(appointment)"
+                >
+                <div class="apt-left">
+                  <div class="time-pill">{{ appointment.slotTime }}</div>
                 </div>
-                <div class="ro-field">
-                  <div class="ro-label">End Time</div>
-                  <div class="ro-value">{{ timingsDaily.end }}</div>
-                </div>
-                <div class="ro-field ro-wide">
-                  <div class="ro-label">Consultation Slot Duration</div>
-                  <div class="ro-value">{{ timingsDaily.slotDuration }} Minutes</div>
-                </div>
-              </div>
-
-              <div class="subsection">
-                <div class="sub-head">
-                  <h4>Scheduled Breaks</h4>
-                </div>
-                <div class="break-list">
-                  <div class="break-item" *ngFor="let b of timingsBreaks">
-                    <div class="break-left">
-                      <app-icon fontIcon="restaurant" [size]="18"></app-icon>
-                      <div class="break-meta">
-                        <div class="break-name">{{ b.label }}</div>
-                        <div class="break-time">{{ b.start }} - {{ b.end }}</div>
-                      </div>
-                    </div>
+                <div class="apt-mid">
+                  <div class="apt-title">
+                    <span class="apt-name">{{ appointment.patientName }}</span>
+                    <span class="apt-doctor">{{ appointment.doctorName }}</span>
                   </div>
+                  @if (appointment.notes) {
+                    <div class="apt-sub">{{ appointment.notes }}</div>
+                  }
                 </div>
-              </div>
-
-              <div class="overview-card">
-                <div class="overview-head">
-                  <app-icon fontIcon="insights" [size]="18"></app-icon>
-                  <span>Daily Overview</span>
-                </div>
-                <div class="overview-grid">
-                  <div class="ov">
-                    <div class="ov-value">{{ getDailyOverview().totalSlots }}</div>
-                    <div class="ov-label">Total Slots</div>
-                  </div>
-                  <div class="ov">
-                    <div class="ov-value">{{ getDailyOverview().first }}</div>
-                    <div class="ov-label">First Appt</div>
-                  </div>
-                  <div class="ov">
-                    <div class="ov-value">{{ getDailyOverview().last }}</div>
-                    <div class="ov-label">Last Appt</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- P3: Weekly Rules -->
-            <div class="config-body" *ngIf="timingsTab === 'p3'">
-              <div class="note">
-                Weekly rules apply on the same weekday every week. This section is view-only (no changes allowed).
-              </div>
-
-              <ng-container *ngIf="getWeeklyDaysWithRules().length > 0; else noWeeklyRules">
-                <div class="selector-grid">
-                  <ul class="selector-list">
-                    <li class="selector-li" *ngFor="let day of getWeeklyDaysWithRules()">
-                      <button
-                        type="button"
-                        class="selector-item"
-                        [class.active]="day === selectedWeeklyDay"
-                        (click)="selectWeeklyDay(day)"
-                      >
-                        <div class="sel-top">
-                          <span class="weekday-pill">{{ day }}</span>
-                          <span class="muted">{{ timingsWeeklyRules[day]?.start }} - {{ timingsWeeklyRules[day]?.end }}</span>
-                        </div>
-                        <div class="sel-sub">
-                          {{ timingsWeeklyRules[day]?.breaks?.length || 0 }} breaks
-                        </div>
-                      </button>
-                    </li>
-                  </ul>
-
-                  <div class="selector-detail" *ngIf="getSelectedWeeklyRule() as sr">
-                    <div class="detail-head">
-                      <span class="weekday-pill">{{ selectedWeeklyDay }}</span>
-                      <span class="muted">Weekly schedule</span>
-                    </div>
-
-                    <div class="readonly-grid">
-                      <div class="ro-field">
-                        <div class="ro-label">Start Time</div>
-                        <div class="ro-value">{{ sr.start }}</div>
-                      </div>
-                      <div class="ro-field">
-                        <div class="ro-label">End Time</div>
-                        <div class="ro-value">{{ sr.end }}</div>
-                      </div>
-                      <div class="ro-field ro-wide">
-                        <div class="ro-label">Breaks</div>
-                        <div class="ro-value">{{ sr.breaks.length }}</div>
-                      </div>
-                    </div>
-
-                    <div class="break-chips" *ngIf="sr.breaks.length > 0; else noWeeklyBreaks">
-                      <span class="break-chip" *ngFor="let b of sr.breaks">{{ b.label }} · {{ b.start }}-{{ b.end }}</span>
-                    </div>
-                    <ng-template #noWeeklyBreaks>
-                      <div class="empty-line">No breaks configured.</div>
-                    </ng-template>
-
-                    <div class="overview-card compact" *ngIf="getWeeklyOverview(selectedWeeklyDay) as wov">
-                      <div class="overview-head">
-                        <app-icon fontIcon="insights" [size]="18"></app-icon>
-                        <span>Weekly Overview</span>
-                      </div>
-                      <div class="overview-grid">
-                        <div class="ov">
-                          <div class="ov-value">{{ wov.totalSlots }}</div>
-                          <div class="ov-label">Total Slots</div>
-                        </div>
-                        <div class="ov">
-                          <div class="ov-value">{{ wov.first }}</div>
-                          <div class="ov-label">First Appt</div>
-                        </div>
-                        <div class="ov">
-                          <div class="ov-value">{{ wov.last }}</div>
-                          <div class="ov-label">Last Appt</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </ng-container>
-              <ng-template #noWeeklyRules>
-                <div class="empty-line">No weekly rules configured.</div>
-              </ng-template>
-            </div>
-
-            <!-- P2: Date Override -->
-            <div class="config-body" *ngIf="timingsTab === 'p2'">
-              <div class="note">
-                Date overrides apply on a specific date. This section is view-only (no changes allowed).
-              </div>
-
-              <ng-container *ngIf="timingsOverrides.length > 0; else noOverrides">
-                <div class="selector-grid">
-                  <ul class="selector-list">
-                    <li class="selector-li" *ngFor="let o of timingsOverrides">
-                      <button
-                        type="button"
-                        class="selector-item"
-                        [class.active]="o.date === selectedOverrideDate"
-                        (click)="selectOverrideDate(o.date)"
-                      >
-                        <div class="sel-top">
-                          <span class="weekday-pill">{{ o.date }}</span>
-                          <span class="muted">{{ o.start }} - {{ o.end }}</span>
-                        </div>
-                        <div class="sel-sub">{{ o.breaks.length }} breaks</div>
-                      </button>
-                    </li>
-                  </ul>
-
-                  <div class="selector-detail" *ngIf="getSelectedOverride() as so; else noOverrideSelected">
-                    <div class="detail-head">
-                      <span class="weekday-pill">{{ so.date }}</span>
-                      <span class="muted">Date override</span>
-                    </div>
-
-                    <div class="readonly-grid">
-                      <div class="ro-field">
-                        <div class="ro-label">Start Time</div>
-                        <div class="ro-value">{{ so.start }}</div>
-                      </div>
-                      <div class="ro-field">
-                        <div class="ro-label">End Time</div>
-                        <div class="ro-value">{{ so.end }}</div>
-                      </div>
-                      <div class="ro-field ro-wide">
-                        <div class="ro-label">Breaks</div>
-                        <div class="ro-value">{{ so.breaks.length }}</div>
-                      </div>
-                    </div>
-
-                    <div class="break-chips" *ngIf="so.breaks.length > 0; else noOverrideBreaks">
-                      <span class="break-chip" *ngFor="let b of so.breaks">{{ b.label }} · {{ b.start }}-{{ b.end }}</span>
-                    </div>
-                    <ng-template #noOverrideBreaks>
-                      <div class="empty-line">No breaks configured.</div>
-                    </ng-template>
-
-                    <div class="overview-card compact" *ngIf="getOverrideOverview(so) as dov">
-                      <div class="overview-head">
-                        <app-icon fontIcon="insights" [size]="18"></app-icon>
-                        <span>Date Overview</span>
-                      </div>
-                      <div class="overview-grid">
-                        <div class="ov">
-                          <div class="ov-value">{{ dov.totalSlots }}</div>
-                          <div class="ov-label">Total Slots</div>
-                        </div>
-                        <div class="ov">
-                          <div class="ov-value">{{ dov.first }}</div>
-                          <div class="ov-label">First Appt</div>
-                        </div>
-                        <div class="ov">
-                          <div class="ov-value">{{ dov.last }}</div>
-                          <div class="ov-label">Last Appt</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <ng-template #noOverrideSelected>
-                    <div class="selector-detail">
-                      <div class="empty-line">Select a date to view details.</div>
-                    </div>
-                  </ng-template>
-                </div>
-              </ng-container>
-            </div>
-            <ng-template #noOverrides>
-              <div class="empty-line">No date overrides added yet.</div>
-            </ng-template>
-
-            <!-- P1: Leave Management -->
-            <div class="config-body" *ngIf="timingsTab === 'p1'">
-              <div class="note">
-                Leave blocks availability for a specific date (highest priority). This section is view-only (no changes allowed).
-              </div>
-
-              <div class="leave-list" *ngIf="timingsLeaveDates.length > 0; else noLeaves">
-                <div class="leave-item" *ngFor="let d of timingsLeaveDates">
-                  <div class="leave-left">
-                    <span class="weekday-pill">{{ d }}</span>
-                    <span class="muted">Full day leave</span>
-                  </div>
-                </div>
-              </div>
-              <ng-template #noLeaves>
-                <div class="empty-line">No leave dates added yet.</div>
-              </ng-template>
-            </div>
-          </div>
-
-            <!-- Right: Forecast -->
-            <div class="forecast-pane">
-              <div class="pane-head">
-                <h4>Applied in next {{ forecastDays }} days</h4>
-                <span class="pane-sub">{{ getSelectedPriorityAppliedText() }}</span>
-              </div>
-
-              <div class="forecast-list forecast-scroll">
-                <div class="forecast-item" *ngFor="let f of filteredTimingsForecast">
-                  <div class="date-badge">
-                    <div class="m">{{ getForecastDateParts(f.date).month }}</div>
-                    <div class="d">{{ getForecastDateParts(f.date).day }}</div>
-                  </div>
-                  <div class="forecast-mid">
-                    <div class="weekday">{{ getForecastDateParts(f.date).weekday }}</div>
-                  </div>
-                  <span class="rule-pill" [class.p4]="f.priority==='p4'" [class.p3]="f.priority==='p3'" [class.p2]="f.priority==='p2'" [class.p1]="f.priority==='p1'">
-                    {{ f.label }}
+                <div class="apt-right">
+                  <span class="status-pill" [style.background-color]="getStatusColor(appointment.status)">
+                    <mat-icon class="st-ico" [fontIcon]="getStatusIcon(appointment.status)"></mat-icon>
+                    {{ appointment.status }}
+                  </span>
+                  <span class="row-actions" (click)="$event.stopPropagation()">
+                    <button mat-icon-button type="button" aria-label="View" (click)="viewAppointment(appointment)"><mat-icon>visibility</mat-icon></button>
+                    <button mat-icon-button type="button" aria-label="Edit" (click)="editAppointment(appointment)"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button type="button" aria-label="Delete" (click)="deleteAppointment(appointment)"><mat-icon>delete</mat-icon></button>
                   </span>
                 </div>
+              </button>
+            }
+          } @else {
+            <div class="sched-empty">
+              <div class="empty-ico"><mat-icon>event_busy</mat-icon></div>
+              <div class="empty-title">No appointments found</div>
+              <div class="empty-sub">Try another date or search by patient name.</div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+    <!-- Quick Add Dialog -->
+    <!-- Settings Dialog -->
+    @if (showSettings) {
+      <div class="settings-overlay" (click)="toggleSettings()">
+        <div class="settings-dialog" (click)="$event.stopPropagation()">
+          <div class="dialog-header">
+            <h3>Schedule Settings</h3>
+            <app-icon fontIcon="close" (iconClick)="toggleSettings()"></app-icon>
+          </div>
+          <div class="dialog-content">
+            <div class="setting-group">
+              <h4>General Settings</h4>
+              <div class="setting-item">
+                <label>Buffer Time (minutes)</label>
+                <input type="number" [(ngModel)]="scheduleSettings.bufferTime" min="0" max="60">
+              </div>
+              <div class="setting-item">
+                <label>Max Appointments Per Day</label>
+                <input type="number" [(ngModel)]="scheduleSettings.maxAppointmentsPerDay" min="1" max="100">
+              </div>
+            </div>
+            <div class="setting-group">
+              <h4>Automation</h4>
+              <div class="setting-item">
+                <label>Auto Confirm Appointments</label>
+                <mat-slide-toggle [(ngModel)]="scheduleSettings.autoConfirmAppointments"></mat-slide-toggle>
+              </div>
+              <div class="setting-item">
+                <label>Send Reminders</label>
+                <mat-slide-toggle [(ngModel)]="scheduleSettings.sendReminders"></mat-slide-toggle>
               </div>
             </div>
           </div>
-        </ng-container>
-
-        <ng-template #manageTimings>
-          <div class="manage-shell">
-            <app-card class="manage-card logic-card" [dense]="true" title="Priority logic" subtitle="Higher priority overrides lower priority">
-              <div class="logic-items">
-                <div class="logic-item p1"><span class="dot"></span><span>P1: Leave</span></div>
-                <div class="chev">›</div>
-                <div class="logic-item p2"><span class="dot"></span><span>P2: Specific Day</span></div>
-                <div class="chev">›</div>
-                <div class="logic-item p3"><span class="dot"></span><span>P3: Weekly Routine</span></div>
-                <div class="chev">›</div>
-                <div class="logic-item p4"><span class="dot"></span><span>P4: Daily (Base)</span></div>
-              </div>
-            </app-card>
-
-            <!-- P1 -->
-            <app-card class="manage-card prio-card p1" [dense]="true" [divider]="true" title="Leave &amp; Absences" subtitle="Priority 1 (highest)">
-              <div appCardActions class="prio-actions">
-                <span class="count">{{ manageLeaves.length }} item(s)</span>
-                <button mat-stroked-button type="button" class="add-btn" (click)="addManageItem('p1')">
-                  <mat-icon>add</mat-icon>
-                  Add
-                </button>
-              </div>
-              <div class="manage-list">
-                <div class="manage-item" *ngFor="let item of manageLeaves; let i = index">
-                  <div class="item-main">
-                    <div class="item-ico p1" aria-hidden="true">
-                      <mat-icon>event_busy</mat-icon>
-                    </div>
-                    <div class="left">
-                      <div class="title-row">
-                        <div class="title">{{ item.label }}</div>
-                        <span class="meta-chip p1">{{ item.durationLabel }}</span>
-                      </div>
-                      <div class="sub">
-                        <mat-icon class="mini-ico">calendar_month</mat-icon>
-                        <span class="range">{{ item.rangeLabel }}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="actions">
-                    <button mat-icon-button aria-label="Edit"><mat-icon>edit</mat-icon></button>
-                    <button mat-icon-button aria-label="Delete" (click)="deleteManageItem('p1', i)"><mat-icon>delete</mat-icon></button>
-                  </div>
+          <div class="dialog-footer">
+            <app-button appearance="basic" (btnClick)="toggleSettings()">Cancel</app-button>
+            <app-button appearance="raised" (btnClick)="updateScheduleSettings()">Save Settings</app-button>
+          </div>
+        </div>
+      </div>
+    }
+  } @else {
+    <div class="timings-shell">
+      <div class="timings-grid">
+        <div class="timings-card">
+          <div class="card-head">
+            <div class="card-title">
+              <h3>Timings</h3>
+              <p>Configure doctor availability and preview how rules apply for the next {{ forecastDays }} days.</p>
+            </div>
+          </div>
+          <div class="mode-tabs" role="tablist" aria-label="Timings mode">
+            <button type="button" class="mode-tab" [class.active]="timingsMode === 'view'" (click)="setTimingsMode('view')" role="tab" [attr.aria-selected]="timingsMode === 'view'">
+              View
+            </button>
+            <button type="button" class="mode-tab" [class.active]="timingsMode === 'manage'" (click)="setTimingsMode('manage')" role="tab" [attr.aria-selected]="timingsMode === 'manage'">
+              Manage
+            </button>
+          </div>
+          @if (timingsMode === 'view') {
+            <div class="priority-tabs in-card" role="tablist" aria-label="Timing priorities">
+              <button type="button" class="priority-tab" [class.active]="timingsTab === 'p4'" (click)="setTimingsTab('p4')">
+                <span class="tab-label">Daily Timing</span>
+                <span class="p-pill p4">P4</span>
+              </button>
+              <button type="button" class="priority-tab" [class.active]="timingsTab === 'p3'" (click)="setTimingsTab('p3')">
+                <span class="tab-label">Weekly Rules</span>
+                <span class="p-pill p3">P3</span>
+              </button>
+              <button type="button" class="priority-tab" [class.active]="timingsTab === 'p2'" (click)="setTimingsTab('p2')">
+                <span class="tab-label">Date Override</span>
+                <span class="p-pill p2">P2</span>
+              </button>
+              <button type="button" class="priority-tab" [class.active]="timingsTab === 'p1'" (click)="setTimingsTab('p1')">
+                <span class="tab-label">Leave Management</span>
+                <span class="p-pill p1">P1</span>
+              </button>
+            </div>
+            <div class="timings-card-grid">
+              <!-- Left: Configuration -->
+              <div class="config-pane">
+                <div class="pane-head">
+                  <h4>Shift Configuration</h4>
                 </div>
-              </div>
-            </app-card>
-
-            <!-- P2 -->
-            <app-card class="manage-card prio-card p2" [dense]="true" [divider]="true" title="Specific Day Overrides" subtitle="Priority 2 (date-specific)">
-              <div appCardActions class="prio-actions">
-                <span class="count">{{ manageSpecificDays.length }} item(s)</span>
-                <button mat-stroked-button type="button" class="add-btn" (click)="addManageItem('p2')">
-                  <mat-icon>add</mat-icon>
-                  Add
-                </button>
-              </div>
-              <div class="manage-list">
-                <div class="manage-item" *ngFor="let item of manageSpecificDays; let i = index">
-                  <div class="item-main">
-                    <div class="item-ico p2" aria-hidden="true">
-                      <mat-icon>event</mat-icon>
+                <!-- P4: Daily -->
+                @if (timingsTab === 'p4') {
+                  <div class="config-body">
+                    <div class="note">
+                      Shift configuration is read-only. Changes can only be made by an admin through priority rules.
                     </div>
-                    <div class="left">
-                      <div class="title-row">
-                        <div class="title">{{ item.label }}</div>
-                        <span class="meta-chip p2">{{ item.dateLabel }}</span>
+                    <div class="readonly-grid">
+                      <div class="ro-field">
+                        <div class="ro-label">Start Time</div>
+                        <div class="ro-value">{{ timingsDaily.start }}</div>
                       </div>
-                      <div class="sub">
-                        <mat-icon class="mini-ico">calendar_month</mat-icon>
-                        <span class="range">{{ item.rangeLabel }}</span>
+                      <div class="ro-field">
+                        <div class="ro-label">End Time</div>
+                        <div class="ro-value">{{ timingsDaily.end }}</div>
+                      </div>
+                      <div class="ro-field ro-wide">
+                        <div class="ro-label">Consultation Slot Duration</div>
+                        <div class="ro-value">{{ timingsDaily.slotDuration }} Minutes</div>
                       </div>
                     </div>
-                  </div>
-                  <div class="actions">
-                    <button mat-icon-button aria-label="Edit"><mat-icon>edit</mat-icon></button>
-                    <button mat-icon-button aria-label="Delete" (click)="deleteManageItem('p2', i)"><mat-icon>delete</mat-icon></button>
-                  </div>
-                </div>
-              </div>
-            </app-card>
-
-            <!-- P3 -->
-            <app-card class="manage-card prio-card p3" [dense]="true" [divider]="true" title="Weekly Routine" subtitle="Priority 3 (recurring)">
-              <div appCardActions class="prio-actions">
-                <span class="count">{{ manageWeeklyRoutines.length }} item(s)</span>
-                <button mat-stroked-button type="button" class="add-btn" (click)="addManageItem('p3')">
-                  <mat-icon>add</mat-icon>
-                  Add
-                </button>
-              </div>
-              <div class="manage-list">
-                <div class="manage-item" *ngFor="let item of manageWeeklyRoutines; let i = index">
-                  <div class="item-main">
-                    <div class="item-ico p3" aria-hidden="true">
-                      <mat-icon>calendar_view_week</mat-icon>
+                    <div class="subsection">
+                      <div class="sub-head">
+                        <h4>Scheduled Breaks</h4>
+                      </div>
+                      <div class="break-list">
+                        @for (b of timingsBreaks; track b) {
+                          <div class="break-item">
+                            <div class="break-left">
+                              <app-icon fontIcon="restaurant" [size]="18"></app-icon>
+                              <div class="break-meta">
+                                <div class="break-name">{{ b.label }}</div>
+                                <div class="break-time">{{ b.start }} - {{ b.end }}</div>
+                              </div>
+                            </div>
+                          </div>
+                        }
+                      </div>
                     </div>
-                    <div class="left">
-                      <div class="title-row">
-                        <div class="title">{{ item.label }}</div>
-                        <span class="meta-chip neutral">{{ item.timeLabel }}</span>
+                    <div class="overview-card">
+                      <div class="overview-head">
+                        <app-icon fontIcon="insights" [size]="18"></app-icon>
+                        <span>Daily Overview</span>
                       </div>
-                      <div class="subtag" *ngIf="item.partiallyOverridden">
-                        <mat-icon class="warn-ico">sync_problem</mat-icon>
-                        <span>Partially Overridden</span>
-                      </div>
-                      <div class="sub">
-                        <mat-icon class="mini-ico">date_range</mat-icon>
-                        <div class="day-chips">
-                          <span class="chip" *ngFor="let d of item.days">{{ getWeekdayAbbr(d) }}</span>
+                      <div class="overview-grid">
+                        <div class="ov">
+                          <div class="ov-value">{{ getDailyOverview().totalSlots }}</div>
+                          <div class="ov-label">Total Slots</div>
+                        </div>
+                        <div class="ov">
+                          <div class="ov-value">{{ getDailyOverview().first }}</div>
+                          <div class="ov-label">First Appt</div>
+                        </div>
+                        <div class="ov">
+                          <div class="ov-value">{{ getDailyOverview().last }}</div>
+                          <div class="ov-label">Last Appt</div>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div class="actions">
-                    <button mat-icon-button aria-label="Edit"><mat-icon>edit</mat-icon></button>
-                    <button mat-icon-button aria-label="Delete" (click)="deleteManageItem('p3', i)"><mat-icon>delete</mat-icon></button>
+                }
+                <!-- P3: Weekly Rules -->
+                @if (timingsTab === 'p3') {
+                  <div class="config-body">
+                    <div class="note">
+                      Weekly rules apply on the same weekday every week. This section is view-only (no changes allowed).
+                    </div>
+                    @if (getWeeklyDaysWithRules().length > 0) {
+                      <div class="selector-grid">
+                        <ul class="selector-list">
+                          @for (day of getWeeklyDaysWithRules(); track day) {
+                            <li class="selector-li">
+                              <button
+                                type="button"
+                                class="selector-item"
+                                [class.active]="day === selectedWeeklyDay"
+                                (click)="selectWeeklyDay(day)"
+                                >
+                                <div class="sel-top">
+                                  <span class="weekday-pill">{{ day }}</span>
+                                  <span class="muted">{{ timingsWeeklyRules[day]?.start }} - {{ timingsWeeklyRules[day]?.end }}</span>
+                                </div>
+                                <div class="sel-sub">
+                                  {{ timingsWeeklyRules[day]?.breaks?.length || 0 }} breaks
+                                </div>
+                              </button>
+                            </li>
+                          }
+                        </ul>
+                        @if (getSelectedWeeklyRule(); as sr) {
+                          <div class="selector-detail">
+                            <div class="detail-head">
+                              <span class="weekday-pill">{{ selectedWeeklyDay }}</span>
+                              <span class="muted">Weekly schedule</span>
+                            </div>
+                            <div class="readonly-grid">
+                              <div class="ro-field">
+                                <div class="ro-label">Start Time</div>
+                                <div class="ro-value">{{ sr.start }}</div>
+                              </div>
+                              <div class="ro-field">
+                                <div class="ro-label">End Time</div>
+                                <div class="ro-value">{{ sr.end }}</div>
+                              </div>
+                              <div class="ro-field ro-wide">
+                                <div class="ro-label">Breaks</div>
+                                <div class="ro-value">{{ sr.breaks.length }}</div>
+                              </div>
+                            </div>
+                            @if (sr.breaks.length > 0) {
+                              <div class="break-chips">
+                                @for (b of sr.breaks; track b) {
+                                  <span class="break-chip">{{ b.label }} · {{ b.start }}-{{ b.end }}</span>
+                                }
+                              </div>
+                            } @else {
+                              <div class="empty-line">No breaks configured.</div>
+                            }
+                            @if (getWeeklyOverview(selectedWeeklyDay); as wov) {
+                              <div class="overview-card compact">
+                                <div class="overview-head">
+                                  <app-icon fontIcon="insights" [size]="18"></app-icon>
+                                  <span>Weekly Overview</span>
+                                </div>
+                                <div class="overview-grid">
+                                  <div class="ov">
+                                    <div class="ov-value">{{ wov.totalSlots }}</div>
+                                    <div class="ov-label">Total Slots</div>
+                                  </div>
+                                  <div class="ov">
+                                    <div class="ov-value">{{ wov.first }}</div>
+                                    <div class="ov-label">First Appt</div>
+                                  </div>
+                                  <div class="ov">
+                                    <div class="ov-value">{{ wov.last }}</div>
+                                    <div class="ov-label">Last Appt</div>
+                                  </div>
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <div class="empty-line">No weekly rules configured.</div>
+                    }
                   </div>
+                }
+                <!-- P2: Date Override -->
+                @if (timingsTab === 'p2') {
+                  <div class="config-body">
+                    <div class="note">
+                      Date overrides apply on a specific date. This section is view-only (no changes allowed).
+                    </div>
+                    @if (timingsOverrides.length > 0) {
+                      <div class="selector-grid">
+                        <ul class="selector-list">
+                          @for (o of timingsOverrides; track o) {
+                            <li class="selector-li">
+                              <button
+                                type="button"
+                                class="selector-item"
+                                [class.active]="o.date === selectedOverrideDate"
+                                (click)="selectOverrideDate(o.date)"
+                                >
+                                <div class="sel-top">
+                                  <span class="weekday-pill">{{ o.date }}</span>
+                                  <span class="muted">{{ o.start }} - {{ o.end }}</span>
+                                </div>
+                                <div class="sel-sub">{{ o.breaks.length }} breaks</div>
+                              </button>
+                            </li>
+                          }
+                        </ul>
+                        @if (getSelectedOverride(); as so) {
+                          <div class="selector-detail">
+                            <div class="detail-head">
+                              <span class="weekday-pill">{{ so.date }}</span>
+                              <span class="muted">Date override</span>
+                            </div>
+                            <div class="readonly-grid">
+                              <div class="ro-field">
+                                <div class="ro-label">Start Time</div>
+                                <div class="ro-value">{{ so.start }}</div>
+                              </div>
+                              <div class="ro-field">
+                                <div class="ro-label">End Time</div>
+                                <div class="ro-value">{{ so.end }}</div>
+                              </div>
+                              <div class="ro-field ro-wide">
+                                <div class="ro-label">Breaks</div>
+                                <div class="ro-value">{{ so.breaks.length }}</div>
+                              </div>
+                            </div>
+                            @if (so.breaks.length > 0) {
+                              <div class="break-chips">
+                                @for (b of so.breaks; track b) {
+                                  <span class="break-chip">{{ b.label }} · {{ b.start }}-{{ b.end }}</span>
+                                }
+                              </div>
+                            } @else {
+                              <div class="empty-line">No breaks configured.</div>
+                            }
+                            @if (getOverrideOverview(so); as dov) {
+                              <div class="overview-card compact">
+                                <div class="overview-head">
+                                  <app-icon fontIcon="insights" [size]="18"></app-icon>
+                                  <span>Date Overview</span>
+                                </div>
+                                <div class="overview-grid">
+                                  <div class="ov">
+                                    <div class="ov-value">{{ dov.totalSlots }}</div>
+                                    <div class="ov-label">Total Slots</div>
+                                  </div>
+                                  <div class="ov">
+                                    <div class="ov-value">{{ dov.first }}</div>
+                                    <div class="ov-label">First Appt</div>
+                                  </div>
+                                  <div class="ov">
+                                    <div class="ov-value">{{ dov.last }}</div>
+                                    <div class="ov-label">Last Appt</div>
+                                  </div>
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        } @else {
+                          <div class="selector-detail">
+                            <div class="empty-line">Select a date to view details.</div>
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <div class="empty-line">No date overrides added yet.</div>
+                    }
+                  </div>
+                }
+                <!-- P1: Leave Management -->
+                @if (timingsTab === 'p1') {
+                  <div class="config-body">
+                    <div class="note">
+                      Leave blocks availability for a specific date (highest priority). This section is view-only (no changes allowed).
+                    </div>
+                    @if (timingsLeaveDates.length > 0) {
+                      <div class="leave-list">
+                        @for (d of timingsLeaveDates; track d) {
+                          <div class="leave-item">
+                            <div class="leave-left">
+                              <span class="weekday-pill">{{ d }}</span>
+                              <span class="muted">Full day leave</span>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <div class="empty-line">No leave dates added yet.</div>
+                    }
+                  </div>
+                }
+              </div>
+              <!-- Right: Forecast -->
+              <div class="forecast-pane">
+                <div class="pane-head">
+                  <h4>Applied in next {{ forecastDays }} days</h4>
+                  <span class="pane-sub">{{ getSelectedPriorityAppliedText() }}</span>
+                </div>
+                <div class="forecast-list forecast-scroll">
+                  @for (f of filteredTimingsForecast; track f) {
+                    <div class="forecast-item">
+                      <div class="date-badge">
+                        <div class="m">{{ getForecastDateParts(f.date).month }}</div>
+                        <div class="d">{{ getForecastDateParts(f.date).day }}</div>
+                      </div>
+                      <div class="forecast-mid">
+                        <div class="weekday">{{ getForecastDateParts(f.date).weekday }}</div>
+                      </div>
+                      <span class="rule-pill" [class.p4]="f.priority==='p4'" [class.p3]="f.priority==='p3'" [class.p2]="f.priority==='p2'" [class.p1]="f.priority==='p1'">
+                        {{ f.label }}
+                      </span>
+                    </div>
+                  }
                 </div>
               </div>
-            </app-card>
-
-            <!-- P4 -->
-            <app-card class="manage-card prio-card p4" [dense]="true" [divider]="true" title="Daily Base Availability" subtitle="Priority 4 (default)">
-              <div appCardActions class="prio-actions">
-                <span class="singleton">Singleton</span>
-                <span class="count">{{ manageBaseAvailability.length }} item(s)</span>
-                <button mat-stroked-button type="button" class="add-btn" (click)="addManageItem('p4')">
-                  <mat-icon>add</mat-icon>
-                  Add
-                </button>
-              </div>
-              <div class="manage-list">
-                <div class="manage-item" *ngFor="let item of manageBaseAvailability; let i = index">
-                  <div class="item-main">
-                    <div class="item-ico p4" aria-hidden="true">
-                      <mat-icon>event_available</mat-icon>
-                    </div>
-                    <div class="left">
-                      <div class="title-row">
-                        <div class="title">{{ item.label }}</div>
-                        <span class="meta-chip p4">{{ item.timeLabel }}</span>
-                      </div>
-                      <div class="sub" *ngIf="item.note">
-                        <mat-icon class="mini-ico">info</mat-icon>
-                        <span class="range">{{ item.note }}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="actions">
-                    <button mat-icon-button aria-label="Edit"><mat-icon>edit</mat-icon></button>
-                    <button mat-icon-button aria-label="Delete" (click)="deleteManageItem('p4', i)"><mat-icon>delete</mat-icon></button>
-                  </div>
-                </div>
-              </div>
-            </app-card>
-          </div>
-        </ng-template>
-      </div>
-
-      <!-- This Week Schedule (view-only) -->
-      <div class="week-schedule-card" *ngIf="timingsMode === 'view'">
-        <div class="week-head">
-          <h3>This Week Schedule</h3>
-          <button type="button" class="week-add-btn" disabled>+ Add New Schedule</button>
-        </div>
-
-        <div class="week-row" aria-label="This week schedule">
-          <div class="week-day" *ngFor="let d of thisWeekScheduleCards" [class.empty]="!d.hasSchedule">
-            <div class="day-top">
-              <div class="day-top-left">
-                <div class="day-title">{{ d.weekday }}</div>
-                <div class="day-sub" [class.is-today]="d.isToday">{{ d.dateLabel }}</div>
-              </div>
-              <span class="day-pill" *ngIf="d.hasSchedule">Fixed</span>
             </div>
-
-            <div class="day-divider"></div>
-
-            <ng-container *ngIf="d.hasSchedule; else emptyDay">
-              <div class="day-body">
-                <div class="info-row">
-                  <app-icon fontIcon="schedule" [size]="22"></app-icon>
-                  <span class="info-text strong">{{ d.start }} - {{ d.end }}</span>
+          } @else {
+            <div class="manage-shell">
+              <app-card class="manage-card logic-card" [dense]="true" title="Priority logic" subtitle="Higher priority overrides lower priority">
+                <div class="logic-items">
+                  <div class="logic-item p1"><span class="dot"></span><span>P1: Leave</span></div>
+                  <div class="chev">›</div>
+                  <div class="logic-item p2"><span class="dot"></span><span>P2: Specific Day</span></div>
+                  <div class="chev">›</div>
+                  <div class="logic-item p3"><span class="dot"></span><span>P3: Weekly Routine</span></div>
+                  <div class="chev">›</div>
+                  <div class="logic-item p4"><span class="dot"></span><span>P4: Daily (Base)</span></div>
                 </div>
-                <div class="info-row">
-                  <app-icon fontIcon="calendar_month" [size]="22"></app-icon>
-                  <span class="info-text muted">{{ d.patternLabel }}</span>
+              </app-card>
+              <!-- P1 -->
+              <app-card class="manage-card prio-card p1" [dense]="true" [divider]="true" title="Leave &amp; Absences" subtitle="Priority 1 (highest)">
+                <div appCardActions class="prio-actions">
+                  <span class="count">{{ manageLeaves.length }} item(s)</span>
+                  <button mat-stroked-button type="button" class="add-btn" (click)="addManageItem('p1')">
+                    <mat-icon>add</mat-icon>
+                    Add
+                  </button>
                 </div>
-
-                <div class="day-table">
-                  <div class="tr">
-                    <div class="k">Duration</div>
-                    <div class="v">{{ d.durationMin }} min</div>
-                  </div>
-                  <div class="tr">
-                    <div class="k">Slot</div>
-                    <div class="v">{{ d.totalSlots }} Total</div>
-                  </div>
+                <div class="manage-list">
+                  @for (item of manageLeaves; track item; let i = $index) {
+                    <div class="manage-item">
+                      <div class="item-main">
+                        <div class="item-ico p1" aria-hidden="true">
+                          <mat-icon>event_busy</mat-icon>
+                        </div>
+                        <div class="left">
+                          <div class="title-row">
+                            <div class="title">{{ item.label }}</div>
+                            <span class="meta-chip p1">{{ item.durationLabel }}</span>
+                          </div>
+                          <div class="sub">
+                            <mat-icon class="mini-ico">calendar_month</mat-icon>
+                            <span class="range">{{ item.rangeLabel }}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="actions">
+                        <button mat-icon-button aria-label="Edit"><mat-icon>edit</mat-icon></button>
+                        <button mat-icon-button aria-label="Delete" (click)="deleteManageItem('p1', i)"><mat-icon>delete</mat-icon></button>
+                      </div>
+                    </div>
+                  }
                 </div>
-              </div>
-
-              <button type="button" class="day-footer-btn" disabled>Edit Details</button>
-            </ng-container>
-
-            <ng-template #emptyDay>
-              <div class="day-empty-body">
-                <div class="plus-circle"><span class="plus">+</span></div>
-                <div class="empty-text">Add Availability</div>
-              </div>
-            </ng-template>
-          </div>
+              </app-card>
+              <!-- P2 -->
+              <app-card class="manage-card prio-card p2" [dense]="true" [divider]="true" title="Specific Day Overrides" subtitle="Priority 2 (date-specific)">
+                <div appCardActions class="prio-actions">
+                  <span class="count">{{ manageSpecificDays.length }} item(s)</span>
+                  <button mat-stroked-button type="button" class="add-btn" (click)="addManageItem('p2')">
+                    <mat-icon>add</mat-icon>
+                    Add
+                  </button>
+                </div>
+                <div class="manage-list">
+                  @for (item of manageSpecificDays; track item; let i = $index) {
+                    <div class="manage-item">
+                      <div class="item-main">
+                        <div class="item-ico p2" aria-hidden="true">
+                          <mat-icon>event</mat-icon>
+                        </div>
+                        <div class="left">
+                          <div class="title-row">
+                            <div class="title">{{ item.label }}</div>
+                            <span class="meta-chip p2">{{ item.dateLabel }}</span>
+                          </div>
+                          <div class="sub">
+                            <mat-icon class="mini-ico">calendar_month</mat-icon>
+                            <span class="range">{{ item.rangeLabel }}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="actions">
+                        <button mat-icon-button aria-label="Edit"><mat-icon>edit</mat-icon></button>
+                        <button mat-icon-button aria-label="Delete" (click)="deleteManageItem('p2', i)"><mat-icon>delete</mat-icon></button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </app-card>
+              <!-- P3 -->
+              <app-card class="manage-card prio-card p3" [dense]="true" [divider]="true" title="Weekly Routine" subtitle="Priority 3 (recurring)">
+                <div appCardActions class="prio-actions">
+                  <span class="count">{{ manageWeeklyRoutines.length }} item(s)</span>
+                  <button mat-stroked-button type="button" class="add-btn" (click)="addManageItem('p3')">
+                    <mat-icon>add</mat-icon>
+                    Add
+                  </button>
+                </div>
+                <div class="manage-list">
+                  @for (item of manageWeeklyRoutines; track item; let i = $index) {
+                    <div class="manage-item">
+                      <div class="item-main">
+                        <div class="item-ico p3" aria-hidden="true">
+                          <mat-icon>calendar_view_week</mat-icon>
+                        </div>
+                        <div class="left">
+                          <div class="title-row">
+                            <div class="title">{{ item.label }}</div>
+                            <span class="meta-chip neutral">{{ item.timeLabel }}</span>
+                          </div>
+                          @if (item.partiallyOverridden) {
+                            <div class="subtag">
+                              <mat-icon class="warn-ico">sync_problem</mat-icon>
+                              <span>Partially Overridden</span>
+                            </div>
+                          }
+                          <div class="sub">
+                            <mat-icon class="mini-ico">date_range</mat-icon>
+                            <div class="day-chips">
+                              @for (d of item.days; track d) {
+                                <span class="chip">{{ getWeekdayAbbr(d) }}</span>
+                              }
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="actions">
+                        <button mat-icon-button aria-label="Edit"><mat-icon>edit</mat-icon></button>
+                        <button mat-icon-button aria-label="Delete" (click)="deleteManageItem('p3', i)"><mat-icon>delete</mat-icon></button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </app-card>
+              <!-- P4 -->
+              <app-card class="manage-card prio-card p4" [dense]="true" [divider]="true" title="Daily Base Availability" subtitle="Priority 4 (default)">
+                <div appCardActions class="prio-actions">
+                  <span class="singleton">Singleton</span>
+                  <span class="count">{{ manageBaseAvailability.length }} item(s)</span>
+                  <button mat-stroked-button type="button" class="add-btn" (click)="addManageItem('p4')">
+                    <mat-icon>add</mat-icon>
+                    Add
+                  </button>
+                </div>
+                <div class="manage-list">
+                  @for (item of manageBaseAvailability; track item; let i = $index) {
+                    <div class="manage-item">
+                      <div class="item-main">
+                        <div class="item-ico p4" aria-hidden="true">
+                          <mat-icon>event_available</mat-icon>
+                        </div>
+                        <div class="left">
+                          <div class="title-row">
+                            <div class="title">{{ item.label }}</div>
+                            <span class="meta-chip p4">{{ item.timeLabel }}</span>
+                          </div>
+                          @if (item.note) {
+                            <div class="sub">
+                              <mat-icon class="mini-ico">info</mat-icon>
+                              <span class="range">{{ item.note }}</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      <div class="actions">
+                        <button mat-icon-button aria-label="Edit"><mat-icon>edit</mat-icon></button>
+                        <button mat-icon-button aria-label="Delete" (click)="deleteManageItem('p4', i)"><mat-icon>delete</mat-icon></button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </app-card>
+            </div>
+          }
         </div>
+        <!-- This Week Schedule (view-only) -->
+        @if (timingsMode === 'view') {
+          <div class="week-schedule-card">
+            <div class="week-head">
+              <h3>This Week Schedule</h3>
+              <button type="button" class="week-add-btn" disabled>+ Add New Schedule</button>
+            </div>
+            <div class="week-row" aria-label="This week schedule">
+              @for (d of thisWeekScheduleCards; track d) {
+                <div class="week-day" [class.empty]="!d.hasSchedule">
+                  <div class="day-top">
+                    <div class="day-top-left">
+                      <div class="day-title">{{ d.weekday }}</div>
+                      <div class="day-sub" [class.is-today]="d.isToday">{{ d.dateLabel }}</div>
+                    </div>
+                    @if (d.hasSchedule) {
+                      <span class="day-pill">Fixed</span>
+                    }
+                  </div>
+                  <div class="day-divider"></div>
+                  @if (d.hasSchedule) {
+                    <div class="day-body">
+                      <div class="info-row">
+                        <app-icon fontIcon="schedule" [size]="22"></app-icon>
+                        <span class="info-text strong">{{ d.start }} - {{ d.end }}</span>
+                      </div>
+                      <div class="info-row">
+                        <app-icon fontIcon="calendar_month" [size]="22"></app-icon>
+                        <span class="info-text muted">{{ d.patternLabel }}</span>
+                      </div>
+                      <div class="day-table">
+                        <div class="tr">
+                          <div class="k">Duration</div>
+                          <div class="v">{{ d.durationMin }} min</div>
+                        </div>
+                        <div class="tr">
+                          <div class="k">Slot</div>
+                          <div class="v">{{ d.totalSlots }} Total</div>
+                        </div>
+                      </div>
+                    </div>
+                    <button type="button" class="day-footer-btn" disabled>Edit Details</button>
+                  } @else {
+                    <div class="day-empty-body">
+                      <div class="plus-circle"><span class="plus">+</span></div>
+                      <div class="empty-text">Add Availability</div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
       </div>
     </div>
-  </div>
-</ng-template>
+  }
+
 </div>

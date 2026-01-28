@@ -12,7 +12,7 @@
           [required]="true">
         </app-selectbox>
       </div>
-      
+
       <div class="form-field">
         <app-selectbox
           [label]="'Select Room'"
@@ -25,7 +25,7 @@
           [disabled]="!bedForm.controls['floor'].value">
         </app-selectbox>
       </div>
-      
+
       <div class="form-field">
         <app-input
           [label]="'Bed ID'"
@@ -35,7 +35,7 @@
           [required]="true">
         </app-input>
       </div>
-      
+
       <div class="form-field">
         <app-selectbox
           [label]="'Bed Status'"
@@ -48,26 +48,27 @@
         </app-selectbox>
       </div>
     </div>
-    
+
     <!-- Bed Facilities -->
     <div class="facilities-section" formGroupName="facilities">
       <h4>Bed Facilities</h4>
       <div class="facilities-grid">
-        <div 
-          *ngFor="let facility of bedFacilitiesOptions" 
-          class="facility-item">
-          <input 
-            type="checkbox" 
-            [id]="'form-' + facility.key" 
-            [formControlName]="facility.key"
-            class="facility-checkbox">
-          <label [for]="'form-' + facility.key" class="facility-label">
-            <app-icon [fontIcon]="facility.icon" [size]="16"></app-icon>
-            <span>{{ facility.label }}</span>
-          </label>
+        @for (facility of bedFacilitiesOptions; track facility) {
+          <div
+            class="facility-item">
+            <input
+              type="checkbox"
+              [id]="'form-' + facility.key"
+              [formControlName]="facility.key"
+              class="facility-checkbox">
+              <label [for]="'form-' + facility.key" class="facility-label">
+                <app-icon [fontIcon]="facility.icon" [size]="16"></app-icon>
+                <span>{{ facility.label }}</span>
+              </label>
+            </div>
+          }
         </div>
       </div>
-    </div>
-  </form>
-</div>
+    </form>
+  </div>
 

@@ -1,7 +1,7 @@
 <div class="create-shift-dialog" [formGroup]="shiftForm">
   <div class="form-section">
     <h3 class="section-title">Shift Information</h3>
-    
+
     <div class="form-row">
       <app-input
         label="Shift Name"
@@ -47,49 +47,59 @@
       </app-button>
     </div>
 
-    <div class="days-selection" *ngIf="scheduleType === 'days'">
-      <div class="days-grid">
-        <button
-          *ngFor="let day of weekDays"
-          type="button"
-          class="day-button"
-          [class.selected]="isDaySelected(day)"
-          (click)="toggleDay(day)">
-          {{ day }}
-        </button>
+    @if (scheduleType === 'days') {
+      <div class="days-selection">
+        <div class="days-grid">
+          @for (day of weekDays; track day) {
+            <button
+              type="button"
+              class="day-button"
+              [class.selected]="isDaySelected(day)"
+              (click)="toggleDay(day)">
+              {{ day }}
+            </button>
+          }
+        </div>
+        @if (daysError) {
+          <div class="error-message">
+            {{ daysError }}
+          </div>
+        }
       </div>
-      <div class="error-message" *ngIf="daysError">
-        {{ daysError }}
-      </div>
-    </div>
+    }
   </div>
 
   <div class="form-section">
     <h3 class="section-title">Assign Staff Members</h3>
     <div class="staff-selection">
       <div class="staff-list">
-        <div
-          *ngFor="let staff of availableStaff"
-          class="staff-item"
-          [class.selected]="isStaffSelected(staff.id)"
-          (click)="toggleStaffSelection(staff.id)">
-          <div class="staff-info">
-            <div class="staff-name">{{ staff.name }}</div>
-            <div class="staff-role">{{ staff.role }} - {{ staff.department }}</div>
+        @for (staff of availableStaff; track staff) {
+          <div
+            class="staff-item"
+            [class.selected]="isStaffSelected(staff.id)"
+            (click)="toggleStaffSelection(staff.id)">
+            <div class="staff-info">
+              <div class="staff-name">{{ staff.name }}</div>
+              <div class="staff-role">{{ staff.role }} - {{ staff.department }}</div>
+            </div>
+            <app-icon
+              [fontIcon]="isStaffSelected(staff.id) ? 'check_circle' : 'radio_button_unchecked'"
+              [size]="20"
+              [color]="isStaffSelected(staff.id) ? '#3b82f6' : '#9ca3af'">
+            </app-icon>
           </div>
-          <app-icon
-            [fontIcon]="isStaffSelected(staff.id) ? 'check_circle' : 'radio_button_unchecked'"
-            [size]="20"
-            [color]="isStaffSelected(staff.id) ? '#3b82f6' : '#9ca3af'">
-          </app-icon>
+        }
+      </div>
+      @if (selectedStaffIds.length > 0) {
+        <div class="selected-staff-summary">
+          <strong>{{ selectedStaffIds.length }} staff member(s) selected</strong>
         </div>
-      </div>
-      <div class="selected-staff-summary" *ngIf="selectedStaffIds.length > 0">
-        <strong>{{ selectedStaffIds.length }} staff member(s) selected</strong>
-      </div>
-      <div class="error-message" *ngIf="staffError">
-        {{ staffError }}
-      </div>
+      }
+      @if (staffError) {
+        <div class="error-message">
+          {{ staffError }}
+        </div>
+      }
     </div>
   </div>
 </div>

@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AppButtonComponent, AppInputComponent, AppSelectboxComponent, IconComponent, DialogboxService, DialogFooterAction, PageComponent, BreadcrumbItem, TabsComponent, TabComponent } from '@lk/core';
@@ -26,16 +26,15 @@ interface Ward {
 @Component({
     selector: 'app-rooms-management',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        AppButtonComponent,
-        AppInputComponent,
-        AppSelectboxComponent,
-        IconComponent,
-        PageComponent,
-        TabsComponent,
-        TabComponent
-    ],
+    ReactiveFormsModule,
+    AppButtonComponent,
+    AppInputComponent,
+    AppSelectboxComponent,
+    IconComponent,
+    PageComponent,
+    TabsComponent,
+    TabComponent
+],
     templateUrl: './rooms-management.component.html',
     styleUrl: './rooms-management.component.scss'
 })

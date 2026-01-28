@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
@@ -66,31 +66,30 @@ interface ScheduleStats {
 @Component({
     selector: 'app-my-schedule',
     imports: [
-        CommonModule,
-        MatTabsModule,
-        MatCardModule,
-        MatIconModule,
-        MatButtonModule,
-        MatChipsModule,
-        MatMenuModule,
-        MatTooltipModule,
-        MatBadgeModule,
-        MatProgressBarModule,
-        MatProgressSpinnerModule,
-        MatSlideToggleModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        ReactiveFormsModule,
-        FormsModule,
-        GridComponent,
-        AppButtonComponent,
-        IconComponent,
-        CalendarComponent,
-        BreadcrumbComponent
-    ],
+    MatTabsModule,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+    MatChipsModule,
+    MatMenuModule,
+    MatTooltipModule,
+    MatBadgeModule,
+    MatProgressBarModule,
+    MatProgressSpinnerModule,
+    MatSlideToggleModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    ReactiveFormsModule,
+    FormsModule,
+    GridComponent,
+    AppButtonComponent,
+    IconComponent,
+    CalendarComponent,
+    BreadcrumbComponent
+],
     templateUrl: './my-schedule.component.html',
     styleUrls: ['./my-schedule.component.scss']
 })

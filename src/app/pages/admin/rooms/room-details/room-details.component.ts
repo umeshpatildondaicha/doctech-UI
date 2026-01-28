@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppButtonComponent, IconComponent, DialogboxService, DialogFooterAction, PageComponent, BreadcrumbItem } from '@lk/core';
 import { RoomsService } from '../../../../services/rooms.service';
@@ -38,7 +38,7 @@ interface Room {
 
 @Component({
     selector: 'app-room-details',
-    imports: [CommonModule, AppButtonComponent, IconComponent, PageComponent],
+    imports: [AppButtonComponent, IconComponent, PageComponent],
     templateUrl: './room-details.component.html',
     styleUrl: './room-details.component.scss'
 })

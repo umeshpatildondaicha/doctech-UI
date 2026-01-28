@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { IconComponent } from '@lk/core';
 
 export interface TabItem {
@@ -13,7 +13,7 @@ export interface TabItem {
 
 @Component({
     selector: 'app-admin-tabs',
-    imports: [CommonModule, IconComponent],
+    imports: [IconComponent],
     templateUrl: './admin-tabs.component.html',
     styleUrl: './admin-tabs.component.scss'
 })

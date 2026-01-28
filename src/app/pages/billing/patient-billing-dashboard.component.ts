@@ -1,6 +1,6 @@
 import { Component, OnChanges, OnInit, Input, SimpleChanges } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -28,21 +28,20 @@ const FORCE_DEMO_PATIENT_BILLING = false;
 @Component({
     selector: 'app-patient-billing-dashboard',
     imports: [
-        CommonModule,
-        RouterModule,
-        MatButtonModule,
-        MatIconModule,
-        MatTabsModule,
-        MatProgressBarModule,
-        MatDialogModule,
-        MatSnackBarModule,
-        MatTooltipModule,
-        MatChipsModule,
-        MatTableModule,
-        GridComponent,
-        BillingStatusRendererComponent,
-        AppCardComponent
-    ],
+    RouterModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTabsModule,
+    MatProgressBarModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    MatTooltipModule,
+    MatChipsModule,
+    MatTableModule,
+    GridComponent,
+    BillingStatusRendererComponent,
+    AppCardComponent
+],
     templateUrl: './patient-billing-dashboard.component.html',
     styleUrl: './patient-billing-dashboard.component.scss'
 })

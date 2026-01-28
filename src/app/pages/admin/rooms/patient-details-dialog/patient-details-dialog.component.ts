@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatDialogRef } from '@angular/material/dialog';
 import { DIALOG_DATA_TOKEN, IconComponent, AppButtonComponent } from '@lk/core';
 import { Subject, takeUntil, filter } from 'rxjs';
@@ -11,7 +11,7 @@ export interface PatientDetailsDialogData {
 
 @Component({
     selector: 'app-patient-details-dialog',
-    imports: [CommonModule, IconComponent, AppButtonComponent],
+    imports: [IconComponent, AppButtonComponent],
     templateUrl: './patient-details-dialog.component.html',
     styleUrls: ['./patient-details-dialog.component.scss']
 })

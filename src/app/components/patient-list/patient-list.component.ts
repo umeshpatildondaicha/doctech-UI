@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { AgGridModule } from 'ag-grid-angular';
 import { ColDef } from 'ag-grid-community';
 import { Patient } from '../../interfaces/patient.interface';
@@ -7,7 +7,7 @@ import { GridComponent } from "@lk/core";
 
 @Component({
     selector: 'app-patient-list',
-    imports: [CommonModule, GridComponent],
+    imports: [GridComponent],
     templateUrl: './patient-list.component.html',
     styleUrl: './patient-list.component.scss'
 })

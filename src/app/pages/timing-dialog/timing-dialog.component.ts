@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { Subject, takeUntil, distinctUntilChanged, filter } from 'rxjs';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { DIALOG_DATA_TOKEN } from "@lk/core";
@@ -27,17 +27,16 @@ export interface Break {
 @Component({
     selector: 'app-timing-dialog',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatSelectModule,
-        MatFormFieldModule,
-        MatOptionModule,
-        AppButtonComponent,
-        AppInputComponent,
-        AppSelectboxComponent,
-        DatePickerComponent,
-        IconComponent
-    ],
+    ReactiveFormsModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatOptionModule,
+    AppButtonComponent,
+    AppInputComponent,
+    AppSelectboxComponent,
+    DatePickerComponent,
+    IconComponent
+],
     templateUrl: './timing-dialog.component.html',
     styleUrl: './timing-dialog.component.scss'
 })

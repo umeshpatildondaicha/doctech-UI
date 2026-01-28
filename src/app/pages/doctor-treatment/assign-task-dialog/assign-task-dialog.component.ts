@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { DIALOG_DATA_TOKEN, AppInputComponent, AppSelectboxComponent, AppButtonComponent } from "@lk/core";
@@ -15,12 +15,11 @@ export interface AssignTaskDialogData {
 @Component({
     selector: 'app-assign-task-dialog',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        AppInputComponent,
-        AppSelectboxComponent,
-        AppButtonComponent
-    ],
+    ReactiveFormsModule,
+    AppInputComponent,
+    AppSelectboxComponent,
+    AppButtonComponent
+],
     templateUrl: './assign-task-dialog.component.html',
     styleUrls: ['./assign-task-dialog.component.scss']
 })

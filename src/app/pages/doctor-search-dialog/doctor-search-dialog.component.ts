@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatDialogRef } from '@angular/material/dialog';
 import { DIALOG_DATA_TOKEN, DialogboxService } from "@lk/core";
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -43,21 +43,20 @@ export interface DoctorSearchDialogData {
 @Component({
     selector: 'app-doctor-search-dialog',
     imports: [
-        CommonModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatButtonModule,
-        MatIconModule,
-        MatCardModule,
-        MatChipsModule,
-        MatProgressSpinnerModule,
-        MatTooltipModule,
-        AppInputComponent,
-        AppButtonComponent,
-        AppSelectboxComponent,
-        IconComponent,
-        GridComponent
-    ],
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    AppInputComponent,
+    AppButtonComponent,
+    AppSelectboxComponent,
+    IconComponent,
+    GridComponent
+],
     templateUrl: './doctor-search-dialog.component.html',
     styleUrls: ['./doctor-search-dialog.component.scss']
 })

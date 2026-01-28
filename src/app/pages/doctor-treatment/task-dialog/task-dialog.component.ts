@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { DIALOG_DATA_TOKEN, AppInputComponent, AppSelectboxComponent, AppButtonComponent } from "@lk/core";
@@ -17,12 +17,11 @@ export interface TaskDialogData {
 @Component({
     selector: 'app-task-dialog',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        AppInputComponent,
-        AppSelectboxComponent,
-        AppButtonComponent
-    ],
+    ReactiveFormsModule,
+    AppInputComponent,
+    AppSelectboxComponent,
+    AppButtonComponent
+],
     templateUrl: './task-dialog.component.html',
     styleUrls: ['./task-dialog.component.scss']
 })

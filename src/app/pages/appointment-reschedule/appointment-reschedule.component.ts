@@ -5,7 +5,7 @@ import { Appointment } from '../../interfaces/appointment.interface';
 import { AppInputComponent } from "@lk/core";
 import { AppButtonComponent } from "@lk/core";
 import { IconComponent } from "@lk/core";
-import { CommonModule } from '@angular/common';
+
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { CalendarComponent, ImageComponent, DIALOG_DATA_TOKEN } from "@lk/core";
 import { filter } from 'rxjs';
@@ -22,16 +22,15 @@ interface TimeSlot {
     templateUrl: './appointment-reschedule.component.html',
     styleUrl: './appointment-reschedule.component.scss',
     imports: [
-        AppInputComponent,
-        AppButtonComponent,
-        ImageComponent,
-        IconComponent,
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        CalendarComponent
-    ]
+    AppInputComponent,
+    AppButtonComponent,
+    ImageComponent,
+    IconComponent,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    CalendarComponent
+]
 })
 export class AppointmentRescheduleComponent implements OnInit {
   rescheduleForm: FormGroup;

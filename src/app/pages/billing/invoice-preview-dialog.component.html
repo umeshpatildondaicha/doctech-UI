@@ -17,123 +17,154 @@
 </div>
 
 <div class="preview-body">
-<div #printContent class="print-surface">
-  <header class="print-header">
-    <div class="header-left">
-      <ng-container *ngIf="data.clinic?.logoUrl; else logoFallback">
-        <figure class="hospital-logo">
-          <img [src]="data.clinic?.logoUrl" alt="Hospital Logo">
-        </figure>
-      </ng-container>
-      <ng-template #logoFallback>
-        <div class="hospital-logo fallback">
-          <span>{{ (data.clinic?.name || data.doctor?.name || 'H').slice(0, 2) }}</span>
+  <div #printContent class="print-surface">
+    <header class="print-header">
+      <div class="header-left">
+        @if (data.clinic?.logoUrl) {
+          <figure class="hospital-logo">
+            <img [src]="data.clinic?.logoUrl" alt="Hospital Logo">
+          </figure>
+        } @else {
+          <div class="hospital-logo fallback">
+            <span>{{ (data.clinic?.name || data.doctor?.name || 'H').slice(0, 2) }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="header-center">
+        <div class="clinic-name">{{ data.clinic?.name || 'Clinic / Hospital Name' }}</div>
+        @if (data.clinic?.tagline) {
+          <div class="clinic-tagline">{{ data.clinic?.tagline }}</div>
+        }
+        @if (data.clinic?.address || data.clinic?.phone || data.clinic?.email || data.clinic?.website) {
+          <div class="clinic-contact">
+            @if (data.clinic?.address) {
+              <span>{{ data.clinic?.address }}</span>
+            }
+            @if (data.clinic?.phone) {
+              <span>· {{ data.clinic?.phone }}</span>
+            }
+            @if (data.clinic?.email) {
+              <span>· {{ data.clinic?.email }}</span>
+            }
+            @if (data.clinic?.website) {
+              <span>· {{ data.clinic?.website }}</span>
+            }
+          </div>
+        }
+      </div>
+
+      @if (data.doctor) {
+        <div class="header-right">
+          <div class="doctor-name">{{ data.doctor.name }}</div>
+          @if (data.doctor.credentials) {
+            <div class="doctor-line">{{ data.doctor.credentials }}</div>
+          }
+          @if (data.doctor.registration) {
+            <div class="doctor-line">Reg: {{ data.doctor.registration }}</div>
+          }
+          @if (data.doctor.contact?.phone) {
+            <div class="doctor-line">{{ data.doctor.contact?.phone }}</div>
+          }
         </div>
-      </ng-template>
+      }
+    </header>
+
+    <div class="invoice-details-row">
+      <div class="bill-to-section">
+        <h3 class="section-heading">{{ data.isStatement ? 'Statement for' : 'Invoice to' }}</h3>
+        <div class="bill-to-content">
+          <p class="patient-name">{{ data.invoice.patientName }}</p>
+          @if (data.invoice.patientId) {
+            <p class="patient-id">ID: {{ data.invoice.patientId }}</p>
+          }
+        </div>
+      </div>
+      <div class="invoice-meta-section">
+        <div class="meta-item">
+          <span class="meta-label">Date</span>
+          <span class="meta-value">{{ data.invoice.date | date:'dd-MMM-yy hh:mm:ss a' }}</span>
+        </div>
+        @if (data.invoice.dueDate) {
+          <div class="meta-item">
+            <span class="meta-label">Due</span>
+            <span class="meta-value">{{ data.invoice.dueDate | date:'dd-MMM-yy' }}</span>
+          </div>
+        }
+        <div class="meta-item">
+          <span class="meta-label">Status</span>
+          <span class="meta-value status-badge" [class.paid]="data.invoice.status === 'PAID'">{{ data.invoice.status }}</span>
+        </div>
+      </div>
     </div>
 
-    <div class="header-center">
-      <div class="clinic-name">{{ data.clinic?.name || 'Clinic / Hospital Name' }}</div>
-      <div class="clinic-tagline" *ngIf="data.clinic?.tagline">{{ data.clinic?.tagline }}</div>
-      <div class="clinic-contact" *ngIf="data.clinic?.address || data.clinic?.phone || data.clinic?.email || data.clinic?.website">
-        <span *ngIf="data.clinic?.address">{{ data.clinic?.address }}</span>
-        <span *ngIf="data.clinic?.phone">· {{ data.clinic?.phone }}</span>
-        <span *ngIf="data.clinic?.email">· {{ data.clinic?.email }}</span>
-        <span *ngIf="data.clinic?.website">· {{ data.clinic?.website }}</span>
+    <div class="items-section">
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th class="col-sno">#</th>
+            <th class="col-desc">Description</th>
+            <th class="col-qty">Qty</th>
+            <th class="col-price">Unit Price</th>
+            <th class="col-tax">Tax %</th>
+            <th class="col-discount">Discount</th>
+            <th class="col-total right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (i of data.invoice.items; track i; let idx = $index) {
+            <tr>
+              <td class="col-sno">{{ idx + 1 }}</td>
+              <td class="col-desc">{{ i.description }}</td>
+              <td class="col-qty">{{ i.quantity }}</td>
+              <td class="col-price">{{ i.unitPrice | currency:'INR':'symbol':'1.2-2' }}</td>
+              <td class="col-tax">{{ i.taxRate || 0 }}%</td>
+              <td class="col-discount">{{ i.discount || 0 | currency:'INR':'symbol':'1.2-2' }}</td>
+              <td class="col-total right">{{ ((i.quantity * i.unitPrice - (i.discount || 0)) * (1 + (i.taxRate || 0)/100)) | currency:'INR':'symbol':'1.2-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="totals-section">
+      <div class="totals-table">
+        <div class="total-row">
+          <span class="total-label">Subtotal</span>
+          <span class="total-amount">{{ data.invoice.subTotal | currency:'INR':'symbol':'1.2-2' }}</span>
+        </div>
+        @if (data.invoice.discountTotal > 0) {
+          <div class="total-row">
+            <span class="total-label">Discount</span>
+            <span class="total-amount">{{ data.invoice.discountTotal | currency:'INR':'symbol':'1.2-2' }}</span>
+          </div>
+        }
+        @if (data.invoice.taxTotal > 0) {
+          <div class="total-row">
+            <span class="total-label">Tax</span>
+            <span class="total-amount">{{ data.invoice.taxTotal | currency:'INR':'symbol':'1.2-2' }}</span>
+          </div>
+        }
+        <div class="total-row grand-total">
+          <span class="total-label">Total</span>
+          <span class="total-amount">{{ data.invoice.total | currency:'INR':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="total-row">
+          <span class="total-label">Paid</span>
+          <span class="total-amount paid-amount">{{ (data.invoice.amountPaid || 0) | currency:'INR':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="total-row balance-row">
+          <span class="total-label">Balance</span>
+          <span class="total-amount" [class.outstanding]="(data.invoice.balanceDue || (data.invoice.total - (data.invoice.amountPaid || 0))) > 0">{{ (data.invoice.balanceDue || (data.invoice.total - (data.invoice.amountPaid || 0))) | currency:'INR':'symbol':'1.2-2' }}</span>
+        </div>
       </div>
     </div>
 
-    <div class="header-right" *ngIf="data.doctor">
-      <div class="doctor-name">{{ data.doctor.name }}</div>
-      <div class="doctor-line" *ngIf="data.doctor.credentials">{{ data.doctor.credentials }}</div>
-      <div class="doctor-line" *ngIf="data.doctor.registration">Reg: {{ data.doctor.registration }}</div>
-      <div class="doctor-line" *ngIf="data.doctor.contact?.phone">{{ data.doctor.contact?.phone }}</div>
-    </div>
-  </header>
-
-  <div class="invoice-details-row">
-    <div class="bill-to-section">
-      <h3 class="section-heading">{{ data.isStatement ? 'Statement for' : 'Invoice to' }}</h3>
-      <div class="bill-to-content">
-        <p class="patient-name">{{ data.invoice.patientName }}</p>
-        <p class="patient-id" *ngIf="data.invoice.patientId">ID: {{ data.invoice.patientId }}</p>
+    @if (data.invoice.notes) {
+      <div class="notes-section">
+        <h3 class="section-heading">Notes</h3>
+        <p class="notes-text">{{ data.invoice.notes }}</p>
       </div>
-    </div>
-    <div class="invoice-meta-section">
-      <div class="meta-item">
-        <span class="meta-label">Date</span>
-        <span class="meta-value">{{ data.invoice.date | date:'dd-MMM-yy hh:mm:ss a' }}</span>
-      </div>
-      <div class="meta-item" *ngIf="data.invoice.dueDate">
-        <span class="meta-label">Due</span>
-        <span class="meta-value">{{ data.invoice.dueDate | date:'dd-MMM-yy' }}</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">Status</span>
-        <span class="meta-value status-badge" [class.paid]="data.invoice.status === 'PAID'">{{ data.invoice.status }}</span>
-      </div>
-    </div>
+    }
   </div>
-
-  <div class="items-section">
-    <table class="invoice-table">
-      <thead>
-        <tr>
-          <th class="col-sno">#</th>
-          <th class="col-desc">Description</th>
-          <th class="col-qty">Qty</th>
-          <th class="col-price">Unit Price</th>
-          <th class="col-tax">Tax %</th>
-          <th class="col-discount">Discount</th>
-          <th class="col-total right">Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let i of data.invoice.items; let idx = index">
-          <td class="col-sno">{{ idx + 1 }}</td>
-          <td class="col-desc">{{ i.description }}</td>
-          <td class="col-qty">{{ i.quantity }}</td>
-          <td class="col-price">{{ i.unitPrice | currency:'INR':'symbol':'1.2-2' }}</td>
-          <td class="col-tax">{{ i.taxRate || 0 }}%</td>
-          <td class="col-discount">{{ i.discount || 0 | currency:'INR':'symbol':'1.2-2' }}</td>
-          <td class="col-total right">{{ ((i.quantity * i.unitPrice - (i.discount || 0)) * (1 + (i.taxRate || 0)/100)) | currency:'INR':'symbol':'1.2-2' }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="totals-section">
-    <div class="totals-table">
-      <div class="total-row">
-        <span class="total-label">Subtotal</span>
-        <span class="total-amount">{{ data.invoice.subTotal | currency:'INR':'symbol':'1.2-2' }}</span>
-      </div>
-      <div class="total-row" *ngIf="data.invoice.discountTotal > 0">
-        <span class="total-label">Discount</span>
-        <span class="total-amount">{{ data.invoice.discountTotal | currency:'INR':'symbol':'1.2-2' }}</span>
-      </div>
-      <div class="total-row" *ngIf="data.invoice.taxTotal > 0">
-        <span class="total-label">Tax</span>
-        <span class="total-amount">{{ data.invoice.taxTotal | currency:'INR':'symbol':'1.2-2' }}</span>
-      </div>
-      <div class="total-row grand-total">
-        <span class="total-label">Total</span>
-        <span class="total-amount">{{ data.invoice.total | currency:'INR':'symbol':'1.2-2' }}</span>
-      </div>
-      <div class="total-row">
-        <span class="total-label">Paid</span>
-        <span class="total-amount paid-amount">{{ (data.invoice.amountPaid || 0) | currency:'INR':'symbol':'1.2-2' }}</span>
-      </div>
-      <div class="total-row balance-row">
-        <span class="total-label">Balance</span>
-        <span class="total-amount" [class.outstanding]="(data.invoice.balanceDue || (data.invoice.total - (data.invoice.amountPaid || 0))) > 0">{{ (data.invoice.balanceDue || (data.invoice.total - (data.invoice.amountPaid || 0))) | currency:'INR':'symbol':'1.2-2' }}</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="notes-section" *ngIf="data.invoice.notes">
-    <h3 class="section-heading">Notes</h3>
-    <p class="notes-text">{{ data.invoice.notes }}</p>
-  </div>
-</div>
 </div>

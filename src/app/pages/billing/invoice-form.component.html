@@ -11,10 +11,12 @@
 
           <!-- Quick Template Chips -->
           <div class="quick-templates">
-            <button type="button" mat-stroked-button class="chip" *ngFor="let template of templates" (click)="addTemplate(template)" [disabled]="readonlyMode">
-              <mat-icon>{{ getTemplateIcon(template.id) }}</mat-icon>
-              {{ template.name }}
-            </button>
+            @for (template of templates; track template) {
+              <button type="button" mat-stroked-button class="chip" (click)="addTemplate(template)" [disabled]="readonlyMode">
+                <mat-icon>{{ getTemplateIcon(template.id) }}</mat-icon>
+                {{ template.name }}
+              </button>
+            }
           </div>
 
           <!-- Quick Add Item Form -->
@@ -57,57 +59,56 @@
           </div>
 
           <div formArrayName="items" class="items-list">
-            <div *ngFor="let g of items.controls; let i = index" [formGroupName]="i" class="item-card">
-              <div class="item-main">
-                <mat-form-field appearance="outline" class="item-description">
-                  <mat-label>Description</mat-label>
-                  <input matInput formControlName="description" placeholder="Item description" />
-                </mat-form-field>
-                
-                <div class="item-details">
-                  <mat-form-field appearance="outline" class="item-qty">
-                    <mat-label>Qty</mat-label>
-                    <input matInput type="number" formControlName="quantity" min="1" />
+            @for (g of items.controls; track g; let i = $index) {
+              <div [formGroupName]="i" class="item-card">
+                <div class="item-main">
+                  <mat-form-field appearance="outline" class="item-description">
+                    <mat-label>Description</mat-label>
+                    <input matInput formControlName="description" placeholder="Item description" />
                   </mat-form-field>
-                  
-                  <mat-form-field appearance="outline" class="item-price">
-                    <mat-label>Unit Price</mat-label>
-                    <input matInput type="number" formControlName="unitPrice" min="0" />
-                  </mat-form-field>
-                  
-                  <mat-form-field appearance="outline" class="item-discount">
-                    <mat-label>Discount</mat-label>
-                    <input matInput type="number" formControlName="discount" min="0" />
-                  </mat-form-field>
-                  
-                  <mat-form-field appearance="outline" class="item-tax">
-                    <mat-label>Tax %</mat-label>
-                    <input matInput type="number" formControlName="taxRate" min="0" max="100" />
-                  </mat-form-field>
+                  <div class="item-details">
+                    <mat-form-field appearance="outline" class="item-qty">
+                      <mat-label>Qty</mat-label>
+                      <input matInput type="number" formControlName="quantity" min="1" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="item-price">
+                      <mat-label>Unit Price</mat-label>
+                      <input matInput type="number" formControlName="unitPrice" min="0" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="item-discount">
+                      <mat-label>Discount</mat-label>
+                      <input matInput type="number" formControlName="discount" min="0" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="item-tax">
+                      <mat-label>Tax %</mat-label>
+                      <input matInput type="number" formControlName="taxRate" min="0" max="100" />
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="item-footer">
+                  <div class="item-total">
+                    Total: <strong>₹ {{ (g.value.quantity * g.value.unitPrice - (g.value.discount || 0)) * (1 + (g.value.taxRate || 0)/100) | number:'1.2-2' }}</strong>
+                  </div>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    color="warn"
+                    (click)="removeItem(i)"
+                    [disabled]="readonlyMode"
+                    matTooltip="Remove item">
+                    <mat-icon>delete</mat-icon>
+                  </button>
                 </div>
               </div>
-              
-              <div class="item-footer">
-                <div class="item-total">
-                  Total: <strong>₹ {{ (g.value.quantity * g.value.unitPrice - (g.value.discount || 0)) * (1 + (g.value.taxRate || 0)/100) | number:'1.2-2' }}</strong>
-                </div>
-                <button 
-                  mat-icon-button 
-                  type="button" 
-                  color="warn" 
-                  (click)="removeItem(i)" 
-                  [disabled]="readonlyMode"
-                  matTooltip="Remove item">
-                  <mat-icon>delete</mat-icon>
-                </button>
+            }
+
+            @if (items.length === 0) {
+              <div class="no-items">
+                <mat-icon>receipt_long</mat-icon>
+                <p>No items added yet</p>
+                <p class="hint">Use templates or add custom items to get started</p>
               </div>
-            </div>
-            
-            <div *ngIf="items.length === 0" class="no-items">
-              <mat-icon>receipt_long</mat-icon>
-              <p>No items added yet</p>
-              <p class="hint">Use templates or add custom items to get started</p>
-            </div>
+            }
           </div>
         </div>
 
@@ -130,12 +131,11 @@
             <mat-radio-button value="INTER" style="margin-left:12px;">Inter-state (IGST)</mat-radio-button>
           </mat-radio-group>
           <div style="margin:12px 0 0 0; font-size:12px; color:#666;">
-            <ng-container *ngIf="taxMode === 'INTRA'; else igstInfo2">
+            @if (taxMode === 'INTRA') {
               Using CGST {{ gstRate }}% + SGST {{ sgstRate }}%
-            </ng-container>
-            <ng-template #igstInfo2>
+            } @else {
               Using IGST {{ igstRate }}%
-            </ng-template>
+            }
           </div>
         </div>
       </div>

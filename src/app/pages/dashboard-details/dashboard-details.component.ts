@@ -2,7 +2,7 @@ import { Component, Input, Inject, ChangeDetectionStrategy } from '@angular/core
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { AgGridModule } from 'ag-grid-angular';
 import { ColDef } from 'ag-grid-community';
-import { CommonModule } from '@angular/common';
+
 import { Patient } from '../../interfaces/patient.interface';
 import { Appointment } from '../../interfaces/appointment.interface';
 import { Billing } from '../../interfaces/billing.interface';
@@ -11,7 +11,7 @@ import { GridComponent } from "@lk/core";
 
 @Component({
     selector: 'app-dashboard-details',
-    imports: [CommonModule, AgGridModule, IconComponent, MatDialogModule, GridComponent],
+    imports: [AgGridModule, IconComponent, MatDialogModule, GridComponent],
     templateUrl: './dashboard-details.component.html',
     styleUrl: './dashboard-details.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush

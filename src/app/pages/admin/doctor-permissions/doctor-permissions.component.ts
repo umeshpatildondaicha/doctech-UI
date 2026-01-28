@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MatInputModule } from '@angular/material/input';
@@ -21,22 +21,21 @@ import { AuthService, PageComponent, BreadcrumbItem } from "@lk/core";
 @Component({
     selector: 'app-doctor-permissions',
     imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        RouterModule,
-        MatInputModule,
-        MatButtonModule,
-        MatIconModule,
-        MatSnackBarModule,
-        MatProgressSpinnerModule,
-        MatExpansionModule,
-        MatSlideToggleModule,
-        MatTooltipModule,
-        MatSelectModule,
-        MatChipsModule,
-        PageComponent
-    ],
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatExpansionModule,
+    MatSlideToggleModule,
+    MatTooltipModule,
+    MatSelectModule,
+    MatChipsModule,
+    PageComponent
+],
     templateUrl: './doctor-permissions.component.html',
     styleUrl: './doctor-permissions.component.scss'
 })

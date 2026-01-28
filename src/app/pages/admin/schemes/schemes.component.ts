@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ColDef } from 'ag-grid-community';
 import { 
   AdminPageHeaderComponent,
@@ -11,7 +11,7 @@ import { MatDialog } from '@angular/material/dialog';
 
 @Component({
     selector: 'app-schemes',
-    imports: [CommonModule, ConfirmDialogComponentComponent, AdminPageHeaderComponent, GridComponent, PageComponent],
+    imports: [ConfirmDialogComponentComponent, AdminPageHeaderComponent, GridComponent, PageComponent],
     templateUrl: './schemes.component.html',
     styleUrl: './schemes.component.scss'
 })

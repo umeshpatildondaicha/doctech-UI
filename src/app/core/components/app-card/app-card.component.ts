@@ -1,10 +1,10 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, ContentChildren, HostBinding, Input, QueryList } from '@angular/core';
 import { AppCardActionsDirective } from './app-card-actions.directive';
 
 @Component({
     selector: 'app-card',
-    imports: [CommonModule],
+    imports: [],
     templateUrl: './app-card.component.html',
     styleUrl: './app-card.component.scss'
 })

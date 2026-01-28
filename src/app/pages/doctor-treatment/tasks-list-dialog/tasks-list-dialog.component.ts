@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatDialogRef } from '@angular/material/dialog';
 import { DIALOG_DATA_TOKEN, ExtendedGridOptions, GridComponent, DialogboxService } from "@lk/core";
 import { ColDef } from 'ag-grid-community';
@@ -14,9 +14,8 @@ export interface TasksListDialogData {
 @Component({
     selector: 'app-tasks-list-dialog',
     imports: [
-        CommonModule,
-        GridComponent
-    ],
+    GridComponent
+],
     templateUrl: './tasks-list-dialog.component.html',
     styleUrls: ['./tasks-list-dialog.component.scss']
 })

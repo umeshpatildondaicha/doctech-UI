@@ -1,289 +1,304 @@
 <div class="chat-container">
   <!-- Backdrop for patient list -->
-  <div class="patient-list-backdrop" 
-       [class.show]="showPatientList" 
-       [class.sidebar-collapsed]="isMainSidebarCollapsed"
-       (click)="togglePatientList()"></div>
+  <div class="patient-list-backdrop"
+    [class.show]="showPatientList"
+    [class.sidebar-collapsed]="isMainSidebarCollapsed"
+  (click)="togglePatientList()"></div>
 
   <!-- Patient List Sidebar - Now as overlay -->
-  <div class="patient-list-sidebar" 
-       [class.show]="showPatientList"
-       [class.sidebar-collapsed]="isMainSidebarCollapsed">
+  <div class="patient-list-sidebar"
+    [class.show]="showPatientList"
+    [class.sidebar-collapsed]="isMainSidebarCollapsed">
     <div class="sidebar-header">
-      <button class="toggle-btn" (click)="togglePatientList()" *ngIf="!isMobile">
-        <span class="material-icons">close</span>
-      </button>
+      @if (!isMobile) {
+        <button class="toggle-btn" (click)="togglePatientList()">
+          <span class="material-icons">close</span>
+        </button>
+      }
     </div>
 
     <!-- Filters Section -->
     <div class="filters-section">
       <div class="search-box">
         <span class="material-icons search-icon">search</span>
-        <input type="text" 
-               placeholder="Search patients..." 
-               [(ngModel)]="filter.searchTerm"
-               (input)="onFilterChange()"
-               class="search-input">
-      </div>
-
-      <!-- Patient Summary -->
-      <div class="patient-summary">
-        <div class="summary-item">
-          <span class="material-icons summary-icon">people</span>
-          <div class="summary-text">
-            <span class="summary-number">{{ chatSessions.length }}</span>
-            <span class="summary-label">Total Patients</span>
-          </div>
-        </div>
-        <div class="summary-item">
-          <span class="material-icons summary-icon online">fiber_manual_record</span>
-          <div class="summary-text">
-            <span class="summary-number">{{ getOnlinePatientsCount() }}</span>
-            <span class="summary-label">Online</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="filter-controls">
-        <select [(ngModel)]="filter.appointmentStatus" 
-                (change)="onFilterChange()" 
-                class="filter-select">
-          <option value="ALL">All Appointments</option>
-          <option value="SCHEDULED">Active</option>
-          <option value="COMPLETED">Past</option>
-          <option value="PENDING">Pending</option>
-          <option value="CANCELED">Canceled</option>
-        </select>
-
-        <select [(ngModel)]="filter.sortBy" 
-                (change)="onFilterChange()" 
-                class="filter-select">
-          <option value="LAST_ACTIVITY">Last Activity</option>
-          <option value="NAME">Name</option>
-          <option value="UNREAD_COUNT">Unread</option>
-          <option value="APPOINTMENT_DATE">Appointment Date</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Patient List -->
-    <div class="patient-list" *ngIf="!isLoading; else loadingTemplate">
-      <div class="patient-item" 
-           *ngFor="let session of chatSessions" 
-           [class.active]="currentSession?.id === session.id"
-           (click)="selectChatSession(session)">
-        
-                          <div class="patient-avatar-container">
-          <img [src]="session.patientAvatar || getDefaultAvatar(session.patientName)" 
-               [alt]="session.patientName" 
-               class="patient-avatar"
-               (error)="onImageError($event, session)"
-               (click)="navigateToPatientProfile(session.patientId, $event)"
-               title="Click to view patient profile">
-          <div class="online-indicator" [class.online]="session.isActive"></div>
+        <input type="text"
+          placeholder="Search patients..."
+          [(ngModel)]="filter.searchTerm"
+          (input)="onFilterChange()"
+          class="search-input">
         </div>
 
-        <div class="patient-details">
-          <div class="patient-name-row">
-            <h4 class="patient-name-link" 
-                (click)="navigateToPatientProfile(session.patientId, $event)"
-                title="Click to view patient profile">
-              {{ session.patientName }}
-            </h4>
-            <span class="unread-badge" *ngIf="session.unreadCount > 0">
-              {{ session.unreadCount }}
-            </span>
+        <!-- Patient Summary -->
+        <div class="patient-summary">
+          <div class="summary-item">
+            <span class="material-icons summary-icon">people</span>
+            <div class="summary-text">
+              <span class="summary-number">{{ chatSessions.length }}</span>
+              <span class="summary-label">Total Patients</span>
+            </div>
           </div>
-          
-          <p class="last-message" *ngIf="session.lastMessage">
-            {{ session.lastMessage.content.length > 50 ? 
-               session.lastMessage.content.substring(0, 50) + '...' : 
-               session.lastMessage.content }}
-          </p>
-          
-          <div class="patient-meta">
-            <span class="last-activity">{{ formatDate(session.lastActivity) }}</span>
-            <span class="appointment-status" 
-                  [style.color]="getStatusColor(session.appointmentStatus || 'PENDING')">
-              <span class="material-icons status-icon">
-                {{ getStatusIcon(session.appointmentStatus || 'PENDING') }}
-              </span>
-              {{ session.appointmentStatus || 'PENDING' }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <ng-template #loadingTemplate>
-      <div class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>Loading patients...</p>
-      </div>
-    </ng-template>
-  </div>
-
-  <!-- Chat Area - Always full width -->
-  <div class="chat-area">
-    <!-- Chat Header - Always visible -->
-    <div class="chat-header">
-      <div class="chat-header-left">
-        <button class="patients-toggle-btn" (click)="togglePatientList()" title="Toggle Patient List">
-          <span class="material-icons">people</span>
-          <span class="toggle-text">Patients</span>
-        </button>
-        
-        <div class="chat-header-info" *ngIf="currentSession">
-          <img [src]="currentSession.patientAvatar || getDefaultAvatar(currentSession.patientName)" 
-               [alt]="currentSession.patientName" 
-               class="patient-avatar"
-               (error)="onImageError($event, currentSession)"
-               (click)="navigateToPatientProfile(currentSession.patientId, $event)"
-               title="Click to view patient profile">
-          <div class="patient-details">
-            <h3 class="patient-name-link" 
-                (click)="navigateToPatientProfile(currentSession.patientId, $event)"
-                title="Click to view patient profile">
-              {{ currentSession.patientName }}
-            </h3>
-            <div class="appointment-info">
-              <span class="appointment-date" *ngIf="currentSession.appointmentDate">
-                {{ currentSession.appointmentDate | date:'MMM dd, yyyy' }}
-              </span>
-              <span class="status-badge" 
-                    [style.background-color]="getStatusColor(currentSession.appointmentStatus || 'PENDING')">
-                {{ currentSession.appointmentStatus || 'PENDING' }}
-              </span>
+          <div class="summary-item">
+            <span class="material-icons summary-icon online">fiber_manual_record</span>
+            <div class="summary-text">
+              <span class="summary-number">{{ getOnlinePatientsCount() }}</span>
+              <span class="summary-label">Online</span>
             </div>
           </div>
         </div>
-        
-        <div class="chat-header-info" *ngIf="!currentSession">
-          <h3>Select a patient to start chatting</h3>
+
+        <div class="filter-controls">
+          <select [(ngModel)]="filter.appointmentStatus"
+            (change)="onFilterChange()"
+            class="filter-select">
+            <option value="ALL">All Appointments</option>
+            <option value="SCHEDULED">Active</option>
+            <option value="COMPLETED">Past</option>
+            <option value="PENDING">Pending</option>
+            <option value="CANCELED">Canceled</option>
+          </select>
+
+          <select [(ngModel)]="filter.sortBy"
+            (change)="onFilterChange()"
+            class="filter-select">
+            <option value="LAST_ACTIVITY">Last Activity</option>
+            <option value="NAME">Name</option>
+            <option value="UNREAD_COUNT">Unread</option>
+            <option value="APPOINTMENT_DATE">Appointment Date</option>
+          </select>
         </div>
       </div>
-      
-      <div class="chat-actions" *ngIf="currentSession">
-        <button class="action-btn" title="Voice Call">
-          <span class="material-icons">call</span>
-        </button>
-        <button class="action-btn" title="Video Call">
-          <span class="material-icons">videocam</span>
-        </button>
-        <button class="action-btn" title="More Options">
-          <span class="material-icons">more_vert</span>
-        </button>
-      </div>
-    </div>
 
-    <!-- Messages Container -->
-    <div class="messages-container" #messageContainer>
-      <div class="message" 
-           *ngFor="let message of messages" 
-           [class.sent]="message.senderType === 'DOCTOR'"
-           [class.received]="message.senderType === 'PATIENT'">
-        
-
-        
-        <div class="message-content">
-          <div class="message-header">
-            <span class="sender-name">{{ message.senderName }}</span>
-            <span class="message-time">{{ formatTime(message.timestamp) }}</span>
-          </div>
-          
-          <div class="message-body">
-            <!-- Text Message -->
-            <p *ngIf="message.messageType === 'TEXT'">{{ message.content }}</p>
-            
-            <!-- Image Message -->
-            <div *ngIf="message.messageType === 'IMAGE'" class="image-message">
-              <img [src]="message.fileUrl" [alt]="message.fileName" class="message-image">
-            </div>
-            
-            <!-- Document/File Message -->
-            <div *ngIf="message.messageType === 'DOCUMENT' || message.messageType === 'FILE'" 
-                 class="file-message">
-              <div class="file-info">
-                <span class="material-icons file-icon">{{ getFileIcon(message.fileName || '') }}</span>
-                <div class="file-details">
-                  <span class="file-name">{{ message.fileName }}</span>
-                  <span class="file-size">{{ formatFileSize(message.fileSize || 0) }}</span>
+      <!-- Patient List -->
+      @if (!isLoading) {
+        <div class="patient-list">
+          @for (session of chatSessions; track session) {
+            <div class="patient-item"
+              [class.active]="currentSession?.id === session.id"
+              (click)="selectChatSession(session)">
+              <div class="patient-avatar-container">
+                <img [src]="session.patientAvatar || getDefaultAvatar(session.patientName)"
+                  [alt]="session.patientName"
+                  class="patient-avatar"
+                  (error)="onImageError($event, session)"
+                  (click)="navigateToPatientProfile(session.patientId, $event)"
+                  title="Click to view patient profile">
+                  <div class="online-indicator" [class.online]="session.isActive"></div>
                 </div>
-                <button class="download-btn" title="Download">
-                  <span class="material-icons">download</span>
+                <div class="patient-details">
+                  <div class="patient-name-row">
+                    <h4 class="patient-name-link"
+                      (click)="navigateToPatientProfile(session.patientId, $event)"
+                      title="Click to view patient profile">
+                      {{ session.patientName }}
+                    </h4>
+                    @if (session.unreadCount > 0) {
+                      <span class="unread-badge">
+                        {{ session.unreadCount }}
+                      </span>
+                    }
+                  </div>
+                  @if (session.lastMessage) {
+                    <p class="last-message">
+                      {{ session.lastMessage.content.length > 50 ?
+                      session.lastMessage.content.substring(0, 50) + '...' :
+                      session.lastMessage.content }}
+                    </p>
+                  }
+                  <div class="patient-meta">
+                    <span class="last-activity">{{ formatDate(session.lastActivity) }}</span>
+                    <span class="appointment-status"
+                      [style.color]="getStatusColor(session.appointmentStatus || 'PENDING')">
+                      <span class="material-icons status-icon">
+                        {{ getStatusIcon(session.appointmentStatus || 'PENDING') }}
+                      </span>
+                      {{ session.appointmentStatus || 'PENDING' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Loading patients...</p>
+          </div>
+        }
+
+      </div>
+
+      <!-- Chat Area - Always full width -->
+      <div class="chat-area">
+        <!-- Chat Header - Always visible -->
+        <div class="chat-header">
+          <div class="chat-header-left">
+            <button class="patients-toggle-btn" (click)="togglePatientList()" title="Toggle Patient List">
+              <span class="material-icons">people</span>
+              <span class="toggle-text">Patients</span>
+            </button>
+
+            @if (currentSession) {
+              <div class="chat-header-info">
+                <img [src]="currentSession.patientAvatar || getDefaultAvatar(currentSession.patientName)"
+                  [alt]="currentSession.patientName"
+                  class="patient-avatar"
+                  (error)="onImageError($event, currentSession)"
+                  (click)="navigateToPatientProfile(currentSession.patientId, $event)"
+                  title="Click to view patient profile">
+                  <div class="patient-details">
+                    <h3 class="patient-name-link"
+                      (click)="navigateToPatientProfile(currentSession.patientId, $event)"
+                      title="Click to view patient profile">
+                      {{ currentSession.patientName }}
+                    </h3>
+                    <div class="appointment-info">
+                      @if (currentSession.appointmentDate) {
+                        <span class="appointment-date">
+                          {{ currentSession.appointmentDate | date:'MMM dd, yyyy' }}
+                        </span>
+                      }
+                      <span class="status-badge"
+                        [style.background-color]="getStatusColor(currentSession.appointmentStatus || 'PENDING')">
+                        {{ currentSession.appointmentStatus || 'PENDING' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              @if (!currentSession) {
+                <div class="chat-header-info">
+                  <h3>Select a patient to start chatting</h3>
+                </div>
+              }
+            </div>
+
+            @if (currentSession) {
+              <div class="chat-actions">
+                <button class="action-btn" title="Voice Call">
+                  <span class="material-icons">call</span>
+                </button>
+                <button class="action-btn" title="Video Call">
+                  <span class="material-icons">videocam</span>
+                </button>
+                <button class="action-btn" title="More Options">
+                  <span class="material-icons">more_vert</span>
                 </button>
               </div>
-            </div>
+            }
           </div>
-          
-          <div class="message-status" *ngIf="message.senderType === 'DOCTOR'">
-            <span class="material-icons status-icon" 
-                  [class.delivered]="message.isDelivered"
-                  [class.read]="message.isRead">
-              {{ message.isRead ? 'done_all' : (message.isDelivered ? 'done' : 'schedule') }}
-            </span>
-            <span class="status-text">
-              {{ message.isRead ? 'Read' : (message.isDelivered ? 'Delivered' : 'Sent') }}
-            </span>
+
+          <!-- Messages Container -->
+          <div class="messages-container" #messageContainer>
+            @for (message of messages; track message) {
+              <div class="message"
+                [class.sent]="message.senderType === 'DOCTOR'"
+                [class.received]="message.senderType === 'PATIENT'">
+                <div class="message-content">
+                  <div class="message-header">
+                    <span class="sender-name">{{ message.senderName }}</span>
+                    <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+                  </div>
+                  <div class="message-body">
+                    <!-- Text Message -->
+                    @if (message.messageType === 'TEXT') {
+                      <p>{{ message.content }}</p>
+                    }
+                    <!-- Image Message -->
+                    @if (message.messageType === 'IMAGE') {
+                      <div class="image-message">
+                        <img [src]="message.fileUrl" [alt]="message.fileName" class="message-image">
+                      </div>
+                    }
+                    <!-- Document/File Message -->
+                    @if (message.messageType === 'DOCUMENT' || message.messageType === 'FILE') {
+                      <div
+                        class="file-message">
+                        <div class="file-info">
+                          <span class="material-icons file-icon">{{ getFileIcon(message.fileName || '') }}</span>
+                          <div class="file-details">
+                            <span class="file-name">{{ message.fileName }}</span>
+                            <span class="file-size">{{ formatFileSize(message.fileSize || 0) }}</span>
+                          </div>
+                          <button class="download-btn" title="Download">
+                            <span class="material-icons">download</span>
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                  @if (message.senderType === 'DOCTOR') {
+                    <div class="message-status">
+                      <span class="material-icons status-icon"
+                        [class.delivered]="message.isDelivered"
+                        [class.read]="message.isRead">
+                        {{ message.isRead ? 'done_all' : (message.isDelivered ? 'done' : 'schedule') }}
+                      </span>
+                      <span class="status-text">
+                        {{ message.isRead ? 'Read' : (message.isDelivered ? 'Delivered' : 'Sent') }}
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Message Input Area -->
+          @if (currentSession) {
+            <div class="message-input-area"
+              [class.sidebar-collapsed]="isMainSidebarCollapsed">
+              <!-- Selected Files Preview -->
+              @if (selectedFiles.length > 0) {
+                <div class="selected-files">
+                  @for (file of selectedFiles; track file) {
+                    <div class="file-preview">
+                      <span class="material-icons file-icon">{{ getFileIcon(file.type) }}</span>
+                      <span class="file-name">{{ file.name }}</span>
+                      <button class="remove-file-btn" (click)="removeFile(file)">
+                        <span class="material-icons">close</span>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+              <div class="input-container">
+                <button class="attach-btn" (click)="fileInput.click()">
+                  <span class="material-icons">attach_file</span>
+                </button>
+                <div class="text-input-container">
+                  <textarea
+                    [(ngModel)]="newMessage"
+                    (keypress)="onKeyPress($event)"
+                    placeholder="Type your message..."
+                    class="message-input"
+                    rows="1">
+                  </textarea>
+                </div>
+                <button class="send-btn"
+                  [disabled]="!newMessage.trim() && selectedFiles.length === 0"
+                  (click)="sendMessage()">
+                  <span class="material-icons">send</span>
+                </button>
+              </div>
+              <input #fileInput
+                type="file"
+                multiple
+                (change)="onFileSelected($event)"
+                style="display: none"
+                accept="image/*,.pdf,.doc,.docx,.txt">
+              </div>
+            }
+
+            <!-- No Chat Selected State -->
+            @if (!currentSession) {
+              <div class="no-chat-selected">
+                <div class="no-chat-content">
+                  <span class="material-icons no-chat-icon">chat_bubble_outline</span>
+                  <h3>Select a patient to start chatting</h3>
+                  <p>Choose a patient from the list to begin your conversation</p>
+                </div>
+              </div>
+            }
           </div>
         </div>
-        
-
-      </div>
-    </div>
-
-    <!-- Message Input Area -->
-    <div class="message-input-area" 
-         *ngIf="currentSession"
-         [class.sidebar-collapsed]="isMainSidebarCollapsed">
-      <!-- Selected Files Preview -->
-      <div class="selected-files" *ngIf="selectedFiles.length > 0">
-        <div class="file-preview" *ngFor="let file of selectedFiles">
-          <span class="material-icons file-icon">{{ getFileIcon(file.type) }}</span>
-          <span class="file-name">{{ file.name }}</span>
-          <button class="remove-file-btn" (click)="removeFile(file)">
-            <span class="material-icons">close</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="input-container">
-        <button class="attach-btn" (click)="fileInput.click()">
-          <span class="material-icons">attach_file</span>
-        </button>
-        
-        <div class="text-input-container">
-          <textarea 
-            [(ngModel)]="newMessage"
-            (keypress)="onKeyPress($event)"
-            placeholder="Type your message..."
-            class="message-input"
-            rows="1">
-          </textarea>
-        </div>
-        
-        <button class="send-btn" 
-                [disabled]="!newMessage.trim() && selectedFiles.length === 0"
-                (click)="sendMessage()">
-          <span class="material-icons">send</span>
-        </button>
-      </div>
-      
-      <input #fileInput 
-             type="file" 
-             multiple 
-             (change)="onFileSelected($event)" 
-             style="display: none"
-             accept="image/*,.pdf,.doc,.docx,.txt">
-    </div>
-
-    <!-- No Chat Selected State -->
-    <div class="no-chat-selected" *ngIf="!currentSession">
-      <div class="no-chat-content">
-        <span class="material-icons no-chat-icon">chat_bubble_outline</span>
-        <h3>Select a patient to start chatting</h3>
-        <p>Choose a patient from the list to begin your conversation</p>
-      </div>
-    </div>
-  </div>
-</div>

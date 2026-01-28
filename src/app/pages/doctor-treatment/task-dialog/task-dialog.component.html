@@ -1,9 +1,11 @@
 <div class="task-dialog">
   <div class="dialog-content">
-    <div class="patient-info" *ngIf="data.patientId && data.patientName !== 'General Task'">
-      <span class="patient-label">Patient:</span>
-      <span class="patient-name">{{ data.patientName }}</span>
-    </div>
+    @if (data.patientId && data.patientName !== 'General Task') {
+      <div class="patient-info">
+        <span class="patient-label">Patient:</span>
+        <span class="patient-name">{{ data.patientName }}</span>
+      </div>
+    }
 
     <form [formGroup]="taskForm" class="task-form">
       <div class="form-row">
@@ -84,19 +86,21 @@
             type="checkbox"
             formControlName="requiresFollowUp"
             class="checkbox-input">
-          <span>Requires Follow-up</span>
-        </label>
-      </div>
+            <span>Requires Follow-up</span>
+          </label>
+        </div>
 
-      <div class="form-row" *ngIf="taskForm.get('requiresFollowUp')?.value">
-        <app-input
-          [label]="'Follow-up Date'"
-          [type]="'datetime-local'"
-          [formGroup]="taskForm"
-          formControlName="followUpDate">
-        </app-input>
-      </div>
-    </form>
+        @if (taskForm.get('requiresFollowUp')?.value) {
+          <div class="form-row">
+            <app-input
+              [label]="'Follow-up Date'"
+              [type]="'datetime-local'"
+              [formGroup]="taskForm"
+              formControlName="followUpDate">
+            </app-input>
+          </div>
+        }
+      </form>
+    </div>
   </div>
-</div>
 

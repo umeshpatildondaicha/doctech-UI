@@ -1,9 +1,11 @@
 <div class="payment-dialog-container">
   <div class="dialog-header">
-    <div *ngIf="data?.itemDescription" class="item-info">
-      <mat-icon>receipt</mat-icon>
-      <span>{{ data?.itemDescription }}</span>
-    </div>
+    @if (data?.itemDescription) {
+      <div class="item-info">
+        <mat-icon>receipt</mat-icon>
+        <span>{{ data?.itemDescription }}</span>
+      </div>
+    }
     <div class="balance-info">
       <span class="balance-label">Balance Due</span>
       <span class="balance-amount">₹ {{ balanceDueValue | number:'1.2-2' }}</span>
@@ -17,20 +19,28 @@
           <mat-label>Payment Amount</mat-label>
           <input matInput type="number" formControlName="amount" placeholder="0.00" />
           <span matPrefix class="currency-prefix">₹</span>
-          <mat-error *ngIf="form.controls['amount'].hasError('max')">Amount exceeds balance due</mat-error>
-          <mat-error *ngIf="form.controls['amount'].hasError('min')">Amount must be greater than 0</mat-error>
-          <mat-error *ngIf="form.controls['amount'].hasError('required')">Amount is required</mat-error>
+          @if (form.controls['amount'].hasError('max')) {
+            <mat-error>Amount exceeds balance due</mat-error>
+          }
+          @if (form.controls['amount'].hasError('min')) {
+            <mat-error>Amount must be greater than 0</mat-error>
+          }
+          @if (form.controls['amount'].hasError('required')) {
+            <mat-error>Amount is required</mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="method-field">
           <mat-label>Payment Method</mat-label>
           <mat-select formControlName="method">
-            <mat-option *ngFor="let m of methods" [value]="m">
-              <div class="method-option">
-                <mat-icon>{{ getMethodIcon(m) }}</mat-icon>
-                <span>{{ getMethodLabel(m) }}</span>
-              </div>
-            </mat-option>
+            @for (m of methods; track m) {
+              <mat-option [value]="m">
+                <div class="method-option">
+                  <mat-icon>{{ getMethodIcon(m) }}</mat-icon>
+                  <span>{{ getMethodLabel(m) }}</span>
+                </div>
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
       </div>

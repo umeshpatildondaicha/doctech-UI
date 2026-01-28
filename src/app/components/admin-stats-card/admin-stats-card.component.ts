@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { IconComponent } from '@lk/core';
 
 export interface StatCard {
@@ -18,7 +18,7 @@ export interface StatCard {
 
 @Component({
     selector: 'app-admin-stats-card',
-    imports: [CommonModule, IconComponent],
+    imports: [IconComponent],
     templateUrl: './admin-stats-card.component.html',
     styleUrl: './admin-stats-card.component.scss'
 })

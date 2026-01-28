@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,14 +16,13 @@ export interface AddRoundDialogData {
 @Component({
     selector: 'app-add-round-dialog',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatCheckboxModule,
-        AppInputComponent,
-        AppSelectboxComponent
-    ],
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatCheckboxModule,
+    AppInputComponent,
+    AppSelectboxComponent
+],
     templateUrl: './add-round-dialog.component.html',
     styleUrls: ['./add-round-dialog.component.scss']
 })

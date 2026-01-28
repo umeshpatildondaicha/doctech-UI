@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -61,20 +61,19 @@ export interface AppointmentRequest {
 @Component({
     selector: 'app-appointment-booking',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatIconModule,
-        MatCardModule,
-        MatChipsModule,
-        MatCheckboxModule,
-        MatRadioModule,
-        MatTooltipModule,
-        MatProgressSpinnerModule,
-        AppInputComponent,
-        IconComponent
-    ],
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatCardModule,
+    MatChipsModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatTooltipModule,
+    MatProgressSpinnerModule,
+    AppInputComponent,
+    IconComponent
+],
     templateUrl: './appointment-booking.component.html',
     styleUrls: ['./appointment-booking.component.scss']
 })

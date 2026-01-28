@@ -1,5 +1,5 @@
 import { Component, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { AppInputComponent, AppSelectboxComponent, AppButtonComponent, IconComponent, DIALOG_DATA_TOKEN } from '@lk/core';
@@ -49,7 +49,7 @@ interface UploadedDocument {
 
 @Component({
     selector: 'app-service-form',
-    imports: [CommonModule, ReactiveFormsModule, FormsModule, AppInputComponent, AppSelectboxComponent, AppButtonComponent, IconComponent],
+    imports: [ReactiveFormsModule, FormsModule, AppInputComponent, AppSelectboxComponent, AppButtonComponent, IconComponent],
     templateUrl: './service-form.component.html',
     styleUrls: ['./service-form.component.scss']
 })

@@ -20,9 +20,11 @@
               <mat-label>Search</mat-label>
               <input matInput [(ngModel)]="searchQuery" [placeholder]="assignmentType === 'weekly' ? 'Search diet plans...' : 'Search diets...'">
               <mat-icon matPrefix>search</mat-icon>
-              <button mat-icon-button matSuffix (click)="searchQuery=''" *ngIf="searchQuery">
-                <mat-icon>close</mat-icon>
-              </button>
+              @if (searchQuery) {
+                <button mat-icon-button matSuffix (click)="searchQuery=''">
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
             </mat-form-field>
           </div>
 
@@ -30,157 +32,178 @@
             <button type="button" class="tab-btn" [class.active]="assignmentType === 'weekly'" (click)="assignmentType = 'weekly'" role="tab" [attr.aria-selected]="assignmentType === 'weekly'">
               <mat-icon>calendar_today</mat-icon>
               <span class="tab-label">Weekly Plans</span>
-              <span class="tab-count" *ngIf="getFilteredPlans()?.length">{{ getFilteredPlans().length }}</span>
+              @if (getFilteredPlans()?.length) {
+                <span class="tab-count">{{ getFilteredPlans().length }}</span>
+              }
             </button>
             <button type="button" class="tab-btn" [class.active]="assignmentType === 'individual'" (click)="assignmentType = 'individual'" role="tab" [attr.aria-selected]="assignmentType === 'individual'">
               <mat-icon>restaurant</mat-icon>
               <span class="tab-label">Individual Diets</span>
-              <span class="tab-count" *ngIf="getFilteredIndividualDiets()?.length">{{ getFilteredIndividualDiets().length }}</span>
+              @if (getFilteredIndividualDiets()?.length) {
+                <span class="tab-count">{{ getFilteredIndividualDiets().length }}</span>
+              }
             </button>
           </div>
         </div>
 
         <!-- Weekly Plans Tab -->
-        <ng-container *ngIf="assignmentType === 'weekly'">
+        @if (assignmentType === 'weekly') {
           <div class="diet-plans-list">
-            <div 
-              *ngFor="let plan of getFilteredPlans()" 
-              class="diet-plan-item"
-              [class.selected]="isPlanSelected(plan)"
-              (click)="selectPlan(plan)"
-              (keydown.enter)="selectPlan(plan)"
-              tabindex="0"
-              role="button"
-              [attr.aria-label]="'Select ' + plan.name">
-              <div class="plan-info">
-                <h4 class="plan-name">{{ plan.name }}</h4>
-                <p class="plan-calories">{{ plan.dietsCount }} diets • {{ plan.duration }} days</p>
+            @for (plan of getFilteredPlans(); track plan) {
+              <div
+                class="diet-plan-item"
+                [class.selected]="isPlanSelected(plan)"
+                (click)="selectPlan(plan)"
+                (keydown.enter)="selectPlan(plan)"
+                tabindex="0"
+                role="button"
+                [attr.aria-label]="'Select ' + plan.name">
+                <div class="plan-info">
+                  <h4 class="plan-name">{{ plan.name }}</h4>
+                  <p class="plan-calories">{{ plan.dietsCount }} diets • {{ plan.duration }} days</p>
+                </div>
+                <div class="plan-actions">
+                  <button
+                    mat-icon-button
+                    class="view-btn"
+                    (click)="viewPlan(plan, $event)"
+                    matTooltip="View plan details">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                  @if (isPlanSelected(plan)) {
+                    <mat-icon
+                      class="check-icon">
+                      check_circle
+                    </mat-icon>
+                  }
+                  @if (!isPlanSelected(plan)) {
+                    <button
+                      mat-icon-button
+                      class="add-btn"
+                      (click)="addPlan(plan, $event)"
+                      matTooltip="Add plan">
+                      <mat-icon>add</mat-icon>
+                    </button>
+                  }
+                </div>
               </div>
-              <div class="plan-actions">
-                <button 
-                  mat-icon-button 
-                  class="view-btn"
-                  (click)="viewPlan(plan, $event)"
-                  matTooltip="View plan details">
-                  <mat-icon>visibility</mat-icon>
-                </button>
-                <mat-icon 
-                  *ngIf="isPlanSelected(plan)" 
-                  class="check-icon">
-                  check_circle
-                </mat-icon>
-                <button 
-                  *ngIf="!isPlanSelected(plan)"
-                  mat-icon-button 
-                  class="add-btn"
-                  (click)="addPlan(plan, $event)"
-                  matTooltip="Add plan">
-                  <mat-icon>add</mat-icon>
-                </button>
-              </div>
-            </div>
+            }
           </div>
-        </ng-container>
+        }
 
         <!-- Individual Diets Tab -->
-        <ng-container *ngIf="assignmentType === 'individual'">
+        @if (assignmentType === 'individual') {
           <div class="individual-diets-list">
-            <div 
-              *ngFor="let diet of getFilteredIndividualDiets()" 
-              class="diet-item"
-              [class.selected]="isDietSelected(diet)"
-              (click)="toggleDietSelection(diet)"
-              (keydown.enter)="toggleDietSelection(diet)"
-              tabindex="0"
-              role="button"
-              [attr.aria-label]="'Select ' + diet.name">
-              <div class="diet-item-info">
-                <h4 class="diet-item-name">{{ diet.name }}</h4>
-                <p class="diet-item-meta">{{ diet.calories }} cal • {{ diet.protein }}g protein • {{ diet.dietType }}</p>
+            @for (diet of getFilteredIndividualDiets(); track diet) {
+              <div
+                class="diet-item"
+                [class.selected]="isDietSelected(diet)"
+                (click)="toggleDietSelection(diet)"
+                (keydown.enter)="toggleDietSelection(diet)"
+                tabindex="0"
+                role="button"
+                [attr.aria-label]="'Select ' + diet.name">
+                <div class="diet-item-info">
+                  <h4 class="diet-item-name">{{ diet.name }}</h4>
+                  <p class="diet-item-meta">{{ diet.calories }} cal • {{ diet.protein }}g protein • {{ diet.dietType }}</p>
+                </div>
+                <div class="diet-item-actions">
+                  @if (isDietSelected(diet)) {
+                    <mat-icon
+                      class="check-icon">
+                      check_circle
+                    </mat-icon>
+                  }
+                  @if (!isDietSelected(diet)) {
+                    <button
+                      mat-icon-button
+                      class="add-btn"
+                      (click)="toggleDietSelection(diet); $event.stopPropagation()"
+                      matTooltip="Add diet">
+                      <mat-icon>add</mat-icon>
+                    </button>
+                  }
+                </div>
               </div>
-              <div class="diet-item-actions">
-                <mat-icon 
-                  *ngIf="isDietSelected(diet)" 
-                  class="check-icon">
-                  check_circle
-                </mat-icon>
-                <button 
-                  *ngIf="!isDietSelected(diet)"
-                  mat-icon-button 
-                  class="add-btn"
-                  (click)="toggleDietSelection(diet); $event.stopPropagation()"
-                  matTooltip="Add diet">
-                  <mat-icon>add</mat-icon>
-                </button>
-              </div>
-            </div>
+            }
           </div>
-        </ng-container>
+        }
       </div>
 
       <!-- Right Section: Assignment Summary -->
       <div class="assignment-summary-section">
         <h3>Assignment Summary ({{ getSelectedItemsCount() }})</h3>
-        
-        <div *ngIf="assignmentType === 'weekly' && selectedPlan" class="summary-content">
-          <!-- Selected Plan Details -->
-          <div class="selected-plan-card">
-            <div class="plan-header">
-              <h4>{{ selectedPlan.name }}</h4>
-              <button 
-                mat-icon-button 
-                (click)="removePlan()"
-                class="remove-btn">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-            
-            <div class="plan-details">
-              <div class="detail-item">
-                <span class="detail-label">Duration:</span>
-                <span class="detail-value">{{ selectedPlan.duration }} days</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Total Diets:</span>
-                <span class="detail-value">{{ selectedPlan.dietsCount || 'N/A' }}</span>
-              </div>
-              <p class="plan-description">{{ selectedPlan.description }}</p>
-            </div>
-          </div>
 
-          <!-- Compatibility Message -->
-          <div class="compatibility-message" *ngIf="selectedPlan.isCompatible !== false">
-            <mat-icon class="check-icon">check_circle</mat-icon>
-            <span>This plan is compatible with the patient's allergies.</span>
+        @if (assignmentType === 'weekly' && selectedPlan) {
+          <div class="summary-content">
+            <!-- Selected Plan Details -->
+            <div class="selected-plan-card">
+              <div class="plan-header">
+                <h4>{{ selectedPlan.name }}</h4>
+                <button
+                  mat-icon-button
+                  (click)="removePlan()"
+                  class="remove-btn">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+              <div class="plan-details">
+                <div class="detail-item">
+                  <span class="detail-label">Duration:</span>
+                  <span class="detail-value">{{ selectedPlan.duration }} days</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Total Diets:</span>
+                  <span class="detail-value">{{ selectedPlan.dietsCount || 'N/A' }}</span>
+                </div>
+                <p class="plan-description">{{ selectedPlan.description }}</p>
+              </div>
+            </div>
+            <!-- Compatibility Message -->
+            @if (selectedPlan.isCompatible !== false) {
+              <div class="compatibility-message">
+                <mat-icon class="check-icon">check_circle</mat-icon>
+                <span>This plan is compatible with the patient's allergies.</span>
+              </div>
+            }
           </div>
-        </div>
+        }
 
         <!-- Individual Diets Summary -->
-        <div *ngIf="assignmentType === 'individual' && selectedDiets.length > 0" class="summary-content">
-          <div class="selected-diets-list">
-            <div 
-              *ngFor="let diet of selectedDiets; let i = index" 
-              class="selected-diet-item">
-              <div class="diet-info">
-                <h5 class="diet-name">{{ diet.name }}</h5>
-                <p class="diet-meta">{{ diet.calories }} cal • {{ diet.protein }}g protein</p>
-              </div>
-              <button 
-                mat-icon-button 
-                (click)="removeDiet(i)"
-                class="remove-btn">
-                <mat-icon>delete</mat-icon>
-              </button>
+        @if (assignmentType === 'individual' && selectedDiets.length > 0) {
+          <div class="summary-content">
+            <div class="selected-diets-list">
+              @for (diet of selectedDiets; track diet; let i = $index) {
+                <div
+                  class="selected-diet-item">
+                  <div class="diet-info">
+                    <h5 class="diet-name">{{ diet.name }}</h5>
+                    <p class="diet-meta">{{ diet.calories }} cal • {{ diet.protein }}g protein</p>
+                  </div>
+                  <button
+                    mat-icon-button
+                    (click)="removeDiet(i)"
+                    class="remove-btn">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              }
             </div>
           </div>
-        </div>
+        }
 
         <!-- Empty State -->
-        <div *ngIf="(assignmentType === 'weekly' && !selectedPlan) || (assignmentType === 'individual' && selectedDiets.length === 0)" class="empty-state">
-          <mat-icon class="empty-icon">restaurant_menu</mat-icon>
-          <p *ngIf="assignmentType === 'weekly'">No plan selected. Choose a plan from the list to see details here.</p>
-          <p *ngIf="assignmentType === 'individual'">No diets selected. Choose diets from the list to add them.</p>
-        </div>
+        @if ((assignmentType === 'weekly' && !selectedPlan) || (assignmentType === 'individual' && selectedDiets.length === 0)) {
+          <div class="empty-state">
+            <mat-icon class="empty-icon">restaurant_menu</mat-icon>
+            @if (assignmentType === 'weekly') {
+              <p>No plan selected. Choose a plan from the list to see details here.</p>
+            }
+            @if (assignmentType === 'individual') {
+              <p>No diets selected. Choose diets from the list to add them.</p>
+            }
+          </div>
+        }
       </div>
     </div>
   </div>
@@ -191,39 +214,39 @@
       <div class="date-fields">
         <mat-form-field appearance="outline" class="date-picker">
           <mat-label>Start Date</mat-label>
-          <input 
-            matInput 
+          <input
+            matInput
             [matDatepicker]="pickerStart"
             [(ngModel)]="startDate">
-          <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
-          <mat-datepicker #pickerStart></mat-datepicker>
-        </mat-form-field>
+            <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+            <mat-datepicker #pickerStart></mat-datepicker>
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" class="date-picker">
-          <mat-label>Till Date</mat-label>
-          <input 
-            matInput 
-            [matDatepicker]="pickerEnd"
-            [(ngModel)]="endDate"
-            [min]="startDate">
-          <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
-          <mat-datepicker #pickerEnd></mat-datepicker>
-        </mat-form-field>
+          <mat-form-field appearance="outline" class="date-picker">
+            <mat-label>Till Date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="pickerEnd"
+              [(ngModel)]="endDate"
+              [min]="startDate">
+              <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+              <mat-datepicker #pickerEnd></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="footer-right">
+          <button mat-stroked-button (click)="onCancel()" class="cancel-btn">
+            Cancel
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="onConfirm()"
+            [disabled]="(assignmentType === 'weekly' && !selectedPlan) || (assignmentType === 'individual' && selectedDiets.length === 0)"
+            class="confirm-btn">
+            Assign Diet
+          </button>
+        </div>
       </div>
     </div>
-    <div class="footer-right">
-      <button mat-stroked-button (click)="onCancel()" class="cancel-btn">
-        Cancel
-      </button>
-      <button 
-        mat-raised-button 
-        color="primary" 
-        (click)="onConfirm()" 
-        [disabled]="(assignmentType === 'weekly' && !selectedPlan) || (assignmentType === 'individual' && selectedDiets.length === 0)"
-        class="confirm-btn">
-        Assign Diet
-      </button>
-    </div>
-  </div>
-</div>
 

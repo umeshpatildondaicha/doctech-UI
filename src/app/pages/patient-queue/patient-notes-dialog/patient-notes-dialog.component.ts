@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,11 +16,10 @@ export interface PatientNotesDialogData {
 @Component({
     selector: 'app-patient-notes-dialog',
     imports: [
-        CommonModule,
-        FormsModule,
-        MatFormFieldModule,
-        MatInputModule
-    ],
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule
+],
     templateUrl: './patient-notes-dialog.component.html',
     styleUrls: ['./patient-notes-dialog.component.scss']
 })

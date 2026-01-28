@@ -1,8 +1,8 @@
 <div class="breadcrumb-container">
   <!-- Back Button -->
-  <button 
-    class="back-button" 
-    (click)="goBack()" 
+  <button
+    class="back-button"
+    (click)="goBack()"
     title="Go Back"
     aria-label="Go back to previous page">
     <mat-icon>arrow_back</mat-icon>
@@ -12,48 +12,50 @@
   <!-- Breadcrumb Path -->
   <nav class="breadcrumb-nav" aria-label="Breadcrumb navigation">
     <ol class="breadcrumb-list">
-      <li 
-        *ngFor="let item of breadcrumbs; let i = index; trackBy: trackByFn" 
-        class="breadcrumb-item"
-        [class.active]="item.isActive"
-        [class.clickable]="item.path && !item.isActive">
-        
-        <!-- Breadcrumb Icon -->
-        <mat-icon 
-          *ngIf="item.icon && item.icon !== 'chevron_right'" 
-          class="breadcrumb-icon"
-          [class.active-icon]="item.isActive">
-          {{ item.icon }}
-        </mat-icon>
-
-        <!-- Breadcrumb Label -->
-        <span 
-          class="breadcrumb-label"
-          (click)="onBreadcrumbClick(item, i)"
+      @for (item of breadcrumbs; track trackByFn(i, item); let i = $index) {
+        <li
+          class="breadcrumb-item"
+          [class.active]="item.isActive"
           [class.clickable]="item.path && !item.isActive">
-          {{ item.label }}
-        </span>
-
-        <!-- Separator -->
-        <mat-icon 
-          *ngIf="i < breadcrumbs.length - 1" 
-          class="breadcrumb-separator">
-          chevron_right
-        </mat-icon>
-      </li>
+          <!-- Breadcrumb Icon -->
+          @if (item.icon && item.icon !== 'chevron_right') {
+            <mat-icon
+              class="breadcrumb-icon"
+              [class.active-icon]="item.isActive">
+              {{ item.icon }}
+            </mat-icon>
+          }
+          <!-- Breadcrumb Label -->
+          <span
+            class="breadcrumb-label"
+            (click)="onBreadcrumbClick(item, i)"
+            [class.clickable]="item.path && !item.isActive">
+            {{ item.label }}
+          </span>
+          <!-- Separator -->
+          @if (i < breadcrumbs.length - 1) {
+            <mat-icon
+              class="breadcrumb-separator">
+              chevron_right
+            </mat-icon>
+          }
+        </li>
+      }
     </ol>
   </nav>
 
   <!-- Current Path Display -->
-  <div class="current-path" *ngIf="currentPath">
-    <span class="path-label">Current Path:</span>
-    <code class="path-value">{{ currentPath }}</code>
-  </div>
+  @if (currentPath) {
+    <div class="current-path">
+      <span class="path-label">Current Path:</span>
+      <code class="path-value">{{ currentPath }}</code>
+    </div>
+  }
 
   <!-- Home Button -->
-  <button 
-    class="home-button" 
-    (click)="goHome()" 
+  <button
+    class="home-button"
+    (click)="goHome()"
     title="Go to Home"
     aria-label="Go to home page">
     <mat-icon>home</mat-icon>

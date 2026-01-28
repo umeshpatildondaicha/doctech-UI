@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { AppButtonComponent, IconComponent } from '@lk/core';
 
 export interface ActionButton {
@@ -15,7 +15,7 @@ export interface ActionButton {
 
 @Component({
     selector: 'app-admin-action-bar',
-    imports: [CommonModule, AppButtonComponent, IconComponent],
+    imports: [AppButtonComponent, IconComponent],
     templateUrl: './admin-action-bar.component.html',
     styleUrl: './admin-action-bar.component.scss'
 })

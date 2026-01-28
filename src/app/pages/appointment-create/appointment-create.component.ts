@@ -7,7 +7,7 @@ import { AppInputComponent } from "@lk/core";
 import { AppButtonComponent } from "@lk/core";
 import { AppSelectboxComponent } from "@lk/core";
 import { IconComponent } from "@lk/core";
-import { CommonModule } from '@angular/common';
+
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { Mode } from '../../types/mode.type';
 import { DatePickerComponent } from "@lk/core";
@@ -19,17 +19,16 @@ import { PatientSearchDialogComponent, PatientSearchResult } from '../patient-se
     templateUrl: './appointment-create.component.html',
     styleUrl: './appointment-create.component.scss',
     imports: [
-        AppInputComponent,
-        AppButtonComponent,
-        AppSelectboxComponent,
-        IconComponent,
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        DatePickerComponent,
-        CalendarComponent
-    ]
+    AppInputComponent,
+    AppButtonComponent,
+    AppSelectboxComponent,
+    IconComponent,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    DatePickerComponent,
+    CalendarComponent
+]
 })
 export class AppointmentCreateComponent implements OnInit {
   appointmentForm: FormGroup;

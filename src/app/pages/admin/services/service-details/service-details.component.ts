@@ -228,7 +228,7 @@ export class ServiceDetailsComponent implements OnInit, OnDestroy {
     const serviceId = this.route.snapshot.paramMap.get('id');
     
     // Get service data from navigation state or load from service
-    const navigation = this.router.getCurrentNavigation();
+    const navigation = this.router.currentNavigation();
     const serviceData = navigation?.extras?.state?.['service'];
     
     if (serviceData) {

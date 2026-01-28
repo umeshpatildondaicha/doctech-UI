@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
@@ -51,14 +51,13 @@ interface DoctorStats {
 @Component({
     selector: 'app-doctors',
     imports: [
-        CommonModule,
-        FormsModule,
-        MatIconModule,
-        GridComponent,
-        IconComponent,
-        AdminStatsCardComponent,
-        PageComponent
-    ],
+    FormsModule,
+    MatIconModule,
+    GridComponent,
+    IconComponent,
+    AdminStatsCardComponent,
+    PageComponent
+],
     templateUrl: './doctors.component.html',
     styleUrl: './doctors.component.scss'
 })

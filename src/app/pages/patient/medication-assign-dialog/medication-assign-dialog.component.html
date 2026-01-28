@@ -1,253 +1,271 @@
 <div class="medication-assign-dialog">
   <div class="dialog-body">
-      <!-- Left Panel -->
-      <div class="dialog-left">
-        <!-- Tabs -->
-        <div class="tabs-toggle">
-          <button
-            class="tab-btn"
-            [class.active]="activeTab === 'medicines'"
-            (click)="setTab('medicines')">
-            Medicines
-          </button>
-          <button
-            class="tab-btn"
-            [class.active]="activeTab === 'template'"
-            (click)="setTab('template')">
-            Template
-          </button>
-        </div>
+    <!-- Left Panel -->
+    <div class="dialog-left">
+      <!-- Tabs -->
+      <div class="tabs-toggle">
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'medicines'"
+          (click)="setTab('medicines')">
+          Medicines
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'template'"
+          (click)="setTab('template')">
+          Template
+        </button>
+      </div>
 
-        <!-- Medicines Tab Content -->
-        <div *ngIf="activeTab === 'medicines'">
+      <!-- Medicines Tab Content -->
+      @if (activeTab === 'medicines') {
+        <div>
           <!-- Show form if medicine is selected, otherwise show browse list -->
-          <div *ngIf="selectedMedicineForForm" class="medicine-form-view">
-            <p class="dialog-subtitle">
-              Enter the required details to add a new medication for this patient.
-            </p>
-
-            <div class="form-area">
-              <div class="form-row">
-                <div class="form-field">
-                  <label>Medicine Name</label>
-                  <input type="text" [(ngModel)]="formData.medicineName" placeholder="e.g., Ibuprofen" />
-                </div>
-                <div class="form-field">
-                  <label>Dosage</label>
-                  <input type="text" [(ngModel)]="formData.dosage" placeholder="e.g., Select dosage" />
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-field">
-                  <label>Frequency</label>
-                  <div class="frequency-options">
-                    <label class="checkbox-pill">
-                      <input type="checkbox" [(ngModel)]="formData.frequency.beforeMeal" />
-                      <span>Before Meal</span>
-                    </label>
-                    <label class="checkbox-pill">
-                      <input type="checkbox" [(ngModel)]="formData.frequency.afterMeal" />
-                      <span>After Meal</span>
-                    </label>
-                    <label class="checkbox-pill">
-                      <input type="checkbox" [(ngModel)]="formData.frequency.every8Hours" />
-                      <span>Every 8 hours</span>
-                    </label>
+          @if (selectedMedicineForForm) {
+            <div class="medicine-form-view">
+              <p class="dialog-subtitle">
+                Enter the required details to add a new medication for this patient.
+              </p>
+              <div class="form-area">
+                <div class="form-row">
+                  <div class="form-field">
+                    <label>Medicine Name</label>
+                    <input type="text" [(ngModel)]="formData.medicineName" placeholder="e.g., Ibuprofen" />
+                  </div>
+                  <div class="form-field">
+                    <label>Dosage</label>
+                    <input type="text" [(ngModel)]="formData.dosage" placeholder="e.g., Select dosage" />
                   </div>
                 </div>
-                <div class="form-field">
-                  <label>Quantity</label>
-                  <input type="number" [(ngModel)]="formData.quantity" placeholder="e.g., 30" />
+                <div class="form-row">
+                  <div class="form-field">
+                    <label>Frequency</label>
+                    <div class="frequency-options">
+                      <label class="checkbox-pill">
+                        <input type="checkbox" [(ngModel)]="formData.frequency.beforeMeal" />
+                        <span>Before Meal</span>
+                      </label>
+                      <label class="checkbox-pill">
+                        <input type="checkbox" [(ngModel)]="formData.frequency.afterMeal" />
+                        <span>After Meal</span>
+                      </label>
+                      <label class="checkbox-pill">
+                        <input type="checkbox" [(ngModel)]="formData.frequency.every8Hours" />
+                        <span>Every 8 hours</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="form-field">
+                    <label>Quantity</label>
+                    <input type="number" [(ngModel)]="formData.quantity" placeholder="e.g., 30" />
+                  </div>
                 </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-field full-width">
-                  <label>Timing</label>
-                  <div class="timing-pills">
-                    <button
-                      type="button"
-                      class="pill"
-                      [class.active]="formData.timing === 'Morning'"
-                      (click)="formData.timing = 'Morning'">
-                      Morning
-                    </button>
-                    <button
-                      type="button"
-                      class="pill"
-                      [class.active]="formData.timing === 'Afternoon'"
-                      (click)="formData.timing = 'Afternoon'">
-                      Afternoon
-                    </button>
-                    <button
-                      type="button"
-                      class="pill"
-                      [class.active]="formData.timing === 'Evening'"
-                      (click)="formData.timing = 'Evening'">
-                      Evening
-                    </button>
-                    <button
-                      type="button"
-                      class="pill"
-                      [class.active]="formData.timing === 'Night'"
-                      (click)="formData.timing = 'Night'">
-                      Night
-                    </button>
+                <div class="form-row">
+                  <div class="form-field full-width">
+                    <label>Timing</label>
+                    <div class="timing-pills">
+                      <button
+                        type="button"
+                        class="pill"
+                        [class.active]="formData.timing === 'Morning'"
+                        (click)="formData.timing = 'Morning'">
+                        Morning
+                      </button>
+                      <button
+                        type="button"
+                        class="pill"
+                        [class.active]="formData.timing === 'Afternoon'"
+                        (click)="formData.timing = 'Afternoon'">
+                        Afternoon
+                      </button>
+                      <button
+                        type="button"
+                        class="pill"
+                        [class.active]="formData.timing === 'Evening'"
+                        (click)="formData.timing = 'Evening'">
+                        Evening
+                      </button>
+                      <button
+                        type="button"
+                        class="pill"
+                        [class.active]="formData.timing === 'Night'"
+                        (click)="formData.timing = 'Night'">
+                        Night
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-field">
+                    <label>Route</label>
+                    <input type="text" [(ngModel)]="formData.route" placeholder="e.g., Select route" />
+                  </div>
+                  <div class="form-field">
+                    <label>Reason for Request</label>
+                    <input type="text" [(ngModel)]="formData.reasonForRequest" placeholder="Enter reason" />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-field full-width">
+                    <label>Current Symptoms</label>
+                    <textarea rows="3" [(ngModel)]="formData.currentSymptoms" placeholder="Describe symptoms"></textarea>
                   </div>
                 </div>
               </div>
-
-              <div class="form-row">
-                <div class="form-field">
-                  <label>Route</label>
-                  <input type="text" [(ngModel)]="formData.route" placeholder="e.g., Select route" />
-                </div>
-                <div class="form-field">
-                  <label>Reason for Request</label>
-                  <input type="text" [(ngModel)]="formData.reasonForRequest" placeholder="Enter reason" />
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-field full-width">
-                  <label>Current Symptoms</label>
-                  <textarea rows="3" [(ngModel)]="formData.currentSymptoms" placeholder="Describe symptoms"></textarea>
-                </div>
+              <div class="inner-footer">
+                <button mat-stroked-button (click)="resetForm()">Cancel</button>
+                <button mat-raised-button color="primary" (click)="onAddToCart()">
+                  Add
+                </button>
               </div>
             </div>
-
-            <div class="inner-footer">
-              <button mat-stroked-button (click)="resetForm()">Cancel</button>
-              <button mat-raised-button color="primary" (click)="onAddToCart()">
-                Add
-              </button>
-            </div>
-          </div>
-
+          }
           <!-- Browse Medicines List -->
-          <div *ngIf="!selectedMedicineForForm" class="browse-medicines-view">
+          @if (!selectedMedicineForForm) {
+            <div class="browse-medicines-view">
+              <div class="browse-header">
+                <h4>Browse Medicines</h4>
+                <div class="browse-search">
+                  <mat-icon>search</mat-icon>
+                  <input
+                    type="text"
+                    [(ngModel)]="medicineSearchText"
+                    placeholder="Search for medicine" />
+                  </div>
+                </div>
+                <div class="medicine-list">
+                  @for (med of filteredMedicines; track med) {
+                    <div
+                      class="medicine-row"
+                      >
+                      <div class="medicine-main">
+                        <div class="medicine-title">{{ med.name }}</div>
+                        <div class="medicine-sub">{{ med.dosage }} • {{ med.frequency }}</div>
+                        <div class="medicine-stock">Quantity Available: {{ med.quantityAvailable }} units</div>
+                      </div>
+                      <div class="medicine-actions">
+                        <button mat-icon-button>
+                          <mat-icon>visibility</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="onAddMedicineClick(med)">
+                          <mat-icon>add</mat-icon>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Template Tab Content -->
+        @if (activeTab === 'template') {
+          <div>
             <div class="browse-header">
-              <h4>Browse Medicines</h4>
+              <h4>Browse Templates</h4>
               <div class="browse-search">
                 <mat-icon>search</mat-icon>
                 <input
                   type="text"
-                  [(ngModel)]="medicineSearchText"
-                  placeholder="Search for medicine" />
-              </div>
-            </div>
-
-            <div class="medicine-list">
-              <div
-                class="medicine-row"
-                *ngFor="let med of filteredMedicines">
-                <div class="medicine-main">
-                  <div class="medicine-title">{{ med.name }}</div>
-                  <div class="medicine-sub">{{ med.dosage }} • {{ med.frequency }}</div>
-                  <div class="medicine-stock">Quantity Available: {{ med.quantityAvailable }} units</div>
-                </div>
-                <div class="medicine-actions">
-                  <button mat-icon-button>
-                    <mat-icon>visibility</mat-icon>
-                  </button>
-                  <button mat-icon-button (click)="onAddMedicineClick(med)">
-                    <mat-icon>add</mat-icon>
-                  </button>
+                  [(ngModel)]="templateSearchText"
+                  placeholder="Search for template" />
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Template Tab Content -->
-        <div *ngIf="activeTab === 'template'">
-          <div class="browse-header">
-            <h4>Browse Templates</h4>
-            <div class="browse-search">
-              <mat-icon>search</mat-icon>
-              <input
-                type="text"
-                [(ngModel)]="templateSearchText"
-                placeholder="Search for template" />
-            </div>
-          </div>
-
-          <div class="template-list">
-            <div
-              class="template-row"
-              *ngFor="let template of filteredTemplates"
-              (click)="onSelectTemplate(template.id)">
-              <div class="template-main">
-                <div class="template-title">{{ template.name }}</div>
-                <div class="template-sub">{{ template.medicineIds.length }} medicines</div>
-              </div>
-              <mat-icon>arrow_forward</mat-icon>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Panel: Requested Medications Summary -->
-      <div class="dialog-right">
-        <div class="summary-header">
-          <h4>Requested Medications Summary</h4>
-          <span class="cart-badge" *ngIf="selectedMedicines.length > 0">
-            {{ selectedMedicines.length }}
-          </span>
-        </div>
-        <p class="summary-subtitle" *ngIf="activeTab === 'medicines'">
-          Review all medications added for this patient before saving
-        </p>
-        <p class="summary-subtitle" *ngIf="activeTab === 'template'">
-          Choose a medicine or set from the list to see details here
-        </p>
-
-        <div *ngIf="selectedMedicines.length === 0" class="empty-summary">
-          <p *ngIf="activeTab === 'medicines'">
-            No medicines selected. Choose a medicine from the list to see details here.
-          </p>
-          <p *ngIf="activeTab === 'template'">
-            No medicines selected. Choose a medicine or set from the list to see details here.
-          </p>
-        </div>
-
-        <div *ngIf="selectedMedicines.length > 0" class="summary-list">
-          <div class="summary-item" *ngFor="let med of selectedMedicines">
-            <div class="summary-main">
-              <div class="summary-title">{{ med.name }}</div>
-              <div class="summary-sub">
-                {{ med.dosage }} • {{ med.frequency }}
+              <div class="template-list">
+                @for (template of filteredTemplates; track template) {
+                  <div
+                    class="template-row"
+                    (click)="onSelectTemplate(template.id)">
+                    <div class="template-main">
+                      <div class="template-title">{{ template.name }}</div>
+                      <div class="template-sub">{{ template.medicineIds.length }} medicines</div>
+                    </div>
+                    <mat-icon>arrow_forward</mat-icon>
+                  </div>
+                }
               </div>
             </div>
-            <div class="summary-actions">
-              <button mat-icon-button (click)="onEditSelected(med)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button (click)="onRemoveSelected(med.id)">
-                <mat-icon>delete</mat-icon>
-              </button>
+          }
+        </div>
+
+        <!-- Right Panel: Requested Medications Summary -->
+        <div class="dialog-right">
+          <div class="summary-header">
+            <h4>Requested Medications Summary</h4>
+            @if (selectedMedicines.length > 0) {
+              <span class="cart-badge">
+                {{ selectedMedicines.length }}
+              </span>
+            }
+          </div>
+          @if (activeTab === 'medicines') {
+            <p class="summary-subtitle">
+              Review all medications added for this patient before saving
+            </p>
+          }
+          @if (activeTab === 'template') {
+            <p class="summary-subtitle">
+              Choose a medicine or set from the list to see details here
+            </p>
+          }
+
+          @if (selectedMedicines.length === 0) {
+            <div class="empty-summary">
+              @if (activeTab === 'medicines') {
+                <p>
+                  No medicines selected. Choose a medicine from the list to see details here.
+                </p>
+              }
+              @if (activeTab === 'template') {
+                <p>
+                  No medicines selected. Choose a medicine or set from the list to see details here.
+                </p>
+              }
+            </div>
+          }
+
+          @if (selectedMedicines.length > 0) {
+            <div class="summary-list">
+              @for (med of selectedMedicines; track med) {
+                <div class="summary-item">
+                  <div class="summary-main">
+                    <div class="summary-title">{{ med.name }}</div>
+                    <div class="summary-sub">
+                      {{ med.dosage }} • {{ med.frequency }}
+                    </div>
+                  </div>
+                  <div class="summary-actions">
+                    <button mat-icon-button (click)="onEditSelected(med)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="onRemoveSelected(med.id)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Date Range (moved to content area) -->
+        <div class="date-range">
+          <div class="date-field">
+            <label>Start date</label>
+            <div class="date-input">
+              <span>{{ today | date:'dd/MM/yyyy' }}</span>
+              <mat-icon>calendar_today</mat-icon>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Date Range (moved to content area) -->
-      <div class="date-range">
-        <div class="date-field">
-          <label>Start date</label>
-          <div class="date-input">
-            <span>{{ today | date:'dd/MM/yyyy' }}</span>
-            <mat-icon>calendar_today</mat-icon>
-          </div>
-        </div>
-        <div class="date-field">
-          <label>Till date</label>
-          <div class="date-input">
-            <span>{{ today | date:'dd/MM/yyyy' }}</span>
-            <mat-icon>calendar_today</mat-icon>
+          <div class="date-field">
+            <label>Till date</label>
+            <div class="date-input">
+              <span>{{ today | date:'dd/MM/yyyy' }}</span>
+              <mat-icon>calendar_today</mat-icon>
+            </div>
           </div>
         </div>
       </div>
     </div>
-</div>

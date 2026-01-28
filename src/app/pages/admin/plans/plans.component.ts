@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ColDef } from 'ag-grid-community';
 import { 
   AdminPageHeaderComponent, 
@@ -10,7 +10,7 @@ import { GridComponent, StatusCellRendererComponent, ChipCellRendererComponent, 
 
 @Component({
     selector: 'app-plans',
-    imports: [CommonModule, AdminPageHeaderComponent, AdminActionBarComponent, GridComponent, PageComponent],
+    imports: [AdminPageHeaderComponent, AdminActionBarComponent, GridComponent, PageComponent],
     templateUrl: './plans.component.html',
     styleUrl: './plans.component.scss'
 })

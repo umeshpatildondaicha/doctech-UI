@@ -1,15 +1,24 @@
-<div class="app-card-header" *ngIf="showHeader">
-  <div class="app-card-title">
-    <div class="app-card-title-row">
-      <h3 class="app-card-title-text" *ngIf="title">{{ title }}</h3>
-      <span class="app-card-separator" *ngIf="title && subtitle">|</span>
-      <span class="app-card-subtitle" *ngIf="subtitle">{{ subtitle }}</span>
+@if (showHeader) {
+  <div class="app-card-header">
+    <div class="app-card-title">
+      <div class="app-card-title-row">
+        @if (title) {
+          <h3 class="app-card-title-text">{{ title }}</h3>
+        }
+        @if (title && subtitle) {
+          <span class="app-card-separator">|</span>
+        }
+        @if (subtitle) {
+          <span class="app-card-subtitle">{{ subtitle }}</span>
+        }
+      </div>
     </div>
+    @if (hasActions) {
+      <div class="app-card-actions">
+        <ng-content select="[appCardActions]"></ng-content>
+      </div>
+    }
   </div>
-
-  <div class="app-card-actions" *ngIf="hasActions">
-    <ng-content select="[appCardActions]"></ng-content>
-  </div>
-</div>
+}
 
 <ng-content></ng-content>

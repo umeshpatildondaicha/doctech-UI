@@ -1,5 +1,5 @@
 <div class="diet-view-page">
-  <app-breadcrumb 
+  <app-breadcrumb
     [customBreadcrumbs]="getBreadcrumbs()"
     [showHome]="true">
   </app-breadcrumb>
@@ -7,283 +7,321 @@
 
 
   <!-- Main Content -->
-  <div class="page-content" *ngIf="diet">
-    <!-- Hero Section with Image and Basic Info -->
-    <div class="hero-section">
-      <div class="hero-image">
-        <img [src]="diet.imageUrl" 
-             alt="Diet image" 
-             class="diet-main-image"
-             (error)="onImageError($event)">
-        <div class="image-overlay">
-          <div class="overlay-content">
-            <div class="nutrition-preview">
-              <div class="nutrition-item">
-                <span class="nutrition-value">{{ diet.calories }}</span>
-                <span class="nutrition-label">Calories</span>
-              </div>
-              <div class="nutrition-item">
-                <span class="nutrition-value">{{ diet.protein }}g</span>
-                <span class="nutrition-label">Protein</span>
-              </div>
-              <div class="nutrition-item">
-                <span class="nutrition-value">{{ diet.carbs }}g</span>
-                <span class="nutrition-label">Carbs</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="hero-info">
-        <div class="recipe-info">
-          <h2 class="recipe-title">{{ diet.name }}</h2>
-          <p class="recipe-description">{{ diet.description }}</p>
-          
-          <!-- Tags -->
-          <div class="recipe-tags">
-            <span class="tag-chip" *ngIf="diet.dietType">
-              {{ diet.dietType }}
-            </span>
-            <span class="tag-chip" *ngFor="let tag of diet.tags">{{ tag }}</span>
-          </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-          <button mat-raised-button color="accent" class="quick-btn" *ngIf="diet.videoUrl" (click)="scrollToVideo()">
-            <mat-icon>play_arrow</mat-icon>
-            Watch Video
-          </button>
-          <button mat-stroked-button class="quick-btn" *ngIf="diet.documentUrl" (click)="scrollToDocument()">
-            <mat-icon>description</mat-icon>
-            View Document
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Content Tabs -->
-    <div class="content-tabs">
-      <div class="tab-nav">
-        <button class="tab-btn active" (click)="setActiveTab('nutrition')" [class.active]="activeTab === 'nutrition'">
-          <mat-icon>monitor_weight</mat-icon>
-          Nutrition
-        </button>
-        <button class="tab-btn" (click)="setActiveTab('video')" [class.active]="activeTab === 'video'" *ngIf="diet.videoUrl">
-          <mat-icon>video_library</mat-icon>
-          Video Guide
-        </button>
-        <button class="tab-btn" (click)="setActiveTab('ingredients')" [class.active]="activeTab === 'ingredients'" *ngIf="diet.ingredients && diet.ingredients.length > 0">
-          <mat-icon>restaurant</mat-icon>
-          Ingredients
-        </button>
-        <button class="tab-btn" (click)="setActiveTab('recipe')" [class.active]="activeTab === 'recipe'" *ngIf="diet.recipe">
-          <mat-icon>menu_book</mat-icon>
-          Recipe
-        </button>
-        <button class="tab-btn" (click)="setActiveTab('document')" [class.active]="activeTab === 'document'" *ngIf="diet.documentUrl">
-          <mat-icon>description</mat-icon>
-          Document
-        </button>
-      </div>
-
-      <!-- Tab Content -->
-      <div class="tab-content">
-        <!-- Nutrition Tab -->
-        <div class="tab-panel" [class.active]="activeTab === 'nutrition'">
-          <div class="nutrition-details">
-            <div class="nutrition-grid">
-              <div class="nutrition-card">
-                <div class="nutrition-icon">
-                  <mat-icon>local_fire_department</mat-icon>
-                </div>
-                <div class="nutrition-info">
-                  <div class="nutrition-value">{{ diet.calories }}</div>
-                  <div class="nutrition-label">Calories</div>
-                </div>
-              </div>
-              <div class="nutrition-card">
-                <div class="nutrition-icon">
-                  <mat-icon>fitness_center</mat-icon>
-                </div>
-                <div class="nutrition-info">
-                  <div class="nutrition-value">{{ diet.protein }}g</div>
-                  <div class="nutrition-label">Protein</div>
-                </div>
-              </div>
-              <div class="nutrition-card">
-                <div class="nutrition-icon">
-                  <mat-icon>grain</mat-icon>
-                </div>
-                <div class="nutrition-info">
-                  <div class="nutrition-value">{{ diet.carbs }}g</div>
-                  <div class="nutrition-label">Carbs</div>
-                </div>
-              </div>
-              <div class="nutrition-card">
-                <div class="nutrition-icon">
-                  <mat-icon>oil_barrel</mat-icon>
-                </div>
-                <div class="nutrition-info">
-                  <div class="nutrition-value">{{ diet.fat }}g</div>
-                  <div class="nutrition-label">Fat</div>
-                </div>
-              </div>
-              <div class="nutrition-card">
-                <div class="nutrition-icon">
-                  <mat-icon>grass</mat-icon>
-                </div>
-                <div class="nutrition-info">
-                  <div class="nutrition-value">{{ diet.fiber }}g</div>
-                  <div class="nutrition-label">Fiber</div>
+  @if (diet) {
+    <div class="page-content">
+      <!-- Hero Section with Image and Basic Info -->
+      <div class="hero-section">
+        <div class="hero-image">
+          <img [src]="diet.imageUrl"
+            alt="Diet image"
+            class="diet-main-image"
+            (error)="onImageError($event)">
+            <div class="image-overlay">
+              <div class="overlay-content">
+                <div class="nutrition-preview">
+                  <div class="nutrition-item">
+                    <span class="nutrition-value">{{ diet.calories }}</span>
+                    <span class="nutrition-label">Calories</span>
+                  </div>
+                  <div class="nutrition-item">
+                    <span class="nutrition-value">{{ diet.protein }}g</span>
+                    <span class="nutrition-label">Protein</span>
+                  </div>
+                  <div class="nutrition-item">
+                    <span class="nutrition-value">{{ diet.carbs }}g</span>
+                    <span class="nutrition-label">Carbs</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Video Tab -->
-        <div class="tab-panel" [class.active]="activeTab === 'video'" *ngIf="diet.videoUrl">
-          <div class="video-section">
-            <div class="video-container">
-              <iframe *ngIf="getVideoEmbedUrl(diet.videoUrl) as videoEmbedUrl" 
-                      [src]="videoEmbedUrl" 
-                      frameborder="0" 
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowfullscreen
-                      class="video-iframe">
-              </iframe>
-              <div class="video-placeholder" *ngIf="!getVideoEmbedUrl(diet.videoUrl)">
-                <mat-icon>play_circle_outline</mat-icon>
-                <span>Video content not available</span>
-                <a [href]="diet.videoUrl" target="_blank" class="external-link">
-                  Open in YouTube
-                </a>
+          <div class="hero-info">
+            <div class="recipe-info">
+              <h2 class="recipe-title">{{ diet.name }}</h2>
+              <p class="recipe-description">{{ diet.description }}</p>
+              <!-- Tags -->
+              <div class="recipe-tags">
+                @if (diet.dietType) {
+                  <span class="tag-chip">
+                    {{ diet.dietType }}
+                  </span>
+                }
+                @for (tag of diet.tags; track tag) {
+                  <span class="tag-chip">{{ tag }}</span>
+                }
               </div>
+            </div>
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+              @if (diet.videoUrl) {
+                <button mat-raised-button color="accent" class="quick-btn" (click)="scrollToVideo()">
+                  <mat-icon>play_arrow</mat-icon>
+                  Watch Video
+                </button>
+              }
+              @if (diet.documentUrl) {
+                <button mat-stroked-button class="quick-btn" (click)="scrollToDocument()">
+                  <mat-icon>description</mat-icon>
+                  View Document
+                </button>
+              }
             </div>
           </div>
         </div>
-
-        <!-- Ingredients Tab -->
-        <div class="tab-panel" [class.active]="activeTab === 'ingredients'" *ngIf="diet.ingredients && diet.ingredients.length > 0">
-          <div class="ingredients-section">
-            <div class="ingredients-grid">
-              <div class="ingredient-card" *ngFor="let ingredient of diet.ingredients">
-                <div class="ingredient-icon">
-                  <mat-icon>{{ getIngredientIcon(ingredient.category) }}</mat-icon>
-                </div>
-                <div class="ingredient-info">
-                  <div class="ingredient-name">{{ ingredient.name }}</div>
-                  <div class="ingredient-quantity">{{ ingredient.quantity }} {{ ingredient.unit }}</div>
-                  <div class="ingredient-category" *ngIf="ingredient.category">{{ ingredient.category }}</div>
-                </div>
-                <div class="ingredient-notes" *ngIf="ingredient.notes">
-                  <mat-icon>info</mat-icon>
-                  <span>{{ ingredient.notes }}</span>
-                </div>
-              </div>
-            </div>
+        <!-- Content Tabs -->
+        <div class="content-tabs">
+          <div class="tab-nav">
+            <button class="tab-btn active" (click)="setActiveTab('nutrition')" [class.active]="activeTab === 'nutrition'">
+              <mat-icon>monitor_weight</mat-icon>
+              Nutrition
+            </button>
+            @if (diet.videoUrl) {
+              <button class="tab-btn" (click)="setActiveTab('video')" [class.active]="activeTab === 'video'">
+                <mat-icon>video_library</mat-icon>
+                Video Guide
+              </button>
+            }
+            @if (diet.ingredients && diet.ingredients.length > 0) {
+              <button class="tab-btn" (click)="setActiveTab('ingredients')" [class.active]="activeTab === 'ingredients'">
+                <mat-icon>restaurant</mat-icon>
+                Ingredients
+              </button>
+            }
+            @if (diet.recipe) {
+              <button class="tab-btn" (click)="setActiveTab('recipe')" [class.active]="activeTab === 'recipe'">
+                <mat-icon>menu_book</mat-icon>
+                Recipe
+              </button>
+            }
+            @if (diet.documentUrl) {
+              <button class="tab-btn" (click)="setActiveTab('document')" [class.active]="activeTab === 'document'">
+                <mat-icon>description</mat-icon>
+                Document
+              </button>
+            }
           </div>
-        </div>
-
-        <!-- Recipe Tab -->
-        <div class="tab-panel" [class.active]="activeTab === 'recipe'" *ngIf="diet.recipe">
-          <div class="recipe-section">
-            <!-- Recipe Header -->
-            <div class="recipe-header">
-              <div class="recipe-meta">
-                <div class="meta-item">
-                  <mat-icon>schedule</mat-icon>
-                  <span>Prep: {{ diet.recipe.prepTime }} min</span>
-                </div>
-                <div class="meta-item">
-                  <mat-icon>timer</mat-icon>
-                  <span>Cook: {{ diet.recipe.cookTime }} min</span>
-                </div>
-                <div class="meta-item">
-                  <mat-icon>people</mat-icon>
-                  <span>Servings: {{ diet.recipe.servings }}</span>
-                </div>
-                <div class="meta-item">
-                  <mat-icon>trending_up</mat-icon>
-                  <span>Difficulty: {{ diet.recipe.difficulty }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Recipe Instructions -->
-            <div class="recipe-instructions">
-              <h3>Instructions</h3>
-              <div class="instruction-steps">
-                <div class="instruction-step" *ngFor="let step of diet.recipe.instructions">
-                  <div class="step-number">{{ step.stepNumber }}</div>
-                  <div class="step-content">
-                    <div class="step-instruction">{{ step.instruction }}</div>
-                    <div class="step-duration" *ngIf="step.duration">
-                      <mat-icon>schedule</mat-icon>
-                      <span>{{ step.duration }} min</span>
+          <!-- Tab Content -->
+          <div class="tab-content">
+            <!-- Nutrition Tab -->
+            <div class="tab-panel" [class.active]="activeTab === 'nutrition'">
+              <div class="nutrition-details">
+                <div class="nutrition-grid">
+                  <div class="nutrition-card">
+                    <div class="nutrition-icon">
+                      <mat-icon>local_fire_department</mat-icon>
                     </div>
-                    <div class="step-tips" *ngIf="step.tips">
-                      <mat-icon>lightbulb</mat-icon>
-                      <span>{{ step.tips }}</span>
+                    <div class="nutrition-info">
+                      <div class="nutrition-value">{{ diet.calories }}</div>
+                      <div class="nutrition-label">Calories</div>
+                    </div>
+                  </div>
+                  <div class="nutrition-card">
+                    <div class="nutrition-icon">
+                      <mat-icon>fitness_center</mat-icon>
+                    </div>
+                    <div class="nutrition-info">
+                      <div class="nutrition-value">{{ diet.protein }}g</div>
+                      <div class="nutrition-label">Protein</div>
+                    </div>
+                  </div>
+                  <div class="nutrition-card">
+                    <div class="nutrition-icon">
+                      <mat-icon>grain</mat-icon>
+                    </div>
+                    <div class="nutrition-info">
+                      <div class="nutrition-value">{{ diet.carbs }}g</div>
+                      <div class="nutrition-label">Carbs</div>
+                    </div>
+                  </div>
+                  <div class="nutrition-card">
+                    <div class="nutrition-icon">
+                      <mat-icon>oil_barrel</mat-icon>
+                    </div>
+                    <div class="nutrition-info">
+                      <div class="nutrition-value">{{ diet.fat }}g</div>
+                      <div class="nutrition-label">Fat</div>
+                    </div>
+                  </div>
+                  <div class="nutrition-card">
+                    <div class="nutrition-icon">
+                      <mat-icon>grass</mat-icon>
+                    </div>
+                    <div class="nutrition-info">
+                      <div class="nutrition-value">{{ diet.fiber }}g</div>
+                      <div class="nutrition-label">Fiber</div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-
-            <!-- Recipe Tips -->
-            <div class="recipe-tips" *ngIf="diet.recipe.tips && diet.recipe.tips.length > 0">
-              <h3>Cooking Tips</h3>
-              <div class="tips-list">
-                <div class="tip-item" *ngFor="let tip of diet.recipe.tips">
-                  <mat-icon>lightbulb</mat-icon>
-                  <span>{{ tip }}</span>
+            <!-- Video Tab -->
+            @if (diet.videoUrl) {
+              <div class="tab-panel" [class.active]="activeTab === 'video'">
+                <div class="video-section">
+                  <div class="video-container">
+                    @if (getVideoEmbedUrl(diet.videoUrl); as videoEmbedUrl) {
+                      <iframe
+                        [src]="videoEmbedUrl"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                        class="video-iframe">
+                      </iframe>
+                    }
+                    @if (!getVideoEmbedUrl(diet.videoUrl)) {
+                      <div class="video-placeholder">
+                        <mat-icon>play_circle_outline</mat-icon>
+                        <span>Video content not available</span>
+                        <a [href]="diet.videoUrl" target="_blank" class="external-link">
+                          Open in YouTube
+                        </a>
+                      </div>
+                    }
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <!-- Recipe Notes -->
-            <div class="recipe-notes" *ngIf="diet.recipe.notes">
-              <h3>Notes</h3>
-              <p>{{ diet.recipe.notes }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Document Tab -->
-        <div class="tab-panel" [class.active]="activeTab === 'document'" *ngIf="diet.documentUrl">
-          <div class="document-section">
-            <div class="document-container">
-              <iframe 
-                [src]="diet.documentUrl | safe:'resourceUrl'"
-                width="100%" 
-                height="600px"
-                frameborder="0"
-                class="pdf-iframe"
-                type="application/pdf">
-              </iframe>
-              <div class="document-actions">
-                <a [href]="diet.documentUrl" target="_blank" class="document-button">
-                  <mat-icon>open_in_new</mat-icon>
-                  Open in New Tab
-                </a>
-                <a [href]="diet.documentUrl" download class="document-button">
-                  <mat-icon>download</mat-icon>
-                  Download PDF
-                </a>
+            }
+            <!-- Ingredients Tab -->
+            @if (diet.ingredients && diet.ingredients.length > 0) {
+              <div class="tab-panel" [class.active]="activeTab === 'ingredients'">
+                <div class="ingredients-section">
+                  <div class="ingredients-grid">
+                    @for (ingredient of diet.ingredients; track ingredient) {
+                      <div class="ingredient-card">
+                        <div class="ingredient-icon">
+                          <mat-icon>{{ getIngredientIcon(ingredient.category) }}</mat-icon>
+                        </div>
+                        <div class="ingredient-info">
+                          <div class="ingredient-name">{{ ingredient.name }}</div>
+                          <div class="ingredient-quantity">{{ ingredient.quantity }} {{ ingredient.unit }}</div>
+                          @if (ingredient.category) {
+                            <div class="ingredient-category">{{ ingredient.category }}</div>
+                          }
+                        </div>
+                        @if (ingredient.notes) {
+                          <div class="ingredient-notes">
+                            <mat-icon>info</mat-icon>
+                            <span>{{ ingredient.notes }}</span>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
               </div>
-            </div>
+            }
+            <!-- Recipe Tab -->
+            @if (diet.recipe) {
+              <div class="tab-panel" [class.active]="activeTab === 'recipe'">
+                <div class="recipe-section">
+                  <!-- Recipe Header -->
+                  <div class="recipe-header">
+                    <div class="recipe-meta">
+                      <div class="meta-item">
+                        <mat-icon>schedule</mat-icon>
+                        <span>Prep: {{ diet.recipe.prepTime }} min</span>
+                      </div>
+                      <div class="meta-item">
+                        <mat-icon>timer</mat-icon>
+                        <span>Cook: {{ diet.recipe.cookTime }} min</span>
+                      </div>
+                      <div class="meta-item">
+                        <mat-icon>people</mat-icon>
+                        <span>Servings: {{ diet.recipe.servings }}</span>
+                      </div>
+                      <div class="meta-item">
+                        <mat-icon>trending_up</mat-icon>
+                        <span>Difficulty: {{ diet.recipe.difficulty }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Recipe Instructions -->
+                  <div class="recipe-instructions">
+                    <h3>Instructions</h3>
+                    <div class="instruction-steps">
+                      @for (step of diet.recipe.instructions; track step) {
+                        <div class="instruction-step">
+                          <div class="step-number">{{ step.stepNumber }}</div>
+                          <div class="step-content">
+                            <div class="step-instruction">{{ step.instruction }}</div>
+                            @if (step.duration) {
+                              <div class="step-duration">
+                                <mat-icon>schedule</mat-icon>
+                                <span>{{ step.duration }} min</span>
+                              </div>
+                            }
+                            @if (step.tips) {
+                              <div class="step-tips">
+                                <mat-icon>lightbulb</mat-icon>
+                                <span>{{ step.tips }}</span>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                  <!-- Recipe Tips -->
+                  @if (diet.recipe.tips && diet.recipe.tips.length > 0) {
+                    <div class="recipe-tips">
+                      <h3>Cooking Tips</h3>
+                      <div class="tips-list">
+                        @for (tip of diet.recipe.tips; track tip) {
+                          <div class="tip-item">
+                            <mat-icon>lightbulb</mat-icon>
+                            <span>{{ tip }}</span>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                  <!-- Recipe Notes -->
+                  @if (diet.recipe.notes) {
+                    <div class="recipe-notes">
+                      <h3>Notes</h3>
+                      <p>{{ diet.recipe.notes }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+            <!-- Document Tab -->
+            @if (diet.documentUrl) {
+              <div class="tab-panel" [class.active]="activeTab === 'document'">
+                <div class="document-section">
+                  <div class="document-container">
+                    <iframe
+                      [src]="diet.documentUrl | safe:'resourceUrl'"
+                      width="100%"
+                      height="600px"
+                      frameborder="0"
+                      class="pdf-iframe"
+                      type="application/pdf">
+                    </iframe>
+                    <div class="document-actions">
+                      <a [href]="diet.documentUrl" target="_blank" class="document-button">
+                        <mat-icon>open_in_new</mat-icon>
+                        Open in New Tab
+                      </a>
+                      <a [href]="diet.documentUrl" download class="document-button">
+                        <mat-icon>download</mat-icon>
+                        Download PDF
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    }
 
-  <!-- Loading State -->
-  <div class="loading-state" *ngIf="!diet">
-    <mat-spinner></mat-spinner>
-    <p>Loading diet details...</p>
+    <!-- Loading State -->
+    @if (!diet) {
+      <div class="loading-state">
+        <mat-spinner></mat-spinner>
+        <p>Loading diet details...</p>
+      </div>
+    }
   </div>
-</div>

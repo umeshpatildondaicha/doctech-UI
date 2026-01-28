@@ -1,167 +1,191 @@
 <div class="my-schedule-container">
 
 
-    <!-- Priority Summary -->
-    <div class="priority-summary">
-      <div class="summary-header">
-        <h3>Schedule Summary by Priority</h3>
-        <p>Overview of your scheduled time slots organized by priority levels</p>
-      </div>
-      
-      <div class="priority-summary-grid">
-        <!-- Priority 1 - Leave -->
-        <div class="priority-card priority-1">
-          <div class="card-header">
-            <div class="priority-badge">
-              <span class="priority-number">1</span>
+  <!-- Priority Summary -->
+  <div class="priority-summary">
+    <div class="summary-header">
+      <h3>Schedule Summary by Priority</h3>
+      <p>Overview of your scheduled time slots organized by priority levels</p>
+    </div>
+
+    <div class="priority-summary-grid">
+      <!-- Priority 1 - Leave -->
+      <div class="priority-card priority-1">
+        <div class="card-header">
+          <div class="priority-badge">
+            <span class="priority-number">1</span>
+          </div>
+          <div class="priority-info">
+            <h4>{{ getPriorityDisplayText(1) }}</h4>
+            <p>{{ getPriorityDescription(1) }}</p>
+          </div>
+          <div class="priority-icon">
+            <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'event_busy'"></app-icon>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="stats-row">
+            <div class="stat-item">
+              <span class="stat-value">{{ getPriorityCount(1) }}</span>
+              <span class="stat-label">Days</span>
             </div>
-            <div class="priority-info">
-              <h4>{{ getPriorityDisplayText(1) }}</h4>
-              <p>{{ getPriorityDescription(1) }}</p>
-            </div>
-            <div class="priority-icon">
-              <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'event_busy'"></app-icon>
+            <div class="stat-item">
+              <span class="stat-value">-</span>
+              <span class="stat-label">Slots</span>
             </div>
           </div>
-          <div class="card-content">
-            <div class="stats-row">
-              <div class="stat-item">
-                <span class="stat-value">{{ getPriorityCount(1) }}</span>
-                <span class="stat-label">Days</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-value">-</span>
-                <span class="stat-label">Slots</span>
-              </div>
+          @if (getSlotsByPriority(1).length > 0) {
+            <div class="days-list">
+              @for (slot of getSlotsByPriority(1); track slot) {
+                <div class="day-item">
+                  <span class="day-name">{{ getPriorityItemDisplay(slot) }}</span>
+                  <span class="time-range">Leave Day</span>
+                </div>
+              }
             </div>
-            <div class="days-list" *ngIf="getSlotsByPriority(1).length > 0">
-              <div class="day-item" *ngFor="let slot of getSlotsByPriority(1)">
-                <span class="day-name">{{ getPriorityItemDisplay(slot) }}</span>
-                <span class="time-range">Leave Day</span>
-              </div>
-            </div>
-            <div class="empty-state" *ngIf="getSlotsByPriority(1).length === 0">
+          }
+          @if (getSlotsByPriority(1).length === 0) {
+            <div class="empty-state">
               <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'check_circle'"></app-icon>
               <span>No leave days scheduled</span>
             </div>
+          }
+        </div>
+      </div>
+
+      <!-- Priority 2 - Specific Day -->
+      <div class="priority-card priority-2">
+        <div class="card-header">
+          <div class="priority-badge">
+            <span class="priority-number">2</span>
+          </div>
+          <div class="priority-info">
+            <h4>{{ getPriorityDisplayText(2) }}</h4>
+            <p>{{ getPriorityDescription(2) }}</p>
+          </div>
+          <div class="priority-icon">
+            <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'event'"></app-icon>
           </div>
         </div>
-  
-        <!-- Priority 2 - Specific Day -->
-        <div class="priority-card priority-2">
-          <div class="card-header">
-            <div class="priority-badge">
-              <span class="priority-number">2</span>
+        <div class="card-content">
+          <div class="stats-row">
+            <div class="stat-item">
+              <span class="stat-value">{{ getPriorityCount(2) }}</span>
+              <span class="stat-label">Days</span>
             </div>
-            <div class="priority-info">
-              <h4>{{ getPriorityDisplayText(2) }}</h4>
-              <p>{{ getPriorityDescription(2) }}</p>
-            </div>
-            <div class="priority-icon">
-              <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'event'"></app-icon>
+            <div class="stat-item">
+              <span class="stat-value">{{ getTotalSlotsByPriority(2) }}</span>
+              <span class="stat-label">Slots</span>
             </div>
           </div>
-          <div class="card-content">
-            <div class="stats-row">
-              <div class="stat-item">
-                <span class="stat-value">{{ getPriorityCount(2) }}</span>
-                <span class="stat-label">Days</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-value">{{ getTotalSlotsByPriority(2) }}</span>
-                <span class="stat-label">Slots</span>
-              </div>
+          @if (getSlotsByPriority(2).length > 0) {
+            <div class="days-list">
+              @for (slot of getSlotsByPriority(2); track slot) {
+                <div class="day-item">
+                  <span class="day-name">{{ getPriorityItemDisplay(slot) }}</span>
+                  <span class="time-range">{{ getTimeRangeDisplay(slot) }}</span>
+                </div>
+              }
             </div>
-            <div class="days-list" *ngIf="getSlotsByPriority(2).length > 0">
-              <div class="day-item" *ngFor="let slot of getSlotsByPriority(2)">
-                <span class="day-name">{{ getPriorityItemDisplay(slot) }}</span>
-                <span class="time-range">{{ getTimeRangeDisplay(slot) }}</span>
-              </div>
-            </div>
-            <div class="empty-state" *ngIf="getSlotsByPriority(2).length === 0">
+          }
+          @if (getSlotsByPriority(2).length === 0) {
+            <div class="empty-state">
               <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'schedule'"></app-icon>
               <span>No specific days set</span>
             </div>
+          }
+        </div>
+      </div>
+
+      <!-- Priority 3 - Weekly -->
+      <div class="priority-card priority-3">
+        <div class="card-header">
+          <div class="priority-badge">
+            <span class="priority-number">3</span>
+          </div>
+          <div class="priority-info">
+            <h4>{{ getPriorityDisplayText(3) }}</h4>
+            <p>{{ getPriorityDescription(3) }}</p>
+          </div>
+          <div class="priority-icon">
+            <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'view_week'"></app-icon>
           </div>
         </div>
-  
-        <!-- Priority 3 - Weekly -->
-        <div class="priority-card priority-3">
-          <div class="card-header">
-            <div class="priority-badge">
-              <span class="priority-number">3</span>
+        <div class="card-content">
+          <div class="stats-row">
+            <div class="stat-item">
+              <span class="stat-value">{{ getPriorityCount(3) }}</span>
+              <span class="stat-label">Days</span>
             </div>
-            <div class="priority-info">
-              <h4>{{ getPriorityDisplayText(3) }}</h4>
-              <p>{{ getPriorityDescription(3) }}</p>
-            </div>
-            <div class="priority-icon">
-              <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'view_week'"></app-icon>
+            <div class="stat-item">
+              <span class="stat-value">{{ getTotalSlotsByPriority(3) }}</span>
+              <span class="stat-label">Slots</span>
             </div>
           </div>
-          <div class="card-content">
-            <div class="stats-row">
-              <div class="stat-item">
-                <span class="stat-value">{{ getPriorityCount(3) }}</span>
-                <span class="stat-label">Days</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-value">{{ getTotalSlotsByPriority(3) }}</span>
-                <span class="stat-label">Slots</span>
-              </div>
+          @if (getSlotsByPriority(3).length > 0) {
+            <div class="days-list">
+              @for (slot of getSlotsByPriority(3); track slot) {
+                <div class="day-item">
+                  <span class="day-name">{{ getPriorityItemDisplay(slot) }}</span>
+                  <span class="time-range">{{ getTimeRangeDisplay(slot) }}</span>
+                </div>
+              }
             </div>
-            <div class="days-list" *ngIf="getSlotsByPriority(3).length > 0">
-              <div class="day-item" *ngFor="let slot of getSlotsByPriority(3)">
-                <span class="day-name">{{ getPriorityItemDisplay(slot) }}</span>
-                <span class="time-range">{{ getTimeRangeDisplay(slot) }}</span>
-              </div>
-            </div>
-            <div class="empty-state" *ngIf="getSlotsByPriority(3).length === 0">
+          }
+          @if (getSlotsByPriority(3).length === 0) {
+            <div class="empty-state">
               <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'calendar_view_week'"></app-icon>
               <span>No weekly patterns set</span>
             </div>
+          }
+        </div>
+      </div>
+
+      <!-- Priority 4 - Daily -->
+      <div class="priority-card priority-4">
+        <div class="card-header">
+          <div class="priority-badge">
+            <span class="priority-number">4</span>
+          </div>
+          <div class="priority-info">
+            <h4>{{ getPriorityDisplayText(4) }}</h4>
+            <p>{{ getPriorityDescription(4) }}</p>
+          </div>
+          <div class="priority-icon">
+            <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'calendar_today'"></app-icon>
           </div>
         </div>
-  
-        <!-- Priority 4 - Daily -->
-        <div class="priority-card priority-4">
-          <div class="card-header">
-            <div class="priority-badge">
-              <span class="priority-number">4</span>
+        <div class="card-content">
+          <div class="stats-row">
+            <div class="stat-item">
+              <span class="stat-value">{{ getPriorityCount(4) }}</span>
+              <span class="stat-label">Days</span>
             </div>
-            <div class="priority-info">
-              <h4>{{ getPriorityDisplayText(4) }}</h4>
-              <p>{{ getPriorityDescription(4) }}</p>
-            </div>
-            <div class="priority-icon">
-              <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'calendar_today'"></app-icon>
+            <div class="stat-item">
+              <span class="stat-value">{{ getTotalSlotsByPriority(4) }}</span>
+              <span class="stat-label">Slots</span>
             </div>
           </div>
-          <div class="card-content">
-            <div class="stats-row">
-              <div class="stat-item">
-                <span class="stat-value">{{ getPriorityCount(4) }}</span>
-                <span class="stat-label">Days</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-value">{{ getTotalSlotsByPriority(4) }}</span>
-                <span class="stat-label">Slots</span>
-              </div>
+          @if (getSlotsByPriority(4).length > 0) {
+            <div class="days-list">
+              @for (slot of getSlotsByPriority(4); track slot) {
+                <div class="day-item">
+                  <span class="day-name">{{ getPriorityItemDisplay(slot) }}</span>
+                  <span class="time-range">{{ getTimeRangeDisplay(slot) }}</span>
+                </div>
+              }
             </div>
-            <div class="days-list" *ngIf="getSlotsByPriority(4).length > 0">
-              <div class="day-item" *ngFor="let slot of getSlotsByPriority(4)">
-                <span class="day-name">{{ getPriorityItemDisplay(slot) }}</span>
-                <span class="time-range">{{ getTimeRangeDisplay(slot) }}</span>
-              </div>
-            </div>
-            <div class="empty-state" *ngIf="getSlotsByPriority(4).length === 0">
+          }
+          @if (getSlotsByPriority(4).length === 0) {
+            <div class="empty-state">
               <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'today'"></app-icon>
               <span>No daily defaults set</span>
             </div>
-          </div>
+          }
         </div>
       </div>
     </div>
+  </div>
 
   <!-- Quick Stats -->
   <div class="quick-stats">
@@ -190,40 +214,42 @@
         <h2>{{ scheduleDays }}-Day Schedule</h2>
         <div class="days-selector">
           <label for="daysSelect">Show:</label>
-          <select 
-            id="daysSelect" 
-            [value]="scheduleDays" 
+          <select
+            id="daysSelect"
+            [value]="scheduleDays"
             (change)="onDaysSelectChange($event)"
             class="days-select"
-          >
-            <option *ngFor="let option of availableDayOptions" [value]="option">
-              {{ option }} days
-            </option>
+            >
+            @for (option of availableDayOptions; track option) {
+              <option [value]="option">
+                {{ option }} days
+              </option>
+            }
           </select>
         </div>
       </div>
       <div class="view-toggle">
         <div class="grid-actions">
-          <app-icon 
-            [fontSet]="'material-icons-outlined'" 
-            [isCovered]="true" 
-            [fontIcon]="'add'" 
+          <app-icon
+            [fontSet]="'material-icons-outlined'"
+            [isCovered]="true"
+            [fontIcon]="'add'"
             (click)="createTimingSlot()"
           ></app-icon>
         </div>
-        <button 
-          class="toggle-btn" 
+        <button
+          class="toggle-btn"
           [class.active]="selectedView === 'weekly'"
           (click)="onViewChange('weekly')"
-        >
+          >
           <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'view_week'"></app-icon>
           Schedule View
         </button>
-        <button 
-          class="toggle-btn" 
+        <button
+          class="toggle-btn"
           [class.active]="selectedView === 'grid'"
           (click)="onViewChange('grid')"
-        >
+          >
           <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'grid_view'"></app-icon>
           List View
         </button>
@@ -231,87 +257,105 @@
     </div>
 
     <!-- Schedule View -->
-    <div class="weekly-view" *ngIf="selectedView === 'weekly'">
-      <div class="week-container" [style.grid-template-columns]="getGridTemplateColumns()">
-        <div class="day-column" *ngFor="let day of getCurrentWeekDays()">
-          <div class="day-header">
-            <div class="day-name">{{ day.slice(0, 3) }}</div>
-            <div class="day-date" *ngIf="getSlotsForDay(day).length > 0">
-              {{ getDateForDay(day) }}
-            </div>
-            <div class="day-status" [class.active]="getSlotsForDay(day).length > 0">
-              {{ getSlotsForDay(day).length > 0 ? 'Active' : 'Off' }}
-            </div>
-          </div>
-          
-          <div class="day-slots">
-            <!-- Priority-based slots -->
-            <div 
-              class="time-block" 
-              *ngFor="let slot of getSlotsForDay(day)"
-              [class.priority-1]="slot.priority === 1"
-              [class.priority-2]="slot.priority === 2"
-              [class.priority-3]="slot.priority === 3"
-              [class.priority-4]="slot.priority === 4"
-              [class.active]="slot.isActive"
-              [class.inactive]="!slot.isActive"
-              (click)="editTiming(slot)"
-            >
-              <!-- Leave Day Display (Priority 1) -->
-              <div *ngIf="slot.priority === 1" class="leave-day-display">
-                <div class="leave-date">{{ getSlotDate(slot) || getDateForDay(day) }}</div>
-                <div class="leave-reason">Leave Day</div>
-              </div>
-              
-              <!-- Regular Slot Display (Other Priorities) -->
-              <div *ngIf="slot.priority !== 1" class="regular-slot-display">
-                <div class="priority-indicator">
-                  <div class="priority-number">{{ slot.priority }}</div>
-                </div>
-                <div class="slot-date" *ngIf="getSlotDate(slot)">
-                  {{ getSlotDate(slot) }}
-                </div>
-                <div class="time-range">
-                  <div class="start-time">{{ slot.startTime }}</div>
-                  <div class="end-time">{{ slot.endTime }}</div>
-                </div>
-                <div class="slot-details">
-                  <div class="duration">{{ slot.appointmentDuration }} min</div>
-                  <div class="type-badge" [class.slots]="slot.schedulingType === 'slots'" [class.flexible]="slot.schedulingType === 'flexible'">
-                    {{ slot.schedulingType === 'slots' ? 'Fixed' : 'Flexible' }}
+    @if (selectedView === 'weekly') {
+      <div class="weekly-view">
+        <div class="week-container" [style.grid-template-columns]="getGridTemplateColumns()">
+          @for (day of getCurrentWeekDays(); track day) {
+            <div class="day-column">
+              <div class="day-header">
+                <div class="day-name">{{ day.slice(0, 3) }}</div>
+                @if (getSlotsForDay(day).length > 0) {
+                  <div class="day-date">
+                    {{ getDateForDay(day) }}
                   </div>
-                </div>
-                <div class="capacity">
-                  <span *ngIf="slot.schedulingType === 'slots'">{{ slot.availableSlots || 0 }} slots</span>
-                  <span *ngIf="slot.schedulingType === 'flexible'">{{ slot.flexibleAppointmentsRemaining || 0 }} remaining</span>
-                </div>
-                <div class="priority-label">
-                  {{ getPriorityLabel(slot.priority) }}
+                }
+                <div class="day-status" [class.active]="getSlotsForDay(day).length > 0">
+                  {{ getSlotsForDay(day).length > 0 ? 'Active' : 'Off' }}
                 </div>
               </div>
+              <div class="day-slots">
+                <!-- Priority-based slots -->
+                @for (slot of getSlotsForDay(day); track slot) {
+                  <div
+                    class="time-block"
+                    [class.priority-1]="slot.priority === 1"
+                    [class.priority-2]="slot.priority === 2"
+                    [class.priority-3]="slot.priority === 3"
+                    [class.priority-4]="slot.priority === 4"
+                    [class.active]="slot.isActive"
+                    [class.inactive]="!slot.isActive"
+                    (click)="editTiming(slot)"
+                    >
+                    <!-- Leave Day Display (Priority 1) -->
+                    @if (slot.priority === 1) {
+                      <div class="leave-day-display">
+                        <div class="leave-date">{{ getSlotDate(slot) || getDateForDay(day) }}</div>
+                        <div class="leave-reason">Leave Day</div>
+                      </div>
+                    }
+                    <!-- Regular Slot Display (Other Priorities) -->
+                    @if (slot.priority !== 1) {
+                      <div class="regular-slot-display">
+                        <div class="priority-indicator">
+                          <div class="priority-number">{{ slot.priority }}</div>
+                        </div>
+                        @if (getSlotDate(slot)) {
+                          <div class="slot-date">
+                            {{ getSlotDate(slot) }}
+                          </div>
+                        }
+                        <div class="time-range">
+                          <div class="start-time">{{ slot.startTime }}</div>
+                          <div class="end-time">{{ slot.endTime }}</div>
+                        </div>
+                        <div class="slot-details">
+                          <div class="duration">{{ slot.appointmentDuration }} min</div>
+                          <div class="type-badge" [class.slots]="slot.schedulingType === 'slots'" [class.flexible]="slot.schedulingType === 'flexible'">
+                            {{ slot.schedulingType === 'slots' ? 'Fixed' : 'Flexible' }}
+                          </div>
+                        </div>
+                        <div class="capacity">
+                          @if (slot.schedulingType === 'slots') {
+                            <span>{{ slot.availableSlots || 0 }} slots</span>
+                          }
+                          @if (slot.schedulingType === 'flexible') {
+                            <span>{{ slot.flexibleAppointmentsRemaining || 0 }} remaining</span>
+                          }
+                        </div>
+                        <div class="priority-label">
+                          {{ getPriorityLabel(slot.priority) }}
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+                @if (getSlotsForDay(day).length === 0) {
+                  <div class="add-slot-placeholder" (click)="createTimingSlot()">
+                    <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'add'"></app-icon>
+                    <span>Add Time</span>
+                  </div>
+                }
+              </div>
             </div>
-            
-            <div class="add-slot-placeholder" *ngIf="getSlotsForDay(day).length === 0" (click)="createTimingSlot()">
-              <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'add'"></app-icon>
-              <span>Add Time</span>
-            </div>
-          </div>
+          }
         </div>
       </div>
-    </div>
+    }
 
     <!-- Grid/List View -->
-    <div class="grid-view" *ngIf="selectedView === 'grid'">
-      <app-grid
-        [rowData]="timingSlots"
-        [columnDefs]="timingColumns"
-        [gridOptions]="timingGridOptions"
-        [height]="'500px'"
-        [showHeader]="true"
-        [searchPlaceholder]="'Search timing slots...'"
-        (rowClicked)="onTimingRowClick($event)"
-      ></app-grid>
-    </div>
+    @if (selectedView === 'grid') {
+      <div class="grid-view">
+        <app-grid
+          [rowData]="timingSlots"
+          [columnDefs]="timingColumns"
+          [gridOptions]="timingGridOptions"
+          [height]="'500px'"
+          [showHeader]="true"
+          [searchPlaceholder]="'Search timing slots...'"
+          (rowClicked)="onTimingRowClick($event)"
+        ></app-grid>
+      </div>
+    }
   </div>
 
 </div>

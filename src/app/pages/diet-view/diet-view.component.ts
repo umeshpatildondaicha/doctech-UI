@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,13 +12,12 @@ import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.comp
 @Component({
     selector: 'app-diet-view',
     imports: [
-        CommonModule,
-        MatButtonModule,
-        MatIconModule,
-        MatProgressSpinnerModule,
-        SafePipe,
-        BreadcrumbComponent
-    ],
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    SafePipe,
+    BreadcrumbComponent
+],
     templateUrl: './diet-view.component.html',
     styleUrl: './diet-view.component.scss'
 })

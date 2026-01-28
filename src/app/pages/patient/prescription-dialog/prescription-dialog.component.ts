@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { DIALOG_DATA_TOKEN, AppInputComponent, AppSelectboxComponent, AppButtonComponent } from "@lk/core";
@@ -13,12 +13,11 @@ export interface PrescriptionDialogData {
 @Component({
     selector: 'app-prescription-dialog',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        AppInputComponent,
-        AppSelectboxComponent,
-        AppButtonComponent
-    ],
+    ReactiveFormsModule,
+    AppInputComponent,
+    AppSelectboxComponent,
+    AppButtonComponent
+],
     templateUrl: './prescription-dialog.component.html',
     styleUrls: ['./prescription-dialog.component.scss']
 })

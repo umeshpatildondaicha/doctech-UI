@@ -2,14 +2,14 @@
   <div class="schedule-header">
     <h2 class="schedule-title">Staff Schedule</h2>
     <div class="schedule-actions">
-      <app-button 
+      <app-button
         appearance="stroked"
         [text]="'Today'"
         fontIcon="today"
         [class.active]="selectedView === 'today'"
         (btnClick)="onViewChange('today')">
       </app-button>
-      <app-button 
+      <app-button
         appearance="stroked"
         [text]="'Week'"
         fontIcon="date_range"
@@ -29,32 +29,37 @@
     </div>
 
     <!-- Existing Shift Cards -->
-    <div *ngFor="let shift of shifts" class="shift-card">
-      <div class="shift-header">
-        <h4 class="shift-name">{{ shift.name }}</h4>
-        <span class="shift-time">{{ shift.startTime }} - {{ shift.endTime }}</span>
-      </div>
-      <div class="shift-content">
-        <div class="staff-count">{{ shift.staffCount }} staff members</div>
-        <div class="staff-list">
-          <span 
-            *ngFor="let staff of getStaffForShift(shift.id)" 
-            class="staff-tag">
-            {{ staff.name }}
-          </span>
-          <span *ngIf="getStaffForShift(shift.id).length === 0" class="no-staff">
-            No staff assigned
-          </span>
+    @for (shift of shifts; track shift) {
+      <div class="shift-card">
+        <div class="shift-header">
+          <h4 class="shift-name">{{ shift.name }}</h4>
+          <span class="shift-time">{{ shift.startTime }} - {{ shift.endTime }}</span>
         </div>
-        <div class="shift-actions">
-          <app-button
-            appearance="icon"
-            fontIcon="add"
-            [title]="'Add Staff'"
-            (btnClick)="openAddStaffDialog(shift.id); $event.stopPropagation()">
-          </app-button>
+        <div class="shift-content">
+          <div class="staff-count">{{ shift.staffCount }} staff members</div>
+          <div class="staff-list">
+            @for (staff of getStaffForShift(shift.id); track staff) {
+              <span
+                class="staff-tag">
+                {{ staff.name }}
+              </span>
+            }
+            @if (getStaffForShift(shift.id).length === 0) {
+              <span class="no-staff">
+                No staff assigned
+              </span>
+            }
+          </div>
+          <div class="shift-actions">
+            <app-button
+              appearance="icon"
+              fontIcon="add"
+              [title]="'Add Staff'"
+              (btnClick)="openAddStaffDialog(shift.id); $event.stopPropagation()">
+            </app-button>
+          </div>
         </div>
       </div>
-    </div>
+    }
   </div>
 </div>

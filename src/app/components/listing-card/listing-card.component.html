@@ -6,83 +6,106 @@
   (keydown)="onKeyActivate($event)"
   [attr.tabindex]="clickable ? 0 : -1"
   [attr.role]="clickable ? 'button' : null"
->
+  >
   <div class="card-media">
-    <img *ngIf="imageUrl" [src]="imageUrl" [alt]="alt || title" />
-    <div class="media-placeholder" *ngIf="!imageUrl">
-      <mat-icon>{{ placeholderIcon }}</mat-icon>
-      <span>{{ placeholderText }}</span>
-    </div>
+    @if (imageUrl) {
+      <img [src]="imageUrl" [alt]="alt || title" />
+    }
+    @if (!imageUrl) {
+      <div class="media-placeholder">
+        <mat-icon>{{ placeholderIcon }}</mat-icon>
+        <span>{{ placeholderText }}</span>
+      </div>
+    }
 
-    <div
-      class="card-badge badge-left"
-      *ngIf="topLeftBadge?.text"
-      [ngClass]="topLeftBadge?.className"
-      [ngStyle]="badgeStyle(topLeftBadge) || undefined"
-    >
-      {{ topLeftBadge?.text }}
-    </div>
+    @if (topLeftBadge?.text) {
+      <div
+        class="card-badge badge-left"
+        [ngClass]="topLeftBadge?.className"
+        [ngStyle]="badgeStyle(topLeftBadge) || undefined"
+        >
+        {{ topLeftBadge?.text }}
+      </div>
+    }
 
-    <div
-      class="card-badge badge-right"
-      *ngIf="topRightBadge?.text"
-      [ngClass]="topRightBadge?.className"
-      [ngStyle]="badgeStyle(topRightBadge) || undefined"
-    >
-      {{ topRightBadge?.text }}
-    </div>
+    @if (topRightBadge?.text) {
+      <div
+        class="card-badge badge-right"
+        [ngClass]="topRightBadge?.className"
+        [ngStyle]="badgeStyle(topRightBadge) || undefined"
+        >
+        {{ topRightBadge?.text }}
+      </div>
+    }
 
-    <div class="selection-indicator" *ngIf="showSelectionIndicator && selected">
-      <mat-icon>{{ selectionIcon }}</mat-icon>
-    </div>
+    @if (showSelectionIndicator && selected) {
+      <div class="selection-indicator">
+        <mat-icon>{{ selectionIcon }}</mat-icon>
+      </div>
+    }
   </div>
 
   <div class="card-content">
     <h3 class="card-title">{{ title }}</h3>
-    <p class="card-description" *ngIf="description">{{ description }}</p>
+    @if (description) {
+      <p class="card-description">{{ description }}</p>
+    }
 
     <!-- Optional projected content (for future variants) -->
     <ng-content></ng-content>
 
-    <div class="stats-grid" *ngIf="stats && stats.length > 0">
-      <div class="stat-item" *ngFor="let stat of stats; trackBy: trackByStatLabel">
-        <mat-icon class="stat-icon" *ngIf="stat.icon">{{ stat.icon }}</mat-icon>
-        <div class="stat-text">
-          <div class="stat-label">{{ stat.label }}</div>
-          <div class="stat-value">
-            {{ stat.value }}<span class="stat-unit" *ngIf="stat.unit">&nbsp;{{ stat.unit }}</span>
+    @if (stats && stats.length > 0) {
+      <div class="stats-grid">
+        @for (stat of stats; track trackByStatLabel($index, stat)) {
+          <div class="stat-item">
+            @if (stat.icon) {
+              <mat-icon class="stat-icon">{{ stat.icon }}</mat-icon>
+            }
+            <div class="stat-text">
+              <div class="stat-label">{{ stat.label }}</div>
+              <div class="stat-value">
+                {{ stat.value }}@if (stat.unit) {
+                <span class="stat-unit">&nbsp;{{ stat.unit }}</span>
+              }
+            </div>
           </div>
         </div>
-      </div>
+      }
     </div>
-  </div>
+  }
+</div>
 
-  <div class="card-footer" *ngIf="primaryAction || (iconActions && iconActions.length > 0)">
-    <button
-      class="primary-footer-action"
-      *ngIf="primaryAction && !primaryAction.hidden"
-      [disabled]="primaryAction.disabled"
-      [matTooltip]="primaryAction.tooltip || ''"
-      [matTooltipDisabled]="!primaryAction.tooltip"
-      (click)="onActionClick($event, primaryAction)"
-    >
-      <mat-icon>{{ primaryAction.icon }}</mat-icon>
-      <span>{{ primaryAction.label }}</span>
-    </button>
-
-    <div class="icon-actions" *ngIf="iconActions && iconActions.length > 0">
+@if (primaryAction || (iconActions && iconActions.length > 0)) {
+  <div class="card-footer">
+    @if (primaryAction && !primaryAction.hidden) {
       <button
-        mat-icon-button
-        class="icon-action"
-        *ngFor="let action of iconActions; trackBy: trackByActionId"
-        [disabled]="action.disabled"
-        [matTooltip]="action.tooltip || ''"
-        [matTooltipDisabled]="!action.tooltip"
-        (click)="onActionClick($event, action)"
-      >
-        <mat-icon>{{ action.icon }}</mat-icon>
+        class="primary-footer-action"
+        [disabled]="primaryAction.disabled"
+        [matTooltip]="primaryAction.tooltip || ''"
+        [matTooltipDisabled]="!primaryAction.tooltip"
+        (click)="onActionClick($event, primaryAction)"
+        >
+        <mat-icon>{{ primaryAction.icon }}</mat-icon>
+        <span>{{ primaryAction.label }}</span>
       </button>
-    </div>
+    }
+    @if (iconActions && iconActions.length > 0) {
+      <div class="icon-actions">
+        @for (action of iconActions; track trackByActionId($index, action)) {
+          <button
+            mat-icon-button
+            class="icon-action"
+            [disabled]="action.disabled"
+            [matTooltip]="action.tooltip || ''"
+            [matTooltipDisabled]="!action.tooltip"
+            (click)="onActionClick($event, action)"
+            >
+            <mat-icon>{{ action.icon }}</mat-icon>
+          </button>
+        }
+      </div>
+    }
   </div>
+}
 </div>
 

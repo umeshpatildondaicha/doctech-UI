@@ -45,94 +45,104 @@
     </div>
 
     <!-- Selection Summary -->
-    <div class="selection-summary" *ngIf="selectedDiets.length > 0">
-      <div class="summary-info">
-        <span class="selected-count">{{ getSelectedCount() }} diets selected</span>
-        <span class="total-calories">{{ getTotalCalories() }} total calories</span>
+    @if (selectedDiets.length > 0) {
+      <div class="selection-summary">
+        <div class="summary-info">
+          <span class="selected-count">{{ getSelectedCount() }} diets selected</span>
+          <span class="total-calories">{{ getTotalCalories() }} total calories</span>
+        </div>
+        <button mat-stroked-button (click)="selectedDiets = []" class="clear-selection-btn">
+          <mat-icon>clear</mat-icon>
+          Clear Selection
+        </button>
       </div>
-      <button mat-stroked-button (click)="selectedDiets = []" class="clear-selection-btn">
-        <mat-icon>clear</mat-icon>
-        Clear Selection
-      </button>
-    </div>
+    }
 
     <!-- Results Count -->
     <div class="results-info">
       <span class="results-count">{{ filteredDiets.length }} diets available</span>
-      <div class="select-all-section" *ngIf="filteredDiets.length > 0">
-        <mat-checkbox 
-          [(ngModel)]="selectAll" 
-          (change)="toggleSelectAll()"
-          class="select-all-checkbox">
-          Select All
-        </mat-checkbox>
-      </div>
+      @if (filteredDiets.length > 0) {
+        <div class="select-all-section">
+          <mat-checkbox
+            [(ngModel)]="selectAll"
+            (change)="toggleSelectAll()"
+            class="select-all-checkbox">
+            Select All
+          </mat-checkbox>
+        </div>
+      }
     </div>
 
     <!-- Diets Grid -->
-    <div class="diets-grid" *ngIf="filteredDiets.length > 0; else noResults">
-      <div class="diet-card" 
-           *ngFor="let diet of filteredDiets" 
-           [class.selected]="isDietSelected(diet)">
-        
-        <div class="card-checkbox">
-          <mat-checkbox 
-            [checked]="isDietSelected(diet)"
-            (change)="toggleDietSelection(diet)"
-            class="diet-checkbox">
-          </mat-checkbox>
-        </div>
-
-        <div class="card-media">
-          <img *ngIf="diet.imageUrl" [src]="diet.imageUrl" [alt]="diet.name">
-          <div class="media-placeholder" *ngIf="!diet.imageUrl">
-            <mat-icon>restaurant</mat-icon>
-          </div>
-          <div class="selection-indicator" *ngIf="isDietSelected(diet)">
-            <mat-icon>check_circle</mat-icon>
-          </div>
-        </div>
-
-        <div class="card-content">
-          <div class="diet-type-badge" [style.background-color]="getDietTypeColor(diet.dietType)">
-            <mat-icon>{{ getDietTypeIcon(diet.dietType) }}</mat-icon>
-            {{ diet.dietType }}
-          </div>
-
-          <h3 class="diet-name">{{ diet.name }}</h3>
-          <p class="diet-description">{{ diet.description }}</p>
-
-          <div class="diet-tags" *ngIf="diet.tags && diet.tags.length > 0">
-            <mat-chip *ngFor="let tag of diet.tags" class="tag-chip">
-              {{ tag }}
-            </mat-chip>
-          </div>
-
-          <div class="nutritional-info">
-            <div class="nutrition-item">
-              <span class="nutrition-value">{{ diet.calories }}</span>
-              <span class="nutrition-label">kcal</span>
+    @if (filteredDiets.length > 0) {
+      <div class="diets-grid">
+        @for (diet of filteredDiets; track diet) {
+          <div class="diet-card"
+            [class.selected]="isDietSelected(diet)">
+            <div class="card-checkbox">
+              <mat-checkbox
+                [checked]="isDietSelected(diet)"
+                (change)="toggleDietSelection(diet)"
+                class="diet-checkbox">
+              </mat-checkbox>
             </div>
-            <div class="nutrition-item">
-              <span class="nutrition-value">{{ diet.protein }}g</span>
-              <span class="nutrition-label">Protein</span>
+            <div class="card-media">
+              @if (diet.imageUrl) {
+                <img [src]="diet.imageUrl" [alt]="diet.name">
+              }
+              @if (!diet.imageUrl) {
+                <div class="media-placeholder">
+                  <mat-icon>restaurant</mat-icon>
+                </div>
+              }
+              @if (isDietSelected(diet)) {
+                <div class="selection-indicator">
+                  <mat-icon>check_circle</mat-icon>
+                </div>
+              }
             </div>
-            <div class="nutrition-item">
-              <span class="nutrition-value">{{ diet.carbs }}g</span>
-              <span class="nutrition-label">Carbs</span>
+            <div class="card-content">
+              <div class="diet-type-badge" [style.background-color]="getDietTypeColor(diet.dietType)">
+                <mat-icon>{{ getDietTypeIcon(diet.dietType) }}</mat-icon>
+                {{ diet.dietType }}
+              </div>
+              <h3 class="diet-name">{{ diet.name }}</h3>
+              <p class="diet-description">{{ diet.description }}</p>
+              @if (diet.tags && diet.tags.length > 0) {
+                <div class="diet-tags">
+                  @for (tag of diet.tags; track tag) {
+                    <mat-chip class="tag-chip">
+                      {{ tag }}
+                    </mat-chip>
+                  }
+                </div>
+              }
+              <div class="nutritional-info">
+                <div class="nutrition-item">
+                  <span class="nutrition-value">{{ diet.calories }}</span>
+                  <span class="nutrition-label">kcal</span>
+                </div>
+                <div class="nutrition-item">
+                  <span class="nutrition-value">{{ diet.protein }}g</span>
+                  <span class="nutrition-label">Protein</span>
+                </div>
+                <div class="nutrition-item">
+                  <span class="nutrition-value">{{ diet.carbs }}g</span>
+                  <span class="nutrition-label">Carbs</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        }
       </div>
-    </div>
-
-    <ng-template #noResults>
+    } @else {
       <div class="no-results">
         <mat-icon class="no-results-icon">search_off</mat-icon>
         <h3>No diets found</h3>
         <p>Try adjusting your search criteria or create new diets.</p>
       </div>
-    </ng-template>
+    }
+
   </div>
 
   <div mat-dialog-actions class="dialog-actions">

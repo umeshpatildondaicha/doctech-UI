@@ -1,47 +1,58 @@
 <div class="admin-page-header">
   <div class="header-content">
     <!-- Back Button and Breadcrumbs -->
-    <div class="header-left" *ngIf="showBackButton || breadcrumbs.length > 0">
-      <app-button 
-        *ngIf="showBackButton"
-        [text]="'Back'" 
-        [color]="'accent'" 
-        [fontIcon]="'arrow_back'"
-        (btnClick)="onBackClick()">
-      </app-button>
-      
-      <div class="breadcrumb" *ngIf="breadcrumbs.length > 0">
-        <ng-container *ngFor="let breadcrumb of breadcrumbs; let last = last">
-          <span 
-            class="breadcrumb-item"
-            [class.clickable]="breadcrumb.route"
-            [class.current]="last"
-            (click)="onBreadcrumbClick(breadcrumb)"
-            (keydown.enter)="onBreadcrumbClick(breadcrumb)"
-            [tabindex]="breadcrumb.route ? 0 : -1">
-            {{ breadcrumb.text }}
-          </span>
-          <span class="breadcrumb-separator" *ngIf="!last">•</span>
-        </ng-container>
+    @if (showBackButton || breadcrumbs.length > 0) {
+      <div class="header-left">
+        @if (showBackButton) {
+          <app-button
+            [text]="'Back'"
+            [color]="'accent'"
+            [fontIcon]="'arrow_back'"
+            (btnClick)="onBackClick()">
+          </app-button>
+        }
+        @if (breadcrumbs.length > 0) {
+          <div class="breadcrumb">
+            @for (breadcrumb of breadcrumbs; track breadcrumb; let last = $last) {
+              <span
+                class="breadcrumb-item"
+                [class.clickable]="breadcrumb.route"
+                [class.current]="last"
+                (click)="onBreadcrumbClick(breadcrumb)"
+                (keydown.enter)="onBreadcrumbClick(breadcrumb)"
+                [tabindex]="breadcrumb.route ? 0 : -1">
+                {{ breadcrumb.text }}
+              </span>
+              @if (!last) {
+                <span class="breadcrumb-separator">•</span>
+              }
+            }
+          </div>
+        }
       </div>
-    </div>
-    
+    }
+
     <!-- Title and Subtitle -->
     <div class="title-section">
       <h1 class="page-title">{{ title }}</h1>
-      <p class="page-subtitle" *ngIf="subtitle">{{ subtitle }}</p>
+      @if (subtitle) {
+        <p class="page-subtitle">{{ subtitle }}</p>
+      }
     </div>
   </div>
-  
+
   <!-- Action Buttons -->
-  <div class="header-actions" *ngIf="actions.length > 0">
-    <app-button 
-      *ngFor="let action of actions"
-      [text]="action.text" 
-      [color]="action.color" 
-      [fontIcon]="action.fontIcon || ''"
-      [disabled]="action.disabled || false"
-      (btnClick)="onActionClick(action.action)">
-    </app-button>
-  </div>
+  @if (actions.length > 0) {
+    <div class="header-actions">
+      @for (action of actions; track action) {
+        <app-button
+          [text]="action.text"
+          [color]="action.color"
+          [fontIcon]="action.fontIcon || ''"
+          [disabled]="action.disabled || false"
+          (btnClick)="onActionClick(action.action)">
+        </app-button>
+      }
+    </div>
+  }
 </div>

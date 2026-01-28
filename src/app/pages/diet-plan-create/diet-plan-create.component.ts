@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -18,19 +18,18 @@ import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.comp
 @Component({
     selector: 'app-diet-plan-create',
     imports: [
-        CommonModule,
-        FormsModule,
-        MatDialogModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatButtonModule,
-        MatIconModule,
-        MatSelectModule,
-        MatTabsModule,
-        MatTooltipModule,
-        MatProgressBarModule,
-        BreadcrumbComponent
-    ],
+    FormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatTabsModule,
+    MatTooltipModule,
+    MatProgressBarModule,
+    BreadcrumbComponent
+],
     templateUrl: './diet-plan-create.component.html',
     styleUrl: './diet-plan-create.component.scss'
 })

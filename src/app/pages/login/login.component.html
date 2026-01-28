@@ -36,85 +36,97 @@
             <label class="form-label" for="email-input">Email Address</label>
             <div class="input-container" [class.error]="isFieldInvalid('email')">
               <mat-icon class="input-icon">email</mat-icon>
-              <input 
+              <input
                 id="email-input"
-                type="email" 
+                type="email"
                 formControlName="email"
                 placeholder="Enter your email address"
                 class="form-input"
                 autocomplete="email">
+              </div>
+              @if (isFieldInvalid('email')) {
+                <div class="error-message">
+                  {{ getErrorMessage('email') }}
+                </div>
+              }
             </div>
-            <div class="error-message" *ngIf="isFieldInvalid('email')">
-              {{ getErrorMessage('email') }}
-            </div>
-          </div>
 
-          <!-- Password Field -->
-          <div class="form-field">
-            <label class="form-label" for="password-input">Password</label>
-            <div class="input-container" [class.error]="isFieldInvalid('password')">
-              <mat-icon class="input-icon">lock</mat-icon>
-              <input 
-                id="password-input"
-                [type]="showPassword ? 'text' : 'password'"
-                formControlName="password"
-                placeholder="Enter your password"
-                class="form-input"
-                autocomplete="current-password">
-              <button 
-                type="button"
-                class="password-toggle"
-                (click)="togglePasswordVisibility()">
-                <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            <!-- Password Field -->
+            <div class="form-field">
+              <label class="form-label" for="password-input">Password</label>
+              <div class="input-container" [class.error]="isFieldInvalid('password')">
+                <mat-icon class="input-icon">lock</mat-icon>
+                <input
+                  id="password-input"
+                  [type]="showPassword ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="Enter your password"
+                  class="form-input"
+                  autocomplete="current-password">
+                  <button
+                    type="button"
+                    class="password-toggle"
+                    (click)="togglePasswordVisibility()">
+                    <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  </button>
+                </div>
+                @if (isFieldInvalid('password')) {
+                  <div class="error-message">
+                    {{ getErrorMessage('password') }}
+                  </div>
+                }
+              </div>
+
+              <!-- Remember Me & Forgot Password -->
+              <div class="form-options">
+                <label class="checkbox-container">
+                  <input type="checkbox" formControlName="rememberMe" class="checkbox-input">
+                  <span class="checkmark"></span>
+                  <span class="checkbox-label">Remember me</span>
+                </label>
+                <a href="#" class="forgot-link">Forgot Password?</a>
+              </div>
+
+              <!-- Error Message -->
+              @if (errorMessage) {
+                <div class="alert alert-error">
+                  <mat-icon>error</mat-icon>
+                  <span>{{ errorMessage }}</span>
+                </div>
+              }
+
+              <!-- Success Message -->
+              @if (successMessage) {
+                <div class="alert alert-success">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>{{ successMessage }}</span>
+                </div>
+              }
+
+              <!-- Submit Button -->
+              <button
+                type="submit"
+                class="submit-button"
+                [disabled]="loginForm.invalid || isLoading"
+                [class.loading]="isLoading">
+                <div class="button-content">
+                  @if (isLoading) {
+                    <mat-spinner diameter="20"></mat-spinner>
+                  }
+                  @if (!isLoading) {
+                    <mat-icon>login</mat-icon>
+                  }
+                  <span>{{ isLoading ? 'Signing In...' : 'Sign In' }}</span>
+                </div>
               </button>
+            </form>
+
+            <!-- Footer -->
+            <div class="form-footer">
+              <p class="version-info">Version {{ environment.version }} | Build {{ environment.buildNumber }}</p>
+              <p class="copyright">© 2024 Shree Clinic. All rights reserved.</p>
             </div>
-            <div class="error-message" *ngIf="isFieldInvalid('password')">
-              {{ getErrorMessage('password') }}
-            </div>
           </div>
-
-          <!-- Remember Me & Forgot Password -->
-          <div class="form-options">
-            <label class="checkbox-container">
-              <input type="checkbox" formControlName="rememberMe" class="checkbox-input">
-              <span class="checkmark"></span>
-              <span class="checkbox-label">Remember me</span>
-            </label>
-            <a href="#" class="forgot-link">Forgot Password?</a>
-          </div>
-
-          <!-- Error Message -->
-          <div class="alert alert-error" *ngIf="errorMessage">
-            <mat-icon>error</mat-icon>
-            <span>{{ errorMessage }}</span>
-          </div>
-
-          <!-- Success Message -->
-          <div class="alert alert-success" *ngIf="successMessage">
-            <mat-icon>check_circle</mat-icon>
-            <span>{{ successMessage }}</span>
-          </div>
-
-          <!-- Submit Button -->
-          <button 
-            type="submit"
-            class="submit-button"
-            [disabled]="loginForm.invalid || isLoading"
-            [class.loading]="isLoading">
-            <div class="button-content">
-              <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
-              <mat-icon *ngIf="!isLoading">login</mat-icon>
-              <span>{{ isLoading ? 'Signing In...' : 'Sign In' }}</span>
-            </div>
-          </button>
-        </form>
-
-        <!-- Footer -->
-        <div class="form-footer">
-          <p class="version-info">Version {{ environment.version }} | Build {{ environment.buildNumber }}</p>
-          <p class="copyright">© 2024 Shree Clinic. All rights reserved.</p>
         </div>
       </div>
     </div>
-  </div>
-</div> 

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,14 +16,13 @@ export interface AddRelativeDialogData {
 @Component({
     selector: 'app-add-relative-dialog',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatCheckboxModule,
-        AppInputComponent,
-        AppSelectboxComponent
-    ],
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatCheckboxModule,
+    AppInputComponent,
+    AppSelectboxComponent
+],
     templateUrl: './add-relative-dialog.component.html',
     styleUrls: ['./add-relative-dialog.component.scss']
 })

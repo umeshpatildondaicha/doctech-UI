@@ -44,14 +44,15 @@
   <!-- Dialog Footer -->
   <div class="dialog-footer">
     <div class="footer-actions">
-      <app-button
-        type="button"
-        *ngIf="!isViewMode"
-        appearance="basic"
-        (btnClick)="onCancel()"
-        [text]="'Cancel'"
-        class="cancel-btn">
-      </app-button>
+      @if (!isViewMode) {
+        <app-button
+          type="button"
+          appearance="basic"
+          (btnClick)="onCancel()"
+          [text]="'Cancel'"
+          class="cancel-btn">
+        </app-button>
+      }
       <app-button
         type="button"
         [appearance]="isViewMode ? 'basic' : 'raised'"
@@ -62,4 +63,4 @@
       </app-button>
     </div>
   </div>
-</div> 
+</div>

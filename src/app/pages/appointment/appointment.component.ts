@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ColDef } from 'ag-grid-community';
@@ -17,7 +17,7 @@ import { CoreEventService, DialogboxService, DialogFooterAction, PageComponent, 
 
 @Component({
     selector: 'app-appointment',
-    imports: [CommonModule, GridComponent, AppButtonComponent, IconComponent, MatTabsModule, CalendarComponent, PageComponent],
+    imports: [GridComponent, AppButtonComponent, IconComponent, MatTabsModule, CalendarComponent, PageComponent],
     templateUrl: './appointment.component.html',
     styleUrl: './appointment.component.scss'
 })

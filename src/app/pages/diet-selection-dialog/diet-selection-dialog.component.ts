@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,18 +14,17 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 @Component({
     selector: 'app-diet-selection-dialog',
     imports: [
-        CommonModule,
-        FormsModule,
-        MatDialogModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatButtonModule,
-        MatIconModule,
-        MatSelectModule,
-        MatChipsModule,
-        MatTooltipModule,
-        MatCheckboxModule
-    ],
+    FormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatChipsModule,
+    MatTooltipModule,
+    MatCheckboxModule
+],
     templateUrl: './diet-selection-dialog.component.html',
     styleUrl: './diet-selection-dialog.component.scss'
 })

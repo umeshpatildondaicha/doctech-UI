@@ -1,430 +1,432 @@
 <div class="diet-form-dialog" [class.view-mode]="isViewMode">
 
   <!-- View Mode Content -->
-  <div class="dialog-content" *ngIf="isViewMode">
-    <div class="diet-view-container">
-      <!-- Large Image Section -->
-      <div class="diet-image-section">
-        <img [src]="dietForm.get('imageUrl')?.value || imagePreview" 
-             alt="Diet image" 
-             class="diet-main-image"
-             (error)="onImageError($event)">
-        <button mat-button class="close-overlay-btn" (click)="onCancel()">
-          Close
-        </button>
-      </div>
-
-      <!-- Content Grid -->
-      <div class="diet-content-grid">
-        <!-- Left Column - Recipe Details -->
-        <div class="recipe-details">
-          <h1 class="recipe-title">{{ dietForm.get('name')?.value }}</h1>
-          <p class="recipe-description">{{ dietForm.get('description')?.value }}</p>
-          
-          <!-- Tags -->
-          <div class="recipe-tags">
-            <span class="tag-chip" *ngIf="dietForm.get('dietType')?.value">
-              {{ dietForm.get('dietType')?.value }}
-            </span>
-            <span class="tag-chip" *ngFor="let tag of getTagsArray()">{{ tag }}</span>
+  @if (isViewMode) {
+    <div class="dialog-content">
+      <div class="diet-view-container">
+        <!-- Large Image Section -->
+        <div class="diet-image-section">
+          <img [src]="dietForm.get('imageUrl')?.value || imagePreview"
+            alt="Diet image"
+            class="diet-main-image"
+            (error)="onImageError($event)">
+            <button mat-button class="close-overlay-btn" (click)="onCancel()">
+              Close
+            </button>
           </div>
-
-          <!-- Video Section -->
-          <div class="video-section" *ngIf="dietForm.get('videoUrl')?.value">
-            <div class="video-header">
-              <mat-icon>video_library</mat-icon>
-              <span>Video</span>
+          <!-- Content Grid -->
+          <div class="diet-content-grid">
+            <!-- Left Column - Recipe Details -->
+            <div class="recipe-details">
+              <h1 class="recipe-title">{{ dietForm.get('name')?.value }}</h1>
+              <p class="recipe-description">{{ dietForm.get('description')?.value }}</p>
+              <!-- Tags -->
+              <div class="recipe-tags">
+                @if (dietForm.get('dietType')?.value) {
+                  <span class="tag-chip">
+                    {{ dietForm.get('dietType')?.value }}
+                  </span>
+                }
+                @for (tag of getTagsArray(); track tag) {
+                  <span class="tag-chip">{{ tag }}</span>
+                }
+              </div>
+              <!-- Video Section -->
+              @if (dietForm.get('videoUrl')?.value) {
+                <div class="video-section">
+                  <div class="video-header">
+                    <mat-icon>video_library</mat-icon>
+                    <span>Video</span>
+                  </div>
+                  <div class="video-placeholder">
+                    <mat-icon>broken_image</mat-icon>
+                    <span>Video content not available</span>
+                  </div>
+                </div>
+              }
             </div>
-            <div class="video-placeholder">
-              <mat-icon>broken_image</mat-icon>
-              <span>Video content not available</span>
+            <!-- Right Column - Nutritional Information -->
+            <div class="nutritional-section">
+              <div class="nutrition-grid-view">
+                <div class="nutrition-card">
+                  <div class="nutrition-label">Calories</div>
+                  <div class="nutrition-value">{{ dietForm.get('calories')?.value }}</div>
+                </div>
+                <div class="nutrition-card">
+                  <div class="nutrition-label">Protein (g)</div>
+                  <div class="nutrition-value">{{ dietForm.get('protein')?.value }}</div>
+                </div>
+                <div class="nutrition-card">
+                  <div class="nutrition-label">Carbs (g)</div>
+                  <div class="nutrition-value">{{ dietForm.get('carbs')?.value }}</div>
+                </div>
+                <div class="nutrition-card">
+                  <div class="nutrition-label">Fat (g)</div>
+                  <div class="nutrition-value">{{ dietForm.get('fat')?.value }}</div>
+                </div>
+                <div class="nutrition-card">
+                  <div class="nutrition-label">Fiber (g)</div>
+                  <div class="nutrition-value">{{ dietForm.get('fiber')?.value }}</div>
+                </div>
+              </div>
+              <!-- Action Buttons -->
+              <div class="action-buttons">
+                <button mat-stroked-button class="action-btn edit-btn" (click)="onEdit()">
+                  Edit
+                </button>
+                <button mat-stroked-button class="action-btn delete-btn" (click)="onDelete()">
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+    }
 
-        <!-- Right Column - Nutritional Information -->
-        <div class="nutritional-section">
-          <div class="nutrition-grid-view">
-            <div class="nutrition-card">
-              <div class="nutrition-label">Calories</div>
-              <div class="nutrition-value">{{ dietForm.get('calories')?.value }}</div>
+    <!-- Form Mode Content -->
+    @if (!isViewMode) {
+      <div class="dialog-content">
+        <form [formGroup]="dietForm" (ngSubmit)="onSubmit()" class="diet-form">
+          <!-- Name Field -->
+          <div class="form-field-group">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Name *</mat-label>
+              <input matInput formControlName="name" placeholder="Enter diet name">
+              @if (dietForm.get('name')?.hasError('required')) {
+                <mat-error>
+                  Name is required
+                </mat-error>
+              }
+            </mat-form-field>
+          </div>
+          <!-- Description Field -->
+          <div class="form-field-group">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description"
+                placeholder="Enter diet description"
+                rows="3"
+                cdkTextareaAutosize
+                cdkAutosizeMinRows="3"
+              cdkAutosizeMaxRows="5"></textarea>
+              @if (dietForm.get('description')?.hasError('required')) {
+                <mat-error>
+                  Description is required
+                </mat-error>
+              }
+            </mat-form-field>
+          </div>
+          <!-- Diet Type Field -->
+          <div class="form-field-group">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Diet Type</mat-label>
+              <mat-select formControlName="dietType">
+                <mat-option value="mediterranean">Mediterranean</mat-option>
+                <mat-option value="keto">Keto</mat-option>
+                <mat-option value="vegan">Vegan</mat-option>
+                <mat-option value="vegetarian">Vegetarian</mat-option>
+                <mat-option value="paleo">Paleo</mat-option>
+                <mat-option value="low-carb">Low Carb</mat-option>
+                <mat-option value="high-protein">High Protein</mat-option>
+              </mat-select>
+              @if (dietForm.get('dietType')?.hasError('required')) {
+                <mat-error>
+                  Diet type is required
+                </mat-error>
+              }
+            </mat-form-field>
+          </div>
+          <!-- Nutritional Information Section -->
+          <div class="section-title">
+            <h4>Nutritional Information</h4>
+          </div>
+          <div class="nutrition-grid">
+            <div class="form-field-group">
+              <mat-form-field appearance="outline">
+                <mat-label>Calories (kcal)</mat-label>
+                <input matInput formControlName="calories" type="number" placeholder="0">
+                @if (dietForm.get('calories')?.hasError('required')) {
+                  <mat-error>
+                    Calories is required
+                  </mat-error>
+                }
+              </mat-form-field>
             </div>
-            <div class="nutrition-card">
-              <div class="nutrition-label">Protein (g)</div>
-              <div class="nutrition-value">{{ dietForm.get('protein')?.value }}</div>
+            <div class="form-field-group">
+              <mat-form-field appearance="outline">
+                <mat-label>Protein (g)</mat-label>
+                <input matInput formControlName="protein" type="number" placeholder="0">
+                @if (dietForm.get('protein')?.hasError('required')) {
+                  <mat-error>
+                    Protein is required
+                  </mat-error>
+                }
+              </mat-form-field>
             </div>
-            <div class="nutrition-card">
-              <div class="nutrition-label">Carbs (g)</div>
-              <div class="nutrition-value">{{ dietForm.get('carbs')?.value }}</div>
+            <div class="form-field-group">
+              <mat-form-field appearance="outline">
+                <mat-label>Carbohydrates (g)</mat-label>
+                <input matInput formControlName="carbs" type="number" placeholder="0">
+                @if (dietForm.get('carbs')?.hasError('required')) {
+                  <mat-error>
+                    Carbohydrates is required
+                  </mat-error>
+                }
+              </mat-form-field>
             </div>
-            <div class="nutrition-card">
-              <div class="nutrition-label">Fat (g)</div>
-              <div class="nutrition-value">{{ dietForm.get('fat')?.value }}</div>
+            <div class="form-field-group">
+              <mat-form-field appearance="outline">
+                <mat-label>Fat (g)</mat-label>
+                <input matInput formControlName="fat" type="number" placeholder="0">
+                @if (dietForm.get('fat')?.hasError('required')) {
+                  <mat-error>
+                    Fat is required
+                  </mat-error>
+                }
+              </mat-form-field>
             </div>
-            <div class="nutrition-card">
-              <div class="nutrition-label">Fiber (g)</div>
-              <div class="nutrition-value">{{ dietForm.get('fiber')?.value }}</div>
+            <div class="form-field-group">
+              <mat-form-field appearance="outline">
+                <mat-label>Fiber (g)</mat-label>
+                <input matInput formControlName="fiber" type="number" placeholder="0">
+                @if (dietForm.get('fiber')?.hasError('required')) {
+                  <mat-error>
+                    Fiber is required
+                  </mat-error>
+                }
+              </mat-form-field>
             </div>
           </div>
-
-          <!-- Action Buttons -->
-          <div class="action-buttons">
-            <button mat-stroked-button class="action-btn edit-btn" (click)="onEdit()">
-              Edit
-            </button>
-            <button mat-stroked-button class="action-btn delete-btn" (click)="onDelete()">
-              Delete
-            </button>
+          <!-- Media Links Section -->
+          <div class="section-title">
+            <h4>Media Links</h4>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Form Mode Content -->
-  <div class="dialog-content" *ngIf="!isViewMode">
-    <form [formGroup]="dietForm" (ngSubmit)="onSubmit()" class="diet-form">
-      
-      <!-- Name Field -->
-      <div class="form-field-group">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Name *</mat-label>
-          <input matInput formControlName="name" placeholder="Enter diet name">
-          <mat-error *ngIf="dietForm.get('name')?.hasError('required')">
-            Name is required
-          </mat-error>
-        </mat-form-field>
-      </div>
-
-      <!-- Description Field -->
-      <div class="form-field-group">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Description</mat-label>
-          <textarea matInput formControlName="description" 
-                    placeholder="Enter diet description" 
+          <div class="form-field-group">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>YouTube URL</mat-label>
+              <input matInput formControlName="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
+              <mat-icon matSuffix>video_library</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="form-field-group">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Document URL (PDF)</mat-label>
+              <input matInput formControlName="documentUrl" placeholder="https://.../doc.pdf">
+              <mat-icon matSuffix>description</mat-icon>
+            </mat-form-field>
+          </div>
+          <!-- Image Section -->
+          <div class="section-title">
+            <h4>Image</h4>
+          </div>
+          <div class="form-field-group">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Image URL</mat-label>
+              <input matInput formControlName="imageUrl" placeholder="https://images.unsplash.com/...">
+              <mat-icon matSuffix>image</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="form-field-group">
+            <div class="upload-section">
+              <label class="upload-label">Or Upload Image File</label>
+              <div class="file-upload-area" (click)="fileInput.click()" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+                <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*" style="display: none;">
+                <mat-icon>cloud_upload</mat-icon>
+                <span>Choose file</span>
+                @if (selectedFileName) {
+                  <span class="file-name">{{ selectedFileName }}</span>
+                }
+                @if (!selectedFileName) {
+                  <span class="file-name">No file chosen</span>
+                }
+              </div>
+            </div>
+          </div>
+          <!-- Image Preview -->
+          @if (imagePreview || dietForm.get('imageUrl')?.value) {
+            <div class="form-field-group">
+              <div class="image-preview-section">
+                <label class="preview-label">Image Preview</label>
+                <div class="image-preview">
+                  <img [src]="imagePreview || dietForm.get('imageUrl')?.value"
+                    alt="Diet preview"
+                    (error)="onImageError($event)">
+                  </div>
+                </div>
+              </div>
+            }
+            <!-- Tags Section -->
+            <div class="form-field-group">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Tags (comma separated)</mat-label>
+                <input matInput formControlName="tags" placeholder="lunch, quick, healthy">
+                <mat-icon matSuffix>local_offer</mat-icon>
+              </mat-form-field>
+            </div>
+            <!-- Ingredients Section -->
+            <div class="section-title">
+              <h4>Ingredients</h4>
+              <button mat-stroked-button type="button" (click)="addIngredient()" class="add-ingredient-btn">
+                <mat-icon>add</mat-icon>
+                <span class="add-ingredient-btn-text">Add Ingredient</span>
+              </button>
+            </div>
+            <div class="ingredients-container" formArrayName="ingredients">
+              @for (ingredient of ingredientsArray.controls; track ingredient; let i = $index) {
+                <div class="ingredient-item" [formGroupName]="i">
+                  <div class="ingredient-header">
+                    <h5>Ingredient {{ i + 1 }}</h5>
+                    <button mat-icon-button type="button" (click)="removeIngredient(i)" color="warn" class="remove-ingredient-btn">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                  <div class="ingredient-fields">
+                    <div class="form-field-group">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Name *</mat-label>
+                        <input matInput formControlName="name" placeholder="e.g., Quinoa">
+                        @if (ingredient.get('name')?.hasError('required')) {
+                          <mat-error>
+                            Name is required
+                          </mat-error>
+                        }
+                      </mat-form-field>
+                    </div>
+                    <div class="form-field-group">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Quantity *</mat-label>
+                        <input matInput formControlName="quantity" type="number" placeholder="1">
+                        @if (ingredient.get('quantity')?.hasError('required')) {
+                          <mat-error>
+                            Quantity is required
+                          </mat-error>
+                        }
+                      </mat-form-field>
+                    </div>
+                    <div class="form-field-group">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Unit *</mat-label>
+                        <mat-select formControlName="unit">
+                          <mat-option value="cup">Cup</mat-option>
+                          <mat-option value="tbsp">Tablespoon</mat-option>
+                          <mat-option value="tsp">Teaspoon</mat-option>
+                          <mat-option value="g">Gram</mat-option>
+                          <mat-option value="kg">Kilogram</mat-option>
+                          <mat-option value="ml">Milliliter</mat-option>
+                          <mat-option value="l">Liter</mat-option>
+                          <mat-option value="piece">Piece</mat-option>
+                          <mat-option value="can">Can</mat-option>
+                          <mat-option value="medium">Medium</mat-option>
+                          <mat-option value="large">Large</mat-option>
+                          <mat-option value="small">Small</mat-option>
+                          <mat-option value="clove">Clove</mat-option>
+                          <mat-option value="bunch">Bunch</mat-option>
+                        </mat-select>
+                        @if (ingredient.get('unit')?.hasError('required')) {
+                          <mat-error>
+                            Unit is required
+                          </mat-error>
+                        }
+                      </mat-form-field>
+                    </div>
+                    <div class="form-field-group">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Category</mat-label>
+                        <mat-select formControlName="category">
+                          <mat-option value="Grains">Grains</mat-option>
+                          <mat-option value="Protein">Protein</mat-option>
+                          <mat-option value="Vegetables">Vegetables</mat-option>
+                          <mat-option value="Fruits">Fruits</mat-option>
+                          <mat-option value="Legumes">Legumes</mat-option>
+                          <mat-option value="Oils">Oils</mat-option>
+                          <mat-option value="Condiments">Condiments</mat-option>
+                          <mat-option value="Herbs">Herbs</mat-option>
+                          <mat-option value="Dairy">Dairy</mat-option>
+                          <mat-option value="Nuts">Nuts</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                    <div class="form-field-group">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Notes</mat-label>
+                        <input matInput formControlName="notes" placeholder="Optional notes">
+                      </mat-form-field>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+            <!-- Recipe Section -->
+            <div class="section-title">
+              <h4>Recipe</h4>
+            </div>
+            <div class="recipe-fields">
+              <div class="recipe-meta-grid">
+                <div class="form-field-group">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Prep Time (minutes)</mat-label>
+                    <input matInput formControlName="prepTime" type="number" placeholder="15">
+                  </mat-form-field>
+                </div>
+                <div class="form-field-group">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Cook Time (minutes)</mat-label>
+                    <input matInput formControlName="cookTime" type="number" placeholder="20">
+                  </mat-form-field>
+                </div>
+                <div class="form-field-group">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Servings</mat-label>
+                    <input matInput formControlName="servings" type="number" placeholder="4">
+                  </mat-form-field>
+                </div>
+                <div class="form-field-group">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Difficulty</mat-label>
+                    <mat-select formControlName="difficulty">
+                      <mat-option value="Easy">Easy</mat-option>
+                      <mat-option value="Medium">Medium</mat-option>
+                      <mat-option value="Hard">Hard</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="form-field-group">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Instructions (one per line)</mat-label>
+                  <textarea matInput formControlName="instructions"
+                    placeholder="1. Rinse quinoa thoroughly under cold water&#10;2. Cook quinoa according to package instructions&#10;3. Drain and rinse chickpeas, set aside"
+                    rows="6"
+                    cdkTextareaAutosize
+                    cdkAutosizeMinRows="6"
+                  cdkAutosizeMaxRows="12"></textarea>
+                </mat-form-field>
+              </div>
+              <div class="form-field-group">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Cooking Tips (one per line)</mat-label>
+                  <textarea matInput formControlName="tips"
+                    placeholder="You can prepare quinoa ahead of time and store in refrigerator&#10;Add more vegetables for extra nutrition and color&#10;Season with salt and pepper to taste"
+                    rows="4"
+                    cdkTextareaAutosize
+                    cdkAutosizeMinRows="4"
+                  cdkAutosizeMaxRows="8"></textarea>
+                </mat-form-field>
+              </div>
+              <div class="form-field-group">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Recipe Notes</mat-label>
+                  <textarea matInput formControlName="notes"
+                    placeholder="This recipe is perfect for meal prep and can be stored for up to 3 days in the refrigerator."
                     rows="3"
                     cdkTextareaAutosize
                     cdkAutosizeMinRows="3"
-                    cdkAutosizeMaxRows="5"></textarea>
-          <mat-error *ngIf="dietForm.get('description')?.hasError('required')">
-            Description is required
-          </mat-error>
-        </mat-form-field>
-      </div>
-
-      <!-- Diet Type Field -->
-      <div class="form-field-group">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Diet Type</mat-label>
-          <mat-select formControlName="dietType">
-            <mat-option value="mediterranean">Mediterranean</mat-option>
-            <mat-option value="keto">Keto</mat-option>
-            <mat-option value="vegan">Vegan</mat-option>
-            <mat-option value="vegetarian">Vegetarian</mat-option>
-            <mat-option value="paleo">Paleo</mat-option>
-            <mat-option value="low-carb">Low Carb</mat-option>
-            <mat-option value="high-protein">High Protein</mat-option>
-          </mat-select>
-          <mat-error *ngIf="dietForm.get('dietType')?.hasError('required')">
-            Diet type is required
-          </mat-error>
-        </mat-form-field>
-      </div>
-
-      <!-- Nutritional Information Section -->
-      <div class="section-title">
-        <h4>Nutritional Information</h4>
-      </div>
-      
-      <div class="nutrition-grid">
-        <div class="form-field-group">
-          <mat-form-field appearance="outline">
-            <mat-label>Calories (kcal)</mat-label>
-            <input matInput formControlName="calories" type="number" placeholder="0">
-            <mat-error *ngIf="dietForm.get('calories')?.hasError('required')">
-              Calories is required
-            </mat-error>
-          </mat-form-field>
-        </div>
-
-        <div class="form-field-group">
-          <mat-form-field appearance="outline">
-            <mat-label>Protein (g)</mat-label>
-            <input matInput formControlName="protein" type="number" placeholder="0">
-            <mat-error *ngIf="dietForm.get('protein')?.hasError('required')">
-              Protein is required
-            </mat-error>
-          </mat-form-field>
-        </div>
-
-        <div class="form-field-group">
-          <mat-form-field appearance="outline">
-            <mat-label>Carbohydrates (g)</mat-label>
-            <input matInput formControlName="carbs" type="number" placeholder="0">
-            <mat-error *ngIf="dietForm.get('carbs')?.hasError('required')">
-              Carbohydrates is required
-            </mat-error>
-          </mat-form-field>
-        </div>
-
-        <div class="form-field-group">
-          <mat-form-field appearance="outline">
-            <mat-label>Fat (g)</mat-label>
-            <input matInput formControlName="fat" type="number" placeholder="0">
-            <mat-error *ngIf="dietForm.get('fat')?.hasError('required')">
-              Fat is required
-            </mat-error>
-          </mat-form-field>
-        </div>
-
-        <div class="form-field-group">
-          <mat-form-field appearance="outline">
-            <mat-label>Fiber (g)</mat-label>
-            <input matInput formControlName="fiber" type="number" placeholder="0">
-            <mat-error *ngIf="dietForm.get('fiber')?.hasError('required')">
-              Fiber is required
-            </mat-error>
-          </mat-form-field>
-        </div>
-      </div>
-
-      <!-- Media Links Section -->
-      <div class="section-title">
-        <h4>Media Links</h4>
-      </div>
-
-      <div class="form-field-group">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>YouTube URL</mat-label>
-          <input matInput formControlName="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
-          <mat-icon matSuffix>video_library</mat-icon>
-        </mat-form-field>
-      </div>
-
-      <div class="form-field-group">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Document URL (PDF)</mat-label>
-          <input matInput formControlName="documentUrl" placeholder="https://.../doc.pdf">
-          <mat-icon matSuffix>description</mat-icon>
-        </mat-form-field>
-      </div>
-
-      <!-- Image Section -->
-      <div class="section-title">
-        <h4>Image</h4>
-      </div>
-
-      <div class="form-field-group">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Image URL</mat-label>
-          <input matInput formControlName="imageUrl" placeholder="https://images.unsplash.com/...">
-          <mat-icon matSuffix>image</mat-icon>
-        </mat-form-field>
-      </div>
-
-      <div class="form-field-group">
-        <div class="upload-section">
-          <label class="upload-label">Or Upload Image File</label>
-          <div class="file-upload-area" (click)="fileInput.click()" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
-            <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*" style="display: none;">
-            <mat-icon>cloud_upload</mat-icon>
-            <span>Choose file</span>
-            <span class="file-name" *ngIf="selectedFileName">{{ selectedFileName }}</span>
-            <span class="file-name" *ngIf="!selectedFileName">No file chosen</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Image Preview -->
-      <div class="form-field-group" *ngIf="imagePreview || dietForm.get('imageUrl')?.value">
-        <div class="image-preview-section">
-          <label class="preview-label">Image Preview</label>
-          <div class="image-preview">
-            <img [src]="imagePreview || dietForm.get('imageUrl')?.value" 
-                 alt="Diet preview" 
-                 (error)="onImageError($event)">
-          </div>
-        </div>
-      </div>
-
-      <!-- Tags Section -->
-      <div class="form-field-group">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Tags (comma separated)</mat-label>
-          <input matInput formControlName="tags" placeholder="lunch, quick, healthy">
-          <mat-icon matSuffix>local_offer</mat-icon>
-        </mat-form-field>
-      </div>
-
-      <!-- Ingredients Section -->
-      <div class="section-title">
-        <h4>Ingredients</h4>
-        <button mat-stroked-button type="button" (click)="addIngredient()" class="add-ingredient-btn">
-          <mat-icon>add</mat-icon>
-          <span class="add-ingredient-btn-text">Add Ingredient</span>
-        </button>
-      </div>
-
-      <div class="ingredients-container" formArrayName="ingredients">
-        <div class="ingredient-item" *ngFor="let ingredient of ingredientsArray.controls; let i = index" [formGroupName]="i">
-          <div class="ingredient-header">
-            <h5>Ingredient {{ i + 1 }}</h5>
-            <button mat-icon-button type="button" (click)="removeIngredient(i)" color="warn" class="remove-ingredient-btn">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
-          
-          <div class="ingredient-fields">
-            <div class="form-field-group">
-              <mat-form-field appearance="outline">
-                <mat-label>Name *</mat-label>
-                <input matInput formControlName="name" placeholder="e.g., Quinoa">
-                <mat-error *ngIf="ingredient.get('name')?.hasError('required')">
-                  Name is required
-                </mat-error>
-              </mat-form-field>
+                  cdkAutosizeMaxRows="6"></textarea>
+                </mat-form-field>
+              </div>
             </div>
-
-            <div class="form-field-group">
-              <mat-form-field appearance="outline">
-                <mat-label>Quantity *</mat-label>
-                <input matInput formControlName="quantity" type="number" placeholder="1">
-                <mat-error *ngIf="ingredient.get('quantity')?.hasError('required')">
-                  Quantity is required
-                </mat-error>
-              </mat-form-field>
-            </div>
-
-            <div class="form-field-group">
-              <mat-form-field appearance="outline">
-                <mat-label>Unit *</mat-label>
-                <mat-select formControlName="unit">
-                  <mat-option value="cup">Cup</mat-option>
-                  <mat-option value="tbsp">Tablespoon</mat-option>
-                  <mat-option value="tsp">Teaspoon</mat-option>
-                  <mat-option value="g">Gram</mat-option>
-                  <mat-option value="kg">Kilogram</mat-option>
-                  <mat-option value="ml">Milliliter</mat-option>
-                  <mat-option value="l">Liter</mat-option>
-                  <mat-option value="piece">Piece</mat-option>
-                  <mat-option value="can">Can</mat-option>
-                  <mat-option value="medium">Medium</mat-option>
-                  <mat-option value="large">Large</mat-option>
-                  <mat-option value="small">Small</mat-option>
-                  <mat-option value="clove">Clove</mat-option>
-                  <mat-option value="bunch">Bunch</mat-option>
-                </mat-select>
-                <mat-error *ngIf="ingredient.get('unit')?.hasError('required')">
-                  Unit is required
-                </mat-error>
-              </mat-form-field>
-            </div>
-
-            <div class="form-field-group">
-              <mat-form-field appearance="outline">
-                <mat-label>Category</mat-label>
-                <mat-select formControlName="category">
-                  <mat-option value="Grains">Grains</mat-option>
-                  <mat-option value="Protein">Protein</mat-option>
-                  <mat-option value="Vegetables">Vegetables</mat-option>
-                  <mat-option value="Fruits">Fruits</mat-option>
-                  <mat-option value="Legumes">Legumes</mat-option>
-                  <mat-option value="Oils">Oils</mat-option>
-                  <mat-option value="Condiments">Condiments</mat-option>
-                  <mat-option value="Herbs">Herbs</mat-option>
-                  <mat-option value="Dairy">Dairy</mat-option>
-                  <mat-option value="Nuts">Nuts</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-
-            <div class="form-field-group">
-              <mat-form-field appearance="outline">
-                <mat-label>Notes</mat-label>
-                <input matInput formControlName="notes" placeholder="Optional notes">
-              </mat-form-field>
-            </div>
-          </div>
+          </form>
         </div>
-      </div>
-
-      <!-- Recipe Section -->
-      <div class="section-title">
-        <h4>Recipe</h4>
-      </div>
-
-      <div class="recipe-fields">
-        <div class="recipe-meta-grid">
-          <div class="form-field-group">
-            <mat-form-field appearance="outline">
-              <mat-label>Prep Time (minutes)</mat-label>
-              <input matInput formControlName="prepTime" type="number" placeholder="15">
-            </mat-form-field>
-          </div>
-
-          <div class="form-field-group">
-            <mat-form-field appearance="outline">
-              <mat-label>Cook Time (minutes)</mat-label>
-              <input matInput formControlName="cookTime" type="number" placeholder="20">
-            </mat-form-field>
-          </div>
-
-          <div class="form-field-group">
-            <mat-form-field appearance="outline">
-              <mat-label>Servings</mat-label>
-              <input matInput formControlName="servings" type="number" placeholder="4">
-            </mat-form-field>
-          </div>
-
-          <div class="form-field-group">
-            <mat-form-field appearance="outline">
-              <mat-label>Difficulty</mat-label>
-              <mat-select formControlName="difficulty">
-                <mat-option value="Easy">Easy</mat-option>
-                <mat-option value="Medium">Medium</mat-option>
-                <mat-option value="Hard">Hard</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </div>
-
-        <div class="form-field-group">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Instructions (one per line)</mat-label>
-            <textarea matInput formControlName="instructions" 
-                      placeholder="1. Rinse quinoa thoroughly under cold water&#10;2. Cook quinoa according to package instructions&#10;3. Drain and rinse chickpeas, set aside"
-                      rows="6"
-                      cdkTextareaAutosize
-                      cdkAutosizeMinRows="6"
-                      cdkAutosizeMaxRows="12"></textarea>
-          </mat-form-field>
-        </div>
-
-        <div class="form-field-group">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Cooking Tips (one per line)</mat-label>
-            <textarea matInput formControlName="tips" 
-                      placeholder="You can prepare quinoa ahead of time and store in refrigerator&#10;Add more vegetables for extra nutrition and color&#10;Season with salt and pepper to taste"
-                      rows="4"
-                      cdkTextareaAutosize
-                      cdkAutosizeMinRows="4"
-                      cdkAutosizeMaxRows="8"></textarea>
-          </mat-form-field>
-        </div>
-
-        <div class="form-field-group">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Recipe Notes</mat-label>
-            <textarea matInput formControlName="notes" 
-                      placeholder="This recipe is perfect for meal prep and can be stored for up to 3 days in the refrigerator."
-                      rows="3"
-                      cdkTextareaAutosize
-                      cdkAutosizeMinRows="3"
-                      cdkAutosizeMaxRows="6"></textarea>
-          </mat-form-field>
-        </div>
-      </div>
-
-    </form>
-  </div>
-</div>
+      }
+    </div>

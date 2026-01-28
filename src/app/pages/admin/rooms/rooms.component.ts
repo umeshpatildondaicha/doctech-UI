@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ColDef } from 'ag-grid-community';
 import { AppButtonComponent, IconComponent, GridComponent, PageComponent, BreadcrumbItem } from '@lk/core';
 import { Router } from '@angular/router';
@@ -13,7 +13,7 @@ import {
 
 @Component({
     selector: 'app-rooms',
-    imports: [CommonModule, GridComponent, AppButtonComponent, IconComponent, AdminPageHeaderComponent, AdminStatsCardComponent, PageComponent],
+    imports: [GridComponent, AppButtonComponent, IconComponent, AdminPageHeaderComponent, AdminStatsCardComponent, PageComponent],
     templateUrl: './rooms.component.html',
     styleUrl: './rooms.component.scss'
 })

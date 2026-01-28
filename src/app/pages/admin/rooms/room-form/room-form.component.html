@@ -1,190 +1,200 @@
 <app-page [breadcrumb]="breadcrumb" [isFooter]="false">
   <div page-body class="room-form-page">
-  <form [formGroup]="roomForm" (ngSubmit)="onSubmit()" class="room-form">
-    <!-- Basic Room Information -->
-    <div class="form-section">
-      <div class="section-header">
-        <span class="card-header-title">Basic Room Information</span>
-        <div class="section-description card-sub-header-title">Configure the primary room details and location</div>
-      </div>
-      
-      <div class="form-grid">
-        <div class="form-field">
-          <app-input
-            [label]="'Room Number'"
-            [placeholder]="'e.g., ICU-01, GW-101'"
-            [value]="roomForm.controls['number'].value"
-            (valueChange)="roomForm.controls['number'].setValue($event); onRoomNumberChange()"
-            [required]="true"
-            [class.error]="isFieldInvalid('number')">
-          </app-input>
-          <div class="field-error" *ngIf="isFieldInvalid('number')">
-            {{ getFieldError('number') }}
+    <form [formGroup]="roomForm" (ngSubmit)="onSubmit()" class="room-form">
+      <!-- Basic Room Information -->
+      <div class="form-section">
+        <div class="section-header">
+          <span class="card-header-title">Basic Room Information</span>
+          <div class="section-description card-sub-header-title">Configure the primary room details and location</div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-field">
+            <app-input
+              [label]="'Room Number'"
+              [placeholder]="'e.g., ICU-01, GW-101'"
+              [value]="roomForm.controls['number'].value"
+              (valueChange)="roomForm.controls['number'].setValue($event); onRoomNumberChange()"
+              [required]="true"
+              [class.error]="isFieldInvalid('number')">
+            </app-input>
+            @if (isFieldInvalid('number')) {
+              <div class="field-error">
+                {{ getFieldError('number') }}
+              </div>
+            }
+          </div>
+
+          <div class="form-field">
+            <app-selectbox
+              [label]="'Room Type'"
+              [data]="roomForm.controls['type'].value"
+              (dataChange)="roomForm.controls['type'].setValue($event); onRoomTypeChange()"
+              [options]="roomTypeOptions"
+              [valueField]="'value'"
+              [displayExpr]="'label'"
+              [required]="true"
+              [class.error]="isFieldInvalid('type')">
+            </app-selectbox>
+            @if (isFieldInvalid('type')) {
+              <div class="field-error">
+                {{ getFieldError('type') }}
+              </div>
+            }
+          </div>
+
+          <div class="form-field">
+            <app-selectbox
+              [label]="'Floor'"
+              [data]="roomForm.controls['floor'].value"
+              (dataChange)="roomForm.controls['floor'].setValue($event)"
+              [options]="floorOptions"
+              [valueField]="'value'"
+              [displayExpr]="'label'"
+              [required]="true"
+              [class.error]="isFieldInvalid('floor')">
+            </app-selectbox>
+            @if (isFieldInvalid('floor')) {
+              <div class="field-error">
+                {{ getFieldError('floor') }}
+              </div>
+            }
+          </div>
+
+
+
+          <div class="form-field">
+            <app-input
+              [label]="'Bed Capacity'"
+              [placeholder]="'Number of beds'"
+              [value]="roomForm.controls['capacity'].value"
+              (valueChange)="roomForm.controls['capacity'].setValue(+$event); onCapacityChange()"
+              [type]="'number'"
+              [required]="true"
+              [class.error]="isFieldInvalid('capacity')">
+            </app-input>
+            @if (isFieldInvalid('capacity')) {
+              <div class="field-error">
+                {{ getFieldError('capacity') }}
+              </div>
+            }
+          </div>
+
+          <div class="form-field">
+            <app-selectbox
+              [label]="'Room Status'"
+              [data]="roomForm.controls['status'].value"
+              (dataChange)="roomForm.controls['status'].setValue($event)"
+              [options]="statusOptions"
+              [valueField]="'value'"
+              [displayExpr]="'label'"
+              [required]="true"
+              [class.error]="isFieldInvalid('status')">
+            </app-selectbox>
+            @if (isFieldInvalid('status')) {
+              <div class="field-error">
+                {{ getFieldError('status') }}
+              </div>
+            }
           </div>
         </div>
+      </div>
 
-        <div class="form-field">
-          <app-selectbox
-            [label]="'Room Type'"
-            [data]="roomForm.controls['type'].value"
-            (dataChange)="roomForm.controls['type'].setValue($event); onRoomTypeChange()"
-            [options]="roomTypeOptions"
-            [valueField]="'value'"
-            [displayExpr]="'label'"
-            [required]="true"
-            [class.error]="isFieldInvalid('type')">
-          </app-selectbox>
-          <div class="field-error" *ngIf="isFieldInvalid('type')">
-            {{ getFieldError('type') }}
+      <!-- Room Facilities -->
+      <div class="form-section">
+        <div class="section-header">
+          <span class="card-header-title">Room Facilities</span>
+          <div class="section-description card-sub-header-title">Select available facilities for this room</div>
+        </div>
+
+        <div class="facilities-grid" formGroupName="facilities">
+          @for (facility of roomFacilities; track facility) {
+            <div
+              class="facility-item">
+              <app-button-checkbox
+                [label]="facility.label"
+                [icon]="facility.icon"
+                [formControlName]="facility.key">
+              </app-button-checkbox>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ICU Level (if ICU selected) -->
+      @if (roomForm.controls['type'].value === 'ICU') {
+        <div class="form-section">
+          <div class="section-header">
+            <span class="card-header-title">ICU Configuration</span>
+            <div class="section-description card-sub-header-title">Specify the ICU level and specialized equipment</div>
+          </div>
+          <div class="form-grid">
+            <div class="form-field">
+              <app-selectbox
+                [label]="'ICU Level'"
+                [data]="roomForm.controls['icuLevel'].value"
+                (dataChange)="roomForm.controls['icuLevel'].setValue($event)"
+                [options]="icuLevelOptions"
+                [valueField]="'value'"
+                [displayExpr]="'label'">
+              </app-selectbox>
+            </div>
           </div>
         </div>
+      }
 
-        <div class="form-field">
-          <app-selectbox
-            [label]="'Floor'"
-            [data]="roomForm.controls['floor'].value"
-            (dataChange)="roomForm.controls['floor'].setValue($event)"
-            [options]="floorOptions"
-            [valueField]="'value'"
-            [displayExpr]="'label'"
-            [required]="true"
-            [class.error]="isFieldInvalid('floor')">
-          </app-selectbox>
-          <div class="field-error" *ngIf="isFieldInvalid('floor')">
-            {{ getFieldError('floor') }}
+      <!-- Bed Configuration -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="header-content">
+            <span class="card-header-title">Bed Configuration</span>
+            <div class="section-description card-sub-header-title">Configure individual beds for this room</div>
           </div>
-        </div>
-
-
-
-        <div class="form-field">
-          <app-input
-            [label]="'Bed Capacity'"
-            [placeholder]="'Number of beds'"
-            [value]="roomForm.controls['capacity'].value"
-            (valueChange)="roomForm.controls['capacity'].setValue(+$event); onCapacityChange()"
-            [type]="'number'"
-            [required]="true"
-            [class.error]="isFieldInvalid('capacity')">
-          </app-input>
-          <div class="field-error" *ngIf="isFieldInvalid('capacity')">
-            {{ getFieldError('capacity') }}
-          </div>
-        </div>
-
-        <div class="form-field">
-          <app-selectbox
-            [label]="'Room Status'"
-            [data]="roomForm.controls['status'].value"
-            (dataChange)="roomForm.controls['status'].setValue($event)"
-            [options]="statusOptions"
-            [valueField]="'value'"
-            [displayExpr]="'label'"
-            [required]="true"
-            [class.error]="isFieldInvalid('status')">
-          </app-selectbox>
-          <div class="field-error" *ngIf="isFieldInvalid('status')">
-            {{ getFieldError('status') }}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Room Facilities -->
-    <div class="form-section">
-      <div class="section-header">
-        <span class="card-header-title">Room Facilities</span>
-        <div class="section-description card-sub-header-title">Select available facilities for this room</div>
-      </div>
-      
-      <div class="facilities-grid" formGroupName="facilities">
-        <div 
-          *ngFor="let facility of roomFacilities" 
-          class="facility-item">
-          <app-button-checkbox
-            [label]="facility.label"
-            [icon]="facility.icon"
-            [formControlName]="facility.key">
-          </app-button-checkbox>
-        </div>
-      </div>
-    </div>
-
-    <!-- ICU Level (if ICU selected) -->
-    <div class="form-section" *ngIf="roomForm.controls['type'].value === 'ICU'">
-      <div class="section-header">
-        <span class="card-header-title">ICU Configuration</span>
-        <div class="section-description card-sub-header-title">Specify the ICU level and specialized equipment</div>
-      </div>
-      
-      <div class="form-grid">
-        <div class="form-field">
-          <app-selectbox
-            [label]="'ICU Level'"
-            [data]="roomForm.controls['icuLevel'].value"
-            (dataChange)="roomForm.controls['icuLevel'].setValue($event)"
-            [options]="icuLevelOptions"
-            [valueField]="'value'"
-            [displayExpr]="'label'">
-          </app-selectbox>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bed Configuration -->
-    <div class="form-section">
-      <div class="section-header">
-        <div class="header-content">
-          <span class="card-header-title">Bed Configuration</span>
-          <div class="section-description card-sub-header-title">Configure individual beds for this room</div>
-        </div>
-        <div class="header-actions">
-          <app-button 
-            [text]="'Add Bed'" 
-            [color]="'primary'" 
-            [fontIcon]="'add'"
-            (btnClick)="addBed()"
-            type="button"
-            class="add-bed-btn">
-          </app-button>
-        </div>
-      </div>
-      
-      <div class="beds-container" formArrayName="beds">
-        <div 
-          *ngFor="let bedControl of bedsFormArray.controls; let i = index" 
-          [formGroupName]="i"
-          class="bed-configuration">
-          
-          <div class="bed-header">
-            <span class="card-header-title">Bed {{ getBedLabel(i) }}</span>
-            <app-button 
-              *ngIf="bedsFormArray.length > 1"
-              [text]="'Remove'" 
-              [color]="'warn'" 
-              [fontIcon]="'delete'"
-              (btnClick)="removeBed(i)"
+          <div class="header-actions">
+            <app-button
+              [text]="'Add Bed'"
+              [color]="'primary'"
+              [fontIcon]="'add'"
+              (btnClick)="addBed()"
               type="button"
-              class="remove-bed-btn">
+              class="add-bed-btn">
             </app-button>
           </div>
-          
-          <div class="bed-form">
-            <div class="bed-basic-info">
-              <div class="form-field">
-                <app-input
-                  [label]="'Bed ID'"
-                  [value]="bedControl.get('id')?.value"
-                  (valueChange)="bedControl.get('id')?.setValue($event)"
-                  [required]="true">
-                </app-input>
+        </div>
+
+        <div class="beds-container" formArrayName="beds">
+          @for (bedControl of bedsFormArray.controls; track bedControl; let i = $index) {
+            <div
+              [formGroupName]="i"
+              class="bed-configuration">
+              <div class="bed-header">
+                <span class="card-header-title">Bed {{ getBedLabel(i) }}</span>
+                @if (bedsFormArray.length > 1) {
+                  <app-button
+                    [text]="'Remove'"
+                    [color]="'warn'"
+                    [fontIcon]="'delete'"
+                    (btnClick)="removeBed(i)"
+                    type="button"
+                    class="remove-bed-btn">
+                  </app-button>
+                }
               </div>
-              
-              <div class="form-field">
-                <app-selectbox
-                  [label]="'Bed Status'"
-                  [data]="bedControl.get('status')?.value"
-                  (dataChange)="bedControl.get('status')?.setValue($event)"
+              <div class="bed-form">
+                <div class="bed-basic-info">
+                  <div class="form-field">
+                    <app-input
+                      [label]="'Bed ID'"
+                      [value]="bedControl.get('id')?.value"
+                      (valueChange)="bedControl.get('id')?.setValue($event)"
+                      [required]="true">
+                    </app-input>
+                  </div>
+                  <div class="form-field">
+                    <app-selectbox
+                      [label]="'Bed Status'"
+                      [data]="bedControl.get('status')?.value"
+                      (dataChange)="bedControl.get('status')?.setValue($event)"
                   [options]="[
                     { label: 'Available', value: 'Available' },
                     { label: 'Occupied', value: 'Occupied' },
@@ -192,40 +202,41 @@
                     { label: 'Maintenance', value: 'Maintenance' },
                     { label: 'Reserved', value: 'Reserved' }
                   ]"
-                  [valueField]="'value'"
-                  [displayExpr]="'label'">
-                </app-selectbox>
-              </div>
-            </div>
-            
-            <div class="bed-facilities" formGroupName="facilities">
-              <span class="card-sub-header-title">Bed Facilities</span>
-              <div class="bed-facilities-grid">
-                <div 
-                  *ngFor="let facility of bedFacilities" 
-                  class="facility-item">
-                <app-button-checkbox
-                  [label]="facility.label"
-                  [icon]="facility.icon"
-                  [formControlName]="facility.key"
-                  [id]="'bed-' + facility.key + '-' + i">
-                </app-button-checkbox>
+                      [valueField]="'value'"
+                      [displayExpr]="'label'">
+                    </app-selectbox>
+                  </div>
+                </div>
+                <div class="bed-facilities" formGroupName="facilities">
+                  <span class="card-sub-header-title">Bed Facilities</span>
+                  <div class="bed-facilities-grid">
+                    @for (facility of bedFacilities; track facility) {
+                      <div
+                        class="facility-item">
+                        <app-button-checkbox
+                          [label]="facility.label"
+                          [icon]="facility.icon"
+                          [formControlName]="facility.key"
+                          [id]="'bed-' + facility.key + '-' + i">
+                        </app-button-checkbox>
+                      </div>
+                    }
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-        
-        <!-- Add Bed Card -->
-        <div class="add-bed-card" (click)="addBed()">
-          <div class="add-bed-content">
-            <app-icon [fontIcon]="'add_circle'" [size]="32"></app-icon>
-            <span class="add-bed-text">Add Another Bed</span>
-            <small class="add-bed-subtitle">Click to add a new bed to this room</small>
+          }
+
+          <!-- Add Bed Card -->
+          <div class="add-bed-card" (click)="addBed()">
+            <div class="add-bed-content">
+              <app-icon [fontIcon]="'add_circle'" [size]="32"></app-icon>
+              <span class="add-bed-text">Add Another Bed</span>
+              <small class="add-bed-subtitle">Click to add a new bed to this room</small>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </form>
+    </form>
   </div>
 </app-page>

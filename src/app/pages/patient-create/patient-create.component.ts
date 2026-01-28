@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { Subject, takeUntil, filter } from 'rxjs';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -25,19 +25,18 @@ export interface DialogData {
 @Component({
     selector: 'app-patient-create',
     imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatButtonModule,
-        MatIconModule,
-        AppButtonComponent,
-        AppInputComponent,
-        AppSelectboxComponent,
-        IconComponent
-    ],
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    AppButtonComponent,
+    AppInputComponent,
+    AppSelectboxComponent,
+    IconComponent
+],
     templateUrl: './patient-create.component.html',
     styleUrl: './patient-create.component.scss'
 })

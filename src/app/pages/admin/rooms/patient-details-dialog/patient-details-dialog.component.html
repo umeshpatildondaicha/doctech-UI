@@ -1,41 +1,43 @@
 <div class="patient-details-dialog">
-  <div class="patient-details-content" *ngIf="patientInfo">
-    <div class="patient-info-row">
-      <span class="label">Patient ID:</span>
-      <span class="value">{{ patientInfo.name.replace(' ', '').toUpperCase() }}{{ patientInfo.age }}</span>
+  @if (patientInfo) {
+    <div class="patient-details-content">
+      <div class="patient-info-row">
+        <span class="label">Patient ID:</span>
+        <span class="value">{{ patientInfo.name.replace(' ', '').toUpperCase() }}{{ patientInfo.age }}</span>
+      </div>
+      <div class="patient-info-row">
+        <span class="label">Patient Name:</span>
+        <span class="value">{{ patientInfo.name }}</span>
+      </div>
+      <div class="patient-info-row">
+        <span class="label">Age:</span>
+        <span class="value">{{ patientInfo.age }}</span>
+      </div>
+      <div class="patient-info-row">
+        <span class="label">Gender:</span>
+        <span class="value">{{ patientInfo.gender === 'M' ? 'Male' : 'Female' }}</span>
+      </div>
+      <div class="patient-info-row">
+        <span class="label">Department:</span>
+        <span class="value">{{ room?.type }}</span>
+      </div>
+      <div class="patient-info-row">
+        <span class="label">Location:</span>
+        <span class="value">{{ room?.type }} Room {{ (room?.number || '').split('-')[1] || '' }}</span>
+      </div>
+      <div class="patient-info-row">
+        <span class="label">Room / Bed#:</span>
+        <span class="value">{{ bed?.id }}</span>
+      </div>
+      <div class="patient-info-row">
+        <span class="label">Status:</span>
+        <span class="value status-occupied">Occupied</span>
+      </div>
+      <div class="patient-info-row">
+        <span class="label">Tags:</span>
+        <span class="value">{{ patientInfo.diagnosis }}</span>
+      </div>
     </div>
-    <div class="patient-info-row">
-      <span class="label">Patient Name:</span>
-      <span class="value">{{ patientInfo.name }}</span>
-    </div>
-    <div class="patient-info-row">
-      <span class="label">Age:</span>
-      <span class="value">{{ patientInfo.age }}</span>
-    </div>
-    <div class="patient-info-row">
-      <span class="label">Gender:</span>
-      <span class="value">{{ patientInfo.gender === 'M' ? 'Male' : 'Female' }}</span>
-    </div>
-    <div class="patient-info-row">
-      <span class="label">Department:</span>
-      <span class="value">{{ room?.type }}</span>
-    </div>
-    <div class="patient-info-row">
-      <span class="label">Location:</span>
-      <span class="value">{{ room?.type }} Room {{ (room?.number || '').split('-')[1] || '' }}</span>
-    </div>
-    <div class="patient-info-row">
-      <span class="label">Room / Bed#:</span>
-      <span class="value">{{ bed?.id }}</span>
-    </div>
-    <div class="patient-info-row">
-      <span class="label">Status:</span>
-      <span class="value status-occupied">Occupied</span>
-    </div>
-    <div class="patient-info-row">
-      <span class="label">Tags:</span>
-      <span class="value">{{ patientInfo.diagnosis }}</span>
-    </div>
-  </div>
+  }
 </div>
 

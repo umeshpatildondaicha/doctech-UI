@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
@@ -119,21 +119,20 @@ interface ServiceRecommendation {
 @Component({
     selector: 'app-services',
     imports: [
-        CommonModule,
-        FormsModule,
-        MatIconModule,
-        MatSelectModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatDialogModule,
-        MatTooltipModule,
-        AppInputComponent,
-        AppSelectboxComponent,
-        AppButtonComponent,
-        IconComponent,
-        GridComponent,
-        AdminPageHeaderComponent
-    ],
+    FormsModule,
+    MatIconModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDialogModule,
+    MatTooltipModule,
+    AppInputComponent,
+    AppSelectboxComponent,
+    AppButtonComponent,
+    IconComponent,
+    GridComponent,
+    AdminPageHeaderComponent
+],
     templateUrl: './services.component.html',
     styleUrl: './services.component.scss'
 })

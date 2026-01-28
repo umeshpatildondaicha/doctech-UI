@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,7 +7,7 @@ import { AdminDoctorCreateComponent } from '../doctor-create/doctor-create.compo
 
 @Component({
     selector: 'app-doctor-create-test',
-    imports: [CommonModule, MatButtonModule, MatIconModule],
+    imports: [MatButtonModule, MatIconModule],
     template: `
     <div class="test-container">
       <h1>Doctor Creation Test</h1>

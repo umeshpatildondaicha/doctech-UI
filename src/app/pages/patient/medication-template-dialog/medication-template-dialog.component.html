@@ -7,19 +7,21 @@
           type="text"
           [(ngModel)]="templateName"
           placeholder="e.g., Hypertension Starter Pack" />
+        </div>
       </div>
-    </div>
-    <div class="form-row">
-      <div class="form-field full-width">
-        <label>Selected Medicines</label>
-        <ul class="selected-meds-list">
-          <li *ngFor="let med of selectedMedications">
-            {{ med.name }} • {{ med.dosage }} • {{ med.frequency }}
-          </li>
-        </ul>
+      <div class="form-row">
+        <div class="form-field full-width">
+          <label>Selected Medicines</label>
+          <ul class="selected-meds-list">
+            @for (med of selectedMedications; track med) {
+              <li>
+                {{ med.name }} • {{ med.dosage }} • {{ med.frequency }}
+              </li>
+            }
+          </ul>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 

@@ -5,7 +5,9 @@
       <span class="status-pill" [class.active]="isActive">{{ plan.status }}</span>
     </div>
 
-    <p class="card-description" *ngIf="plan.description">{{ plan.description }}</p>
+    @if (plan.description) {
+      <p class="card-description">{{ plan.description }}</p>
+    }
 
     <div class="divider"></div>
 
@@ -49,47 +51,66 @@
       <div class="meals-title">Meals Included</div>
     </div>
 
-    <div class="meal-list" *ngIf="plan.mealsIncluded && plan.mealsIncluded.length > 0">
-      <div class="meal-item" *ngFor="let meal of plan.mealsIncluded">
-        <div class="meal-thumb">
-          <img *ngIf="meal.imageUrl" [src]="meal.imageUrl" [alt]="meal.title" />
-          <div class="thumb-placeholder" *ngIf="!meal.imageUrl">
-            <mat-icon>restaurant</mat-icon>
+    @if (plan.mealsIncluded && plan.mealsIncluded.length > 0) {
+      <div class="meal-list">
+        @for (meal of plan.mealsIncluded; track meal) {
+          <div class="meal-item">
+            <div class="meal-thumb">
+              @if (meal.imageUrl) {
+                <img [src]="meal.imageUrl" [alt]="meal.title" />
+              }
+              @if (!meal.imageUrl) {
+                <div class="thumb-placeholder">
+                  <mat-icon>restaurant</mat-icon>
+                </div>
+              }
+            </div>
+            <div class="meal-content">
+              <div class="meal-name">{{ meal.title }}</div>
+              @if (meal.subtitle) {
+                <div class="meal-subtitle">{{ meal.subtitle }}</div>
+              }
+              @if (meal.tags && meal.tags.length > 0) {
+                <div class="meal-tags">
+                  {{ meal.tags.join('  •  ') }}
+                </div>
+              }
+            </div>
           </div>
-        </div>
-        <div class="meal-content">
-          <div class="meal-name">{{ meal.title }}</div>
-          <div class="meal-subtitle" *ngIf="meal.subtitle">{{ meal.subtitle }}</div>
-          <div class="meal-tags" *ngIf="meal.tags && meal.tags.length > 0">
-            {{ meal.tags.join('  •  ') }}
-          </div>
-        </div>
+        }
       </div>
-    </div>
+    }
   </div>
 
-  <div class="card-footer" *ngIf="showFooter">
-    <div class="reviewed">
-      <div class="reviewed-label">Reviewed By</div>
-      <div class="reviewed-meta">
-        {{ plan.reviewedByName || '—' }}
-        <span class="dot" *ngIf="plan.reviewedAt">•</span>
-        <span class="reviewed-date" *ngIf="plan.reviewedAt">{{ formatReviewedAt(plan.reviewedAt) }}</span>
+  @if (showFooter) {
+    <div class="card-footer">
+      <div class="reviewed">
+        <div class="reviewed-label">Reviewed By</div>
+        <div class="reviewed-meta">
+          {{ plan.reviewedByName || '—' }}
+          @if (plan.reviewedAt) {
+            <span class="dot">•</span>
+          }
+          @if (plan.reviewedAt) {
+            <span class="reviewed-date">{{ formatReviewedAt(plan.reviewedAt) }}</span>
+          }
+        </div>
       </div>
+      @if (showActions) {
+        <div class="footer-actions">
+          <button mat-icon-button (click)="onView($event)" matTooltip="View">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button mat-icon-button (click)="onEdit($event)" matTooltip="Edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button (click)="onDelete($event)" matTooltip="Delete">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      }
     </div>
-
-    <div class="footer-actions" *ngIf="showActions">
-      <button mat-icon-button (click)="onView($event)" matTooltip="View">
-        <mat-icon>visibility</mat-icon>
-      </button>
-      <button mat-icon-button (click)="onEdit($event)" matTooltip="Edit">
-        <mat-icon>edit</mat-icon>
-      </button>
-      <button mat-icon-button (click)="onDelete($event)" matTooltip="Delete">
-        <mat-icon>delete</mat-icon>
-      </button>
-    </div>
-  </div>
+  }
 </div>
 
 

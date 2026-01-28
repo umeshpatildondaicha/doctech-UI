@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatDialogRef, MatDialog } from '@angular/material/dialog';
 import { DIALOG_DATA_TOKEN, AppButtonComponent, IconComponent, DialogboxService, DialogFooterAction } from "@lk/core";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -25,11 +25,10 @@ export interface Shift {
 @Component({
     selector: 'app-staff-schedule-dialog',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        AppButtonComponent,
-        IconComponent
-    ],
+    ReactiveFormsModule,
+    AppButtonComponent,
+    IconComponent
+],
     templateUrl: './staff-schedule-dialog.component.html',
     styleUrls: ['./staff-schedule-dialog.component.scss']
 })

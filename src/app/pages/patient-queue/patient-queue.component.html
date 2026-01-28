@@ -1,556 +1,578 @@
 <div class="patient-queue-container">
 
   <!-- Current Patient Section -->
-  <div class="current-patient-section" *ngIf="currentPatient">
-    <div class="section-header">
-      <h2 class="section-title">
-        <mat-icon>person_pin</mat-icon>
-        Current Patient
-      </h2>
-    </div>
-    
-    <div class="current-patient-card">
-            <div class="patient-avatar">
-        <div class="avatar-container" *ngIf="hasValidPhoto(currentPatient)">
-          <img [src]="getPatientPhoto(currentPatient)"
-               [alt]="currentPatient.firstName + ' ' + currentPatient.lastName"
-               class="avatar-image"
-               (error)="onImageError($event)">
-          <div class="status-indicator in-progress"></div>
-        </div>
-        <div class="avatar-fallback" *ngIf="!hasValidPhoto(currentPatient)">
-          <div class="icon-avatar">
-            <mat-icon>{{ getProfileIcon(currentPatient) }}</mat-icon>
-          </div>
-          <div class="status-indicator in-progress"></div>
-        </div>
+  @if (currentPatient) {
+    <div class="current-patient-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <mat-icon>person_pin</mat-icon>
+          Current Patient
+        </h2>
       </div>
-      
-      <div class="patient-info">
-        <div class="patient-name-row">
-          <h3 class="patient-name">
-            {{ currentPatient.firstName }} {{ currentPatient.lastName }}
-          </h3>
-          <div class="auto-progress-indicator" *ngIf="isAutoProgressed(currentPatient)">
-            <mat-icon>autorenew</mat-icon>
-            <span>Auto-started</span>
+      <div class="current-patient-card">
+        <div class="patient-avatar">
+          @if (hasValidPhoto(currentPatient)) {
+            <div class="avatar-container">
+              <img [src]="getPatientPhoto(currentPatient)"
+                [alt]="currentPatient.firstName + ' ' + currentPatient.lastName"
+                class="avatar-image"
+                (error)="onImageError($event)">
+                <div class="status-indicator in-progress"></div>
+              </div>
+            }
+            @if (!hasValidPhoto(currentPatient)) {
+              <div class="avatar-fallback">
+                <div class="icon-avatar">
+                  <mat-icon>{{ getProfileIcon(currentPatient) }}</mat-icon>
+                </div>
+                <div class="status-indicator in-progress"></div>
+              </div>
+            }
           </div>
-        </div>
-        <div class="patient-details">
-          <span class="detail-item">
-            <mat-icon>schedule</mat-icon>
-            Room: {{ currentPatient.queueInfo.roomNumber }}
-          </span>
-          <span class="detail-item">
-            <mat-icon>timer</mat-icon>
-            Duration: {{ currentPatient.queueInfo.estimatedDuration }}m
-          </span>
-          <span class="detail-item">
-            <mat-icon>medical_services</mat-icon>
-            Reason :  {{ currentPatient.queueInfo.reasonForVisit }}
-          </span>
-        </div>
-      </div>
-      
-      <div class="patient-actions">
-        <app-button 
-                appearance="raised"
-                color="primary"
-                class="action-btn"
-                [text]="'Start Consultation'"
-                fontIcon="play_arrow"
-                (btnClick)="startConsultation(currentPatient)">
-        </app-button>
-        
-        <app-button 
-                appearance="raised"
-                color="accent"
-                class="action-btn"
-                [text]="'Complete'"
-                fontIcon="check"
-                (btnClick)="completeConsultation(currentPatient)">
-        </app-button>
-        
-        <app-button 
-                appearance="icon"
-                class="action-btn"
-                fontIcon="note_add"
-                [title]="'Add Notes'"
-                (btnClick)="addNotes(currentPatient)">
-        </app-button>
-        
-        <app-button 
-                appearance="raised"
-                color="warn"
-                class="action-btn"
-                [text]="'Reschedule'"
-                fontIcon="schedule"
-                (btnClick)="reschedulePatient(currentPatient)">
-        </app-button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Content Area -->
-  <div class="main-content">
-    <!-- Left Sidebar - Queue List -->
-    <div class="queue-sidebar">
-      <div class="sidebar-header">
-        <div class="sidebar-header-content">
-
-          <h3 class="sidebar-title">Patient Queue</h3>
-
-          <div class="sidebar-header-content-chips">
-            <div class="stat-card wait-time">
-              <div class="stat-icon">
-                <mat-icon>access_time</mat-icon>
-              </div>
-              <div class="stat-content">
-                <div class="stat-number">{{ queueStatistics.averageWaitTime }}m</div>
-                <div class="stat-label">Avg Wait Time</div>
-              </div>
-            </div>
-            
-            <div class="stat-card completion-time">
-              <div class="stat-icon">
-                <mat-icon>event_available</mat-icon>
-              </div>
-              <div class="stat-content">
-                <div class="stat-number">{{ queueStatistics.estimatedCompletionTime }}</div>
-                <div class="stat-label">Est. Completion</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Search and Filters -->
-        <div class="search-filters">
-          <div class="search-box">
-            <mat-icon class="search-icon">search</mat-icon>
-            <input type="text" 
-                   placeholder="Search patients..."
-                   [(ngModel)]="searchTerm"
-                   (ngModelChange)="onFiltersChanged()"
-                   class="search-input">
-          </div>
-          
-          <div class="filter-controls">
-            <app-selectbox
-              [(ngModel)]="filterStatus"
-              (ngModelChange)="onFiltersChanged()"
-              [options]="statusOptions"
-              [displayExpr]="'label'"
-              [valueField]="'value'"
-              placeholder="All Status"
-              class="filter-select">
-            </app-selectbox>
-            
-            <app-selectbox
-              [(ngModel)]="sortBy"
-              (ngModelChange)="onFiltersChanged()"
-              [options]="sortByOptions"
-              [displayExpr]="'label'"
-              [valueField]="'value'"
-              placeholder="Queue Position"
-              class="filter-select">
-            </app-selectbox>
-          </div>
-
-           <!-- Statistics Cards -->
-          <div class="stats-section">
-            <div class="stat-card total-patients" 
-                [class.active]="filterStatus === 'ALL'"
-                (click)="applyFilter('ALL')"
-                role="button"
-                tabindex="0"
-                (keydown.enter)="applyFilter('ALL')"
-                (keydown.space)="$event.preventDefault(); applyFilter('ALL')">
-              <div class="stat-content">
-                <div class="stat-number">{{ queueStatistics.totalPatients }}</div>
-                <div class="stat-label">Total Patients</div>
-              </div>
-            </div>
-            
-            <div class="stat-card waiting"
-                [class.active]="filterStatus === 'WAITING'"
-                (click)="applyFilter('WAITING')"
-                role="button"
-                tabindex="0"
-                (keydown.enter)="applyFilter('WAITING')"
-                (keydown.space)="$event.preventDefault(); applyFilter('WAITING')">
-              <div class="stat-content">
-                <div class="stat-number">{{ queueStatistics.waiting }}</div>
-                <div class="stat-label">Waiting</div>
-              </div>
-            </div>
-            
-            <div class="stat-card in-progress"
-                [class.active]="filterStatus === 'IN_PROGRESS'"
-                (click)="applyFilter('IN_PROGRESS')"
-                role="button"
-                tabindex="0"
-                (keydown.enter)="applyFilter('IN_PROGRESS')"
-                (keydown.space)="$event.preventDefault(); applyFilter('IN_PROGRESS')">
-              <div class="stat-content">
-                <div class="stat-number">{{ queueStatistics.inProgress }}</div>
-                <div class="stat-label">In Progress</div>
-              </div>
-            </div>
-            
-            <div class="stat-card completed"
-                [class.active]="filterStatus === 'COMPLETED'"
-                (click)="applyFilter('COMPLETED')"
-                role="button"
-                tabindex="0"
-                (keydown.enter)="applyFilter('COMPLETED')"
-                (keydown.space)="$event.preventDefault(); applyFilter('COMPLETED')">
-              <div class="stat-content">
-                <div class="stat-number">{{ queueStatistics.completed }}</div>
-                <div class="stat-label">Completed</div>
-              </div>
-            </div>
-            
-
-          </div>
-        </div>
-
-
-      </div>
-      
-      <!-- Queue List -->
-      <div class="queue-list" cdkDropList (cdkDropListDropped)="drop($event)">
-        <div class="queue-item" cdkDrag
-             *ngFor="let patient of filteredQueue; trackBy: trackByPatientId"
-             [class.active]="selectedPatient?.patientId === patient.patientId"
-             [class.current]="currentPatient?.patientId === patient.patientId"
-             (click)="viewPatientDetails(patient)"
-             tabindex="0"
-             role="button"
-             (keydown.enter)="viewPatientDetails(patient)"
-             (keydown.space)="$event.preventDefault(); viewPatientDetails(patient)">
-          
-          <div class="queue-position">
-            <div class="position-number">{{ patient.queueInfo.queuePosition }}</div>
-            <div class="priority-badge" 
-                 [style.background-color]="getPriorityColor(patient.queueInfo.priority)">
-              {{ patient.queueInfo.priority }}
-            </div>
-          </div>
-          
-          <div class="patient-avatar">
-            <div class="avatar-container" *ngIf="hasValidPhoto(patient)">
-              <img [src]="getPatientPhoto(patient)"
-                   [alt]="patient.firstName + ' ' + patient.lastName"
-                   class="avatar-image"
-                   (error)="onImageError($event)">
-              <div class="status-indicator" 
-                   [class]="patient.queueInfo.status.toLowerCase()"></div>
-            </div>
-            <div class="avatar-fallback" *ngIf="!hasValidPhoto(patient)">
-              <div class="icon-avatar">
-                <mat-icon>{{ getProfileIcon(patient) }}</mat-icon>
-              </div>
-              <div class="status-indicator" 
-                   [class]="patient.queueInfo.status.toLowerCase()"></div>
-            </div>
-          </div>
-          
-          <div class="patient-details">
+          <div class="patient-info">
             <div class="patient-name-row">
-              <h4 class="patient-name">{{ patient.firstName }} {{ patient.lastName }}</h4>
-              <div class="patient-age">{{ getAge(patient.dateOfBirth) }}y</div>
+              <h3 class="patient-name">
+                {{ currentPatient.firstName }} {{ currentPatient.lastName }}
+              </h3>
+              @if (isAutoProgressed(currentPatient)) {
+                <div class="auto-progress-indicator">
+                  <mat-icon>autorenew</mat-icon>
+                  <span>Auto-started</span>
+                </div>
+              }
             </div>
-            
-            <div class="visit-reason">{{ patient.queueInfo.reasonForVisit }}</div>
-            
-            <div class="queue-meta">
-              <span class="meta-item">
+            <div class="patient-details">
+              <span class="detail-item">
                 <mat-icon>schedule</mat-icon>
-                {{ patient.queueInfo.checkInTime }}
+                Room: {{ currentPatient.queueInfo.roomNumber }}
               </span>
-              <span class="meta-item wait-badge" [class]="'wait-badge ' + getWaitBadgeClass(patient.queueInfo.waitTime)">
+              <span class="detail-item">
                 <mat-icon>timer</mat-icon>
-                {{ patient.queueInfo.waitTime }}m wait
+                Duration: {{ currentPatient.queueInfo.estimatedDuration }}m
               </span>
-              <span class="meta-item appointment-time" [class.delayed]="getDelayTime(patient) > 0">
-                <mat-icon>{{ getDelayTime(patient) > 0 ? 'warning' : 'event' }}</mat-icon>
-                <span *ngIf="getDelayTime(patient) > 0; else showAppointmentTime">
-                  {{ getDelayTime(patient) }}m delay
-                </span>
-                <ng-template #showAppointmentTime>
-                  {{ patient.queueInfo.appointmentTime }}
-                </ng-template>
-              </span>
-              <span class="meta-item" *ngIf="patient.queueInfo.roomNumber">
-                <mat-icon>room</mat-icon>
-                {{ patient.queueInfo.roomNumber }}
+              <span class="detail-item">
+                <mat-icon>medical_services</mat-icon>
+                Reason :  {{ currentPatient.queueInfo.reasonForVisit }}
               </span>
             </div>
           </div>
-          
-          <div class="queue-actions">
-            <button mat-icon-button 
-                    class="action-btn"
-                    matTooltip="Call Patient"
-                    (click)="callPatient(patient); $event.stopPropagation()"
-                    *ngIf="patient.queueInfo.status === 'WAITING'">
-              <mat-icon>call</mat-icon>
-            </button>
-            
-            <button mat-icon-button 
-                    class="action-btn"
-                    matTooltip="Start Consultation"
-                    (click)="startConsultation(patient); $event.stopPropagation()"
-                    *ngIf="patient.queueInfo.status === 'IN_PROGRESS'">
-              <mat-icon>play_arrow</mat-icon>
-            </button>
-            
-            <button mat-icon-button 
-                    class="action-btn"
-                    matTooltip="More Actions"
-                    [matMenuTriggerFor]="patientMenu"
-                    (click)="$event.stopPropagation()">
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            
-            <mat-menu #patientMenu="matMenu">
-              <button mat-menu-item (click)="addNotes(patient)">
-                <mat-icon>note_add</mat-icon>
-                <span>Add Notes</span>
-              </button>
-              <button mat-menu-item (click)="reschedulePatient(patient)">
-                <mat-icon>schedule</mat-icon>
-                <span>Reschedule</span>
-              </button>
-              <button mat-menu-item (click)="viewPatientDetails(patient)">
-                <mat-icon>visibility</mat-icon>
-                <span>View Details</span>
-              </button>
-            </mat-menu>
+          <div class="patient-actions">
+            <app-button
+              appearance="raised"
+              color="primary"
+              class="action-btn"
+              [text]="'Start Consultation'"
+              fontIcon="play_arrow"
+              (btnClick)="startConsultation(currentPatient)">
+            </app-button>
+            <app-button
+              appearance="raised"
+              color="accent"
+              class="action-btn"
+              [text]="'Complete'"
+              fontIcon="check"
+              (btnClick)="completeConsultation(currentPatient)">
+            </app-button>
+            <app-button
+              appearance="icon"
+              class="action-btn"
+              fontIcon="note_add"
+              [title]="'Add Notes'"
+              (btnClick)="addNotes(currentPatient)">
+            </app-button>
+            <app-button
+              appearance="raised"
+              color="warn"
+              class="action-btn"
+              [text]="'Reschedule'"
+              fontIcon="schedule"
+              (btnClick)="reschedulePatient(currentPatient)">
+            </app-button>
           </div>
         </div>
-        
-        <!-- Empty State -->
-        <div class="empty-state" *ngIf="filteredQueue.length === 0">
-          <mat-icon class="empty-icon">people_outline</mat-icon>
-          <h3>No patients found</h3>
-          <p>Try adjusting your search or filters</p>
-        </div>
       </div>
-    </div>
-    
-    <!-- Right Sidebar - Patient Details -->
-    <div class="patient-details-sidebar" *ngIf="showPatientDetails && selectedPatient">
-      <div class="sidebar-content">
-        <div class="sidebar-header">
-          <h3 class="sidebar-title">Patient Details</h3>
-          <button mat-icon-button 
-                  class="close-btn"
-                  (click)="closePatientDetails()">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
+    }
 
-        <div class="sidebar-actions">
-          <button mat-button 
-                  class="refresh-btn"
-                  [disabled]="isRefreshing"
-                  (click)="manualRefresh()">
-            <mat-icon [class.rotating]="isRefreshing">refresh</mat-icon>
-            {{ isRefreshing ? 'Refreshing...' : 'Refresh' }}
-          </button>
-          
-          <button mat-raised-button 
-                  color="primary"
-                  class="export-btn"
-                  (click)="exportQueue()">
-            <mat-icon>download</mat-icon>
-            Export
-          </button>
-        </div>
-      </div>
-      
-      <div class="patient-details-content">
-        <!-- Patient Header -->
-        <div class="patient-header">
-          <div class="patient-avatar-large">
-            <div class="avatar-container-large" *ngIf="hasValidPhoto(selectedPatient)">
-              <img [src]="getPatientPhoto(selectedPatient)"
-                   [alt]="selectedPatient.firstName + ' ' + selectedPatient.lastName"
-                   class="avatar-image-large"
-                   (error)="onImageError($event)">
-            </div>
-            <div class="avatar-fallback-large" *ngIf="!hasValidPhoto(selectedPatient)">
-              <div class="icon-avatar-large">
-                <mat-icon>{{ getProfileIcon(selectedPatient) }}</mat-icon>
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Left Sidebar - Queue List -->
+      <div class="queue-sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-header-content">
+
+            <h3 class="sidebar-title">Patient Queue</h3>
+
+            <div class="sidebar-header-content-chips">
+              <div class="stat-card wait-time">
+                <div class="stat-icon">
+                  <mat-icon>access_time</mat-icon>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-number">{{ queueStatistics.averageWaitTime }}m</div>
+                  <div class="stat-label">Avg Wait Time</div>
+                </div>
+              </div>
+
+              <div class="stat-card completion-time">
+                <div class="stat-icon">
+                  <mat-icon>event_available</mat-icon>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-number">{{ queueStatistics.estimatedCompletionTime }}</div>
+                  <div class="stat-label">Est. Completion</div>
+                </div>
               </div>
             </div>
           </div>
-          
-          <div class="patient-basic-info">
-            <h2 class="patient-full-name">
-              {{ selectedPatient.firstName }} {{ selectedPatient.lastName }}
-            </h2>
-            <p class="patient-dob">
-              {{ selectedPatient.dateOfBirth | date:'mediumDate' }} 
-              ({{ getAge(selectedPatient.dateOfBirth) }} years old)
-            </p>
-            <p class="patient-gender">{{ selectedPatient.gender }}</p>
+
+          <!-- Search and Filters -->
+          <div class="search-filters">
+            <div class="search-box">
+              <mat-icon class="search-icon">search</mat-icon>
+              <input type="text"
+                placeholder="Search patients..."
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="onFiltersChanged()"
+                class="search-input">
+              </div>
+
+              <div class="filter-controls">
+                <app-selectbox
+                  [(ngModel)]="filterStatus"
+                  (ngModelChange)="onFiltersChanged()"
+                  [options]="statusOptions"
+                  [displayExpr]="'label'"
+                  [valueField]="'value'"
+                  placeholder="All Status"
+                  class="filter-select">
+                </app-selectbox>
+
+                <app-selectbox
+                  [(ngModel)]="sortBy"
+                  (ngModelChange)="onFiltersChanged()"
+                  [options]="sortByOptions"
+                  [displayExpr]="'label'"
+                  [valueField]="'value'"
+                  placeholder="Queue Position"
+                  class="filter-select">
+                </app-selectbox>
+              </div>
+
+              <!-- Statistics Cards -->
+              <div class="stats-section">
+                <div class="stat-card total-patients"
+                  [class.active]="filterStatus === 'ALL'"
+                  (click)="applyFilter('ALL')"
+                  role="button"
+                  tabindex="0"
+                  (keydown.enter)="applyFilter('ALL')"
+                  (keydown.space)="$event.preventDefault(); applyFilter('ALL')">
+                  <div class="stat-content">
+                    <div class="stat-number">{{ queueStatistics.totalPatients }}</div>
+                    <div class="stat-label">Total Patients</div>
+                  </div>
+                </div>
+
+                <div class="stat-card waiting"
+                  [class.active]="filterStatus === 'WAITING'"
+                  (click)="applyFilter('WAITING')"
+                  role="button"
+                  tabindex="0"
+                  (keydown.enter)="applyFilter('WAITING')"
+                  (keydown.space)="$event.preventDefault(); applyFilter('WAITING')">
+                  <div class="stat-content">
+                    <div class="stat-number">{{ queueStatistics.waiting }}</div>
+                    <div class="stat-label">Waiting</div>
+                  </div>
+                </div>
+
+                <div class="stat-card in-progress"
+                  [class.active]="filterStatus === 'IN_PROGRESS'"
+                  (click)="applyFilter('IN_PROGRESS')"
+                  role="button"
+                  tabindex="0"
+                  (keydown.enter)="applyFilter('IN_PROGRESS')"
+                  (keydown.space)="$event.preventDefault(); applyFilter('IN_PROGRESS')">
+                  <div class="stat-content">
+                    <div class="stat-number">{{ queueStatistics.inProgress }}</div>
+                    <div class="stat-label">In Progress</div>
+                  </div>
+                </div>
+
+                <div class="stat-card completed"
+                  [class.active]="filterStatus === 'COMPLETED'"
+                  (click)="applyFilter('COMPLETED')"
+                  role="button"
+                  tabindex="0"
+                  (keydown.enter)="applyFilter('COMPLETED')"
+                  (keydown.space)="$event.preventDefault(); applyFilter('COMPLETED')">
+                  <div class="stat-content">
+                    <div class="stat-number">{{ queueStatistics.completed }}</div>
+                    <div class="stat-label">Completed</div>
+                  </div>
+                </div>
+
+
+              </div>
+            </div>
+
+
           </div>
-        </div>
-        
-        <!-- Medical Alerts -->
-        <div class="medical-alerts" *ngIf="selectedPatient.medicalAlerts && selectedPatient.medicalAlerts.length > 0">
-          <h4 class="section-title">
-            <mat-icon class="alert-icon">warning</mat-icon>
-            Medical Alerts
-          </h4>
-          <div class="alert-chips">
-            <mat-chip *ngFor="let alert of selectedPatient.medicalAlerts" 
-                     class="alert-chip">
-              {{ alert }}
-            </mat-chip>
-          </div>
-        </div>
-        
-        <!-- Allergies -->
-        <div class="allergies-section" *ngIf="selectedPatient.allergies && selectedPatient.allergies.length > 0">
-          <h4 class="section-title">
-            <mat-icon class="allergy-icon">allergies</mat-icon>
-            Allergies
-          </h4>
-          <div class="allergy-chips">
-            <mat-chip *ngFor="let allergy of selectedPatient.allergies" 
-                     class="allergy-chip">
-              {{ allergy }}
-            </mat-chip>
-          </div>
-        </div>
-        
-        <!-- Current Medications -->
-        <div class="medications-section" *ngIf="selectedPatient.currentMedications && selectedPatient.currentMedications.length > 0">
-          <h4 class="section-title">
-            <mat-icon class="medication-icon">medication</mat-icon>
-            Current Medications
-          </h4>
-          <div class="medication-list">
-            <div class="medication-item" 
-                 *ngFor="let medication of selectedPatient.currentMedications">
-              {{ medication }}
+
+          <!-- Queue List -->
+          <div class="queue-list" cdkDropList (cdkDropListDropped)="drop($event)">
+            @for (patient of filteredQueue; track trackByPatientId($index, patient)) {
+              <div class="queue-item" cdkDrag
+                [class.active]="selectedPatient?.patientId === patient.patientId"
+                [class.current]="currentPatient?.patientId === patient.patientId"
+                (click)="viewPatientDetails(patient)"
+                tabindex="0"
+                role="button"
+                (keydown.enter)="viewPatientDetails(patient)"
+                (keydown.space)="$event.preventDefault(); viewPatientDetails(patient)">
+                <div class="queue-position">
+                  <div class="position-number">{{ patient.queueInfo.queuePosition }}</div>
+                  <div class="priority-badge"
+                    [style.background-color]="getPriorityColor(patient.queueInfo.priority)">
+                    {{ patient.queueInfo.priority }}
+                  </div>
+                </div>
+                <div class="patient-avatar">
+                  @if (hasValidPhoto(patient)) {
+                    <div class="avatar-container">
+                      <img [src]="getPatientPhoto(patient)"
+                        [alt]="patient.firstName + ' ' + patient.lastName"
+                        class="avatar-image"
+                        (error)="onImageError($event)">
+                        <div class="status-indicator"
+                        [class]="patient.queueInfo.status.toLowerCase()"></div>
+                      </div>
+                    }
+                    @if (!hasValidPhoto(patient)) {
+                      <div class="avatar-fallback">
+                        <div class="icon-avatar">
+                          <mat-icon>{{ getProfileIcon(patient) }}</mat-icon>
+                        </div>
+                        <div class="status-indicator"
+                        [class]="patient.queueInfo.status.toLowerCase()"></div>
+                      </div>
+                    }
+                  </div>
+                  <div class="patient-details">
+                    <div class="patient-name-row">
+                      <h4 class="patient-name">{{ patient.firstName }} {{ patient.lastName }}</h4>
+                      <div class="patient-age">{{ getAge(patient.dateOfBirth) }}y</div>
+                    </div>
+                    <div class="visit-reason">{{ patient.queueInfo.reasonForVisit }}</div>
+                    <div class="queue-meta">
+                      <span class="meta-item">
+                        <mat-icon>schedule</mat-icon>
+                        {{ patient.queueInfo.checkInTime }}
+                      </span>
+                      <span class="meta-item wait-badge" [class]="'wait-badge ' + getWaitBadgeClass(patient.queueInfo.waitTime)">
+                        <mat-icon>timer</mat-icon>
+                        {{ patient.queueInfo.waitTime }}m wait
+                      </span>
+                      <span class="meta-item appointment-time" [class.delayed]="getDelayTime(patient) > 0">
+                        <mat-icon>{{ getDelayTime(patient) > 0 ? 'warning' : 'event' }}</mat-icon>
+                        @if (getDelayTime(patient) > 0) {
+                          <span>
+                            {{ getDelayTime(patient) }}m delay
+                          </span>
+                        } @else {
+                          {{ patient.queueInfo.appointmentTime }}
+                        }
+                      </span>
+                      @if (patient.queueInfo.roomNumber) {
+                        <span class="meta-item">
+                          <mat-icon>room</mat-icon>
+                          {{ patient.queueInfo.roomNumber }}
+                        </span>
+                      }
+                    </div>
+                  </div>
+                  <div class="queue-actions">
+                    @if (patient.queueInfo.status === 'WAITING') {
+                      <button mat-icon-button
+                        class="action-btn"
+                        matTooltip="Call Patient"
+                        (click)="callPatient(patient); $event.stopPropagation()"
+                        >
+                        <mat-icon>call</mat-icon>
+                      </button>
+                    }
+                    @if (patient.queueInfo.status === 'IN_PROGRESS') {
+                      <button mat-icon-button
+                        class="action-btn"
+                        matTooltip="Start Consultation"
+                        (click)="startConsultation(patient); $event.stopPropagation()"
+                        >
+                        <mat-icon>play_arrow</mat-icon>
+                      </button>
+                    }
+                    <button mat-icon-button
+                      class="action-btn"
+                      matTooltip="More Actions"
+                      [matMenuTriggerFor]="patientMenu"
+                      (click)="$event.stopPropagation()">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #patientMenu="matMenu">
+                      <button mat-menu-item (click)="addNotes(patient)">
+                        <mat-icon>note_add</mat-icon>
+                        <span>Add Notes</span>
+                      </button>
+                      <button mat-menu-item (click)="reschedulePatient(patient)">
+                        <mat-icon>schedule</mat-icon>
+                        <span>Reschedule</span>
+                      </button>
+                      <button mat-menu-item (click)="viewPatientDetails(patient)">
+                        <mat-icon>visibility</mat-icon>
+                        <span>View Details</span>
+                      </button>
+                    </mat-menu>
+                  </div>
+                </div>
+              }
+
+              <!-- Empty State -->
+              @if (filteredQueue.length === 0) {
+                <div class="empty-state">
+                  <mat-icon class="empty-icon">people_outline</mat-icon>
+                  <h3>No patients found</h3>
+                  <p>Try adjusting your search or filters</p>
+                </div>
+              }
             </div>
           </div>
-        </div>
-        
-        <!-- Chronic Conditions -->
-        <div class="conditions-section" *ngIf="selectedPatient.chronicConditions && selectedPatient.chronicConditions.length > 0">
-          <h4 class="section-title">
-            <mat-icon class="condition-icon">favorite</mat-icon>
-            Chronic Conditions
-          </h4>
-          <div class="condition-chips">
-            <mat-chip *ngFor="let condition of selectedPatient.chronicConditions" 
-                     class="condition-chip">
-              {{ condition }}
-            </mat-chip>
-          </div>
-        </div>
-        
-        <!-- Insurance Information -->
-        <div class="insurance-section" *ngIf="selectedPatient.insuranceProvider">
-          <h4 class="section-title">
-            <mat-icon class="insurance-icon">account_balance</mat-icon>
-            Insurance
-          </h4>
-          <div class="insurance-info">
-            <p class="insurance-provider">{{ selectedPatient.insuranceProvider }}</p>
-            <p class="payment-status">
-              Payment: 
-              <span class="status-badge" 
-                    [class]="selectedPatient.queueInfo.paymentStatus.toLowerCase()">
-                {{ selectedPatient.queueInfo.paymentStatus }}
-              </span>
-            </p>
-          </div>
-        </div>
-        
-        <!-- Emergency Contact -->
-        <div class="emergency-contact-section" *ngIf="selectedPatient.emergencyContact">
-          <h4 class="section-title">
-            <mat-icon class="emergency-icon">emergency</mat-icon>
-            Emergency Contact
-          </h4>
-          <div class="emergency-info">
-            <p class="contact-name">{{ selectedPatient.emergencyContact.name }}</p>
-            <p class="contact-relationship">{{ selectedPatient.emergencyContact.relationship }}</p>
-            <p class="contact-phone">{{ selectedPatient.emergencyContact.phone }}</p>
-          </div>
-        </div>
-        
-        <!-- Queue Information -->
-        <div class="queue-info-section">
-          <h4 class="section-title">
-            <mat-icon class="queue-icon">queue</mat-icon>
-            Queue Information
-          </h4>
-          <div class="queue-info-grid">
-            <div class="info-item">
-              <span class="info-label">Position:</span>
-              <span class="info-value">{{ selectedPatient.queueInfo.queuePosition }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Status:</span>
-              <span class="info-value status-badge" 
-                    [class]="selectedPatient.queueInfo.status.toLowerCase()">
-                {{ selectedPatient.queueInfo.status }}
-              </span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Priority:</span>
-              <span class="info-value priority-badge" 
-                    [style.background-color]="getPriorityColor(selectedPatient.queueInfo.priority)">
-                {{ selectedPatient.queueInfo.priority }}
-              </span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Check-in:</span>
-              <span class="info-value">{{ selectedPatient.queueInfo.checkInTime }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Wait Time:</span>
-              <span class="info-value">{{ selectedPatient.queueInfo.waitTime }} minutes</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Room:</span>
-              <span class="info-value">{{ selectedPatient.queueInfo.roomNumber || 'TBD' }}</span>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Notes -->
-        <div class="notes-section">
-          <h4 class="section-title">
-            <mat-icon class="notes-icon">note</mat-icon>
-            Notes
-          </h4>
-          <div class="notes-content">
-            <p *ngIf="selectedPatient.queueInfo.notes; else noNotes">
-              {{ selectedPatient.queueInfo.notes }}
-            </p>
-            <ng-template #noNotes>
-              <p class="no-notes">No notes added yet</p>
-            </ng-template>
-            <button mat-button 
+
+          <!-- Right Sidebar - Patient Details -->
+          @if (showPatientDetails && selectedPatient) {
+            <div class="patient-details-sidebar">
+              <div class="sidebar-content">
+                <div class="sidebar-header">
+                  <h3 class="sidebar-title">Patient Details</h3>
+                  <button mat-icon-button
+                    class="close-btn"
+                    (click)="closePatientDetails()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+                <div class="sidebar-actions">
+                  <button mat-button
+                    class="refresh-btn"
+                    [disabled]="isRefreshing"
+                    (click)="manualRefresh()">
+                    <mat-icon [class.rotating]="isRefreshing">refresh</mat-icon>
+                    {{ isRefreshing ? 'Refreshing...' : 'Refresh' }}
+                  </button>
+                  <button mat-raised-button
                     color="primary"
-                    class="add-notes-btn"
-                    (click)="addNotes(selectedPatient)">
-              <mat-icon>edit</mat-icon>
-              {{ selectedPatient.queueInfo.notes ? 'Edit Notes' : 'Add Notes' }}
-            </button>
+                    class="export-btn"
+                    (click)="exportQueue()">
+                    <mat-icon>download</mat-icon>
+                    Export
+                  </button>
+                </div>
+              </div>
+              <div class="patient-details-content">
+                <!-- Patient Header -->
+                <div class="patient-header">
+                  <div class="patient-avatar-large">
+                    @if (hasValidPhoto(selectedPatient)) {
+                      <div class="avatar-container-large">
+                        <img [src]="getPatientPhoto(selectedPatient)"
+                          [alt]="selectedPatient.firstName + ' ' + selectedPatient.lastName"
+                          class="avatar-image-large"
+                          (error)="onImageError($event)">
+                        </div>
+                      }
+                      @if (!hasValidPhoto(selectedPatient)) {
+                        <div class="avatar-fallback-large">
+                          <div class="icon-avatar-large">
+                            <mat-icon>{{ getProfileIcon(selectedPatient) }}</mat-icon>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                    <div class="patient-basic-info">
+                      <h2 class="patient-full-name">
+                        {{ selectedPatient.firstName }} {{ selectedPatient.lastName }}
+                      </h2>
+                      <p class="patient-dob">
+                        {{ selectedPatient.dateOfBirth | date:'mediumDate' }}
+                        ({{ getAge(selectedPatient.dateOfBirth) }} years old)
+                      </p>
+                      <p class="patient-gender">{{ selectedPatient.gender }}</p>
+                    </div>
+                  </div>
+                  <!-- Medical Alerts -->
+                  @if (selectedPatient.medicalAlerts && selectedPatient.medicalAlerts.length > 0) {
+                    <div class="medical-alerts">
+                      <h4 class="section-title">
+                        <mat-icon class="alert-icon">warning</mat-icon>
+                        Medical Alerts
+                      </h4>
+                      <div class="alert-chips">
+                        @for (alert of selectedPatient.medicalAlerts; track alert) {
+                          <mat-chip
+                            class="alert-chip">
+                            {{ alert }}
+                          </mat-chip>
+                        }
+                      </div>
+                    </div>
+                  }
+                  <!-- Allergies -->
+                  @if (selectedPatient.allergies && selectedPatient.allergies.length > 0) {
+                    <div class="allergies-section">
+                      <h4 class="section-title">
+                        <mat-icon class="allergy-icon">allergies</mat-icon>
+                        Allergies
+                      </h4>
+                      <div class="allergy-chips">
+                        @for (allergy of selectedPatient.allergies; track allergy) {
+                          <mat-chip
+                            class="allergy-chip">
+                            {{ allergy }}
+                          </mat-chip>
+                        }
+                      </div>
+                    </div>
+                  }
+                  <!-- Current Medications -->
+                  @if (selectedPatient.currentMedications && selectedPatient.currentMedications.length > 0) {
+                    <div class="medications-section">
+                      <h4 class="section-title">
+                        <mat-icon class="medication-icon">medication</mat-icon>
+                        Current Medications
+                      </h4>
+                      <div class="medication-list">
+                        @for (medication of selectedPatient.currentMedications; track medication) {
+                          <div class="medication-item"
+                            >
+                            {{ medication }}
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                  <!-- Chronic Conditions -->
+                  @if (selectedPatient.chronicConditions && selectedPatient.chronicConditions.length > 0) {
+                    <div class="conditions-section">
+                      <h4 class="section-title">
+                        <mat-icon class="condition-icon">favorite</mat-icon>
+                        Chronic Conditions
+                      </h4>
+                      <div class="condition-chips">
+                        @for (condition of selectedPatient.chronicConditions; track condition) {
+                          <mat-chip
+                            class="condition-chip">
+                            {{ condition }}
+                          </mat-chip>
+                        }
+                      </div>
+                    </div>
+                  }
+                  <!-- Insurance Information -->
+                  @if (selectedPatient.insuranceProvider) {
+                    <div class="insurance-section">
+                      <h4 class="section-title">
+                        <mat-icon class="insurance-icon">account_balance</mat-icon>
+                        Insurance
+                      </h4>
+                      <div class="insurance-info">
+                        <p class="insurance-provider">{{ selectedPatient.insuranceProvider }}</p>
+                        <p class="payment-status">
+                          Payment:
+                          <span class="status-badge"
+                            [class]="selectedPatient.queueInfo.paymentStatus.toLowerCase()">
+                            {{ selectedPatient.queueInfo.paymentStatus }}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  }
+                  <!-- Emergency Contact -->
+                  @if (selectedPatient.emergencyContact) {
+                    <div class="emergency-contact-section">
+                      <h4 class="section-title">
+                        <mat-icon class="emergency-icon">emergency</mat-icon>
+                        Emergency Contact
+                      </h4>
+                      <div class="emergency-info">
+                        <p class="contact-name">{{ selectedPatient.emergencyContact.name }}</p>
+                        <p class="contact-relationship">{{ selectedPatient.emergencyContact.relationship }}</p>
+                        <p class="contact-phone">{{ selectedPatient.emergencyContact.phone }}</p>
+                      </div>
+                    </div>
+                  }
+                  <!-- Queue Information -->
+                  <div class="queue-info-section">
+                    <h4 class="section-title">
+                      <mat-icon class="queue-icon">queue</mat-icon>
+                      Queue Information
+                    </h4>
+                    <div class="queue-info-grid">
+                      <div class="info-item">
+                        <span class="info-label">Position:</span>
+                        <span class="info-value">{{ selectedPatient.queueInfo.queuePosition }}</span>
+                      </div>
+                      <div class="info-item">
+                        <span class="info-label">Status:</span>
+                        <span class="info-value status-badge"
+                          [class]="selectedPatient.queueInfo.status.toLowerCase()">
+                          {{ selectedPatient.queueInfo.status }}
+                        </span>
+                      </div>
+                      <div class="info-item">
+                        <span class="info-label">Priority:</span>
+                        <span class="info-value priority-badge"
+                          [style.background-color]="getPriorityColor(selectedPatient.queueInfo.priority)">
+                          {{ selectedPatient.queueInfo.priority }}
+                        </span>
+                      </div>
+                      <div class="info-item">
+                        <span class="info-label">Check-in:</span>
+                        <span class="info-value">{{ selectedPatient.queueInfo.checkInTime }}</span>
+                      </div>
+                      <div class="info-item">
+                        <span class="info-label">Wait Time:</span>
+                        <span class="info-value">{{ selectedPatient.queueInfo.waitTime }} minutes</span>
+                      </div>
+                      <div class="info-item">
+                        <span class="info-label">Room:</span>
+                        <span class="info-value">{{ selectedPatient.queueInfo.roomNumber || 'TBD' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Notes -->
+                  <div class="notes-section">
+                    <h4 class="section-title">
+                      <mat-icon class="notes-icon">note</mat-icon>
+                      Notes
+                    </h4>
+                    <div class="notes-content">
+                      @if (selectedPatient.queueInfo.notes) {
+                        <p>
+                          {{ selectedPatient.queueInfo.notes }}
+                        </p>
+                      } @else {
+                        <p class="no-notes">No notes added yet</p>
+                      }
+                      <button mat-button
+                        color="primary"
+                        class="add-notes-btn"
+                        (click)="addNotes(selectedPatient)">
+                        <mat-icon>edit</mat-icon>
+                        {{ selectedPatient.queueInfo.notes ? 'Edit Notes' : 'Add Notes' }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 

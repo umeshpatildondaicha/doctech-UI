@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppButtonComponent, AppInputComponent, AppSelectboxComponent, IconComponent, PageComponent, BreadcrumbItem } from '@lk/core';
@@ -52,15 +52,14 @@ interface RoomFormModel {
 @Component({
     selector: 'app-room-form',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        AppButtonComponent,
-        AppInputComponent,
-        AppSelectboxComponent,
-        IconComponent,
-        PageComponent,
-        ButtonCheckboxComponent
-    ],
+    ReactiveFormsModule,
+    AppButtonComponent,
+    AppInputComponent,
+    AppSelectboxComponent,
+    IconComponent,
+    PageComponent,
+    ButtonCheckboxComponent
+],
     templateUrl: './room-form.component.html',
     styleUrl: './room-form.component.scss'
 })

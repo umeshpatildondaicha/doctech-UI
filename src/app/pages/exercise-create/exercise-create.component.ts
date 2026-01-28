@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -21,21 +21,20 @@ import { Subject, takeUntil, filter } from 'rxjs';
 @Component({
     selector: 'app-exercise-create',
     imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatButtonModule,
-        MatIconModule,
-        MatChipsModule,
-        MatCardModule,
-        MatDividerModule,
-        MatTooltipModule,
-        AppInputComponent,
-        AppSelectboxComponent
-    ],
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatCardModule,
+    MatDividerModule,
+    MatTooltipModule,
+    AppInputComponent,
+    AppSelectboxComponent
+],
     templateUrl: './exercise-create.component.html',
     styleUrl: './exercise-create.component.scss'
 })

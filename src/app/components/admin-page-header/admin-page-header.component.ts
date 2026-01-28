@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { AppButtonComponent, IconComponent, BreadcrumbItem } from '@lk/core';
 
 export interface HeaderAction {
@@ -12,7 +12,7 @@ export interface HeaderAction {
 
 @Component({
     selector: 'app-admin-page-header',
-    imports: [CommonModule, AppButtonComponent, IconComponent],
+    imports: [AppButtonComponent, IconComponent],
     templateUrl: './admin-page-header.component.html',
     styleUrl: './admin-page-header.component.scss'
 })

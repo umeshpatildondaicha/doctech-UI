@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,7 +7,7 @@ import { BreadcrumbItem } from '@lk/core';
 
 @Component({
     selector: 'app-breadcrumb',
-    imports: [CommonModule, MatIconModule],
+    imports: [MatIconModule],
     templateUrl: './breadcrumb.component.html',
     styleUrl: './breadcrumb.component.scss'
 })

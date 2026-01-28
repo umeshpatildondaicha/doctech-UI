@@ -1,545 +1,549 @@
 <app-page [breadcrumb]="breadcrumb" [isFooter]="false">
   <div page-body class="rooms-management-page">
-  <app-tabs [selectedIndex]="selectedTabIndex">
-    <app-tab label="Floors">
-      <div class="tab-panel">
-      <div class="management-section">
-        
-        <!-- Add Floor Form -->
-        <div class="add-form-card">
-          <h3>Add New Floor</h3>
-          <form [formGroup]="floorForm" class="add-form">
-            <div class="form-row">
-              <div class="form-field">
-                <app-input
-                  [label]="'Floor Number'"
-                  [placeholder]="'e.g., 0, 1, 2'"
-                  [value]="floorForm.controls['number'].value"
-                  (valueChange)="floorForm.controls['number'].setValue(+$event)"
-                  [type]="'number'"
-                  [required]="true">
-                </app-input>
-              </div>
-              <div class="form-field">
-                <app-input
-                  [label]="'Floor Name'"
-                  [placeholder]="'e.g., Ground Floor, 1st Floor'"
-                  [value]="floorForm.controls['name'].value"
-                  (valueChange)="floorForm.controls['name'].setValue($event)"
-                  [required]="true">
-                </app-input>
-              </div>
+    <app-tabs [selectedIndex]="selectedTabIndex">
+      <app-tab label="Floors">
+        <div class="tab-panel">
+          <div class="management-section">
+
+            <!-- Add Floor Form -->
+            <div class="add-form-card">
+              <h3>Add New Floor</h3>
+              <form [formGroup]="floorForm" class="add-form">
+                <div class="form-row">
+                  <div class="form-field">
+                    <app-input
+                      [label]="'Floor Number'"
+                      [placeholder]="'e.g., 0, 1, 2'"
+                      [value]="floorForm.controls['number'].value"
+                      (valueChange)="floorForm.controls['number'].setValue(+$event)"
+                      [type]="'number'"
+                      [required]="true">
+                    </app-input>
+                  </div>
+                  <div class="form-field">
+                    <app-input
+                      [label]="'Floor Name'"
+                      [placeholder]="'e.g., Ground Floor, 1st Floor'"
+                      [value]="floorForm.controls['name'].value"
+                      (valueChange)="floorForm.controls['name'].setValue($event)"
+                      [required]="true">
+                    </app-input>
+                  </div>
+                </div>
+
+                <app-button
+                  [text]="'Add Floor'"
+                  [color]="'primary'"
+                  [fontIcon]="'add'"
+                  (btnClick)="onAddFloor()"
+                  [disabled]="floorForm.invalid">
+                </app-button>
+              </form>
             </div>
 
-            <app-button 
-              [text]="'Add Floor'" 
-              [color]="'primary'" 
-              [fontIcon]="'add'"
-              (btnClick)="onAddFloor()"
-              [disabled]="floorForm.invalid">
-            </app-button>
-          </form>
-        </div>
-        
-        <!-- Floors List -->
-        <div class="items-grid">
-          <div *ngFor="let floor of floors" class="item-card floor-card">
-            <div class="card-header">
-              <div class="card-title">
-                <app-icon [fontIcon]="'business'" [size]="24"></app-icon>
-                <div>
-                  <h4>{{ floor.name }}</h4>
-                  <span class="card-subtitle">Floor {{ floor.number }}</span>
+            <!-- Floors List -->
+            <div class="items-grid">
+              @for (floor of floors; track floor) {
+                <div class="item-card floor-card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <app-icon [fontIcon]="'business'" [size]="24"></app-icon>
+                      <div>
+                        <h4>{{ floor.name }}</h4>
+                        <span class="card-subtitle">Floor {{ floor.number }}</span>
+                      </div>
+                    </div>
+                    <app-button
+                      [fontIcon]="'delete'"
+                      [color]="'warn'"
+                      (btnClick)="removeFloor(floor.id)"
+                      class="delete-btn">
+                    </app-button>
+                  </div>
+                  <div class="card-content">
+                    <div class="stat-item">
+                      <span class="label">Total Rooms:</span>
+                      <span class="value">{{ floor.totalRooms }}</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="label">Total Beds:</span>
+                      <span class="value">{{ floor.totalBeds }}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <app-button 
-                [fontIcon]="'delete'" 
-                [color]="'warn'"
-                (btnClick)="removeFloor(floor.id)"
-                class="delete-btn">
-              </app-button>
-            </div>
-            <div class="card-content">
-              <div class="stat-item">
-                <span class="label">Total Rooms:</span>
-                <span class="value">{{ floor.totalRooms }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="label">Total Beds:</span>
-                <span class="value">{{ floor.totalBeds }}</span>
-              </div>
+              }
             </div>
           </div>
         </div>
-      </div>
-      </div>
-    </app-tab>
+      </app-tab>
 
-    <app-tab label="Wards">
-      <div class="tab-panel">
-      <div class="management-section">
-        
-        <!-- Add Ward Form -->
-        <div class="add-form-card">
-          <h3>Add New Ward</h3>
-          <form [formGroup]="wardForm" class="add-form">
-            <div class="form-row">
-              <div class="form-field">
-                <app-input
-                  [label]="'Ward Name'"
-                  [placeholder]="'e.g., ICU Ward 1, General Ward A'"
-                  [value]="wardForm.controls['name'].value"
-                  (valueChange)="wardForm.controls['name'].setValue($event)"
-                  [required]="true">
-                </app-input>
-              </div>
-              <div class="form-field">
-                <app-selectbox
-                  [label]="'Ward Type'"
-                  [data]="wardForm.controls['type'].value"
-                  (dataChange)="wardForm.controls['type'].setValue($event)"
-                  [options]="wardTypeOptions"
-                  [valueField]="'value'"
-                  [displayExpr]="'label'"
-                  [required]="true">
-                </app-selectbox>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <app-selectbox
-                  [label]="'Floor'"
-                  [data]="wardForm.controls['floor'].value"
-                  (dataChange)="wardForm.controls['floor'].setValue($event)"
-                  [options]="getFloorOptions()"
-                  [valueField]="'value'"
-                  [displayExpr]="'label'"
-                  [required]="true">
-                </app-selectbox>
-              </div>
+      <app-tab label="Wards">
+        <div class="tab-panel">
+          <div class="management-section">
 
-              <div class="form-field">
-                <app-input
-                  [label]="'Capacity'"
-                  [placeholder]="'Total bed capacity'"
-                  [value]="wardForm.controls['capacity'].value"
-                  (valueChange)="wardForm.controls['capacity'].setValue(+$event)"
-                  [type]="'number'"
-                  [required]="true">
-                </app-input>
-              </div>
-            </div>
-            
-            <app-button 
-              [text]="'Add Ward'" 
-              [color]="'primary'" 
-              [fontIcon]="'add'"
-              (btnClick)="onAddWard()"
-              [disabled]="!wardForm.valid">
-            </app-button>
-          </form>
-        </div>
-        
-        <!-- Wards List -->
-        <div class="items-grid">
-          <div *ngFor="let ward of wards" class="item-card ward-card">
-            <div class="card-header">
-              <div class="card-title">
-                <app-icon [fontIcon]="'local_hospital'" [size]="24"></app-icon>
-                <div>
-                  <h4>{{ ward.name }}</h4>
-                  <span class="card-subtitle">{{ ward.type }} Ward</span>
+            <!-- Add Ward Form -->
+            <div class="add-form-card">
+              <h3>Add New Ward</h3>
+              <form [formGroup]="wardForm" class="add-form">
+                <div class="form-row">
+                  <div class="form-field">
+                    <app-input
+                      [label]="'Ward Name'"
+                      [placeholder]="'e.g., ICU Ward 1, General Ward A'"
+                      [value]="wardForm.controls['name'].value"
+                      (valueChange)="wardForm.controls['name'].setValue($event)"
+                      [required]="true">
+                    </app-input>
+                  </div>
+                  <div class="form-field">
+                    <app-selectbox
+                      [label]="'Ward Type'"
+                      [data]="wardForm.controls['type'].value"
+                      (dataChange)="wardForm.controls['type'].setValue($event)"
+                      [options]="wardTypeOptions"
+                      [valueField]="'value'"
+                      [displayExpr]="'label'"
+                      [required]="true">
+                    </app-selectbox>
+                  </div>
                 </div>
-              </div>
-              <app-button 
-                [fontIcon]="'delete'" 
-                [color]="'warn'"
-                (btnClick)="removeWard(ward.id)"
-                class="delete-btn">
-              </app-button>
+                <div class="form-row">
+                  <div class="form-field">
+                    <app-selectbox
+                      [label]="'Floor'"
+                      [data]="wardForm.controls['floor'].value"
+                      (dataChange)="wardForm.controls['floor'].setValue($event)"
+                      [options]="getFloorOptions()"
+                      [valueField]="'value'"
+                      [displayExpr]="'label'"
+                      [required]="true">
+                    </app-selectbox>
+                  </div>
+
+                  <div class="form-field">
+                    <app-input
+                      [label]="'Capacity'"
+                      [placeholder]="'Total bed capacity'"
+                      [value]="wardForm.controls['capacity'].value"
+                      (valueChange)="wardForm.controls['capacity'].setValue(+$event)"
+                      [type]="'number'"
+                      [required]="true">
+                    </app-input>
+                  </div>
+                </div>
+
+                <app-button
+                  [text]="'Add Ward'"
+                  [color]="'primary'"
+                  [fontIcon]="'add'"
+                  (btnClick)="onAddWard()"
+                  [disabled]="!wardForm.valid">
+                </app-button>
+              </form>
             </div>
-            <div class="card-content">
-              <div class="stat-item">
-                <span class="label">Location:</span>
-                <span class="value">Floor {{ ward.floor }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="label">Capacity:</span>
-                <span class="value">{{ ward.capacity }} beds</span>
-              </div>
-              <div class="stat-item">
-                <span class="label">Rooms:</span>
-                <span class="value">{{ ward.rooms.length }} assigned</span>
-              </div>
+
+            <!-- Wards List -->
+            <div class="items-grid">
+              @for (ward of wards; track ward) {
+                <div class="item-card ward-card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <app-icon [fontIcon]="'local_hospital'" [size]="24"></app-icon>
+                      <div>
+                        <h4>{{ ward.name }}</h4>
+                        <span class="card-subtitle">{{ ward.type }} Ward</span>
+                      </div>
+                    </div>
+                    <app-button
+                      [fontIcon]="'delete'"
+                      [color]="'warn'"
+                      (btnClick)="removeWard(ward.id)"
+                      class="delete-btn">
+                    </app-button>
+                  </div>
+                  <div class="card-content">
+                    <div class="stat-item">
+                      <span class="label">Location:</span>
+                      <span class="value">Floor {{ ward.floor }}</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="label">Capacity:</span>
+                      <span class="value">{{ ward.capacity }} beds</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="label">Rooms:</span>
+                      <span class="value">{{ ward.rooms.length }} assigned</span>
+                    </div>
+                  </div>
+                </div>
+              }
             </div>
           </div>
         </div>
-      </div>
-      </div>
-    </app-tab>
+      </app-tab>
 
-    <app-tab label="Rooms">
-      <div class="tab-panel">
-      <div class="management-section">
+      <app-tab label="Rooms">
+        <div class="tab-panel">
+          <div class="management-section">
 
-        
-        <!-- Add Room Form -->
-        <div class="add-form-card">
-          <h3>Add New Room</h3>
-          <form [formGroup]="roomForm" class="add-form">
-            <div class="form-row">
-              <div class="form-field">
-                <app-input
-                  [label]="'Room Number'"
-                  [placeholder]="'e.g., ICU-01, GW-101'"
-                  [value]="roomForm.controls['number'].value"
-                  (valueChange)="roomForm.controls['number'].setValue($event)"
-                  [required]="true">
-                </app-input>
-              </div>
-              <div class="form-field">
-                <app-selectbox
-                  [label]="'Room Type'"
-                  [data]="roomForm.controls['type'].value"
-                  (dataChange)="roomForm.controls['type'].setValue($event)"
+
+            <!-- Add Room Form -->
+            <div class="add-form-card">
+              <h3>Add New Room</h3>
+              <form [formGroup]="roomForm" class="add-form">
+                <div class="form-row">
+                  <div class="form-field">
+                    <app-input
+                      [label]="'Room Number'"
+                      [placeholder]="'e.g., ICU-01, GW-101'"
+                      [value]="roomForm.controls['number'].value"
+                      (valueChange)="roomForm.controls['number'].setValue($event)"
+                      [required]="true">
+                    </app-input>
+                  </div>
+                  <div class="form-field">
+                    <app-selectbox
+                      [label]="'Room Type'"
+                      [data]="roomForm.controls['type'].value"
+                      (dataChange)="roomForm.controls['type'].setValue($event)"
                   [options]="[
                     { label: 'ICU', value: 'ICU' },
                     { label: 'General Ward', value: 'General Ward' },
                     { label: 'Private', value: 'Private' },
                     { label: 'Semi-Private', value: 'Semi-Private' }
                   ]"
-                  [valueField]="'value'"
-                  [displayExpr]="'label'"
-                  [required]="true">
-                </app-selectbox>
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-field">
-                <app-selectbox
-                  [label]="'Floor'"
-                  [data]="roomForm.controls['floor'].value"
-                  (dataChange)="roomForm.controls['floor'].setValue($event)"
-                  [options]="getFloorOptions()"
-                  [valueField]="'value'"
-                  [displayExpr]="'label'"
-                  [required]="true">
-                </app-selectbox>
-              </div>
-
-              <div class="form-field">
-                <app-input
-                  [label]="'Bed Capacity'"
-                  [placeholder]="'Number of beds'"
-                  [value]="roomForm.controls['capacity'].value"
-                  (valueChange)="roomForm.controls['capacity'].setValue(+$event)"
-                  [type]="'number'"
-                  [required]="true">
-                </app-input>
-              </div>
-            </div>
-            
-            <app-button 
-              [text]="'Add Room'" 
-              [color]="'primary'" 
-              [fontIcon]="'add'"
-              (btnClick)="onAddRoom()"
-              [disabled]="roomForm.invalid">
-            </app-button>
-          </form>
-        </div>
-        
-        <!-- Rooms List -->
-        <div class="items-grid">
-          <div *ngFor="let room of rooms" class="item-card room-card">
-            <div class="card-header">
-              <div class="card-title">
-                <app-icon [fontIcon]="'meeting_room'" [size]="24"></app-icon>
-                <div>
-                  <h4>{{ room.number }}</h4>
-                  <span class="card-subtitle">{{ room.type }}</span>
-                </div>
-              </div>
-              <app-button 
-                [fontIcon]="'delete'" 
-                [color]="'warn'"
-                (btnClick)="removeRoom(room.id)"
-                class="delete-btn">
-              </app-button>
-            </div>
-            <div class="card-content">
-              <div class="stat-item">
-                <span class="label">Location:</span>
-                <span class="value">Floor {{ room.floor }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="label">Capacity:</span>
-                <span class="value">{{ room.capacity }} beds</span>
-              </div>
-              <div class="stat-item">
-                <span class="label">Status:</span>
-                <span class="value status-{{ room.status.toLowerCase() }}">{{ room.status }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      </div>
-    </app-tab>
-
-    <app-tab label="Beds">
-      <div class="tab-panel">
-      <div class="management-section">
-        <div class="section-header">
-          <div class="header-actions">
-            <app-button 
-              [text]="'Add New Bed'" 
-              [color]="'primary'" 
-              [fontIcon]="'add'"
-              (btnClick)="openAddBedForm()"
-              class="add-bed-btn">
-            </app-button>
-          </div>
-        </div>
-        
-        <!-- Bed Management Form -->
-        
-        <!-- Beds Overview Cards -->
-        <div class="beds-overview">
-          <div *ngFor="let floor of floors" class="floor-section">
-            <div class="floor-header">
-              <h3 class="floor-title">
-                <app-icon [fontIcon]="'apartment'" [size]="24"></app-icon>
-                {{ floor.name }}
-              </h3>
-              <div class="floor-stats">
-                <span class="stat">{{ getTotalBedsInFloor(floor.number) }} beds</span>
-                <span class="stat">{{ getOccupiedBedsInFloor(floor.number) }} occupied</span>
-              </div>
-            </div>
-            
-            <div class="rooms-grid">
-              <div *ngFor="let room of getRoomsByFloor(floor.number)" class="room-card">
-                <div class="room-header">
-                  <div class="room-info">
-                    <h4 class="room-number">{{ room.number }}</h4>
-                    <span class="room-type">{{ room.type }}</span>
-                  </div>
-                  <div class="room-stats">
-                    <span class="bed-count">{{ room.beds?.length || 0 }} beds</span>
+                      [valueField]="'value'"
+                      [displayExpr]="'label'"
+                      [required]="true">
+                    </app-selectbox>
                   </div>
                 </div>
-                
-                <div class="beds-grid-compact">
-                  <div 
-                    *ngFor="let bed of room.beds" 
-                    class="bed-card"
-                    [class]="'status-' + bed.status.toLowerCase()"
-                    (click)="editBed(room, bed)">
-                    
-                    <div class="bed-icon">
-                      <app-icon [fontIcon]="'hotel'" [size]="20"></app-icon>
-                    </div>
-                    
-                    <div class="bed-details">
-                      <div class="bed-id">{{ bed.id.split('-').pop() }}</div>
-                      <div class="bed-status">{{ bed.status }}</div>
-                    </div>
-                    
-                    <div class="bed-actions">
-                      <div class="action-btn-wrapper" (click)="editBed(room ,bed);$event.stopPropagation()">
-                       <app-button 
-                        [fontIcon]="'edit'" 
-                        [color]="'accent'"
-                        
-                        class="action-btn">
-                      </app-button>
-                      </div>
-                     <div class="action-btn-wrapper" (click)="deleteBed(room, bed); $event.stopPropagation()">
-                       <app-button 
-                        [fontIcon]="'delete'" 
-                        [color]="'warn'"
-                        class="action-btn">
-                      </app-button>
-                     </div>
-                     
-                    </div>
+                <div class="form-row">
+                  <div class="form-field">
+                    <app-selectbox
+                      [label]="'Floor'"
+                      [data]="roomForm.controls['floor'].value"
+                      (dataChange)="roomForm.controls['floor'].setValue($event)"
+                      [options]="getFloorOptions()"
+                      [valueField]="'value'"
+                      [displayExpr]="'label'"
+                      [required]="true">
+                    </app-selectbox>
                   </div>
-                  
-                  <!-- Add Bed to Room Card -->
-                  <div class="add-bed-to-room-card" (click)="addBedToRoom(room)">
-                    <app-icon [fontIcon]="'add_circle'" [size]="24"></app-icon>
-                    <span>Add Bed</span>
+
+                  <div class="form-field">
+                    <app-input
+                      [label]="'Bed Capacity'"
+                      [placeholder]="'Number of beds'"
+                      [value]="roomForm.controls['capacity'].value"
+                      (valueChange)="roomForm.controls['capacity'].setValue(+$event)"
+                      [type]="'number'"
+                      [required]="true">
+                    </app-input>
                   </div>
                 </div>
-              </div>
+
+                <app-button
+                  [text]="'Add Room'"
+                  [color]="'primary'"
+                  [fontIcon]="'add'"
+                  (btnClick)="onAddRoom()"
+                  [disabled]="roomForm.invalid">
+                </app-button>
+              </form>
             </div>
-          </div>
-        </div>
-      </div>
-      </div>
-    </app-tab>
 
-    <app-tab label="Preview">
-      <div class="tab-panel">
-      <div class="management-section">
-        <div class="preview-section">
-
-          <!-- Building Stats -->
-          <div class="building-stats">
-            <div class="stat-card">
-              <app-icon fontIcon="layers" [size]="24" color="#667eea"></app-icon>
-              <div class="stat-info">
-                <span class="stat-value">{{ floors.length }}</span>
-                <span class="stat-label">Total Floors</span>
-              </div>
-            </div>
-            <div class="stat-card">
-              <app-icon fontIcon="meeting_room" [size]="24" color="#3498db"></app-icon>
-              <div class="stat-info">
-                <span class="stat-value">{{ rooms.length }}</span>
-                <span class="stat-label">Total Rooms</span>
-              </div>
-            </div>
-            <div class="stat-card">
-              <app-icon fontIcon="bed" [size]="24" color="#27ae60"></app-icon>
-              <div class="stat-info">
-                <span class="stat-value">{{ getTotalBeds() }}</span>
-                <span class="stat-label">Total Beds</span>
-              </div>
-            </div>
-            <div class="stat-card">
-              <app-icon fontIcon="check_circle" [size]="24" color="#27ae60"></app-icon>
-              <div class="stat-info">
-                <span class="stat-value">{{ getAvailableBeds() }}</span>
-                <span class="stat-label">Available Beds</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Building Visualization -->
-          <div class="building-container">
-            <!-- Loop through floors (reverse order to show from top to bottom) -->
-            <div class="floor-card" *ngFor="let floor of getFloorsReversed()" 
-                 [class.ground-floor]="floor.number === 0">
-              
-              <!-- Floor Header -->
-              <div class="floor-header">
-                <div class="floor-title">
-                  <app-icon fontIcon="domain" [size]="20" color="#667eea"></app-icon>
-                  <h3>{{ floor.name }}</h3>
-                  <span class="floor-number">Floor {{ floor.number }}</span>
-                </div>
-                <div class="floor-info">
-                  <span class="info-badge">
-                    <app-icon fontIcon="meeting_room" [size]="16" color="#3498db"></app-icon>
-                    {{ getRoomsByFloor(floor.number).length }} Rooms
-                  </span>
-                  <span class="info-badge">
-                    <app-icon fontIcon="bed" [size]="16" color="#27ae60"></app-icon>
-                    {{ getBedsByFloor(floor.number) }} Beds
-                  </span>
-                </div>
-              </div>
-
-              <!-- Rooms in this floor -->
-              <div class="rooms-container">
-                <div class="room-card" *ngFor="let room of getRoomsByFloor(floor.number)"
-                     [class.room-full]="room.status === 'Full'"
-                     [class.room-available]="room.status === 'Available'"
-                     [class.room-maintenance]="room.status === 'Maintenance'">
-                  
-                  <!-- Room Header -->
-                  <div class="room-header">
-                    <div class="room-title">
-                      <app-icon [fontIcon]="getRoomIcon(room.type)" [size]="18" [color]="getRoomColor(room.type)"></app-icon>
-                      <span class="room-number">{{ room.number }}</span>
-                    </div>
-                    <span class="room-status" [class]="'status-' + room.status.toLowerCase()">
-                      {{ room.status }}
-                    </span>
-                  </div>
-
-                  <!-- Room Type -->
-                  <div class="room-type">
-                    <span class="type-badge" [style.background-color]="getRoomColor(room.type) + '20'">
-                      {{ room.type }}
-                    </span>
-                  </div>
-
-                  <!-- Beds in this room -->
-                  <div class="beds-container">
-                    <div class="bed-item" *ngFor="let bed of room.beds"
-                         [class.bed-occupied]="bed.status === 'Occupied'"
-                         [class.bed-available]="bed.status === 'Available'"
-                         [class.bed-cleaning]="bed.status === 'Cleaning'"
-                         [class.bed-maintenance]="bed.status === 'Maintenance'"
-                         [class.bed-reserved]="bed.status === 'Reserved'"
-                         [title]="bed.id + ' - ' + bed.status + (bed.patient ? ' (' + bed.patient + ')' : '')"
-                         (click)="showBedDetails(bed, room)">
-                      <app-icon fontIcon="bed" [size]="20" [color]="getBedColor(bed.status)"></app-icon>
-                      <span class="bed-id">{{ getBedLetter(bed.id) }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Room Capacity Info -->
-                  <div class="room-capacity">
-                    <div class="capacity-bar">
-                      <div class="capacity-fill" 
-                           [style.width.%]="(room.occupied / room.capacity) * 100"
-                           [style.background-color]="getRoomCapacityColor(room.occupied, room.capacity)">
+            <!-- Rooms List -->
+            <div class="items-grid">
+              @for (room of rooms; track room) {
+                <div class="item-card room-card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <app-icon [fontIcon]="'meeting_room'" [size]="24"></app-icon>
+                      <div>
+                        <h4>{{ room.number }}</h4>
+                        <span class="card-subtitle">{{ room.type }}</span>
                       </div>
                     </div>
-                    <span class="capacity-text">{{ room.occupied }}/{{ room.capacity }}</span>
+                    <app-button
+                      [fontIcon]="'delete'"
+                      [color]="'warn'"
+                      (btnClick)="removeRoom(room.id)"
+                      class="delete-btn">
+                    </app-button>
+                  </div>
+                  <div class="card-content">
+                    <div class="stat-item">
+                      <span class="label">Location:</span>
+                      <span class="value">Floor {{ room.floor }}</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="label">Capacity:</span>
+                      <span class="value">{{ room.capacity }} beds</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="label">Status:</span>
+                      <span class="value status-{{ room.status.toLowerCase() }}">{{ room.status }}</span>
+                    </div>
                   </div>
                 </div>
-
-                <!-- Empty state if no rooms -->
-                <div class="empty-rooms" *ngIf="getRoomsByFloor(floor.number).length === 0">
-                  <app-icon fontIcon="info" [size]="24" color="#95a5a6"></app-icon>
-                  <p>No rooms on this floor</p>
-                </div>
-              </div>
+              }
             </div>
           </div>
+        </div>
+      </app-tab>
 
-          <!-- Legend -->
-          <div class="preview-legend">
-            <h4>
-              <app-icon fontIcon="info" [size]="20" color="#667eea"></app-icon>
-              Legend
-            </h4>
-            <div class="legend-items">
-              <div class="legend-item">
-                <div class="legend-color bed-available"></div>
-                <span>Available</span>
+      <app-tab label="Beds">
+        <div class="tab-panel">
+          <div class="management-section">
+            <div class="section-header">
+              <div class="header-actions">
+                <app-button
+                  [text]="'Add New Bed'"
+                  [color]="'primary'"
+                  [fontIcon]="'add'"
+                  (btnClick)="openAddBedForm()"
+                  class="add-bed-btn">
+                </app-button>
               </div>
-              <div class="legend-item">
-                <div class="legend-color bed-occupied"></div>
-                <span>Occupied</span>
+            </div>
+
+            <!-- Bed Management Form -->
+
+            <!-- Beds Overview Cards -->
+            <div class="beds-overview">
+              @for (floor of floors; track floor) {
+                <div class="floor-section">
+                  <div class="floor-header">
+                    <h3 class="floor-title">
+                      <app-icon [fontIcon]="'apartment'" [size]="24"></app-icon>
+                      {{ floor.name }}
+                    </h3>
+                    <div class="floor-stats">
+                      <span class="stat">{{ getTotalBedsInFloor(floor.number) }} beds</span>
+                      <span class="stat">{{ getOccupiedBedsInFloor(floor.number) }} occupied</span>
+                    </div>
+                  </div>
+                  <div class="rooms-grid">
+                    @for (room of getRoomsByFloor(floor.number); track room) {
+                      <div class="room-card">
+                        <div class="room-header">
+                          <div class="room-info">
+                            <h4 class="room-number">{{ room.number }}</h4>
+                            <span class="room-type">{{ room.type }}</span>
+                          </div>
+                          <div class="room-stats">
+                            <span class="bed-count">{{ room.beds?.length || 0 }} beds</span>
+                          </div>
+                        </div>
+                        <div class="beds-grid-compact">
+                          @for (bed of room.beds; track bed) {
+                            <div
+                              class="bed-card"
+                              [class]="'status-' + bed.status.toLowerCase()"
+                              (click)="editBed(room, bed)">
+                              <div class="bed-icon">
+                                <app-icon [fontIcon]="'hotel'" [size]="20"></app-icon>
+                              </div>
+                              <div class="bed-details">
+                                <div class="bed-id">{{ bed.id.split('-').pop() }}</div>
+                                <div class="bed-status">{{ bed.status }}</div>
+                              </div>
+                              <div class="bed-actions">
+                                <div class="action-btn-wrapper" (click)="editBed(room ,bed);$event.stopPropagation()">
+                                  <app-button
+                                    [fontIcon]="'edit'"
+                                    [color]="'accent'"
+                                    class="action-btn">
+                                  </app-button>
+                                </div>
+                                <div class="action-btn-wrapper" (click)="deleteBed(room, bed); $event.stopPropagation()">
+                                  <app-button
+                                    [fontIcon]="'delete'"
+                                    [color]="'warn'"
+                                    class="action-btn">
+                                  </app-button>
+                                </div>
+                              </div>
+                            </div>
+                          }
+                          <!-- Add Bed to Room Card -->
+                          <div class="add-bed-to-room-card" (click)="addBedToRoom(room)">
+                            <app-icon [fontIcon]="'add_circle'" [size]="24"></app-icon>
+                            <span>Add Bed</span>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </app-tab>
+
+      <app-tab label="Preview">
+        <div class="tab-panel">
+          <div class="management-section">
+            <div class="preview-section">
+
+              <!-- Building Stats -->
+              <div class="building-stats">
+                <div class="stat-card">
+                  <app-icon fontIcon="layers" [size]="24" color="#667eea"></app-icon>
+                  <div class="stat-info">
+                    <span class="stat-value">{{ floors.length }}</span>
+                    <span class="stat-label">Total Floors</span>
+                  </div>
+                </div>
+                <div class="stat-card">
+                  <app-icon fontIcon="meeting_room" [size]="24" color="#3498db"></app-icon>
+                  <div class="stat-info">
+                    <span class="stat-value">{{ rooms.length }}</span>
+                    <span class="stat-label">Total Rooms</span>
+                  </div>
+                </div>
+                <div class="stat-card">
+                  <app-icon fontIcon="bed" [size]="24" color="#27ae60"></app-icon>
+                  <div class="stat-info">
+                    <span class="stat-value">{{ getTotalBeds() }}</span>
+                    <span class="stat-label">Total Beds</span>
+                  </div>
+                </div>
+                <div class="stat-card">
+                  <app-icon fontIcon="check_circle" [size]="24" color="#27ae60"></app-icon>
+                  <div class="stat-info">
+                    <span class="stat-value">{{ getAvailableBeds() }}</span>
+                    <span class="stat-label">Available Beds</span>
+                  </div>
+                </div>
               </div>
-              <div class="legend-item">
-                <div class="legend-color bed-reserved"></div>
-                <span>Reserved</span>
+
+              <!-- Building Visualization -->
+              <div class="building-container">
+                <!-- Loop through floors (reverse order to show from top to bottom) -->
+                @for (floor of getFloorsReversed(); track floor) {
+                  <div class="floor-card"
+                    [class.ground-floor]="floor.number === 0">
+                    <!-- Floor Header -->
+                    <div class="floor-header">
+                      <div class="floor-title">
+                        <app-icon fontIcon="domain" [size]="20" color="#667eea"></app-icon>
+                        <h3>{{ floor.name }}</h3>
+                        <span class="floor-number">Floor {{ floor.number }}</span>
+                      </div>
+                      <div class="floor-info">
+                        <span class="info-badge">
+                          <app-icon fontIcon="meeting_room" [size]="16" color="#3498db"></app-icon>
+                          {{ getRoomsByFloor(floor.number).length }} Rooms
+                        </span>
+                        <span class="info-badge">
+                          <app-icon fontIcon="bed" [size]="16" color="#27ae60"></app-icon>
+                          {{ getBedsByFloor(floor.number) }} Beds
+                        </span>
+                      </div>
+                    </div>
+                    <!-- Rooms in this floor -->
+                    <div class="rooms-container">
+                      @for (room of getRoomsByFloor(floor.number); track room) {
+                        <div class="room-card"
+                          [class.room-full]="room.status === 'Full'"
+                          [class.room-available]="room.status === 'Available'"
+                          [class.room-maintenance]="room.status === 'Maintenance'">
+                          <!-- Room Header -->
+                          <div class="room-header">
+                            <div class="room-title">
+                              <app-icon [fontIcon]="getRoomIcon(room.type)" [size]="18" [color]="getRoomColor(room.type)"></app-icon>
+                              <span class="room-number">{{ room.number }}</span>
+                            </div>
+                            <span class="room-status" [class]="'status-' + room.status.toLowerCase()">
+                              {{ room.status }}
+                            </span>
+                          </div>
+                          <!-- Room Type -->
+                          <div class="room-type">
+                            <span class="type-badge" [style.background-color]="getRoomColor(room.type) + '20'">
+                              {{ room.type }}
+                            </span>
+                          </div>
+                          <!-- Beds in this room -->
+                          <div class="beds-container">
+                            @for (bed of room.beds; track bed) {
+                              <div class="bed-item"
+                                [class.bed-occupied]="bed.status === 'Occupied'"
+                                [class.bed-available]="bed.status === 'Available'"
+                                [class.bed-cleaning]="bed.status === 'Cleaning'"
+                                [class.bed-maintenance]="bed.status === 'Maintenance'"
+                                [class.bed-reserved]="bed.status === 'Reserved'"
+                                [title]="bed.id + ' - ' + bed.status + (bed.patient ? ' (' + bed.patient + ')' : '')"
+                                (click)="showBedDetails(bed, room)">
+                                <app-icon fontIcon="bed" [size]="20" [color]="getBedColor(bed.status)"></app-icon>
+                                <span class="bed-id">{{ getBedLetter(bed.id) }}</span>
+                              </div>
+                            }
+                          </div>
+                          <!-- Room Capacity Info -->
+                          <div class="room-capacity">
+                            <div class="capacity-bar">
+                              <div class="capacity-fill"
+                                [style.width.%]="(room.occupied / room.capacity) * 100"
+                                [style.background-color]="getRoomCapacityColor(room.occupied, room.capacity)">
+                              </div>
+                            </div>
+                            <span class="capacity-text">{{ room.occupied }}/{{ room.capacity }}</span>
+                          </div>
+                        </div>
+                      }
+                      <!-- Empty state if no rooms -->
+                      @if (getRoomsByFloor(floor.number).length === 0) {
+                        <div class="empty-rooms">
+                          <app-icon fontIcon="info" [size]="24" color="#95a5a6"></app-icon>
+                          <p>No rooms on this floor</p>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
               </div>
-              <div class="legend-item">
-                <div class="legend-color bed-cleaning"></div>
-                <span>Cleaning</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color bed-maintenance"></div>
-                <span>Maintenance</span>
+
+              <!-- Legend -->
+              <div class="preview-legend">
+                <h4>
+                  <app-icon fontIcon="info" [size]="20" color="#667eea"></app-icon>
+                  Legend
+                </h4>
+                <div class="legend-items">
+                  <div class="legend-item">
+                    <div class="legend-color bed-available"></div>
+                    <span>Available</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-color bed-occupied"></div>
+                    <span>Occupied</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-color bed-reserved"></div>
+                    <span>Reserved</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-color bed-cleaning"></div>
+                    <span>Cleaning</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-color bed-maintenance"></div>
+                    <span>Maintenance</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      </div>
-    </app-tab>
-  </app-tabs>
+      </app-tab>
+    </app-tabs>
 
 
 
-  <!-- Bed Form Dialog -->
-</div>
+    <!-- Bed Form Dialog -->
+  </div>
 </app-page>

@@ -54,10 +54,10 @@
       <div class="card-content">
         <div class="patient-profile">
           <div class="patient-avatar">
-            <app-image 
-              [src]="patientImageSrc" 
-              [alt]="patient?.name || 'Patient'" 
-              [width]="80" 
+            <app-image
+              [src]="patientImageSrc"
+              [alt]="patient?.name || 'Patient'"
+              [width]="80"
               [height]="80"
               (imageError)="onImageError($event)">
             </app-image>
@@ -84,42 +84,48 @@
     </div>
 
     <!-- Referral Information Card -->
-    <div class="referral-card" *ngIf="appointment?.is_referred">
-      <div class="card-header">
-        <h3 class="card-title">
-          <app-icon [fontIcon]="'person_add'" class="card-title-icon"></app-icon>
-          Referral Information
-        </h3>
-      </div>
-      <div class="card-content">
-        <div class="referral-info">
-          <div class="referral-item">
-            <div class="referral-label">
-              <app-icon [fontIcon]="'medical_services'" class="referral-icon"></app-icon>
-              Referred By
+    @if (appointment?.is_referred) {
+      <div class="referral-card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <app-icon [fontIcon]="'person_add'" class="card-title-icon"></app-icon>
+            Referral Information
+          </h3>
+        </div>
+        <div class="card-content">
+          <div class="referral-info">
+            <div class="referral-item">
+              <div class="referral-label">
+                <app-icon [fontIcon]="'medical_services'" class="referral-icon"></app-icon>
+                Referred By
+              </div>
+              <div class="referral-value">{{ appointment?.referred_by_doctor_name }}</div>
             </div>
-            <div class="referral-value">{{ appointment?.referred_by_doctor_name }}</div>
-          </div>
-          <div class="referral-item" *ngIf="appointment?.referral_notes">
-            <div class="referral-label">
-              <app-icon [fontIcon]="'note'" class="referral-icon"></app-icon>
-              Referral Notes
-            </div>
-            <div class="referral-value">{{ appointment?.referral_notes }}</div>
+            @if (appointment?.referral_notes) {
+              <div class="referral-item">
+                <div class="referral-label">
+                  <app-icon [fontIcon]="'note'" class="referral-icon"></app-icon>
+                  Referral Notes
+                </div>
+                <div class="referral-value">{{ appointment?.referral_notes }}</div>
+              </div>
+            }
           </div>
         </div>
       </div>
-    </div>
+    }
 
     <!-- Notes Card -->
-    <div class="notes-card" *ngIf="appointment?.notes">
-      <div class="card-header">
-        <h3 class="card-title">Notes</h3>
+    @if (appointment?.notes) {
+      <div class="notes-card">
+        <div class="card-header">
+          <h3 class="card-title">Notes</h3>
+        </div>
+        <div class="card-content">
+          <p class="notes-text">{{ appointment?.notes }}</p>
+        </div>
       </div>
-      <div class="card-content">
-        <p class="notes-text">{{ appointment?.notes }}</p>
-      </div>
-    </div>
+    }
 
     <!-- Timeline Card -->
     <div class="timeline-card">
@@ -137,15 +143,17 @@
               <div class="timeline-date">{{ formattedCreatedAt }}</div>
             </div>
           </div>
-          <div class="timeline-item" *ngIf="appointment?.updated_at !== appointment?.created_at">
-            <div class="timeline-icon">
-              <app-icon [fontIcon]="'update'" class="timeline-icon-svg"></app-icon>
+          @if (appointment?.updated_at !== appointment?.created_at) {
+            <div class="timeline-item">
+              <div class="timeline-icon">
+                <app-icon [fontIcon]="'update'" class="timeline-icon-svg"></app-icon>
+              </div>
+              <div class="timeline-content">
+                <div class="timeline-title">Last Updated</div>
+                <div class="timeline-date">{{ formattedUpdatedAt }}</div>
+              </div>
             </div>
-            <div class="timeline-content">
-              <div class="timeline-title">Last Updated</div>
-              <div class="timeline-date">{{ formattedUpdatedAt }}</div>
-            </div>
-          </div>
+          }
         </div>
       </div>
     </div>

@@ -3,308 +3,320 @@
     <div class="card card-main">
       <div class="card-header">Basic Details</div>
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-grid">
-   
+
         <div class="input-form-wrapped">
           <app-input
-          class="input-form-field"
+            class="input-form-field"
             label="Service Name"
             placeholder="Enter service name"
             formControlName="name">
           </app-input>
-      
+
           <app-input
-          class="input-form-field"
+            class="input-form-field"
             label="Description"
             placeholder="Enter description"
             [multiline]="true"
             [rows]="3"
             formControlName="description">
           </app-input>
-      
+
           <app-selectbox
-          class="input-form-field"
+            class="input-form-field"
             label="Department"
             [options]="departmentOptions"
             [displayExpr]="'label'"
             [valueField]="'value'"
             [data]="form.controls['department'].value"
-                (dataChange)="form.controls['department'].setValue($event)">
+            (dataChange)="form.controls['department'].setValue($event)">
           </app-selectbox>
-      
+
           <app-selectbox
-          class="input-form-field"
+            class="input-form-field"
             label="Category"
             [options]="categoryOptions"
             [displayExpr]="'label'"
             [valueField]="'value'"
             [data]="form.controls['category'].value"
-                (dataChange)="form.controls['category'].setValue($event)">
+            (dataChange)="form.controls['category'].setValue($event)">
           </app-selectbox>
-      
+
           <app-input
-          class="input-form-field"
+            class="input-form-field"
             label="Price/Charges"
             placeholder="Enter price"
             type="number"
             formControlName="price">
           </app-input>
-      
+
           <app-input
-          class="input-form-field"
+            class="input-form-field"
             label="Duration (minutes)"
             placeholder="Enter duration"
             type="number"
             formControlName="duration">
           </app-input>
-      
+
           <app-selectbox
-          class="input-form-field"
+            class="input-form-field"
             label="Service Type"
             [options]="typeOptions"
             [displayExpr]="'label'"
             [valueField]="'value'"
             [data]="form.controls['consultationType'].value"
-                (dataChange)="form.controls['consultationType'].setValue($event)">
+            (dataChange)="form.controls['consultationType'].setValue($event)">
           </app-selectbox>
-      
+
           <app-selectbox
-          class="input-form-field"
+            class="input-form-field"
             label="Availability"
             [options]="availabilityOptions"
             [displayExpr]="'label'"
             [valueField]="'value'"
             [data]="form.controls['availability'].value"
-                (dataChange)="form.controls['availability'].setValue($event)">
+            (dataChange)="form.controls['availability'].setValue($event)">
           </app-selectbox>
-      
-              <!-- Service Tags -->
-              <div class="form-field input-complete">
-                <label>Service Tags</label>
-                <div class="tags-input">
-                  <div class="tags-container">
-                    <span class="tag" *ngFor="let tag of tags; index as i">
-                      {{ tag }}
-                      <button type="button" class="remove-tag" (click)="removeTag(i)">×</button>
-                    </span>
-                  </div>
-                  <div class="tag-input-group">
-                    <app-input 
-                      type="text" 
-                      placeholder="Add tags (press Enter)"
-                      [(ngModel)]="newTag"
-                      [ngModelOptions]="{standalone: true}"
-                      (keyup.enter)="addTag()">
-                    </app-input>
-                    <app-button
-                      text="Add"
-                      color="primary"
-                      [appearance]="'flat'"
-                      (btnClick)="addTag()">
-                    </app-button>
-                  </div>
-                </div>
+
+          <!-- Service Tags -->
+          <div class="form-field input-complete">
+            <label>Service Tags</label>
+            <div class="tags-input">
+              <div class="tags-container">
+                @for (tag of tags; track tag; let i = $index) {
+                  <span class="tag">
+                    {{ tag }}
+                    <button type="button" class="remove-tag" (click)="removeTag(i)">×</button>
+                  </span>
+                }
               </div>
-      
-              <!-- Service Dependencies -->
-              <div class="form-field input-complete">
-                <label>Prerequisites/Dependencies</label>
-                <div class="dependencies-input">
-                  <div class="dependencies-container">
-                    <span class="dependency" *ngFor="let dep of dependencies; index as i">
-                      {{ dep }}
-                      <button type="button" class="remove-dependency" (click)="removeDependency(i)">×</button>
-                    </span>
+              <div class="tag-input-group">
+                <app-input
+                  type="text"
+                  placeholder="Add tags (press Enter)"
+                  [(ngModel)]="newTag"
+                  [ngModelOptions]="{standalone: true}"
+                  (keyup.enter)="addTag()">
+                </app-input>
+                <app-button
+                  text="Add"
+                  color="primary"
+                  [appearance]="'flat'"
+                  (btnClick)="addTag()">
+                </app-button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Service Dependencies -->
+          <div class="form-field input-complete">
+            <label>Prerequisites/Dependencies</label>
+            <div class="dependencies-input">
+              <div class="dependencies-container">
+                @for (dep of dependencies; track dep; let i = $index) {
+                  <span class="dependency">
+                    {{ dep }}
+                    <button type="button" class="remove-dependency" (click)="removeDependency(i)">×</button>
+                  </span>
+                }
+              </div>
+              <div class="dependency-input-group">
+                <app-input
+                  placeholder="Add prerequisites (press Enter)"
+                  [(ngModel)]="newDependency"
+                  (keyup.enter)="addDependency()"
+                  [ngModelOptions]="{standalone: true}">
+                </app-input>
+                <app-button
+                  text="Add"
+                  color="primary"
+                  [appearance]="'flat'"
+                  (btnClick)="addDependency()">
+                </app-button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Capacity Management -->
+          <div class="capacity-section input-complete">
+            <h3>Capacity Management</h3>
+            <div class="capacity-grid">
+              <app-input
+                class="input-form-field"
+                label="Maximum Bookings"
+                placeholder="Enter max bookings"
+                type="number"
+                formControlName="maxBookings">
+              </app-input>
+
+              <app-input
+                class="input-form-field"
+                label="Current Bookings"
+                placeholder="Enter current bookings"
+                type="number"
+                formControlName="currentBookings">
+              </app-input>
+
+              <app-input
+                class="input-form-field"
+                label="Time Slots"
+                placeholder="e.g., 09:00,10:00,11:00"
+                formControlName="timeSlots">
+              </app-input>
+            </div>
+          </div>
+
+          <!-- Insurance Information -->
+          <div class="insurance-section input-complete">
+            <h3>Insurance & Billing</h3>
+            <div class="insurance-grid">
+              <app-input
+                label="Insurance Coverage (%)"
+                placeholder="Enter coverage percentage"
+                type="number"
+                formControlName="insuranceCoverage">
+              </app-input>
+
+              <div class="form-field">
+                <label>Insurance Codes</label>
+                <div class="codes-input">
+                  <div class="codes-container">
+                    @for (code of insuranceCodes; track code; let i = $index) {
+                      <span class="code">
+                        {{ code }}
+                        <button type="button" class="remove-code" (click)="removeInsuranceCode(i)">×</button>
+                      </span>
+                    }
                   </div>
-                  <div class="dependency-input-group">
+                  <div class="code-input-group">
                     <app-input
-                      placeholder="Add prerequisites (press Enter)"
-                      [(ngModel)]="newDependency"
-                      (keyup.enter)="addDependency()"
+                      placeholder="Add insurance code (press Enter)"
+                      [(ngModel)]="newInsuranceCode"
+                      (keyup.enter)="addInsuranceCode()"
                       [ngModelOptions]="{standalone: true}">
                     </app-input>
                     <app-button
                       text="Add"
                       color="primary"
                       [appearance]="'flat'"
-                      (btnClick)="addDependency()">
+                      (btnClick)="addInsuranceCode()">
                     </app-button>
                   </div>
                 </div>
               </div>
-      
-              <!-- Capacity Management -->
-              <div class="capacity-section input-complete">
-                <h3>Capacity Management</h3>
-                <div class="capacity-grid">
-                  <app-input
-                  class="input-form-field"
-                    label="Maximum Bookings"
-                    placeholder="Enter max bookings"
-                    type="number"
-                    formControlName="maxBookings">
-                  </app-input>
-      
-                  <app-input
-                  class="input-form-field"
-                    label="Current Bookings"
-                    placeholder="Enter current bookings"
-                    type="number"
-                    formControlName="currentBookings">
-                  </app-input>
-      
-                  <app-input
-                  class="input-form-field"
-                    label="Time Slots"
-                    placeholder="e.g., 09:00,10:00,11:00"
-                    formControlName="timeSlots">
-                  </app-input>
-                </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Pricing -->
+          <div class="pricing-section input-complete">
+            <h3>Dynamic Pricing & Discounts</h3>
+            <div class="pricing-options">
+              <div class="checkbox-field">
+                <input type="checkbox" formControlName="seasonalPricing" id="seasonalPricing">
+                <label for="seasonalPricing">Enable Seasonal Pricing</label>
               </div>
-      
-              <!-- Insurance Information -->
-              <div class="insurance-section input-complete">
-                <h3>Insurance & Billing</h3>
-                <div class="insurance-grid">
-                  <app-input
-                    label="Insurance Coverage (%)"
-                    placeholder="Enter coverage percentage"
-                    type="number"
-                    formControlName="insuranceCoverage">
-                  </app-input>
-      
-                  <div class="form-field">
-                    <label>Insurance Codes</label>
-                    <div class="codes-input">
-                      <div class="codes-container">
-                        <span class="code" *ngFor="let code of insuranceCodes; index as i">
-                          {{ code }}
-                          <button type="button" class="remove-code" (click)="removeInsuranceCode(i)">×</button>
-                        </span>
-                      </div>
-                      <div class="code-input-group">
-                        <app-input 
-                          placeholder="Add insurance code (press Enter)"
-                          [(ngModel)]="newInsuranceCode"
-                          (keyup.enter)="addInsuranceCode()"
-                          [ngModelOptions]="{standalone: true}">
+
+              @if (form.controls['seasonalPricing'].value) {
+                <div class="discounts-container">
+                  <h4>Discounts</h4>
+                  @for (discount of discounts; track discount; let i = $index) {
+                    <div class="discount-item">
+                      <div class="discount-grid">
+                        <app-input
+                          label="Discount Type"
+                          placeholder="e.g., Senior Citizen, Student"
+                          [value]="discount.type"
+                          (valueChange)="updateDiscount(i, 'type', $event)">
+                        </app-input>
+                        <app-input
+                          label="Percentage"
+                          placeholder="Enter percentage"
+                          type="number"
+                          [value]="discount.percentage.toString()"
+                          (valueChange)="updateDiscount(i, 'percentage', +$event)">
+                        </app-input>
+                        <app-input
+                          label="Valid Until"
+                          placeholder="YYYY-MM-DD"
+                          type="date"
+                          [value]="discount.validUntil"
+                          (valueChange)="updateDiscount(i, 'validUntil', $event)">
                         </app-input>
                         <app-button
-                          text="Add"
-                          color="primary"
-                          [appearance]="'flat'"
-                          (btnClick)="addInsuranceCode()">
+                          fontIcon="delete"
+                          color="warn"
+                          appearance="icon"
+                          (btnClick)="removeDiscount(i)">
                         </app-button>
                       </div>
                     </div>
-                  </div>
+                  }
+                  <app-button
+                    fontIcon="add"
+                    color="primary"
+                    appearance="flat"
+                    [text]="'Add Discount'"
+                    (btnClick)="addDiscount()">
+                  </app-button>
                 </div>
-              </div>
-      
-              <!-- Dynamic Pricing -->
-              <div class="pricing-section input-complete">
-                <h3>Dynamic Pricing & Discounts</h3>
-                <div class="pricing-options">
-                  <div class="checkbox-field">
-                    <input type="checkbox" formControlName="seasonalPricing" id="seasonalPricing">
-                    <label for="seasonalPricing">Enable Seasonal Pricing</label>
-                  </div>
-      
-                  <div class="discounts-container" *ngIf="form.controls['seasonalPricing'].value">
-                    <h4>Discounts</h4>
-                    <div class="discount-item" *ngFor="let discount of discounts; index as i">
-                      <div class="discount-grid">
-                                        <app-input
-                        label="Discount Type"
-                        placeholder="e.g., Senior Citizen, Student"
-                        [value]="discount.type"
-                        (valueChange)="updateDiscount(i, 'type', $event)">
-                      </app-input>
-                      <app-input
-                        label="Percentage"
-                        placeholder="Enter percentage"
-                        type="number"
-                        [value]="discount.percentage.toString()"
-                        (valueChange)="updateDiscount(i, 'percentage', +$event)">
-                      </app-input>
-                      <app-input
-                        label="Valid Until"
-                        placeholder="YYYY-MM-DD"
-                        type="date"
-                        [value]="discount.validUntil"
-                        (valueChange)="updateDiscount(i, 'validUntil', $event)">
-                      </app-input>
-                      <app-button
-                        fontIcon="delete"
-                        color="warn"
-                        appearance="icon"
-                        (btnClick)="removeDiscount(i)">
-                      </app-button>
-                      </div>
-                    </div>
+              }
+            </div>
+          </div>
+
+          <!-- Payment Plans -->
+          <div class="payment-section input-complete">
+            <h3>Payment Plans</h3>
+            <div class="payment-plans-container">
+              @for (plan of paymentPlans; track plan; let i = $index) {
+                <div class="payment-plan-item">
+                  <div class="plan-grid">
+                    <app-input
+                      label="Plan Name"
+                      placeholder="e.g., 3-Month Plan"
+                      [value]="plan.name"
+                      (valueChange)="updatePaymentPlan(i, 'name', $event)">
+                    </app-input>
+                    <app-input
+                      label="Installments"
+                      placeholder="Number of installments"
+                      type="number"
+                      [value]="plan.installments.toString()"
+                      (valueChange)="updatePaymentPlan(i, 'installments', +$event)">
+                    </app-input>
+                    <app-input
+                      label="Interest Rate (%)"
+                      placeholder="Interest rate"
+                      type="number"
+                      [value]="plan.interest.toString()"
+                      (valueChange)="updatePaymentPlan(i, 'interest', +$event)">
+                    </app-input>
                     <app-button
-                      fontIcon="add"
-                      color="primary"
-                      appearance="flat"
-                      [text]="'Add Discount'"
-                      (btnClick)="addDiscount()">
+                      fontIcon="delete"
+                      color="warn"
+                      appearance="icon"
+                      (btnClick)="removePaymentPlan(i)">
                     </app-button>
                   </div>
                 </div>
-              </div>
-      
-              <!-- Payment Plans -->
-              <div class="payment-section input-complete">
-                <h3>Payment Plans</h3>
-                <div class="payment-plans-container">
-                  <div class="payment-plan-item" *ngFor="let plan of paymentPlans; index as i">
-                    <div class="plan-grid">
-                      <app-input
-                        label="Plan Name"
-                        placeholder="e.g., 3-Month Plan"
-                        [value]="plan.name"
-                        (valueChange)="updatePaymentPlan(i, 'name', $event)">
-                      </app-input>
-                      <app-input
-                        label="Installments"
-                        placeholder="Number of installments"
-                        type="number"
-                        [value]="plan.installments.toString()"
-                        (valueChange)="updatePaymentPlan(i, 'installments', +$event)">
-                      </app-input>
-                      <app-input
-                        label="Interest Rate (%)"
-                        placeholder="Interest rate"
-                        type="number"
-                        [value]="plan.interest.toString()"
-                        (valueChange)="updatePaymentPlan(i, 'interest', +$event)">
-                      </app-input>
-                      <app-button
-                        fontIcon="delete"
-                        color="warn"
-                        appearance="icon"
-                        (btnClick)="removePaymentPlan(i)">
-                      </app-button>
-                    </div>
-                  </div>
-                  <app-button
-                    text="Add Payment Plan"
-                    fontIcon="add"
-                    color="primary"
-                    appearance="stroked"
-                    (btnClick)="addPaymentPlan()">
-                  </app-button>
-                </div>
-              </div>
-      
-              <!-- Media Section -->
+              }
+              <app-button
+                text="Add Payment Plan"
+                fontIcon="add"
+                color="primary"
+                appearance="stroked"
+                (btnClick)="addPaymentPlan()">
+              </app-button>
+            </div>
+          </div>
+
+          <!-- Media Section -->
           <div class="media-section in-form input-complete">
             <div class="card-subtitle">Service Media & Details</div>
             <p class="sub">Upload images and documents related to the service.</p>
-      
+
             <!-- Images Upload -->
             <h3>Images</h3>
-            <div 
-              class="dropzone" 
+            <div
+              class="dropzone"
               [class.dragover]="isImagesDragOver"
               (drop)="onImagesDrop($event)"
               (dragover)="onImagesDragOver($event)"
@@ -318,19 +330,23 @@
                 </label>
               </div>
             </div>
-      
-            <div class="thumbs" *ngIf="images.length">
-              <div class="thumb" *ngFor="let img of images; index as i">
-                <img [src]="img.previewUrl" [alt]="img.name">
-                <div class="thumb-name">{{ img.name }}</div>
-                <button type="button" class="remove" (click)="removeImage(i)">Remove</button>
+
+            @if (images.length) {
+              <div class="thumbs">
+                @for (img of images; track img; let i = $index) {
+                  <div class="thumb">
+                    <img [src]="img.previewUrl" [alt]="img.name">
+                    <div class="thumb-name">{{ img.name }}</div>
+                    <button type="button" class="remove" (click)="removeImage(i)">Remove</button>
+                  </div>
+                }
               </div>
-            </div>
-      
+            }
+
             <!-- Documents Upload -->
             <h3>Documents</h3>
-            <div 
-              class="dropzone" 
+            <div
+              class="dropzone"
               [class.dragover]="isDocsDragOver"
               (drop)="onDocumentsDrop($event)"
               (dragover)="onDocumentsDragOver($event)"
@@ -344,14 +360,18 @@
                 </label>
               </div>
             </div>
-      
-            <div class="docs" *ngIf="documents.length">
-              <div class="doc" *ngFor="let doc of documents; index as i">
-                <app-icon fontIcon="description" [size]="18"></app-icon>
-                <span class="doc-name">{{ doc.name }}</span>
-                <button type="button" class="remove" (click)="removeDocument(i)">Remove</button>
+
+            @if (documents.length) {
+              <div class="docs">
+                @for (doc of documents; track doc; let i = $index) {
+                  <div class="doc">
+                    <app-icon fontIcon="description" [size]="18"></app-icon>
+                    <span class="doc-name">{{ doc.name }}</span>
+                    <button type="button" class="remove" (click)="removeDocument(i)">Remove</button>
+                  </div>
+                }
               </div>
-            </div>
+            }
           </div>
         </div>
       </form>

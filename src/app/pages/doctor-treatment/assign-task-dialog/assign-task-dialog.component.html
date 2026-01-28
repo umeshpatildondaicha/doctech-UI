@@ -1,9 +1,11 @@
 <div class="assign-task-dialog">
   <div class="dialog-content">
-    <div class="staff-info" *ngIf="data.staffName">
-      <span class="staff-label">Assigning to:</span>
-      <span class="staff-name">{{ data.staffName }}</span>
-    </div>
+    @if (data.staffName) {
+      <div class="staff-info">
+        <span class="staff-label">Assigning to:</span>
+        <span class="staff-name">{{ data.staffName }}</span>
+      </div>
+    }
 
     <form [formGroup]="assignTaskForm" class="assign-task-form">
       <div class="form-row">

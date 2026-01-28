@@ -1,11 +1,11 @@
 <div class="diet-dashboard">
 
   <!-- Tabs Section -->
-  <mat-tab-group 
+  <mat-tab-group
     [selectedIndex]="selectedTabIndex"
     (selectedIndexChange)="onTabChange($event)"
     class="diet-tabs"
-  >
+    >
     <!-- Diets Tab -->
     <mat-tab label="Diets">
       <div class="tab-content">
@@ -73,7 +73,9 @@
 
           <mat-form-field appearance="outline" class="select-field">
             <mat-select [(ngModel)]="selectedMealType" (selectionChange)="filterDiets()" placeholder="Meal Type">
-              <mat-option *ngFor="let mt of mealTypes" [value]="mt.value">{{ mt.label }}</mat-option>
+              @for (mt of mealTypes; track mt) {
+                <mat-option [value]="mt.value">{{ mt.label }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
 
@@ -87,34 +89,37 @@
 
         <!-- Diet Cards Grid -->
         <div class="cards-grid">
-          <app-diet-card
-            *ngFor="let diet of filteredDiets"
-            [diet]="diet"
-            [showActions]="true"
-            [clickable]="true"
-            (cardClick)="onViewDiet($event)"
-            (viewClick)="onViewDiet($event)"
-            (editClick)="onEditDiet($event)"
-            (deleteClick)="onDeleteDiet($event)"
-            (videoClick)="onVideoClick($event)"
-            (pdfClick)="onPdfClick($event)"
-          ></app-diet-card>
+          @for (diet of filteredDiets; track diet) {
+            <app-diet-card
+              [diet]="diet"
+              [showActions]="true"
+              [clickable]="true"
+              (cardClick)="onViewDiet($event)"
+              (viewClick)="onViewDiet($event)"
+              (editClick)="onEditDiet($event)"
+              (deleteClick)="onDeleteDiet($event)"
+              (videoClick)="onVideoClick($event)"
+              (pdfClick)="onPdfClick($event)"
+            ></app-diet-card>
+          }
         </div>
 
         <!-- No Results -->
-        <div class="no-results" *ngIf="filteredDiets.length === 0">
-          <div class="no-results-card">
-            <div class="no-results-content">
-              <mat-icon class="no-results-icon">restaurant</mat-icon>
-              <h3>No diets found</h3>
-              <p>Try adjusting your search criteria or create a new diet.</p>
-              <button mat-raised-button color="primary" (click)="onCreateDiet()">
-                <mat-icon>add</mat-icon>
-                Add Diet
-              </button>
+        @if (filteredDiets.length === 0) {
+          <div class="no-results">
+            <div class="no-results-card">
+              <div class="no-results-content">
+                <mat-icon class="no-results-icon">restaurant</mat-icon>
+                <h3>No diets found</h3>
+                <p>Try adjusting your search criteria or create a new diet.</p>
+                <button mat-raised-button color="primary" (click)="onCreateDiet()">
+                  <mat-icon>add</mat-icon>
+                  Add Diet
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        }
       </div>
     </mat-tab>
 
@@ -173,67 +178,69 @@
               [(ngModel)]="planSearchQuery"
               (input)="onPlanSearchChange($event)"
               placeholder="Search Diet plans"
-            />
-          </mat-form-field>
+              />
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="select-field">
-            <mat-select [(ngModel)]="selectedPlanType" (selectionChange)="onPlanTypeChange($event)">
-              <mat-option value="">Plan Type</mat-option>
-              <mat-option value="weekly">Weekly</mat-option>
-              <mat-option value="monthly">Monthly</mat-option>
-              <mat-option value="custom">Custom</mat-option>
-            </mat-select>
-          </mat-form-field>
+            <mat-form-field appearance="outline" class="select-field">
+              <mat-select [(ngModel)]="selectedPlanType" (selectionChange)="onPlanTypeChange($event)">
+                <mat-option value="">Plan Type</mat-option>
+                <mat-option value="weekly">Weekly</mat-option>
+                <mat-option value="monthly">Monthly</mat-option>
+                <mat-option value="custom">Custom</mat-option>
+              </mat-select>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="select-field">
-            <mat-select [(ngModel)]="selectedPlanStatus" (selectionChange)="onPlanStatusChange($event)">
-              <mat-option value="">Plan Status</mat-option>
-              <mat-option value="active">Active</mat-option>
-              <mat-option value="inactive">Inactive</mat-option>
-              <mat-option value="draft">Draft</mat-option>
-            </mat-select>
-          </mat-form-field>
+            <mat-form-field appearance="outline" class="select-field">
+              <mat-select [(ngModel)]="selectedPlanStatus" (selectionChange)="onPlanStatusChange($event)">
+                <mat-option value="">Plan Status</mat-option>
+                <mat-option value="active">Active</mat-option>
+                <mat-option value="inactive">Inactive</mat-option>
+                <mat-option value="draft">Draft</mat-option>
+              </mat-select>
+            </mat-form-field>
 
-          <button class="clear-link" type="button" (click)="clearPlanFilters()">Clear Filters</button>
+            <button class="clear-link" type="button" (click)="clearPlanFilters()">Clear Filters</button>
 
-          <button mat-raised-button color="primary" class="add-btn" (click)="onCreateDietPlan()">
-            <mat-icon>add</mat-icon>
-            Create Weekly Plan
-          </button>
-        </div>
-
-        <!-- Diet Plans Content -->
-        <div class="diet-plans-content">
-          <div class="plans-grid" *ngIf="filteredDietPlans.length > 0; else noPlans">
-            <app-diet-plan-card
-              *ngFor="let plan of filteredDietPlans"
-              [plan]="plan"
-              [showActions]="true"
-              [showFooter]="true"
-              (cardClick)="onViewPlan($event)"
-              (viewClick)="onViewPlan($event)"
-              (editClick)="onEditPlan($event)"
-              (deleteClick)="onDeletePlan($event)"
-            ></app-diet-plan-card>
+            <button mat-raised-button color="primary" class="add-btn" (click)="onCreateDietPlan()">
+              <mat-icon>add</mat-icon>
+              Create Weekly Plan
+            </button>
           </div>
 
-          <ng-template #noPlans>
-            <div class="no-results">
-              <div class="no-results-card">
-                <div class="no-results-content">
-                  <mat-icon class="no-results-icon">calendar_today</mat-icon>
-                  <h3>No diet plans found</h3>
-                  <p>Create your first weekly diet plan to get started.</p>
-                  <button mat-raised-button color="primary" (click)="onCreateDietPlan()">
-                    <mat-icon>add</mat-icon>
-                    Create Weekly Plan
-                  </button>
+          <!-- Diet Plans Content -->
+          <div class="diet-plans-content">
+            @if (filteredDietPlans.length > 0) {
+              <div class="plans-grid">
+                @for (plan of filteredDietPlans; track plan) {
+                  <app-diet-plan-card
+                    [plan]="plan"
+                    [showActions]="true"
+                    [showFooter]="true"
+                    (cardClick)="onViewPlan($event)"
+                    (viewClick)="onViewPlan($event)"
+                    (editClick)="onEditPlan($event)"
+                    (deleteClick)="onDeletePlan($event)"
+                  ></app-diet-plan-card>
+                }
+              </div>
+            } @else {
+              <div class="no-results">
+                <div class="no-results-card">
+                  <div class="no-results-content">
+                    <mat-icon class="no-results-icon">calendar_today</mat-icon>
+                    <h3>No diet plans found</h3>
+                    <p>Create your first weekly diet plan to get started.</p>
+                    <button mat-raised-button color="primary" (click)="onCreateDietPlan()">
+                      <mat-icon>add</mat-icon>
+                      Create Weekly Plan
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </ng-template>
+            }
+
+          </div>
         </div>
-      </div>
-    </mat-tab>
-  </mat-tab-group>
-</div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>

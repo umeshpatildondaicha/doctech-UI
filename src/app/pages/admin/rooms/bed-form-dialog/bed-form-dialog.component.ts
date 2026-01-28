@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { DIALOG_DATA_TOKEN, AppInputComponent, AppSelectboxComponent, IconComponent } from '@lk/core';
@@ -22,12 +22,11 @@ export interface BedFormDialogData {
 @Component({
     selector: 'app-bed-form-dialog',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        AppInputComponent,
-        AppSelectboxComponent,
-        IconComponent
-    ],
+    ReactiveFormsModule,
+    AppInputComponent,
+    AppSelectboxComponent,
+    IconComponent
+],
     templateUrl: './bed-form-dialog.component.html',
     styleUrls: ['./bed-form-dialog.component.scss']
 })

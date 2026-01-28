@@ -2,7 +2,7 @@
   <!-- Dialog Content -->
   <div class="dialog-content">
     <form [formGroup]="exerciseGroupForm" (ngSubmit)="onSubmit()" class="form">
-      
+
       <!-- Group Information -->
       <div class="form-section">
         <h3 class="section-title">Group Information</h3>
@@ -66,15 +66,17 @@
               <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
           </div>
-          
+
           <div class="filter-container">
             <mat-form-field appearance="outline" class="filter-field">
               <mat-label>Category</mat-label>
               <mat-select [(ngModel)]="selectedCategory" [ngModelOptions]="{standalone: true}" (selectionChange)="onCategoryFilterChange()">
                 <mat-option value="">All Categories</mat-option>
-                <mat-option *ngFor="let category of categories" [value]="category.value">
-                  {{ category.label }}
-                </mat-option>
+                @for (category of categories; track category) {
+                  <mat-option [value]="category.value">
+                    {{ category.label }}
+                  </mat-option>
+                }
               </mat-select>
             </mat-form-field>
 
@@ -82,78 +84,99 @@
               <mat-label>Difficulty</mat-label>
               <mat-select [(ngModel)]="selectedDifficulty" [ngModelOptions]="{standalone: true}" (selectionChange)="onDifficultyFilterChange()">
                 <mat-option value="">All Difficulties</mat-option>
-                <mat-option *ngFor="let difficulty of difficulties" [value]="difficulty.value">
-                  {{ difficulty.label }}
-                </mat-option>
+                @for (difficulty of difficulties; track difficulty) {
+                  <mat-option [value]="difficulty.value">
+                    {{ difficulty.label }}
+                  </mat-option>
+                }
               </mat-select>
             </mat-form-field>
           </div>
         </div>
 
         <!-- Selected Exercises -->
-        <div class="selected-exercises" *ngIf="selectedExercises.length > 0">
-          <h4 class="subsection-title">Selected Exercises ({{ selectedExercises.length }})</h4>
-          <div class="selected-exercises-list">
-            <div class="selected-exercise-item" *ngFor="let exercise of selectedExercises; let i = index">
-              <div class="exercise-info">
-                <div class="exercise-header">
-                  <h5 class="exercise-name">{{ exercise.name }}</h5>
-                  <div class="exercise-meta">
-                    <span class="category-badge">{{ exercise.category }}</span>
-                    <span class="difficulty-badge" [class]="'difficulty-' + exercise.difficulty.toLowerCase()">
-                      {{ exercise.difficulty }}
-                    </span>
+        @if (selectedExercises.length > 0) {
+          <div class="selected-exercises">
+            <h4 class="subsection-title">Selected Exercises ({{ selectedExercises.length }})</h4>
+            <div class="selected-exercises-list">
+              @for (exercise of selectedExercises; track exercise; let i = $index) {
+                <div class="selected-exercise-item">
+                  <div class="exercise-info">
+                    <div class="exercise-header">
+                      <h5 class="exercise-name">{{ exercise.name }}</h5>
+                      <div class="exercise-meta">
+                        <span class="category-badge">{{ exercise.category }}</span>
+                        <span class="difficulty-badge" [class]="'difficulty-' + exercise.difficulty.toLowerCase()">
+                          {{ exercise.difficulty }}
+                        </span>
+                      </div>
+                    </div>
+                    <p class="exercise-description">{{ exercise.description }}</p>
+                    <div class="exercise-details">
+                      <span class="detail-item">
+                        <mat-icon>fitness_center</mat-icon>
+                        {{ exercise.targetMuscles.join(', ') }}
+                      </span>
+                      @if (exercise.equipment && exercise.equipment.length > 0) {
+                        <span class="detail-item">
+                          <mat-icon>build</mat-icon>
+                          {{ exercise.equipment.join(', ') }}
+                        </span>
+                      }
+                    </div>
+                  </div>
+                  <div class="exercise-actions">
+                    <button type="button" mat-icon-button (click)="removeExerciseFromGroup(i)" class="remove-btn">
+                      <mat-icon>remove_circle</mat-icon>
+                    </button>
                   </div>
                 </div>
-                <p class="exercise-description">{{ exercise.description }}</p>
-                <div class="exercise-details">
-                  <span class="detail-item">
-                    <mat-icon>fitness_center</mat-icon>
-                    {{ exercise.targetMuscles.join(', ') }}
-                  </span>
-                  <span class="detail-item" *ngIf="exercise.equipment && exercise.equipment.length > 0">
-                    <mat-icon>build</mat-icon>
-                    {{ exercise.equipment.join(', ') }}
-                  </span>
-                </div>
-              </div>
-              <div class="exercise-actions">
-                <button type="button" mat-icon-button (click)="removeExerciseFromGroup(i)" class="remove-btn">
-                  <mat-icon>remove_circle</mat-icon>
-                </button>
-              </div>
+              }
             </div>
           </div>
-        </div>
+        }
 
         <!-- Available Exercises -->
         <div class="available-exercises">
           <h4 class="subsection-title">Available Exercises</h4>
-          <div class="exercises-grid" *ngIf="getFilteredExercises().length > 0; else noExercises">
-            <div class="exercise-card" 
-                 *ngFor="let exercise of getFilteredExercises()" 
-                 [class.selected]="isExerciseSelected(exercise)"
-                 (click)="toggleExerciseSelection(exercise)">
-              <div class="card-header">
-                <h5 class="exercise-name">{{ exercise.name }}</h5>
-                <div class="exercise-badges">
-                  <span class="category-badge">{{ exercise.category }}</span>
-                  <span class="difficulty-badge" [class]="'difficulty-' + exercise.difficulty.toLowerCase()">
-                    {{ exercise.difficulty }}
-                  </span>
+          @if (getFilteredExercises().length > 0) {
+            <div class="exercises-grid">
+              @for (exercise of getFilteredExercises(); track exercise) {
+                <div class="exercise-card"
+                  [class.selected]="isExerciseSelected(exercise)"
+                  (click)="toggleExerciseSelection(exercise)">
+                  <div class="card-header">
+                    <h5 class="exercise-name">{{ exercise.name }}</h5>
+                    <div class="exercise-badges">
+                      <span class="category-badge">{{ exercise.category }}</span>
+                      <span class="difficulty-badge" [class]="'difficulty-' + exercise.difficulty.toLowerCase()">
+                        {{ exercise.difficulty }}
+                      </span>
+                    </div>
+                  </div>
+                  <p class="exercise-description">{{ exercise.description }}</p>
+                  <div class="exercise-muscles">
+                    <mat-icon>fitness_center</mat-icon>
+                    <span>{{ exercise.targetMuscles.join(', ') }}</span>
+                  </div>
+                  <div class="selection-indicator">
+                    @if (isExerciseSelected(exercise)) {
+                      <mat-icon>check_circle</mat-icon>
+                    }
+                    @if (!isExerciseSelected(exercise)) {
+                      <mat-icon>radio_button_unchecked</mat-icon>
+                    }
+                  </div>
                 </div>
-              </div>
-              <p class="exercise-description">{{ exercise.description }}</p>
-              <div class="exercise-muscles">
-                <mat-icon>fitness_center</mat-icon>
-                <span>{{ exercise.targetMuscles.join(', ') }}</span>
-              </div>
-              <div class="selection-indicator">
-                <mat-icon *ngIf="isExerciseSelected(exercise)">check_circle</mat-icon>
-                <mat-icon *ngIf="!isExerciseSelected(exercise)">radio_button_unchecked</mat-icon>
-              </div>
+              }
             </div>
-          </div>
+          } @else {
+            <div class="no-exercises">
+              <mat-icon class="no-exercises-icon">fitness_center</mat-icon>
+              <h4>No exercises found</h4>
+              <p>Try adjusting your search criteria or create some exercises first.</p>
+            </div>
+          }
         </div>
       </div>
 
@@ -163,10 +186,3 @@
 </div>
 
 <!-- No Exercises Template -->
-<ng-template #noExercises>
-  <div class="no-exercises">
-    <mat-icon class="no-exercises-icon">fitness_center</mat-icon>
-    <h4>No exercises found</h4>
-    <p>Try adjusting your search criteria or create some exercises first.</p>
-  </div>
-</ng-template> 

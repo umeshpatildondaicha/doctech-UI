@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,13 +15,12 @@ export interface ScheduleRoundsDialogData {
 @Component({
     selector: 'app-schedule-rounds-dialog',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        AppInputComponent,
-        AppSelectboxComponent
-    ],
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    AppInputComponent,
+    AppSelectboxComponent
+],
     templateUrl: './schedule-rounds-dialog.component.html',
     styleUrls: ['./schedule-rounds-dialog.component.scss']
 })

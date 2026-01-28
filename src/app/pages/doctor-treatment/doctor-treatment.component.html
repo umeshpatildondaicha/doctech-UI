@@ -5,7 +5,7 @@
 
   <!-- Main Content Tabs -->
   <mat-tab-group class="doctor-treatment-tabs" [selectedIndex]="getSelectedIndex()" (selectedIndexChange)="onTabChangeIndex($event)">
-    
+
     <!-- Practical Admitted Patients Dashboard -->
     <mat-tab label="Dashboard">
       <div class="tab-content practical-dashboard">
@@ -22,7 +22,7 @@
                 <div class="metric-label">Total Patients</div>
               </div>
             </div>
-            
+
             <div class="metric-card critical">
               <div class="metric-icon">
                 <mat-icon>warning</mat-icon>
@@ -32,7 +32,7 @@
                 <div class="metric-label">Critical Patients</div>
               </div>
             </div>
-            
+
             <div class="metric-card rounds">
               <div class="metric-icon">
                 <mat-icon>schedule</mat-icon>
@@ -42,7 +42,7 @@
                 <div class="metric-label">Pending Rounds</div>
               </div>
             </div>
-            
+
             <div class="metric-card medications">
               <div class="metric-icon">
                 <mat-icon>medication</mat-icon>
@@ -52,7 +52,7 @@
                 <div class="metric-label">Due Medications</div>
               </div>
             </div>
-            
+
             <div class="metric-card discharge">
               <div class="metric-icon">
                 <mat-icon>exit_to_app</mat-icon>
@@ -62,7 +62,7 @@
                 <div class="metric-label">Ready for Discharge</div>
               </div>
             </div>
-            
+
             <div class="metric-card occupancy">
               <div class="metric-icon">
                 <mat-icon>hotel</mat-icon>
@@ -89,7 +89,7 @@
                 </highcharts-chart>
               </div>
             </div>
-            
+
             <div class="chart-card">
               <div class="chart-header">
                 <h3>Ward Occupancy</h3>
@@ -101,7 +101,7 @@
                 </highcharts-chart>
               </div>
             </div>
-            
+
             <div class="chart-card">
               <div class="chart-header">
                 <h3>Rounds Completion Trend</h3>
@@ -113,7 +113,7 @@
                 </highcharts-chart>
               </div>
             </div>
-            
+
             <div class="chart-card">
               <div class="chart-header">
                 <h3>Medication Status</h3>
@@ -137,44 +137,46 @@
             </h3>
             <button mat-stroked-button>View All</button>
           </div>
-          
+
           <div class="critical-patients-grid">
-            <div *ngFor="let patient of criticalPatients" class="critical-patient-card">
-              <div class="patient-header">
-                <div class="patient-info">
-                  <h4>{{ patient.name }}</h4>
-                  <p>{{ patient.ward }} • {{ patient.room }}, {{ patient.bed }}</p>
+            @for (patient of criticalPatients; track patient) {
+              <div class="critical-patient-card">
+                <div class="patient-header">
+                  <div class="patient-info">
+                    <h4>{{ patient.name }}</h4>
+                    <p>{{ patient.ward }} • {{ patient.room }}, {{ patient.bed }}</p>
+                  </div>
+                  <div class="patient-status" [style.background-color]="getStatusColor(patient.status)">
+                    {{ patient.status }}
+                  </div>
                 </div>
-                <div class="patient-status" [style.background-color]="getStatusColor(patient.status)">
-                  {{ patient.status }}
+                <div class="patient-details">
+                  <div class="detail-item">
+                    <span class="label">Priority:</span>
+                    <span class="value" [style.color]="getPriorityColor(patient.priority)">{{ patient.priority }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">Last Vitals:</span>
+                    <span class="value">{{ formatDate(patient.lastVitals) }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">Active Alerts:</span>
+                    <span class="value">{{ patient.alerts }}</span>
+                  </div>
+                </div>
+                <div class="patient-actions">
+                  <button mat-icon-button matTooltip="View Details">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                  <button mat-icon-button matTooltip="Start Round">
+                    <mat-icon>assessment</mat-icon>
+                  </button>
+                  <button mat-icon-button matTooltip="View Vitals">
+                    <mat-icon>monitor_heart</mat-icon>
+                  </button>
                 </div>
               </div>
-              <div class="patient-details">
-                <div class="detail-item">
-                  <span class="label">Priority:</span>
-                  <span class="value" [style.color]="getPriorityColor(patient.priority)">{{ patient.priority }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="label">Last Vitals:</span>
-                  <span class="value">{{ formatDate(patient.lastVitals) }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="label">Active Alerts:</span>
-                  <span class="value">{{ patient.alerts }}</span>
-                </div>
-              </div>
-              <div class="patient-actions">
-                <button mat-icon-button matTooltip="View Details">
-                  <mat-icon>visibility</mat-icon>
-                </button>
-                <button mat-icon-button matTooltip="Start Round">
-                  <mat-icon>assessment</mat-icon>
-                </button>
-                <button mat-icon-button matTooltip="View Vitals">
-                  <mat-icon>monitor_heart</mat-icon>
-                </button>
-              </div>
-            </div>
+            }
           </div>
         </div>
 
@@ -187,27 +189,29 @@
             </h3>
             <button mat-stroked-button>View All</button>
           </div>
-          
+
           <div class="rounds-list">
-            <div *ngFor="let round of pendingRounds" class="round-item">
-              <div class="round-info">
-                <div class="round-patient">{{ round.patientName }}</div>
-                <div class="round-location">{{ round.ward }} • {{ round.room }}, {{ round.bed }}</div>
-                <div class="round-time">{{ formatDate(round.scheduledTime) }}</div>
-              </div>
-              <div class="round-details">
-                <div class="round-type">{{ round.roundType.replace('_', ' ') }}</div>
-                <div class="round-priority" [style.background-color]="getPriorityColor(round.priority)">
-                  {{ round.priority }}
+            @for (round of pendingRounds; track round) {
+              <div class="round-item">
+                <div class="round-info">
+                  <div class="round-patient">{{ round.patientName }}</div>
+                  <div class="round-location">{{ round.ward }} • {{ round.room }}, {{ round.bed }}</div>
+                  <div class="round-time">{{ formatDate(round.scheduledTime) }}</div>
+                </div>
+                <div class="round-details">
+                  <div class="round-type">{{ round.roundType.replace('_', ' ') }}</div>
+                  <div class="round-priority" [style.background-color]="getPriorityColor(round.priority)">
+                    {{ round.priority }}
+                  </div>
+                </div>
+                <div class="round-actions">
+                  <button mat-raised-button color="primary" size="small">Start Round</button>
+                  <button mat-icon-button matTooltip="Reschedule">
+                    <mat-icon>schedule</mat-icon>
+                  </button>
                 </div>
               </div>
-              <div class="round-actions">
-                <button mat-raised-button color="primary" size="small">Start Round</button>
-                <button mat-icon-button matTooltip="Reschedule">
-                  <mat-icon>schedule</mat-icon>
-                </button>
-              </div>
-            </div>
+            }
           </div>
         </div>
 
@@ -220,28 +224,30 @@
             </h3>
             <button mat-stroked-button>View All</button>
           </div>
-          
+
           <div class="medications-list">
-            <div *ngFor="let med of dueMedications" class="medication-item" [class.overdue]="med.overdue">
-              <div class="medication-info">
-                <div class="medication-patient">{{ med.patientName }}</div>
-                <div class="medication-location">{{ med.ward }} • {{ med.room }}, {{ med.bed }}</div>
-                <div class="medication-name">{{ med.medication }}</div>
-                <div class="medication-dosage">{{ med.dosage }}</div>
-              </div>
-              <div class="medication-due">
-                <div class="due-time">{{ formatDate(med.dueTime) }}</div>
-                <div class="due-status" [class.overdue]="med.overdue">
-                  {{ med.overdue ? 'OVERDUE' : 'DUE' }}
+            @for (med of dueMedications; track med) {
+              <div class="medication-item" [class.overdue]="med.overdue">
+                <div class="medication-info">
+                  <div class="medication-patient">{{ med.patientName }}</div>
+                  <div class="medication-location">{{ med.ward }} • {{ med.room }}, {{ med.bed }}</div>
+                  <div class="medication-name">{{ med.medication }}</div>
+                  <div class="medication-dosage">{{ med.dosage }}</div>
+                </div>
+                <div class="medication-due">
+                  <div class="due-time">{{ formatDate(med.dueTime) }}</div>
+                  <div class="due-status" [class.overdue]="med.overdue">
+                    {{ med.overdue ? 'OVERDUE' : 'DUE' }}
+                  </div>
+                </div>
+                <div class="medication-actions">
+                  <button mat-raised-button color="primary" size="small">Administer</button>
+                  <button mat-icon-button matTooltip="View Details">
+                    <mat-icon>info</mat-icon>
+                  </button>
                 </div>
               </div>
-              <div class="medication-actions">
-                <button mat-raised-button color="primary" size="small">Administer</button>
-                <button mat-icon-button matTooltip="View Details">
-                  <mat-icon>info</mat-icon>
-                </button>
-              </div>
-            </div>
+            }
           </div>
         </div>
 
@@ -254,35 +260,37 @@
             </h3>
             <button mat-stroked-button>View All</button>
           </div>
-          
+
           <div class="discharge-patients-grid">
-            <div *ngFor="let patient of dischargeReadyPatients" class="discharge-patient-card">
-              <div class="patient-header">
-                <div class="patient-info">
-                  <h4>{{ patient.name }}</h4>
-                  <p>{{ patient.ward }} • {{ patient.room }}, {{ patient.bed }}</p>
+            @for (patient of dischargeReadyPatients; track patient) {
+              <div class="discharge-patient-card">
+                <div class="patient-header">
+                  <div class="patient-info">
+                    <h4>{{ patient.name }}</h4>
+                    <p>{{ patient.ward }} • {{ patient.room }}, {{ patient.bed }}</p>
+                  </div>
+                  <div class="discharge-status" [style.background-color]="patient.readiness === 'READY' ? '#27ae60' : '#f39c12'">
+                    {{ patient.readiness }}
+                  </div>
                 </div>
-                <div class="discharge-status" [style.background-color]="patient.readiness === 'READY' ? '#27ae60' : '#f39c12'">
-                  {{ patient.readiness }}
+                <div class="patient-details">
+                  <div class="detail-item">
+                    <span class="label">Length of Stay:</span>
+                    <span class="value">{{ patient.lengthOfStay }} days</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="label">Expected Discharge:</span>
+                    <span class="value">{{ formatDate(patient.expectedDischarge) }}</span>
+                  </div>
+                </div>
+                <div class="patient-actions">
+                  <button mat-raised-button color="primary" size="small">Process Discharge</button>
+                  <button mat-icon-button matTooltip="View Details">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
                 </div>
               </div>
-              <div class="patient-details">
-                <div class="detail-item">
-                  <span class="label">Length of Stay:</span>
-                  <span class="value">{{ patient.lengthOfStay }} days</span>
-                </div>
-                <div class="detail-item">
-                  <span class="label">Expected Discharge:</span>
-                  <span class="value">{{ formatDate(patient.expectedDischarge) }}</span>
-                </div>
-              </div>
-              <div class="patient-actions">
-                <button mat-raised-button color="primary" size="small">Process Discharge</button>
-                <button mat-icon-button matTooltip="View Details">
-                  <mat-icon>visibility</mat-icon>
-                </button>
-              </div>
-            </div>
+            }
           </div>
         </div>
 
@@ -292,7 +300,7 @@
     <!-- Unified Patients Tab -->
     <mat-tab label="Patients">
       <div class="tab-content professional-layout">
-        
+
         <!-- Admitted Patients - Compact Card Design -->
         <div class="admitted-patients-section">
           <div class="admitted-layout">
@@ -300,16 +308,16 @@
               <div class="admitted-header">
                 <div class="admitted-actions">
                   <div class="custom-search-bar">
-                    <app-input 
-                      type="text" 
-                      [(ngModel)]="searchQuery" 
+                    <app-input
+                      type="text"
+                      [(ngModel)]="searchQuery"
                       placeholder="Search patients..."
                       prefixIconName="search"
                       class="search-input">
                     </app-input>
-                    
+
                   </div>
-                  <app-button 
+                  <app-button
                     appearance="raised"
                     color="primary"
                     [text]="'Admit Patient'"
@@ -321,35 +329,37 @@
 
               <!-- Patient Cards Grid (compact) -->
               <div class="admitted-cards-grid">
-                <div *ngFor="let patient of getFilteredPatients()" class="admitted-card" (click)="selectPatient(patient)">
-                  <div class="card-meta">
-                    <div class="avatar">
-                      <span>{{ patient.patientName.charAt(0) }}</span>
+                @for (patient of getFilteredPatients(); track patient) {
+                  <div class="admitted-card" (click)="selectPatient(patient)">
+                    <div class="card-meta">
+                      <div class="avatar">
+                        <span>{{ patient.patientName.charAt(0) }}</span>
+                      </div>
+                      <div class="meta-text">
+                        <div class="name">{{ patient.patientName }}</div>
+                        <div class="sub">{{ patient.age }} {{ patient.gender }}, Room {{ patient.room }}</div>
+                      </div>
+                      <div class="meta-indicator" [class.critical]="calculatePatientPriority(patient) >= 100" [class.warning]="calculatePatientPriority(patient) >= 70 && calculatePatientPriority(patient) < 100" [class.stable]="calculatePatientPriority(patient) < 70"></div>
                     </div>
-                    <div class="meta-text">
-                      <div class="name">{{ patient.patientName }}</div>
-                      <div class="sub">{{ patient.age }} {{ patient.gender }}, Room {{ patient.room }}</div>
+                    <div class="badge-row">
+                      <span class="pill" [style.background-color]="getStatusColor(patient.currentStatus)">{{ patient.currentStatus }}</span>
+                      <span class="pill light">{{ patient.ward }}</span>
                     </div>
-                    <div class="meta-indicator" [class.critical]="calculatePatientPriority(patient) >= 100" [class.warning]="calculatePatientPriority(patient) >= 70 && calculatePatientPriority(patient) < 100" [class.stable]="calculatePatientPriority(patient) < 70"></div>
+                    <div class="card-actions">
+                      <app-button
+                        appearance="stroked"
+                        color="primary"
+                        [text]="'View Chart'"
+                        (btnClick)="navigateToPatientProfile(patient); $event.stopPropagation()">
+                      </app-button>
+                      <app-button
+                        appearance="stroked"
+                        [text]="'Add Task'"
+                        (btnClick)="addTask(patient); $event.stopPropagation()">
+                      </app-button>
+                    </div>
                   </div>
-                  <div class="badge-row">
-                    <span class="pill" [style.background-color]="getStatusColor(patient.currentStatus)">{{ patient.currentStatus }}</span>
-                    <span class="pill light">{{ patient.ward }}</span>
-                  </div>
-                  <div class="card-actions">
-                    <app-button 
-                      appearance="stroked"
-                      color="primary"
-                      [text]="'View Chart'"
-                      (btnClick)="navigateToPatientProfile(patient); $event.stopPropagation()">
-                    </app-button>
-                    <app-button 
-                      appearance="stroked"
-                      [text]="'Add Task'"
-                      (btnClick)="addTask(patient); $event.stopPropagation()">
-                    </app-button>
-                  </div>
-                </div>
+                }
               </div>
             </div>
 
@@ -365,23 +375,27 @@
                 <div class="sidebar-card">
                   <div class="sidebar-card-title">My Tasks ({{ dashboardTasks.length }}) <a class="view-all" (click)="viewAllTasks()">View All</a></div>
                   <div class="task-list">
-                    <div class="task-item" *ngFor="let task of dashboardTasks; let i = index">
-                      <mat-icon class="task-check" [class.checked]="task.completed">{{ task.completed ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
-                      <div class="task-text">
-                        <div class="task-title" [class.completed]="task.completed">{{ task.title }}</div>
-                        <div class="task-sub">Due by {{ task.due }}</div>
+                    @for (task of dashboardTasks; track task; let i = $index) {
+                      <div class="task-item">
+                        <mat-icon class="task-check" [class.checked]="task.completed">{{ task.completed ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                        <div class="task-text">
+                          <div class="task-title" [class.completed]="task.completed">{{ task.title }}</div>
+                          <div class="task-sub">Due by {{ task.due }}</div>
+                        </div>
+                        <div class="task-actions">
+                          @if (!task.completed) {
+                            <button mat-icon-button matTooltip="Complete" (click)="completeTask(i); $event.stopPropagation()">
+                              <mat-icon>done</mat-icon>
+                            </button>
+                          }
+                          <button mat-icon-button matTooltip="Delete" (click)="deleteTask(i); $event.stopPropagation()">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </div>
                       </div>
-                      <div class="task-actions">
-                        <button mat-icon-button matTooltip="Complete" (click)="completeTask(i); $event.stopPropagation()" *ngIf="!task.completed">
-                          <mat-icon>done</mat-icon>
-                        </button>
-                        <button mat-icon-button matTooltip="Delete" (click)="deleteTask(i); $event.stopPropagation()">
-                          <mat-icon>delete</mat-icon>
-                        </button>
-                      </div>
-                    </div>
+                    }
                   </div>
-                  <app-button 
+                  <app-button
                     appearance="stroked"
                     color="primary"
                     class="add-task-btn"
@@ -390,28 +404,32 @@
                     (btnClick)="openAddTaskDialog()">
                   </app-button>
                 </div>
-  
+
                 <div class="sidebar-card">
                   <div class="sidebar-card-title">Upcoming Procedures</div>
                   <div class="procedure-list">
-                    <div class="procedure-item" *ngFor="let proc of upcomingProcedures">
-                      <mat-icon class="proc-icon">symptoms</mat-icon>
-                      <div class="proc-text">
-                        <div class="proc-title">{{ proc.title }}</div>
-                        <div class="proc-sub">{{ proc.time }} in {{ proc.location }}</div>
+                    @for (proc of upcomingProcedures; track proc) {
+                      <div class="procedure-item">
+                        <mat-icon class="proc-icon">symptoms</mat-icon>
+                        <div class="proc-text">
+                          <div class="proc-title">{{ proc.title }}</div>
+                          <div class="proc-sub">{{ proc.time }} in {{ proc.location }}</div>
+                        </div>
                       </div>
+                    }
+                  </div>
+                </div>
+
+                @if (pendingLabResultsEmpty) {
+                  <div class="sidebar-card empty">
+                    <div class="sidebar-card-title">Pending Lab Results</div>
+                    <div class="empty-lab">
+                      <mat-icon>science</mat-icon>
+                      <div class="lab-title">No Pending Results</div>
+                      <div class="lab-sub">All lab results are up to date.</div>
                     </div>
                   </div>
-                </div>
-  
-                <div class="sidebar-card empty" *ngIf="pendingLabResultsEmpty">
-                  <div class="sidebar-card-title">Pending Lab Results</div>
-                  <div class="empty-lab">
-                    <mat-icon>science</mat-icon>
-                    <div class="lab-title">No Pending Results</div>
-                    <div class="lab-sub">All lab results are up to date.</div>
-                  </div>
-                </div>
+                }
               </div>
             </div>
           </div>
@@ -426,160 +444,166 @@
               <span class="count-label">patients found</span>
             </div>
           </div>
-          
+
           <div class="patients-grid professional-grid">
-            <div 
-              *ngFor="let patient of getFilteredPatients()" 
-              class="professional-patient-card"
-              [class.priority-critical]="calculatePatientPriority(patient) >= 100"
-              [class.priority-high]="calculatePatientPriority(patient) >= 70 && calculatePatientPriority(patient) < 100"
-              [class.priority-medium]="calculatePatientPriority(patient) >= 40 && calculatePatientPriority(patient) < 70"
-              [class.priority-low]="calculatePatientPriority(patient) < 40"
-              (click)="selectPatient(patient)">
-              <!-- Card Header -->
-              <div class="card-header">
-                <div class="patient-avatar">
-                  <div class="avatar-circle" [style.background-color]="getPriorityColorByScore(calculatePatientPriority(patient))">
-                    {{ patient.patientName.charAt(0) }}
+            @for (patient of getFilteredPatients(); track patient) {
+              <div
+                class="professional-patient-card"
+                [class.priority-critical]="calculatePatientPriority(patient) >= 100"
+                [class.priority-high]="calculatePatientPriority(patient) >= 70 && calculatePatientPriority(patient) < 100"
+                [class.priority-medium]="calculatePatientPriority(patient) >= 40 && calculatePatientPriority(patient) < 70"
+                [class.priority-low]="calculatePatientPriority(patient) < 40"
+                (click)="selectPatient(patient)">
+                <!-- Card Header -->
+                <div class="card-header">
+                  <div class="patient-avatar">
+                    <div class="avatar-circle" [style.background-color]="getPriorityColorByScore(calculatePatientPriority(patient))">
+                      {{ patient.patientName.charAt(0) }}
+                    </div>
+                    <div class="priority-badge" [style.background-color]="getPriorityColorByScore(calculatePatientPriority(patient))">
+                      {{ getPriorityLabel(calculatePatientPriority(patient)) }}
+                    </div>
                   </div>
-                  <div class="priority-badge" [style.background-color]="getPriorityColorByScore(calculatePatientPriority(patient))">
-                    {{ getPriorityLabel(calculatePatientPriority(patient)) }}
+                  <div class="patient-info">
+                    <h4 class="patient-name">{{ patient.patientName }}</h4>
+                    <p class="patient-id">ID: {{ patient.patientId }}</p>
+                    <div class="patient-demographics">
+                      <span class="age-gender">{{ patient.age }}y • {{ patient.gender }}</span>
+                      <span class="length-stay">{{ patient.lengthOfStay }} days</span>
+                    </div>
+                  </div>
+                  <div class="card-actions">
+                    <button mat-icon-button (click)="quickStartRound(patient); $event.stopPropagation()" matTooltip="Start Round">
+                      <mat-icon>assessment</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="navigateToPatientProfile(patient); $event.stopPropagation()" matTooltip="View Profile">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
                   </div>
                 </div>
-                <div class="patient-info">
-                  <h4 class="patient-name">{{ patient.patientName }}</h4>
-                  <p class="patient-id">ID: {{ patient.patientId }}</p>
-                  <div class="patient-demographics">
-                    <span class="age-gender">{{ patient.age }}y • {{ patient.gender }}</span>
-                    <span class="length-stay">{{ patient.lengthOfStay }} days</span>
+                <!-- Vital Signs Section -->
+                <div class="vitals-section">
+                  <div class="vitals-header">
+                    <mat-icon class="vitals-icon">favorite</mat-icon>
+                    <span class="vitals-label">Vital Signs</span>
+                    <div class="vitals-status" [style.background-color]="getVitalStatusColor(patient)">
+                      {{ getVitalStatus(patient) }}
+                    </div>
+                  </div>
+                  @if (patient.vitalSigns) {
+                    <div class="vitals-grid">
+                      <div class="vital-item">
+                        <span class="vital-label">HR</span>
+                        <span class="vital-value">{{ patient.vitalSigns.heartRate }}</span>
+                        <span class="vital-unit">bpm</span>
+                      </div>
+                      <div class="vital-item">
+                        <span class="vital-label">BP</span>
+                        <span class="vital-value">{{ patient.vitalSigns.bloodPressure }}</span>
+                      </div>
+                      <div class="vital-item">
+                        <span class="vital-label">Temp</span>
+                        <span class="vital-value">{{ patient.vitalSigns.temperature }}</span>
+                        <span class="vital-unit">°C</span>
+                      </div>
+                      <div class="vital-item">
+                        <span class="vital-label">O2</span>
+                        <span class="vital-value">{{ patient.vitalSigns.oxygenSaturation }}</span>
+                        <span class="vital-unit">%</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <!-- Patient Details -->
+                <div class="patient-details-section">
+                  <div class="detail-item">
+                    <mat-icon>location_on</mat-icon>
+                    <span>{{ patient.ward }} • Room {{ patient.room }}, Bed {{ patient.bed }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <mat-icon>medical_services</mat-icon>
+                    <span>{{ patient.primaryDiagnosis.join(', ') }}</span>
+                  </div>
+                  <div class="status-row">
+                    <div class="status-badge" [style.background-color]="getStatusColor(patient.currentStatus)">
+                      {{ patient.currentStatus }}
+                    </div>
+                    <div class="priority-badge" [style.background-color]="getPriorityColor(patient.priority)">
+                      {{ patient.priority }}
+                    </div>
                   </div>
                 </div>
-                <div class="card-actions">
-                  <button mat-icon-button (click)="quickStartRound(patient); $event.stopPropagation()" matTooltip="Start Round">
-                    <mat-icon>assessment</mat-icon>
+                <!-- Alerts Section -->
+                @if (patient.alerts && patient.alerts.length > 0) {
+                  <div class="alerts-section">
+                    <div class="alerts-header">
+                      <mat-icon>notifications_active</mat-icon>
+                      <span>{{ patient.alerts.length }} Alert{{ patient.alerts.length > 1 ? 's' : '' }}</span>
+                    </div>
+                    <div class="alerts-list">
+                      @for (alert of patient.alerts.slice(0, 2); track alert) {
+                        <div class="alert-item" [style.background-color]="getAlertColor(alert.severity)">
+                          {{ alert.type.replace('_', ' ') }}
+                        </div>
+                      }
+                      @if (patient.alerts.length > 2) {
+                        <div class="more-alerts">
+                          +{{ patient.alerts.length - 2 }} more
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+                <!-- Timeline Section -->
+                <div class="timeline-section">
+                  <div class="timeline-item">
+                    <mat-icon>schedule</mat-icon>
+                    <div class="timeline-content">
+                      <span class="timeline-label">Last Round</span>
+                      <span class="timeline-value">{{ getTimeAgo(patient.lastDoctorRound) }}</span>
+                    </div>
+                  </div>
+                  <div class="timeline-item">
+                    <mat-icon>access_time</mat-icon>
+                    <div class="timeline-content">
+                      <span class="timeline-label">Next Round</span>
+                      <span class="timeline-value">{{ getTimeAgo(patient.nextScheduledRound) }}</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                  <button mat-stroked-button (click)="quickViewVitals(patient); $event.stopPropagation()" class="action-btn">
+                    <mat-icon>favorite</mat-icon>
+                    Vitals
                   </button>
-                  <button mat-icon-button (click)="navigateToPatientProfile(patient); $event.stopPropagation()" matTooltip="View Profile">
-                    <mat-icon>visibility</mat-icon>
+                  <button mat-stroked-button (click)="quickAddMedication(patient); $event.stopPropagation()" class="action-btn">
+                    <mat-icon>medication</mat-icon>
+                    Meds
+                  </button>
+                  <button mat-stroked-button (click)="quickOrderTest(patient); $event.stopPropagation()" class="action-btn">
+                    <mat-icon>science</mat-icon>
+                    Tests
                   </button>
                 </div>
               </div>
-              
-              <!-- Vital Signs Section -->
-              <div class="vitals-section">
-                <div class="vitals-header">
-                  <mat-icon class="vitals-icon">favorite</mat-icon>
-                  <span class="vitals-label">Vital Signs</span>
-                  <div class="vitals-status" [style.background-color]="getVitalStatusColor(patient)">
-                    {{ getVitalStatus(patient) }}
-                  </div>
-                </div>
-                <div class="vitals-grid" *ngIf="patient.vitalSigns">
-                  <div class="vital-item">
-                    <span class="vital-label">HR</span>
-                    <span class="vital-value">{{ patient.vitalSigns.heartRate }}</span>
-                    <span class="vital-unit">bpm</span>
-                  </div>
-                  <div class="vital-item">
-                    <span class="vital-label">BP</span>
-                    <span class="vital-value">{{ patient.vitalSigns.bloodPressure }}</span>
-                  </div>
-                  <div class="vital-item">
-                    <span class="vital-label">Temp</span>
-                    <span class="vital-value">{{ patient.vitalSigns.temperature }}</span>
-                    <span class="vital-unit">°C</span>
-                  </div>
-                  <div class="vital-item">
-                    <span class="vital-label">O2</span>
-                    <span class="vital-value">{{ patient.vitalSigns.oxygenSaturation }}</span>
-                    <span class="vital-unit">%</span>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Patient Details -->
-              <div class="patient-details-section">
-                <div class="detail-item">
-                  <mat-icon>location_on</mat-icon>
-                  <span>{{ patient.ward }} • Room {{ patient.room }}, Bed {{ patient.bed }}</span>
-                </div>
-                <div class="detail-item">
-                  <mat-icon>medical_services</mat-icon>
-                  <span>{{ patient.primaryDiagnosis.join(', ') }}</span>
-                </div>
-                <div class="status-row">
-                  <div class="status-badge" [style.background-color]="getStatusColor(patient.currentStatus)">
-                    {{ patient.currentStatus }}
-                  </div>
-                  <div class="priority-badge" [style.background-color]="getPriorityColor(patient.priority)">
-                    {{ patient.priority }}
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Alerts Section -->
-              <div class="alerts-section" *ngIf="patient.alerts && patient.alerts.length > 0">
-                <div class="alerts-header">
-                  <mat-icon>notifications_active</mat-icon>
-                  <span>{{ patient.alerts.length }} Alert{{ patient.alerts.length > 1 ? 's' : '' }}</span>
-                </div>
-                <div class="alerts-list">
-                  <div *ngFor="let alert of patient.alerts.slice(0, 2)" class="alert-item" [style.background-color]="getAlertColor(alert.severity)">
-                    {{ alert.type.replace('_', ' ') }}
-                  </div>
-                  <div *ngIf="patient.alerts.length > 2" class="more-alerts">
-                    +{{ patient.alerts.length - 2 }} more
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Timeline Section -->
-              <div class="timeline-section">
-                <div class="timeline-item">
-                  <mat-icon>schedule</mat-icon>
-                  <div class="timeline-content">
-                    <span class="timeline-label">Last Round</span>
-                    <span class="timeline-value">{{ getTimeAgo(patient.lastDoctorRound) }}</span>
-                  </div>
-                </div>
-                <div class="timeline-item">
-                  <mat-icon>access_time</mat-icon>
-                  <div class="timeline-content">
-                    <span class="timeline-label">Next Round</span>
-                    <span class="timeline-value">{{ getTimeAgo(patient.nextScheduledRound) }}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Quick Actions -->
-              <div class="quick-actions">
-                <button mat-stroked-button (click)="quickViewVitals(patient); $event.stopPropagation()" class="action-btn">
-                  <mat-icon>favorite</mat-icon>
-                  Vitals
-                </button>
-                <button mat-stroked-button (click)="quickAddMedication(patient); $event.stopPropagation()" class="action-btn">
-                  <mat-icon>medication</mat-icon>
-                  Meds
-                </button>
-                <button mat-stroked-button (click)="quickOrderTest(patient); $event.stopPropagation()" class="action-btn">
-                  <mat-icon>science</mat-icon>
-                  Tests
-                </button>
-              </div>
-            </div>
+            }
           </div>
-          
+
           <!-- Empty State -->
-          <div *ngIf="getFilteredPatients().length === 0" class="empty-state">
-            <div class="empty-icon">
-              <mat-icon>person_search</mat-icon>
+          @if (getFilteredPatients().length === 0) {
+            <div class="empty-state">
+              <div class="empty-icon">
+                <mat-icon>person_search</mat-icon>
+              </div>
+              <h3>No patients found</h3>
+              <p>No patients match your current search criteria. Try adjusting your filters.</p>
+              <button mat-raised-button (click)="clearFilters()" class="clear-filters-btn">
+                <mat-icon>refresh</mat-icon>
+                Clear All Filters
+              </button>
             </div>
-            <h3>No patients found</h3>
-            <p>No patients match your current search criteria. Try adjusting your filters.</p>
-            <button mat-raised-button (click)="clearFilters()" class="clear-filters-btn">
-              <mat-icon>refresh</mat-icon>
-              Clear All Filters
-            </button>
-          </div>
+          }
         </div>
       </div>
     </mat-tab>
@@ -589,417 +613,256 @@
     <!-- Staff Tab -->
     <mat-tab label="Staff">
       <div class="tab-content professional-layout">
-        
+
 
         <!-- Staff Management Tabs -->
         <div class="staff-tabs-container">
           <div class="staff-tabs">
-            <button 
-              *ngFor="let tab of staffTabs" 
-              class="staff-tab"
-              [class.active]="selectedStaffTab === tab.id"
-              (click)="selectedStaffTab = tab.id">
-              <mat-icon>{{ tab.icon }}</mat-icon>
-              <span>{{ tab.label }}</span>
-            </button>
+            @for (tab of staffTabs; track tab) {
+              <button
+                class="staff-tab"
+                [class.active]="selectedStaffTab === tab.id"
+                (click)="selectedStaffTab = tab.id">
+                <mat-icon>{{ tab.icon }}</mat-icon>
+                <span>{{ tab.label }}</span>
+              </button>
+            }
           </div>
         </div>
 
         <!-- Staff Overview Tab -->
-        <div *ngIf="selectedStaffTab === 'overview'" class="staff-overview-tab">
-          <!-- Staff Statistics Dashboard -->
-          <div class="staff-stats-dashboard">
-            <div class="stats-container">
-              <div class="stat-card professional-card">
-                <div class="stat-icon-wrapper">
-                  <div class="stat-icon">
-                    <mat-icon>people</mat-icon>
-                  </div>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-row">
-                    <div class="stat-number">{{ staffMembers.length }}</div>
-                    <div class="stat-trend positive">
-                      <mat-icon>trending_up</mat-icon>
-                      <span>+2 this week</span>
+        @if (selectedStaffTab === 'overview') {
+          <div class="staff-overview-tab">
+            <!-- Staff Statistics Dashboard -->
+            <div class="staff-stats-dashboard">
+              <div class="stats-container">
+                <div class="stat-card professional-card">
+                  <div class="stat-icon-wrapper">
+                    <div class="stat-icon">
+                      <mat-icon>people</mat-icon>
                     </div>
                   </div>
-                  <div class="stat-label">Total Staff</div>
+                  <div class="stat-content">
+                    <div class="stat-row">
+                      <div class="stat-number">{{ staffMembers.length }}</div>
+                      <div class="stat-trend positive">
+                        <mat-icon>trending_up</mat-icon>
+                        <span>+2 this week</span>
+                      </div>
+                    </div>
+                    <div class="stat-label">Total Staff</div>
+                  </div>
+                </div>
+                <div class="stat-card professional-card">
+                  <div class="stat-icon-wrapper">
+                    <div class="stat-icon">
+                      <mat-icon>check_circle</mat-icon>
+                    </div>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-row">
+                      <div class="stat-number">{{ getActiveStaffCount() }}</div>
+                      <div class="stat-trend positive">
+                        <mat-icon>trending_up</mat-icon>
+                        <span>{{ getActiveStaffPercentage() }}%</span>
+                      </div>
+                    </div>
+                    <div class="stat-label">On Duty</div>
+                  </div>
+                </div>
+                <div class="stat-card professional-card">
+                  <div class="stat-icon-wrapper">
+                    <div class="stat-icon">
+                      <mat-icon>assignment</mat-icon>
+                    </div>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-row">
+                      <div class="stat-number">{{ getActiveTasksCount() }}</div>
+                      <div class="stat-trend positive">
+                        <mat-icon>trending_up</mat-icon>
+                        <span>{{ getStaffEfficiency() }}%</span>
+                      </div>
+                    </div>
+                    <div class="stat-label">Active Tasks</div>
+                  </div>
+                </div>
+                <div class="stat-card professional-card">
+                  <div class="stat-icon-wrapper">
+                    <div class="stat-icon">
+                      <mat-icon>trending_up</mat-icon>
+                    </div>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-row">
+                      <div class="stat-number">{{ getAverageEfficiency() }}%</div>
+                      <div class="stat-trend positive">
+                        <mat-icon>trending_up</mat-icon>
+                        <span>+5% this month</span>
+                      </div>
+                    </div>
+                    <div class="stat-label">Avg Efficiency</div>
+                  </div>
                 </div>
               </div>
-              
-              <div class="stat-card professional-card">
-                <div class="stat-icon-wrapper">
-                  <div class="stat-icon">
-                    <mat-icon>check_circle</mat-icon>
-                  </div>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-row">
-                    <div class="stat-number">{{ getActiveStaffCount() }}</div>
-                    <div class="stat-trend positive">
-                      <mat-icon>trending_up</mat-icon>
-                      <span>{{ getActiveStaffPercentage() }}%</span>
-                    </div>
-                  </div>
-                  <div class="stat-label">On Duty</div>
+            </div>
+            <!-- Staff Members Grid -->
+            <div class="staff-members-section">
+              <div class="section-header">
+                <h3>Staff Members</h3>
+                <div class="section-actions">
+                  <button mat-icon-button matTooltip="Refresh">
+                    <mat-icon>refresh</mat-icon>
+                  </button>
+                  <button mat-icon-button matTooltip="Filter">
+                    <mat-icon>filter_list</mat-icon>
+                  </button>
                 </div>
               </div>
-              
-              <div class="stat-card professional-card">
-                <div class="stat-icon-wrapper">
-                  <div class="stat-icon">
-                    <mat-icon>assignment</mat-icon>
-                  </div>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-row">
-                    <div class="stat-number">{{ getActiveTasksCount() }}</div>
-                    <div class="stat-trend positive">
-                      <mat-icon>trending_up</mat-icon>
-                      <span>{{ getStaffEfficiency() }}%</span>
+              <div class="staff-grid">
+                @for (staff of staffMembers; track staff) {
+                  <div
+                    class="staff-card professional-card">
+                    <div class="card-header">
+                      <div class="staff-avatar">
+                        <div class="avatar-circle" [style.background-color]="getStaffStatusColor(staff.status)">
+                          {{ staff.name.charAt(0) }}
+                        </div>
+                        <div class="status-indicator" [style.background-color]="getStaffStatusColor(staff.status)">
+                          <mat-icon>{{ getStaffStatusIcon(staff.status) }}</mat-icon>
+                        </div>
+                      </div>
+                      <div class="staff-info">
+                        <h4 class="staff-name">{{ staff.name }}</h4>
+                        <p class="staff-role">{{ staff.role }}</p>
+                        <p class="staff-department">{{ staff.department }}</p>
+                      </div>
+                      <div class="card-actions">
+                        <app-button
+                          appearance="icon"
+                          [title]="'View Profile'"
+                          fontIcon="visibility"
+                          (btnClick)="viewStaffProfile(staff.id)">
+                        </app-button>
+                        <app-button
+                          appearance="icon"
+                          [title]="'Assign Task'"
+                          fontIcon="assignment"
+                          (btnClick)="openAssignTaskDialog(staff.id, staff.name)">
+                        </app-button>
+                      </div>
+                    </div>
+                    <div class="staff-metrics">
+                      <div class="metric-item">
+                        <span class="metric-label">Patients</span>
+                        <span class="metric-value">{{ staff.currentPatients }}/{{ staff.maxPatients }}</span>
+                      </div>
+                      <div class="metric-item">
+                        <span class="metric-label">Workload</span>
+                        <span class="metric-value" [style.color]="getWorkloadColor(staff.workload)">{{ staff.workload }}%</span>
+                      </div>
+                      <div class="metric-item">
+                        <span class="metric-label">Shift</span>
+                        <span class="metric-value">{{ staff.shift }}</span>
+                      </div>
+                    </div>
+                    <div class="staff-performance">
+                      <div class="performance-item">
+                        <mat-icon>assessment</mat-icon>
+                        <span>{{ staff.performance.roundsCompleted }} rounds</span>
+                      </div>
+                      <div class="performance-item">
+                        <mat-icon>star</mat-icon>
+                        <span>{{ staff.performance.patientSatisfaction }}/5</span>
+                      </div>
+                      <div class="performance-item">
+                        <mat-icon>trending_up</mat-icon>
+                        <span>{{ staff.performance.efficiency }}%</span>
+                      </div>
                     </div>
                   </div>
-                  <div class="stat-label">Active Tasks</div>
-                </div>
-              </div>
-              
-              <div class="stat-card professional-card">
-                <div class="stat-icon-wrapper">
-                  <div class="stat-icon">
-                    <mat-icon>trending_up</mat-icon>
-                  </div>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-row">
-                    <div class="stat-number">{{ getAverageEfficiency() }}%</div>
-                    <div class="stat-trend positive">
-                      <mat-icon>trending_up</mat-icon>
-                      <span>+5% this month</span>
-                    </div>
-                  </div>
-                  <div class="stat-label">Avg Efficiency</div>
-                </div>
+                }
               </div>
             </div>
           </div>
-
-          <!-- Staff Members Grid -->
-          <div class="staff-members-section">
-            <div class="section-header">
-              <h3>Staff Members</h3>
-              <div class="section-actions">
-                <button mat-icon-button matTooltip="Refresh">
-                  <mat-icon>refresh</mat-icon>
-                </button>
-                <button mat-icon-button matTooltip="Filter">
-                  <mat-icon>filter_list</mat-icon>
-                </button>
-              </div>
-            </div>
-            
-            <div class="staff-grid">
-              <div 
-                *ngFor="let staff of staffMembers" 
-                class="staff-card professional-card">
-                <div class="card-header">
-                  <div class="staff-avatar">
-                    <div class="avatar-circle" [style.background-color]="getStaffStatusColor(staff.status)">
-                      {{ staff.name.charAt(0) }}
-                    </div>
-                    <div class="status-indicator" [style.background-color]="getStaffStatusColor(staff.status)">
-                      <mat-icon>{{ getStaffStatusIcon(staff.status) }}</mat-icon>
-                    </div>
-                  </div>
-                  <div class="staff-info">
-                    <h4 class="staff-name">{{ staff.name }}</h4>
-                    <p class="staff-role">{{ staff.role }}</p>
-                    <p class="staff-department">{{ staff.department }}</p>
-                  </div>
-                  <div class="card-actions">
-                    <app-button 
-                      appearance="icon"
-                      [title]="'View Profile'"
-                      fontIcon="visibility"
-                      (btnClick)="viewStaffProfile(staff.id)">
-                    </app-button>
-                    <app-button 
-                      appearance="icon"
-                      [title]="'Assign Task'"
-                      fontIcon="assignment"
-                      (btnClick)="openAssignTaskDialog(staff.id, staff.name)">
-                    </app-button>
-                  </div>
-                </div>
-                
-                <div class="staff-metrics">
-                  <div class="metric-item">
-                    <span class="metric-label">Patients</span>
-                    <span class="metric-value">{{ staff.currentPatients }}/{{ staff.maxPatients }}</span>
-                  </div>
-                  <div class="metric-item">
-                    <span class="metric-label">Workload</span>
-                    <span class="metric-value" [style.color]="getWorkloadColor(staff.workload)">{{ staff.workload }}%</span>
-                  </div>
-                  <div class="metric-item">
-                    <span class="metric-label">Shift</span>
-                    <span class="metric-value">{{ staff.shift }}</span>
-                  </div>
-                </div>
-                
-                <div class="staff-performance">
-                  <div class="performance-item">
-                    <mat-icon>assessment</mat-icon>
-                    <span>{{ staff.performance.roundsCompleted }} rounds</span>
-                  </div>
-                  <div class="performance-item">
-                    <mat-icon>star</mat-icon>
-                    <span>{{ staff.performance.patientSatisfaction }}/5</span>
-                  </div>
-                  <div class="performance-item">
-                    <mat-icon>trending_up</mat-icon>
-                    <span>{{ staff.performance.efficiency }}%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        }
 
         <!-- Schedule Tab -->
-        <div *ngIf="selectedStaffTab === 'schedule'" class="staff-schedule-tab">
-          <div class="schedule-header">
-            <h3>Staff Schedule</h3>
-            <div class="schedule-actions">
-              <button mat-stroked-button>
-                <mat-icon>today</mat-icon>
-                Today
-              </button>
-              <button mat-stroked-button>
-                <mat-icon>date_range</mat-icon>
-                Week
-              </button>
-              <app-button 
-                appearance="raised"
-                color="primary"
-                [text]="'New Schedule'"
-                fontIcon="add"
-                (btnClick)="openNewScheduleDialog()">
-              </app-button>
-            </div>
-          </div>
-          
-          <div class="shifts-overview">
-            <div *ngFor="let shift of shifts" class="shift-card">
-              <div class="shift-header">
-                <h4>{{ shift.name }}</h4>
-                <span class="shift-time">{{ shift.startTime }} - {{ shift.endTime }}</span>
+        @if (selectedStaffTab === 'schedule') {
+          <div class="staff-schedule-tab">
+            <div class="schedule-header">
+              <h3>Staff Schedule</h3>
+              <div class="schedule-actions">
+                <button mat-stroked-button>
+                  <mat-icon>today</mat-icon>
+                  Today
+                </button>
+                <button mat-stroked-button>
+                  <mat-icon>date_range</mat-icon>
+                  Week
+                </button>
+                <app-button
+                  appearance="raised"
+                  color="primary"
+                  [text]="'New Schedule'"
+                  fontIcon="add"
+                  (btnClick)="openNewScheduleDialog()">
+                </app-button>
               </div>
-              <div class="shift-staff">
-                <span class="staff-count">{{ shift.staffCount }} staff members</span>
-                <div class="staff-list">
-                  <span *ngFor="let staff of getStaffForShift(shift.name)" class="staff-name">
-                    {{ staff.name }}
-                  </span>
+            </div>
+            <div class="shifts-overview">
+              @for (shift of shifts; track shift) {
+                <div class="shift-card">
+                  <div class="shift-header">
+                    <h4>{{ shift.name }}</h4>
+                    <span class="shift-time">{{ shift.startTime }} - {{ shift.endTime }}</span>
+                  </div>
+                  <div class="shift-staff">
+                    <span class="staff-count">{{ shift.staffCount }} staff members</span>
+                    <div class="staff-list">
+                      @for (staff of getStaffForShift(shift.name); track staff) {
+                        <span class="staff-name">
+                          {{ staff.name }}
+                        </span>
+                      }
+                    </div>
+                  </div>
                 </div>
-              </div>
+              }
             </div>
           </div>
-        </div>
+        }
 
         <!-- Tasks Tab -->
-        <div *ngIf="selectedStaffTab === 'tasks'" class="staff-tasks-tab">
-          <div class="tasks-header">
-            <h3>Task Management</h3>
-            <div class="tasks-actions">
-              <button mat-stroked-button>
-                <mat-icon>filter_list</mat-icon>
-                Filter
-              </button>
-              <app-button 
-                appearance="raised"
-                color="primary"
-                [text]="'New Task'"
-                fontIcon="add"
-                (btnClick)="openNewTaskDialog()">
-              </app-button>
-            </div>
-          </div>
-          
-          <div class="tasks-grid">
-            <div *ngFor="let task of staffTasks" class="task-card">
-              <div class="task-header">
-                <h4>{{ task.title }}</h4>
-                <div class="task-priority" [style.background-color]="getTaskPriorityColor(task.priority)">
-                  {{ task.priority }}
-                </div>
-              </div>
-              <div class="task-details">
-                <p><strong>Assigned to:</strong> {{ task.assignedTo }}</p>
-                <p><strong>Patient:</strong> {{ task.patientId }}</p>
-                <p><strong>Due:</strong> {{ formatDate(task.dueTime) }}</p>
-                <p>{{ task.description }}</p>
-              </div>
-              <div class="task-actions">
-                <div class="task-status" [style.background-color]="getTaskStatusColor(task.status)">
-                  {{ task.status.replace('_', ' ') }}
-                </div>
-                <div class="action-buttons">
-                  <button mat-icon-button matTooltip="Edit Task" (click)="editTask(task)">
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                  <button mat-icon-button matTooltip="Complete Task" (click)="updateTaskStatus(task.id, 'completed')">
-                    <mat-icon>check</mat-icon>
-                  </button>
-                </div>
+        @if (selectedStaffTab === 'tasks') {
+          <div class="staff-tasks-tab">
+            <div class="tasks-header">
+              <h3>Task Management</h3>
+              <div class="tasks-actions">
+                <button mat-stroked-button>
+                  <mat-icon>filter_list</mat-icon>
+                  Filter
+                </button>
+                <app-button
+                  appearance="raised"
+                  color="primary"
+                  [text]="'New Task'"
+                  fontIcon="add"
+                  (btnClick)="openNewTaskDialog()">
+                </app-button>
               </div>
             </div>
-          </div>
-        </div>
-
-        <!-- Doctor Tasks Tab -->
-        <div *ngIf="selectedStaffTab === 'doctor-tasks'" class="doctor-tasks-tab">
-          <div class="doctor-tasks-header">
-            <h3>Doctor Task Management</h3>
-            <div class="doctor-tasks-actions">
-              <button mat-stroked-button>
-                <mat-icon>filter_list</mat-icon>
-                Filter by Category
-              </button>
-              <button mat-stroked-button>
-                <mat-icon>schedule</mat-icon>
-                Filter by Priority
-              </button>
-              <app-button 
-                appearance="raised"
-                color="primary"
-                [text]="'Assign Doctor Task'"
-                fontIcon="add"
-                (btnClick)="openAssignTaskDialog()">
-              </app-button>
-            </div>
-          </div>
-          
-          <!-- Doctor Task Statistics -->
-          <div class="doctor-task-stats">
-            <div class="stat-card">
-              <div class="stat-icon critical">
-                <mat-icon>emergency</mat-icon>
-              </div>
-              <div class="stat-info">
-                <h4>{{ getDoctorTasksByPriority('CRITICAL').length }}</h4>
-                <p>Critical Tasks</p>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon high">
-                <mat-icon>priority_high</mat-icon>
-              </div>
-              <div class="stat-info">
-                <h4>{{ getDoctorTasksByPriority('HIGH').length }}</h4>
-                <p>High Priority</p>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon in-progress">
-                <mat-icon>play_circle</mat-icon>
-              </div>
-              <div class="stat-info">
-                <h4>{{ getDoctorTasksByStatus('in_progress').length }}</h4>
-                <p>In Progress</p>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon completed">
-                <mat-icon>check_circle</mat-icon>
-              </div>
-              <div class="stat-info">
-                <h4>{{ getDoctorTasksByStatus('completed').length }}</h4>
-                <p>Completed</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Doctor Tasks by Category -->
-          <div class="doctor-tasks-categories">
-            <div class="category-section">
-              <h4>Patient Care Tasks</h4>
-              <div class="tasks-grid">
-                <div *ngFor="let task of getDoctorTasksByCategory('Patient Care')" class="doctor-task-card">
+            <div class="tasks-grid">
+              @for (task of staffTasks; track task) {
+                <div class="task-card">
                   <div class="task-header">
-                    <h5>{{ task.title }}</h5>
+                    <h4>{{ task.title }}</h4>
                     <div class="task-priority" [style.background-color]="getTaskPriorityColor(task.priority)">
                       {{ task.priority }}
                     </div>
                   </div>
                   <div class="task-details">
-                    <p><strong>Doctor:</strong> {{ task.assignedTo }}</p>
-                    <p><strong>Patient:</strong> {{ task.patientId }}</p>
-                    <p><strong>Due:</strong> {{ formatDate(task.dueTime) }}</p>
-                    <p>{{ task.description }}</p>
-                  </div>
-                  <div class="task-actions">
-                    <div class="task-status" [style.background-color]="getTaskStatusColor(task.status)">
-                      {{ task.status.replace('_', ' ') }}
-                    </div>
-                    <div class="action-buttons">
-                      <button mat-icon-button matTooltip="View Patient" (click)="viewPatientFromTask(task)">
-                        <mat-icon>visibility</mat-icon>
-                      </button>
-                      <button mat-icon-button matTooltip="Complete Task" (click)="updateTaskStatus(task.id, 'completed')">
-                        <mat-icon>check</mat-icon>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="category-section">
-              <h4>Emergency Tasks</h4>
-              <div class="tasks-grid">
-                <div *ngFor="let task of getDoctorTasksByCategory('Emergency')" class="doctor-task-card emergency">
-                  <div class="task-header">
-                    <h5>{{ task.title }}</h5>
-                    <div class="task-priority critical">
-                      {{ task.priority }}
-                    </div>
-                  </div>
-                  <div class="task-details">
-                    <p><strong>Doctor:</strong> {{ task.assignedTo }}</p>
-                    <p><strong>Patient:</strong> {{ task.patientId }}</p>
-                    <p><strong>Due:</strong> {{ formatDate(task.dueTime) }}</p>
-                    <p>{{ task.description }}</p>
-                  </div>
-                  <div class="task-actions">
-                    <div class="task-status urgent">
-                      {{ task.status.replace('_', ' ') }}
-                    </div>
-                    <div class="action-buttons">
-                      <button mat-icon-button matTooltip="Emergency Response">
-                        <mat-icon>emergency</mat-icon>
-                      </button>
-                      <button mat-icon-button matTooltip="Complete Task" (click)="updateTaskStatus(task.id, 'completed')">
-                        <mat-icon>check</mat-icon>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="category-section">
-              <h4>Administrative Tasks</h4>
-              <div class="tasks-grid">
-                <div *ngFor="let task of getDoctorTasksByCategory('Administrative')" class="doctor-task-card">
-                  <div class="task-header">
-                    <h5>{{ task.title }}</h5>
-                    <div class="task-priority" [style.background-color]="getTaskPriorityColor(task.priority)">
-                      {{ task.priority }}
-                    </div>
-                  </div>
-                  <div class="task-details">
-                    <p><strong>Doctor:</strong> {{ task.assignedTo }}</p>
+                    <p><strong>Assigned to:</strong> {{ task.assignedTo }}</p>
                     <p><strong>Patient:</strong> {{ task.patientId }}</p>
                     <p><strong>Due:</strong> {{ formatDate(task.dueTime) }}</p>
                     <p>{{ task.description }}</p>
@@ -1018,140 +881,306 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              }
             </div>
           </div>
+        }
 
-          <!-- Doctor Performance Overview -->
-          <div class="doctor-performance-overview">
-            <h4>Doctor Performance Overview</h4>
-            <div class="doctors-grid">
-              <div *ngFor="let doctor of getDoctors()" class="doctor-performance-card">
-                <div class="doctor-info">
-                  <h5>{{ doctor.name }}</h5>
-                  <p>{{ doctor.role }} - {{ doctor.department }}</p>
+        <!-- Doctor Tasks Tab -->
+        @if (selectedStaffTab === 'doctor-tasks') {
+          <div class="doctor-tasks-tab">
+            <div class="doctor-tasks-header">
+              <h3>Doctor Task Management</h3>
+              <div class="doctor-tasks-actions">
+                <button mat-stroked-button>
+                  <mat-icon>filter_list</mat-icon>
+                  Filter by Category
+                </button>
+                <button mat-stroked-button>
+                  <mat-icon>schedule</mat-icon>
+                  Filter by Priority
+                </button>
+                <app-button
+                  appearance="raised"
+                  color="primary"
+                  [text]="'Assign Doctor Task'"
+                  fontIcon="add"
+                  (btnClick)="openAssignTaskDialog()">
+                </app-button>
+              </div>
+            </div>
+            <!-- Doctor Task Statistics -->
+            <div class="doctor-task-stats">
+              <div class="stat-card">
+                <div class="stat-icon critical">
+                  <mat-icon>emergency</mat-icon>
                 </div>
-                <div class="performance-metrics">
-                  <div class="metric">
-                    <span class="label">Tasks:</span>
-                    <span class="value">{{ getDoctorTaskCount(doctor.id) }}</span>
-                  </div>
-                  <div class="metric">
-                    <span class="label">Completed:</span>
-                    <span class="value">{{ getDoctorCompletedTasks(doctor.id) }}</span>
-                  </div>
-                  <div class="metric">
-                    <span class="label">Efficiency:</span>
-                    <span class="value">{{ getDoctorEfficiency(doctor.id) }}%</span>
-                  </div>
-                  <div class="metric">
-                    <span class="label">Workload:</span>
-                    <span class="value" [style.color]="getWorkloadColor(doctor.workload)">{{ doctor.workload }}%</span>
-                  </div>
+                <div class="stat-info">
+                  <h4>{{ getDoctorTasksByPriority('CRITICAL').length }}</h4>
+                  <p>Critical Tasks</p>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon high">
+                  <mat-icon>priority_high</mat-icon>
+                </div>
+                <div class="stat-info">
+                  <h4>{{ getDoctorTasksByPriority('HIGH').length }}</h4>
+                  <p>High Priority</p>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon in-progress">
+                  <mat-icon>play_circle</mat-icon>
+                </div>
+                <div class="stat-info">
+                  <h4>{{ getDoctorTasksByStatus('in_progress').length }}</h4>
+                  <p>In Progress</p>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon completed">
+                  <mat-icon>check_circle</mat-icon>
+                </div>
+                <div class="stat-info">
+                  <h4>{{ getDoctorTasksByStatus('completed').length }}</h4>
+                  <p>Completed</p>
                 </div>
               </div>
             </div>
+            <!-- Doctor Tasks by Category -->
+            <div class="doctor-tasks-categories">
+              <div class="category-section">
+                <h4>Patient Care Tasks</h4>
+                <div class="tasks-grid">
+                  @for (task of getDoctorTasksByCategory('Patient Care'); track task) {
+                    <div class="doctor-task-card">
+                      <div class="task-header">
+                        <h5>{{ task.title }}</h5>
+                        <div class="task-priority" [style.background-color]="getTaskPriorityColor(task.priority)">
+                          {{ task.priority }}
+                        </div>
+                      </div>
+                      <div class="task-details">
+                        <p><strong>Doctor:</strong> {{ task.assignedTo }}</p>
+                        <p><strong>Patient:</strong> {{ task.patientId }}</p>
+                        <p><strong>Due:</strong> {{ formatDate(task.dueTime) }}</p>
+                        <p>{{ task.description }}</p>
+                      </div>
+                      <div class="task-actions">
+                        <div class="task-status" [style.background-color]="getTaskStatusColor(task.status)">
+                          {{ task.status.replace('_', ' ') }}
+                        </div>
+                        <div class="action-buttons">
+                          <button mat-icon-button matTooltip="View Patient" (click)="viewPatientFromTask(task)">
+                            <mat-icon>visibility</mat-icon>
+                          </button>
+                          <button mat-icon-button matTooltip="Complete Task" (click)="updateTaskStatus(task.id, 'completed')">
+                            <mat-icon>check</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+              <div class="category-section">
+                <h4>Emergency Tasks</h4>
+                <div class="tasks-grid">
+                  @for (task of getDoctorTasksByCategory('Emergency'); track task) {
+                    <div class="doctor-task-card emergency">
+                      <div class="task-header">
+                        <h5>{{ task.title }}</h5>
+                        <div class="task-priority critical">
+                          {{ task.priority }}
+                        </div>
+                      </div>
+                      <div class="task-details">
+                        <p><strong>Doctor:</strong> {{ task.assignedTo }}</p>
+                        <p><strong>Patient:</strong> {{ task.patientId }}</p>
+                        <p><strong>Due:</strong> {{ formatDate(task.dueTime) }}</p>
+                        <p>{{ task.description }}</p>
+                      </div>
+                      <div class="task-actions">
+                        <div class="task-status urgent">
+                          {{ task.status.replace('_', ' ') }}
+                        </div>
+                        <div class="action-buttons">
+                          <button mat-icon-button matTooltip="Emergency Response">
+                            <mat-icon>emergency</mat-icon>
+                          </button>
+                          <button mat-icon-button matTooltip="Complete Task" (click)="updateTaskStatus(task.id, 'completed')">
+                            <mat-icon>check</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+              <div class="category-section">
+                <h4>Administrative Tasks</h4>
+                <div class="tasks-grid">
+                  @for (task of getDoctorTasksByCategory('Administrative'); track task) {
+                    <div class="doctor-task-card">
+                      <div class="task-header">
+                        <h5>{{ task.title }}</h5>
+                        <div class="task-priority" [style.background-color]="getTaskPriorityColor(task.priority)">
+                          {{ task.priority }}
+                        </div>
+                      </div>
+                      <div class="task-details">
+                        <p><strong>Doctor:</strong> {{ task.assignedTo }}</p>
+                        <p><strong>Patient:</strong> {{ task.patientId }}</p>
+                        <p><strong>Due:</strong> {{ formatDate(task.dueTime) }}</p>
+                        <p>{{ task.description }}</p>
+                      </div>
+                      <div class="task-actions">
+                        <div class="task-status" [style.background-color]="getTaskStatusColor(task.status)">
+                          {{ task.status.replace('_', ' ') }}
+                        </div>
+                        <div class="action-buttons">
+                          <button mat-icon-button matTooltip="Edit Task" (click)="editTask(task)">
+                            <mat-icon>edit</mat-icon>
+                          </button>
+                          <button mat-icon-button matTooltip="Complete Task" (click)="updateTaskStatus(task.id, 'completed')">
+                            <mat-icon>check</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+            <!-- Doctor Performance Overview -->
+            <div class="doctor-performance-overview">
+              <h4>Doctor Performance Overview</h4>
+              <div class="doctors-grid">
+                @for (doctor of getDoctors(); track doctor) {
+                  <div class="doctor-performance-card">
+                    <div class="doctor-info">
+                      <h5>{{ doctor.name }}</h5>
+                      <p>{{ doctor.role }} - {{ doctor.department }}</p>
+                    </div>
+                    <div class="performance-metrics">
+                      <div class="metric">
+                        <span class="label">Tasks:</span>
+                        <span class="value">{{ getDoctorTaskCount(doctor.id) }}</span>
+                      </div>
+                      <div class="metric">
+                        <span class="label">Completed:</span>
+                        <span class="value">{{ getDoctorCompletedTasks(doctor.id) }}</span>
+                      </div>
+                      <div class="metric">
+                        <span class="label">Efficiency:</span>
+                        <span class="value">{{ getDoctorEfficiency(doctor.id) }}%</span>
+                      </div>
+                      <div class="metric">
+                        <span class="label">Workload:</span>
+                        <span class="value" [style.color]="getWorkloadColor(doctor.workload)">{{ doctor.workload }}%</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
           </div>
-        </div>
+        }
 
         <!-- Performance Tab -->
-        <div *ngIf="selectedStaffTab === 'performance'" class="staff-performance-tab">
-          <div class="performance-header">
-            <h3>Staff Performance</h3>
-            <div class="performance-actions">
-              <button mat-stroked-button>
-                <mat-icon>download</mat-icon>
-                Export Report
-              </button>
-              <button mat-raised-button color="primary">
-                <mat-icon>assessment</mat-icon>
-                Performance Review
-              </button>
-            </div>
-          </div>
-          
-          <div class="performance-metrics">
-            <div class="metric-card">
-              <h4>Task Completion Rate</h4>
-              <div class="metric-value">{{ getStaffEfficiency() }}%</div>
-              <div class="metric-trend positive">
-                <mat-icon>trending_up</mat-icon>
-                <span>+3% from last week</span>
+        @if (selectedStaffTab === 'performance') {
+          <div class="staff-performance-tab">
+            <div class="performance-header">
+              <h3>Staff Performance</h3>
+              <div class="performance-actions">
+                <button mat-stroked-button>
+                  <mat-icon>download</mat-icon>
+                  Export Report
+                </button>
+                <button mat-raised-button color="primary">
+                  <mat-icon>assessment</mat-icon>
+                  Performance Review
+                </button>
               </div>
             </div>
-            
-            <div class="metric-card">
-              <h4>Average Patient Satisfaction</h4>
-              <div class="metric-value">{{ getAveragePatientSatisfaction() }}/5</div>
-              <div class="metric-trend positive">
-                <mat-icon>trending_up</mat-icon>
-                <span>+0.2 from last month</span>
+            <div class="performance-metrics">
+              <div class="metric-card">
+                <h4>Task Completion Rate</h4>
+                <div class="metric-value">{{ getStaffEfficiency() }}%</div>
+                <div class="metric-trend positive">
+                  <mat-icon>trending_up</mat-icon>
+                  <span>+3% from last week</span>
+                </div>
+              </div>
+              <div class="metric-card">
+                <h4>Average Patient Satisfaction</h4>
+                <div class="metric-value">{{ getAveragePatientSatisfaction() }}/5</div>
+                <div class="metric-trend positive">
+                  <mat-icon>trending_up</mat-icon>
+                  <span>+0.2 from last month</span>
+                </div>
+              </div>
+              <div class="metric-card">
+                <h4>Overdue Tasks</h4>
+                <div class="metric-value">{{ getOverdueTasks().length }}</div>
+                <div class="metric-trend" [class.negative]="getOverdueTasks().length > 0">
+                  <mat-icon>{{ getOverdueTasks().length > 0 ? 'warning' : 'check_circle' }}</mat-icon>
+                  <span>{{ getOverdueTasks().length > 0 ? 'Needs attention' : 'All on track' }}</span>
+                </div>
               </div>
             </div>
-            
-            <div class="metric-card">
-              <h4>Overdue Tasks</h4>
-              <div class="metric-value">{{ getOverdueTasks().length }}</div>
-              <div class="metric-trend" [class.negative]="getOverdueTasks().length > 0">
-                <mat-icon>{{ getOverdueTasks().length > 0 ? 'warning' : 'check_circle' }}</mat-icon>
-                <span>{{ getOverdueTasks().length > 0 ? 'Needs attention' : 'All on track' }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Staff Performance Charts -->
-          <div class="performance-charts">
-            <div class="charts-grid">
-              <div class="chart-card">
-                <div class="chart-header">
-                  <h3>Task Completion Rate Trend</h3>
+            <!-- Staff Performance Charts -->
+            <div class="performance-charts">
+              <div class="charts-grid">
+                <div class="chart-card">
+                  <div class="chart-header">
+                    <h3>Task Completion Rate Trend</h3>
+                  </div>
+                  <div class="chart-content">
+                    <highcharts-chart
+                      [Highcharts]="Highcharts"
+                      [options]="staffTaskCompletionChartOptions">
+                    </highcharts-chart>
+                  </div>
                 </div>
-                <div class="chart-content">
-                  <highcharts-chart
-                    [Highcharts]="Highcharts"
-                    [options]="staffTaskCompletionChartOptions">
-                  </highcharts-chart>
+                <div class="chart-card">
+                  <div class="chart-header">
+                    <h3>Performance by Department</h3>
+                  </div>
+                  <div class="chart-content">
+                    <highcharts-chart
+                      [Highcharts]="Highcharts"
+                      [options]="staffPerformanceByDepartmentChartOptions">
+                    </highcharts-chart>
+                  </div>
                 </div>
-              </div>
-              
-              <div class="chart-card">
-                <div class="chart-header">
-                  <h3>Performance by Department</h3>
+                <div class="chart-card">
+                  <div class="chart-header">
+                    <h3>Task Status Distribution</h3>
+                  </div>
+                  <div class="chart-content">
+                    <highcharts-chart
+                      [Highcharts]="Highcharts"
+                      [options]="staffTaskStatusChartOptions">
+                    </highcharts-chart>
+                  </div>
                 </div>
-                <div class="chart-content">
-                  <highcharts-chart
-                    [Highcharts]="Highcharts"
-                    [options]="staffPerformanceByDepartmentChartOptions">
-                  </highcharts-chart>
-                </div>
-              </div>
-              
-              <div class="chart-card">
-                <div class="chart-header">
-                  <h3>Task Status Distribution</h3>
-                </div>
-                <div class="chart-content">
-                  <highcharts-chart
-                    [Highcharts]="Highcharts"
-                    [options]="staffTaskStatusChartOptions">
-                  </highcharts-chart>
-                </div>
-              </div>
-              
-              <div class="chart-card">
-                <div class="chart-header">
-                  <h3>Top Staff by Efficiency</h3>
-                </div>
-                <div class="chart-content">
-                  <highcharts-chart
-                    [Highcharts]="Highcharts"
-                    [options]="staffEfficiencyChartOptions">
-                  </highcharts-chart>
+                <div class="chart-card">
+                  <div class="chart-header">
+                    <h3>Top Staff by Efficiency</h3>
+                  </div>
+                  <div class="chart-content">
+                    <highcharts-chart
+                      [Highcharts]="Highcharts"
+                      [options]="staffEfficiencyChartOptions">
+                    </highcharts-chart>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        }
       </div>
     </mat-tab>
 
@@ -1172,43 +1201,49 @@
           </div>
 
           <div class="alerts-list">
-            <mat-card *ngFor="let alert of doctorAlerts" class="alert-card" [class.unacknowledged]="!alert.acknowledged">
-              <mat-card-content>
-                <div class="alert-header">
-                  <mat-icon [style.color]="getAlertSeverityColor(alert.severity)" class="alert-icon">
-                    warning
-                  </mat-icon>
-                  <div class="alert-info">
-                    <h4>{{ alert.title }}</h4>
-                    <p>{{ alert.patientName }} • {{ alert.ward }}, {{ alert.room }}, {{ alert.bed }}</p>
+            @for (alert of doctorAlerts; track alert) {
+              <mat-card class="alert-card" [class.unacknowledged]="!alert.acknowledged">
+                <mat-card-content>
+                  <div class="alert-header">
+                    <mat-icon [style.color]="getAlertSeverityColor(alert.severity)" class="alert-icon">
+                      warning
+                    </mat-icon>
+                    <div class="alert-info">
+                      <h4>{{ alert.title }}</h4>
+                      <p>{{ alert.patientName }} • {{ alert.ward }}, {{ alert.room }}, {{ alert.bed }}</p>
+                    </div>
+                    <div class="alert-actions">
+                      @if (!alert.acknowledged) {
+                        <button
+                          mat-button
+                          color="primary"
+                          (click)="acknowledgeAlert(alert)">
+                          Acknowledge
+                        </button>
+                      }
+                      @if (!alert.resolved) {
+                        <button
+                          mat-button
+                          color="accent"
+                          (click)="resolveAlert(alert)">
+                          Resolve
+                        </button>
+                      }
+                    </div>
                   </div>
-                  <div class="alert-actions">
-                    <button 
-                      *ngIf="!alert.acknowledged" 
-                      mat-button 
-                      color="primary" 
-                      (click)="acknowledgeAlert(alert)">
-                      Acknowledge
-                    </button>
-                    <button 
-                      *ngIf="!alert.resolved" 
-                      mat-button 
-                      color="accent" 
-                      (click)="resolveAlert(alert)">
-                      Resolve
-                    </button>
+                  <p class="alert-message">{{ alert.message }}</p>
+                  <div class="alert-meta">
+                    <span class="alert-severity" [style.background-color]="getAlertSeverityColor(alert.severity)">
+                      {{ alert.severity }}
+                    </span>
+                    <span class="alert-time">{{ getTimeAgo(alert.createdAt) }}</span>
+                    @if (alert.requiresImmediateAction) {
+                      <span class="immediate-action">Immediate Action Required</span>
+                    }
                   </div>
-                </div>
-                <p class="alert-message">{{ alert.message }}</p>
-                <div class="alert-meta">
-                  <span class="alert-severity" [style.background-color]="getAlertSeverityColor(alert.severity)">
-                    {{ alert.severity }}
-                  </span>
-                  <span class="alert-time">{{ getTimeAgo(alert.createdAt) }}</span>
-                  <span *ngIf="alert.requiresImmediateAction" class="immediate-action">Immediate Action Required</span>
-                </div>
-              </mat-card-content>
-            </mat-card>
+                </mat-card-content>
+              </mat-card>
+            }
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, Inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule, MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -21,18 +21,17 @@ export interface BodyPartComment {
 @Component({
     selector: 'app-full-body-diagnosis',
     imports: [
-        CommonModule,
-        MatButtonModule,
-        MatIconModule,
-        MatDialogModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatTooltipModule,
-        FormsModule,
-        ReactiveFormsModule,
-        AppButtonComponent,
-        IconComponent
-    ],
+    MatButtonModule,
+    MatIconModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTooltipModule,
+    FormsModule,
+    ReactiveFormsModule,
+    AppButtonComponent,
+    IconComponent
+],
     templateUrl: './full-body-diagnosis.component.html',
     styleUrl: './full-body-diagnosis.component.scss'
 })
@@ -182,13 +181,12 @@ export class FullBodyDiagnosisComponent implements OnInit, OnDestroy {
 @Component({
     selector: 'app-comment-dialog',
     imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        AppInputComponent
-    ],
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    AppInputComponent
+],
     template: `
     <div class="comment-dialog-content">
       <div class="dialog-body">

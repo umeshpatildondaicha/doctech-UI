@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, OnDestroy, AfterViewInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DIALOG_DATA_TOKEN, AppButtonComponent, IconComponent, AppInputComponent } from "@lk/core";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -13,12 +13,11 @@ export interface CreateShiftDialogData {
 @Component({
     selector: 'app-create-shift-dialog',
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        AppButtonComponent,
-        IconComponent,
-        AppInputComponent
-    ],
+    ReactiveFormsModule,
+    AppButtonComponent,
+    IconComponent,
+    AppInputComponent
+],
     templateUrl: './create-shift-dialog.component.html',
     styleUrls: ['./create-shift-dialog.component.scss']
 })

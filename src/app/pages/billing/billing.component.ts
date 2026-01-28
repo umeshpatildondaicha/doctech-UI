@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { ColDef } from 'ag-grid-community';
@@ -42,32 +42,31 @@ const FORCE_DEMO_BILLING_DATA = false;
 @Component({
     selector: 'app-billing',
     imports: [
-        CommonModule,
-        MatTableModule,
-        MatButtonModule,
-        MatIconModule,
-        MatDialogModule,
-        MatSnackBarModule,
-        MatTooltipModule,
-        MatChipsModule,
-        MatProgressBarModule,
-        MatPaginatorModule,
-        MatSortModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        GridComponent,
-        BillingActionsRendererComponent,
-        BillingStatusRendererComponent,
-        BillingPatientRendererComponent,
-        AppCardComponent,
-        AdminPageHeaderComponent,
-        AdminStatsCardComponent,
-        AdminTabsComponent
-    ],
+    MatTableModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    MatTooltipModule,
+    MatChipsModule,
+    MatProgressBarModule,
+    MatPaginatorModule,
+    MatSortModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    GridComponent,
+    BillingActionsRendererComponent,
+    BillingStatusRendererComponent,
+    BillingPatientRendererComponent,
+    AppCardComponent,
+    AdminPageHeaderComponent,
+    AdminStatsCardComponent,
+    AdminTabsComponent
+],
     templateUrl: './billing.component.html',
     styleUrl: './billing.component.scss'
 })
