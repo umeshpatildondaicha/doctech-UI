@@ -13,17 +13,16 @@ export interface AssignTaskDialogData {
 }
 
 @Component({
-  selector: 'app-assign-task-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    AppInputComponent,
-    AppSelectboxComponent,
-    AppButtonComponent
-  ],
-  templateUrl: './assign-task-dialog.component.html',
-  styleUrls: ['./assign-task-dialog.component.scss']
+    selector: 'app-assign-task-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        AppInputComponent,
+        AppSelectboxComponent,
+        AppButtonComponent
+    ],
+    templateUrl: './assign-task-dialog.component.html',
+    styleUrls: ['./assign-task-dialog.component.scss']
 })
 export class AssignTaskDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<AssignTaskDialogComponent>);

@@ -14,17 +14,16 @@ export interface AdmissionDialogData {
 }
 
 @Component({
-  selector: 'app-admission-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    AppInputComponent,
-    AppSelectboxComponent,
-    AppButtonComponent
-  ],
-  templateUrl: './admission-dialog.component.html',
-  styleUrls: ['./admission-dialog.component.scss']
+    selector: 'app-admission-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        AppInputComponent,
+        AppSelectboxComponent,
+        AppButtonComponent
+    ],
+    templateUrl: './admission-dialog.component.html',
+    styleUrls: ['./admission-dialog.component.scss']
 })
 export class AdmissionDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<AdmissionDialogComponent>);

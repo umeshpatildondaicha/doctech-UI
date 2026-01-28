@@ -3,11 +3,10 @@ import { Component, ContentChildren, HostBinding, Input, QueryList } from '@angu
 import { AppCardActionsDirective } from './app-card-actions.directive';
 
 @Component({
-  selector: 'app-card',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './app-card.component.html',
-  styleUrl: './app-card.component.scss'
+    selector: 'app-card',
+    imports: [CommonModule],
+    templateUrl: './app-card.component.html',
+    styleUrl: './app-card.component.scss'
 })
 export class AppCardComponent {
   /** Optional header title */

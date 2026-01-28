@@ -14,19 +14,18 @@ export interface AddRoundDialogData {
 }
 
 @Component({
-  selector: 'app-add-round-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatCheckboxModule,
-    AppInputComponent,
-    AppSelectboxComponent
-  ],
-  templateUrl: './add-round-dialog.component.html',
-  styleUrls: ['./add-round-dialog.component.scss']
+    selector: 'app-add-round-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatCheckboxModule,
+        AppInputComponent,
+        AppSelectboxComponent
+    ],
+    templateUrl: './add-round-dialog.component.html',
+    styleUrls: ['./add-round-dialog.component.scss']
 })
 export class AddRoundDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<AddRoundDialogComponent>);

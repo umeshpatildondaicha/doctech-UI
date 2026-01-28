@@ -10,12 +10,11 @@ import { IconComponent } from "@lk/core";
 import { GridComponent } from "@lk/core";
 
 @Component({
-  selector: 'app-dashboard-details',
-  standalone: true,
-  imports: [CommonModule, AgGridModule, IconComponent, MatDialogModule, GridComponent],
-  templateUrl: './dashboard-details.component.html',
-  styleUrl: './dashboard-details.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-dashboard-details',
+    imports: [CommonModule, AgGridModule, IconComponent, MatDialogModule, GridComponent],
+    templateUrl: './dashboard-details.component.html',
+    styleUrl: './dashboard-details.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardDetailsComponent {
   @Input() cardType: 'patients' | 'appointments' | 'billing' = 'patients';

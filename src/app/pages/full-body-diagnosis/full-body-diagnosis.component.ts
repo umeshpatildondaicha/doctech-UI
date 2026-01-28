@@ -19,23 +19,22 @@ export interface BodyPartComment {
 }
 
 @Component({
-  selector: 'app-full-body-diagnosis',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatTooltipModule,
-    FormsModule,
-    ReactiveFormsModule,
-    AppButtonComponent,
-    IconComponent
-  ],
-  templateUrl: './full-body-diagnosis.component.html',
-  styleUrl: './full-body-diagnosis.component.scss'
+    selector: 'app-full-body-diagnosis',
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatIconModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatTooltipModule,
+        FormsModule,
+        ReactiveFormsModule,
+        AppButtonComponent,
+        IconComponent
+    ],
+    templateUrl: './full-body-diagnosis.component.html',
+    styleUrl: './full-body-diagnosis.component.scss'
 })
 export class FullBodyDiagnosisComponent implements OnInit, OnDestroy {
   isClickModeEnabled = false;
@@ -181,17 +180,16 @@ export class FullBodyDiagnosisComponent implements OnInit, OnDestroy {
 
 // Comment Dialog Component
 @Component({
-  selector: 'app-comment-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    AppInputComponent
-  ],
-  template: `
+    selector: 'app-comment-dialog',
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        AppInputComponent
+    ],
+    template: `
     <div class="comment-dialog-content">
       <div class="dialog-body">
         <p class="body-part-label">Body Part: <strong>{{ data.bodyPartName }}</strong></p>
@@ -208,7 +206,7 @@ export class FullBodyDiagnosisComponent implements OnInit, OnDestroy {
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .comment-dialog-content {
       padding: 0;
     }

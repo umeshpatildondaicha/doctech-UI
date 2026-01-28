@@ -10,11 +10,10 @@ import { ConfirmDialogComponentComponent } from './confirm-dialog-component/conf
 import { MatDialog } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-schemes',
-  standalone: true,
-  imports: [CommonModule,ConfirmDialogComponentComponent, AdminPageHeaderComponent, GridComponent, PageComponent],
-  templateUrl: './schemes.component.html',
-  styleUrl: './schemes.component.scss'
+    selector: 'app-schemes',
+    imports: [CommonModule, ConfirmDialogComponentComponent, AdminPageHeaderComponent, GridComponent, PageComponent],
+    templateUrl: './schemes.component.html',
+    styleUrl: './schemes.component.scss'
 })
 export class SchemesComponent implements OnInit {
   breadcrumb: BreadcrumbItem[] = [

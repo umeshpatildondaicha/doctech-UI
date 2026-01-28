@@ -3,13 +3,12 @@ import { CommonModule } from '@angular/common';
 import { GridComponent } from "@lk/core";
 
 @Component({
-  selector: 'app-billing-status-renderer',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-billing-status-renderer',
+    imports: [CommonModule],
+    template: `
     <span class="status-badge" [ngClass]="statusClass">{{ label }}</span>
   `,
-  styles: [`
+    styles: [`
     :host {
       display: flex;
       align-items: center;

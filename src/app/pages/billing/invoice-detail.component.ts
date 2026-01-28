@@ -23,27 +23,26 @@ import { InvoicePreviewDialogComponent } from './invoice-preview-dialog.componen
 import { BillingStatusRendererComponent } from './billing-status-renderer.component';
 
 @Component({
-  selector: 'app-invoice-detail',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTabsModule,
-    MatProgressBarModule,
-    MatDialogModule,
-    MatSnackBarModule,
-    MatTooltipModule,
-    MatChipsModule,
-    MatTableModule,
-    MatFormFieldModule,
-    MatInputModule,
-    ReactiveFormsModule,
-    BillingStatusRendererComponent
-  ],
-  templateUrl: './invoice-detail.component.html',
-  styleUrl: './invoice-detail.component.scss'
+    selector: 'app-invoice-detail',
+    imports: [
+        CommonModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTabsModule,
+        MatProgressBarModule,
+        MatDialogModule,
+        MatSnackBarModule,
+        MatTooltipModule,
+        MatChipsModule,
+        MatTableModule,
+        MatFormFieldModule,
+        MatInputModule,
+        ReactiveFormsModule,
+        BillingStatusRendererComponent
+    ],
+    templateUrl: './invoice-detail.component.html',
+    styleUrl: './invoice-detail.component.scss'
 })
 export class InvoiceDetailComponent implements OnInit {
   invoiceId: string = '';

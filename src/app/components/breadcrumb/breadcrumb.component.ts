@@ -6,11 +6,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { BreadcrumbItem } from '@lk/core';
 
 @Component({
-  selector: 'app-breadcrumb',
-  standalone: true,
-  imports: [CommonModule, MatIconModule],
-  templateUrl: './breadcrumb.component.html',
-  styleUrl: './breadcrumb.component.scss'
+    selector: 'app-breadcrumb',
+    imports: [CommonModule, MatIconModule],
+    templateUrl: './breadcrumb.component.html',
+    styleUrl: './breadcrumb.component.scss'
 })
 export class BreadcrumbComponent implements OnInit {
   @Input() customBreadcrumbs: BreadcrumbItem[] = [];

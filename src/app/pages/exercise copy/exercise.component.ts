@@ -21,31 +21,30 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ExerciseCardComponent } from '../../components/exercise-card/exercise-card.component';
 
 @Component({
-  selector: 'app-exercise',
-  standalone: true,
-  imports: [
-    CommonModule, 
-    MatTabsModule, 
-    MatDialogModule, 
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatChipsModule,
-    MatBadgeModule,
-    MatMenuModule,
-    MatTooltipModule,
-    MatSelectModule,
-    GridComponent, 
-    IconComponent,
-    FormsModule,
-    ReactiveFormsModule,
-    ExerciseCardComponent,
-    AppInputComponent
-  ],
-  templateUrl: './exercise.component.html',
-  styleUrl: './exercise.component.scss'
+    selector: 'app-exercise',
+    imports: [
+        CommonModule,
+        MatTabsModule,
+        MatDialogModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule,
+        MatInputModule,
+        MatFormFieldModule,
+        MatChipsModule,
+        MatBadgeModule,
+        MatMenuModule,
+        MatTooltipModule,
+        MatSelectModule,
+        GridComponent,
+        IconComponent,
+        FormsModule,
+        ReactiveFormsModule,
+        ExerciseCardComponent,
+        AppInputComponent
+    ],
+    templateUrl: './exercise.component.html',
+    styleUrl: './exercise.component.scss'
 })
 export class ExerciseComponent implements OnInit {
   selectedTabIndex = 0;

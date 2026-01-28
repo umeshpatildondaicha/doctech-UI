@@ -14,16 +14,15 @@ export interface PatientNotesDialogData {
 }
 
 @Component({
-  selector: 'app-patient-notes-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule
-  ],
-  templateUrl: './patient-notes-dialog.component.html',
-  styleUrls: ['./patient-notes-dialog.component.scss']
+    selector: 'app-patient-notes-dialog',
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatFormFieldModule,
+        MatInputModule
+    ],
+    templateUrl: './patient-notes-dialog.component.html',
+    styleUrls: ['./patient-notes-dialog.component.scss']
 })
 export class PatientNotesDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<PatientNotesDialogComponent>);

@@ -67,25 +67,24 @@ interface Doctor {
 }
 
 @Component({
-  selector: 'app-roles',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    AppButtonComponent,
-    AppInputComponent,
-    AppSelectboxComponent,
-    IconComponent,
-    TabComponent,
-    TabsComponent,
-    CheckboxComponent,
-    AdminPageHeaderComponent,
-    AdminStatsCardComponent,
-    AdminTabsComponent,
-    PageComponent
-  ],
-  templateUrl: './roles.component.html',
-  styleUrl: './roles.component.scss'
+    selector: 'app-roles',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        AppButtonComponent,
+        AppInputComponent,
+        AppSelectboxComponent,
+        IconComponent,
+        TabComponent,
+        TabsComponent,
+        CheckboxComponent,
+        AdminPageHeaderComponent,
+        AdminStatsCardComponent,
+        AdminTabsComponent,
+        PageComponent
+    ],
+    templateUrl: './roles.component.html',
+    styleUrl: './roles.component.scss'
 })
 export class RolesComponent implements OnInit {
   // State Management

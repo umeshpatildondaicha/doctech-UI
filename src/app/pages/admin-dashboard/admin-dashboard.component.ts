@@ -46,11 +46,10 @@ interface FinancialMetric {
 type TabType = 'overview' | 'staff' | 'patients' | 'billing' | 'analytics';
 
 @Component({
-  selector: 'app-admin-dashboard',
-  standalone: true,
-  imports: [CommonModule, HighchartsChartModule, AppButtonComponent, AppInputComponent, IconComponent],
-  templateUrl: './admin-dashboard.component.html',
-  styleUrl: './admin-dashboard.component.scss'
+    selector: 'app-admin-dashboard',
+    imports: [CommonModule, HighchartsChartModule, AppButtonComponent, AppInputComponent, IconComponent],
+    templateUrl: './admin-dashboard.component.html',
+    styleUrl: './admin-dashboard.component.scss'
 })
 export class AdminDashboardComponent implements OnInit, AfterViewInit {
   Highcharts: typeof Highcharts = Highcharts;

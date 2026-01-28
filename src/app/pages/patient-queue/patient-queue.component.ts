@@ -21,25 +21,24 @@ import { AppSelectboxComponent } from "@lk/core";
 import { PatientNotesDialogComponent } from './patient-notes-dialog/patient-notes-dialog.component';
 
 @Component({
-  selector: 'app-patient-queue',
-  standalone: true,
-  imports: [
-    CommonModule,
-    DragDropModule,
-    MatIconModule,
-    MatButtonModule,
-    MatCardModule,
-    MatChipsModule,
-    MatBadgeModule,
-    MatTooltipModule,
-    MatMenuModule,
-    FormsModule,
-    ReactiveFormsModule,
-    AppSelectboxComponent,
-    AppButtonComponent
-  ],
-  templateUrl: './patient-queue.component.html',
-  styleUrl: './patient-queue.component.scss'
+    selector: 'app-patient-queue',
+    imports: [
+        CommonModule,
+        DragDropModule,
+        MatIconModule,
+        MatButtonModule,
+        MatCardModule,
+        MatChipsModule,
+        MatBadgeModule,
+        MatTooltipModule,
+        MatMenuModule,
+        FormsModule,
+        ReactiveFormsModule,
+        AppSelectboxComponent,
+        AppButtonComponent
+    ],
+    templateUrl: './patient-queue.component.html',
+    styleUrl: './patient-queue.component.scss'
 })
 export class PatientQueueComponent implements OnInit, OnDestroy {
   

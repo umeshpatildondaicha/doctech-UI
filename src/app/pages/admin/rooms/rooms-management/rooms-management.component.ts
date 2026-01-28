@@ -24,21 +24,20 @@ interface Ward {
 }
 
 @Component({
-  selector: 'app-rooms-management',
-  standalone: true,
-  imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
-    AppButtonComponent, 
-    AppInputComponent, 
-    AppSelectboxComponent, 
-    IconComponent,
-    PageComponent,
-    TabsComponent,
-    TabComponent
-  ],
-  templateUrl: './rooms-management.component.html',
-  styleUrl: './rooms-management.component.scss'
+    selector: 'app-rooms-management',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        AppButtonComponent,
+        AppInputComponent,
+        AppSelectboxComponent,
+        IconComponent,
+        PageComponent,
+        TabsComponent,
+        TabComponent
+    ],
+    templateUrl: './rooms-management.component.html',
+    styleUrl: './rooms-management.component.scss'
 })
 export class RoomsManagementComponent implements OnInit, AfterViewInit {
   selectedTabIndex = 0;

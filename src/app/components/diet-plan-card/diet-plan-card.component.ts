@@ -34,16 +34,15 @@ export interface DietPlanMealPreview {
 }
 
 @Component({
-  selector: 'app-diet-plan-card',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule
-  ],
-  templateUrl: './diet-plan-card.component.html',
-  styleUrl: './diet-plan-card.component.scss'
+    selector: 'app-diet-plan-card',
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTooltipModule
+    ],
+    templateUrl: './diet-plan-card.component.html',
+    styleUrl: './diet-plan-card.component.scss'
 })
 export class DietPlanCardComponent {
   @Input() plan!: DietPlan;

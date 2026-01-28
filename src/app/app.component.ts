@@ -20,20 +20,19 @@ export interface PatientQueueItem {
 }
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [
-    RouterOutlet,
-    CommonModule,
-    SidebarComponent,
-    TopbarComponent,
-    MatIconModule,
-    AppButtonComponent,
-    MatChipsModule,
-    MatDividerModule
-  ],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+    selector: 'app-root',
+    imports: [
+        RouterOutlet,
+        CommonModule,
+        SidebarComponent,
+        TopbarComponent,
+        MatIconModule,
+        AppButtonComponent,
+        MatChipsModule,
+        MatDividerModule
+    ],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'Shree Clinic Management System';

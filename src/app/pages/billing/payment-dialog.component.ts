@@ -21,22 +21,21 @@ export interface PaymentDialogData {
 }
 
 @Component({
-  selector: 'app-payment-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatIconModule
-  ],
-  templateUrl: './payment-dialog.component.html',
-  styleUrl: './payment-dialog.component.scss'
+    selector: 'app-payment-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MatDialogModule,
+        MatButtonModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatIconModule
+    ],
+    templateUrl: './payment-dialog.component.html',
+    styleUrl: './payment-dialog.component.scss'
 })
 export class PaymentDialogComponent implements OnDestroy {
   form: FormGroup;

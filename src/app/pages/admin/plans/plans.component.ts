@@ -9,11 +9,10 @@ import {
 import { GridComponent, StatusCellRendererComponent, ChipCellRendererComponent, PageComponent, BreadcrumbItem, DialogboxService } from '@lk/core';
 
 @Component({
-  selector: 'app-plans',
-  standalone: true,
-  imports: [CommonModule, AdminPageHeaderComponent, AdminActionBarComponent, GridComponent, PageComponent],
-  templateUrl: './plans.component.html',
-  styleUrl: './plans.component.scss'
+    selector: 'app-plans',
+    imports: [CommonModule, AdminPageHeaderComponent, AdminActionBarComponent, GridComponent, PageComponent],
+    templateUrl: './plans.component.html',
+    styleUrl: './plans.component.scss'
 })
 export class PlansComponent implements OnInit {
   breadcrumb: BreadcrumbItem[] = [

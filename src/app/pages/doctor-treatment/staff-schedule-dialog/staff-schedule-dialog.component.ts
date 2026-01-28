@@ -23,16 +23,15 @@ export interface Shift {
 }
 
 @Component({
-  selector: 'app-staff-schedule-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    AppButtonComponent,
-    IconComponent
-  ],
-  templateUrl: './staff-schedule-dialog.component.html',
-  styleUrls: ['./staff-schedule-dialog.component.scss']
+    selector: 'app-staff-schedule-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        AppButtonComponent,
+        IconComponent
+    ],
+    templateUrl: './staff-schedule-dialog.component.html',
+    styleUrls: ['./staff-schedule-dialog.component.scss']
 })
 export class StaffScheduleDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<StaffScheduleDialogComponent>);

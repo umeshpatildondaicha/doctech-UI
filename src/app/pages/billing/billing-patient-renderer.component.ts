@@ -3,16 +3,15 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-billing-patient-renderer',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-billing-patient-renderer',
+    imports: [CommonModule],
+    template: `
     <div class="cell-two-line">
       <div class="primary clickable" (click)="navigateToPatient($event)">{{ name }}</div>
       <div class="secondary" *ngIf="sub">{{ sub }}</div>
     </div>
   `,
-  styles: [`
+    styles: [`
     :host {
       display: flex;
       align-items: center;

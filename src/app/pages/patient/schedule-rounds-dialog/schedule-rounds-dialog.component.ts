@@ -13,18 +13,17 @@ export interface ScheduleRoundsDialogData {
 }
 
 @Component({
-  selector: 'app-schedule-rounds-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    AppInputComponent,
-    AppSelectboxComponent
-  ],
-  templateUrl: './schedule-rounds-dialog.component.html',
-  styleUrls: ['./schedule-rounds-dialog.component.scss']
+    selector: 'app-schedule-rounds-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        AppInputComponent,
+        AppSelectboxComponent
+    ],
+    templateUrl: './schedule-rounds-dialog.component.html',
+    styleUrls: ['./schedule-rounds-dialog.component.scss']
 })
 export class ScheduleRoundsDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<ScheduleRoundsDialogComponent>);

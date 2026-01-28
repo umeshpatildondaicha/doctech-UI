@@ -49,19 +49,18 @@ interface DoctorStats {
 }
 
 @Component({
-  selector: 'app-doctors',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatIconModule,
-    GridComponent,
-    IconComponent,
-    AdminStatsCardComponent,
-    PageComponent
-  ],
-  templateUrl: './doctors.component.html',
-  styleUrl: './doctors.component.scss'
+    selector: 'app-doctors',
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatIconModule,
+        GridComponent,
+        IconComponent,
+        AdminStatsCardComponent,
+        PageComponent
+    ],
+    templateUrl: './doctors.component.html',
+    styleUrl: './doctors.component.scss'
 })
 export class DoctorsComponent implements OnInit, OnDestroy {
   // Grid configuration

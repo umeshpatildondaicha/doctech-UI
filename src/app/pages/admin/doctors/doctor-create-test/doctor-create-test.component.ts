@@ -6,10 +6,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { AdminDoctorCreateComponent } from '../doctor-create/doctor-create.component';
 
 @Component({
-  selector: 'app-doctor-create-test',
-  standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule],
-  template: `
+    selector: 'app-doctor-create-test',
+    imports: [CommonModule, MatButtonModule, MatIconModule],
+    template: `
     <div class="test-container">
       <h1>Doctor Creation Test</h1>
       <p>Click the button below to test the doctor creation dialog:</p>
@@ -47,7 +46,7 @@ import { AdminDoctorCreateComponent } from '../doctor-create/doctor-create.compo
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .test-container {
       padding: 40px;
       max-width: 800px;

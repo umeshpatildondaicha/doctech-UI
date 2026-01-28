@@ -11,17 +11,16 @@ export interface MedicineRequestDialogData {
 }
 
 @Component({
-  selector: 'app-medicine-request-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    AppInputComponent,
-    AppSelectboxComponent,
-    AppButtonComponent
-  ],
-  templateUrl: './medicine-request-dialog.component.html',
-  styleUrls: ['./medicine-request-dialog.component.scss']
+    selector: 'app-medicine-request-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        AppInputComponent,
+        AppSelectboxComponent,
+        AppButtonComponent
+    ],
+    templateUrl: './medicine-request-dialog.component.html',
+    styleUrls: ['./medicine-request-dialog.component.scss']
 })
 export class MedicineRequestDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<MedicineRequestDialogComponent>);

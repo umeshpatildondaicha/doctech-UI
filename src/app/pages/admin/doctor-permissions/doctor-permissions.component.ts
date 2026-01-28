@@ -19,27 +19,26 @@ import { DoctorFeatureService } from '../../../services/doctor-feature.service';
 import { AuthService, PageComponent, BreadcrumbItem } from "@lk/core";
 
 @Component({
-  selector: 'app-doctor-permissions',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    RouterModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSnackBarModule,
-    MatProgressSpinnerModule,
-    MatExpansionModule,
-    MatSlideToggleModule,
-    MatTooltipModule,
-    MatSelectModule,
-    MatChipsModule,
-    PageComponent
-  ],
-  templateUrl: './doctor-permissions.component.html',
-  styleUrl: './doctor-permissions.component.scss'
+    selector: 'app-doctor-permissions',
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        RouterModule,
+        MatInputModule,
+        MatButtonModule,
+        MatIconModule,
+        MatSnackBarModule,
+        MatProgressSpinnerModule,
+        MatExpansionModule,
+        MatSlideToggleModule,
+        MatTooltipModule,
+        MatSelectModule,
+        MatChipsModule,
+        PageComponent
+    ],
+    templateUrl: './doctor-permissions.component.html',
+    styleUrl: './doctor-permissions.component.scss'
 })
 export class DoctorPermissionsComponent implements OnInit {
   breadcrumb: BreadcrumbItem[] = [

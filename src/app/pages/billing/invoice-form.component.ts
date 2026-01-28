@@ -30,24 +30,23 @@ export interface InvoiceTemplate {
 }
 
 @Component({
-  selector: 'app-invoice-form',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatDividerModule,
-    MatTooltipModule,
-    MatRadioModule
-  ],
-  templateUrl: './invoice-form.component.html',
-  styleUrl: './invoice-form.component.scss'
+    selector: 'app-invoice-form',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MatDialogModule,
+        MatButtonModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatIconModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatDividerModule,
+        MatTooltipModule,
+        MatRadioModule
+    ],
+    templateUrl: './invoice-form.component.html',
+    styleUrl: './invoice-form.component.scss'
 })
 export class InvoiceFormComponent implements OnDestroy {
   form: FormGroup;

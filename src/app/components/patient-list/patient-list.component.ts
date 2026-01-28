@@ -6,11 +6,10 @@ import { Patient } from '../../interfaces/patient.interface';
 import { GridComponent } from "@lk/core";
 
 @Component({
-  selector: 'app-patient-list',
-  standalone: true,
-  imports: [CommonModule, GridComponent],
-  templateUrl: './patient-list.component.html',
-  styleUrl: './patient-list.component.scss'
+    selector: 'app-patient-list',
+    imports: [CommonModule, GridComponent],
+    templateUrl: './patient-list.component.html',
+    styleUrl: './patient-list.component.scss'
 })
 export class PatientListComponent {
   columnDefs: ColDef<Patient>[] = [

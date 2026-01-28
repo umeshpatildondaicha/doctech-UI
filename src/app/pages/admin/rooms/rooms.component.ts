@@ -12,11 +12,10 @@ import {
 } from '../../../components';
 
 @Component({
-  selector: 'app-rooms',
-  standalone: true,
-  imports: [CommonModule, GridComponent, AppButtonComponent, IconComponent, AdminPageHeaderComponent, AdminStatsCardComponent, PageComponent],
-  templateUrl: './rooms.component.html',
-  styleUrl: './rooms.component.scss'
+    selector: 'app-rooms',
+    imports: [CommonModule, GridComponent, AppButtonComponent, IconComponent, AdminPageHeaderComponent, AdminStatsCardComponent, PageComponent],
+    templateUrl: './rooms.component.html',
+    styleUrl: './rooms.component.scss'
 })
 export class RoomsComponent implements OnInit {
   // Extended options to work with app-grid

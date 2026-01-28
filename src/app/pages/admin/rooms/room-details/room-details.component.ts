@@ -37,11 +37,10 @@ interface Room {
 }
 
 @Component({
-  selector: 'app-room-details',
-  standalone: true,
-  imports: [CommonModule, AppButtonComponent, IconComponent, PageComponent],
-  templateUrl: './room-details.component.html',
-  styleUrl: './room-details.component.scss'
+    selector: 'app-room-details',
+    imports: [CommonModule, AppButtonComponent, IconComponent, PageComponent],
+    templateUrl: './room-details.component.html',
+    styleUrl: './room-details.component.scss'
 })
 export class RoomDetailsComponent implements OnInit {
   room: Room | null = null;

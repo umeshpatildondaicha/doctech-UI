@@ -14,16 +14,15 @@ export interface LabTestOrderDialogData {
 }
 
 @Component({
-  selector: 'app-lab-test-order-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    AppInputComponent,
-    AppSelectboxComponent
-  ],
-  templateUrl: './lab-test-order-dialog.component.html',
-  styleUrls: ['./lab-test-order-dialog.component.scss']
+    selector: 'app-lab-test-order-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        AppInputComponent,
+        AppSelectboxComponent
+    ],
+    templateUrl: './lab-test-order-dialog.component.html',
+    styleUrls: ['./lab-test-order-dialog.component.scss']
 })
 export class LabTestOrderDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<LabTestOrderDialogComponent>);

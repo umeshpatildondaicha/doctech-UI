@@ -5,10 +5,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
-  selector: 'app-billing-actions-renderer',
-  standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatMenuModule],
-  template: `
+    selector: 'app-billing-actions-renderer',
+    imports: [CommonModule, MatIconModule, MatButtonModule, MatMenuModule],
+    template: `
     <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Invoice actions" (click)="$event.stopPropagation()">
       <mat-icon>more_vert</mat-icon>
     </button>

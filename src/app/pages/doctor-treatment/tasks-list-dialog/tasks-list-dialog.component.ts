@@ -12,14 +12,13 @@ export interface TasksListDialogData {
 }
 
 @Component({
-  selector: 'app-tasks-list-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    GridComponent
-  ],
-  templateUrl: './tasks-list-dialog.component.html',
-  styleUrls: ['./tasks-list-dialog.component.scss']
+    selector: 'app-tasks-list-dialog',
+    imports: [
+        CommonModule,
+        GridComponent
+    ],
+    templateUrl: './tasks-list-dialog.component.html',
+    styleUrls: ['./tasks-list-dialog.component.scss']
 })
 export class TasksListDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<TasksListDialogComponent>);

@@ -28,15 +28,14 @@ export interface StaffViewDialogData {
 }
 
 @Component({
-  selector: 'app-staff-view-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    IconComponent,
-    AppButtonComponent
-  ],
-  templateUrl: './staff-view-dialog.component.html',
-  styleUrls: ['./staff-view-dialog.component.scss']
+    selector: 'app-staff-view-dialog',
+    imports: [
+        CommonModule,
+        IconComponent,
+        AppButtonComponent
+    ],
+    templateUrl: './staff-view-dialog.component.html',
+    styleUrls: ['./staff-view-dialog.component.scss']
 })
 export class StaffViewDialogComponent {
   data = inject<StaffViewDialogData>(DIALOG_DATA_TOKEN);

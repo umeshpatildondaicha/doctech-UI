@@ -26,26 +26,25 @@ type StatusFilter = 'ALL' | 'UNPAID' | 'PARTIALLY_PAID' | 'PAID' | 'OVERDUE';
 const FORCE_DEMO_PATIENT_BILLING = false;
 
 @Component({
-  selector: 'app-patient-billing-dashboard',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTabsModule,
-    MatProgressBarModule,
-    MatDialogModule,
-    MatSnackBarModule,
-    MatTooltipModule,
-    MatChipsModule,
-    MatTableModule,
-    GridComponent,
-    BillingStatusRendererComponent,
-    AppCardComponent
-  ],
-  templateUrl: './patient-billing-dashboard.component.html',
-  styleUrl: './patient-billing-dashboard.component.scss'
+    selector: 'app-patient-billing-dashboard',
+    imports: [
+        CommonModule,
+        RouterModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTabsModule,
+        MatProgressBarModule,
+        MatDialogModule,
+        MatSnackBarModule,
+        MatTooltipModule,
+        MatChipsModule,
+        MatTableModule,
+        GridComponent,
+        BillingStatusRendererComponent,
+        AppCardComponent
+    ],
+    templateUrl: './patient-billing-dashboard.component.html',
+    styleUrl: './patient-billing-dashboard.component.scss'
 })
 export class PatientBillingDashboardComponent implements OnInit, OnChanges {
   @Input() patientId: string = '';

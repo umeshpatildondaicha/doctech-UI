@@ -9,14 +9,13 @@ import {
 } from '../listing-card/listing-card.component';
 
 @Component({
-  selector: 'app-diet-card',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ListingCardComponent
-  ],
-  templateUrl: './diet-card.component.html',
-  styleUrl: './diet-card.component.scss'
+    selector: 'app-diet-card',
+    imports: [
+        CommonModule,
+        ListingCardComponent
+    ],
+    templateUrl: './diet-card.component.html',
+    styleUrl: './diet-card.component.scss'
 })
 export class DietCardComponent {
   @Input() diet!: Diet;

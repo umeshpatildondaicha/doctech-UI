@@ -15,22 +15,21 @@ import { CalendarComponent, CalendarEvent } from "@lk/core";
 import { PatientSearchDialogComponent, PatientSearchResult } from '../patient-search-dialog/patient-search-dialog.component';
 
 @Component({
-  selector: 'app-appointment-create',
-  templateUrl: './appointment-create.component.html',
-  styleUrl: './appointment-create.component.scss',
-  standalone: true,
-  imports: [
-    AppInputComponent,
-    AppButtonComponent,
-    AppSelectboxComponent,
-    IconComponent,
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    DatePickerComponent,
-    CalendarComponent
-]
+    selector: 'app-appointment-create',
+    templateUrl: './appointment-create.component.html',
+    styleUrl: './appointment-create.component.scss',
+    imports: [
+        AppInputComponent,
+        AppButtonComponent,
+        AppSelectboxComponent,
+        IconComponent,
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        DatePickerComponent,
+        CalendarComponent
+    ]
 })
 export class AppointmentCreateComponent implements OnInit {
   appointmentForm: FormGroup;

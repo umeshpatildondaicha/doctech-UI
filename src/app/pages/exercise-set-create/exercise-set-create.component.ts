@@ -28,27 +28,26 @@ interface ExerciseGroup {
 }
 
 @Component({
-  selector: 'app-exercise-set-create',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDialogModule,
-    MatChipsModule,
-    MatTooltipModule,
-    AppButtonComponent,
-    AppInputComponent,
-    AppSelectboxComponent,
-    IconComponent
-  ],
-  templateUrl: './exercise-set-create.component.html',
-  styleUrl: './exercise-set-create.component.scss'
+    selector: 'app-exercise-set-create',
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatIconModule,
+        MatDialogModule,
+        MatChipsModule,
+        MatTooltipModule,
+        AppButtonComponent,
+        AppInputComponent,
+        AppSelectboxComponent,
+        IconComponent
+    ],
+    templateUrl: './exercise-set-create.component.html',
+    styleUrl: './exercise-set-create.component.scss'
 })
 export class ExerciseSetCreateComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<ExerciseSetCreateComponent>);

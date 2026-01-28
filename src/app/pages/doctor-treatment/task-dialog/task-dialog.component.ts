@@ -15,17 +15,16 @@ export interface TaskDialogData {
 }
 
 @Component({
-  selector: 'app-task-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    AppInputComponent,
-    AppSelectboxComponent,
-    AppButtonComponent
-  ],
-  templateUrl: './task-dialog.component.html',
-  styleUrls: ['./task-dialog.component.scss']
+    selector: 'app-task-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        AppInputComponent,
+        AppSelectboxComponent,
+        AppButtonComponent
+    ],
+    templateUrl: './task-dialog.component.html',
+    styleUrls: ['./task-dialog.component.scss']
 })
 export class TaskDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<TaskDialogComponent>);

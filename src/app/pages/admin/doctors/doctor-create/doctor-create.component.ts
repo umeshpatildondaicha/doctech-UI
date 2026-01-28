@@ -18,23 +18,22 @@ import { HttpService } from '../../../../services/http.service';
 import { DIALOG_DATA_TOKEN } from '@lk/core';
 
 @Component({
-  selector: 'app-admin-doctor-create',
-  templateUrl: './doctor-create.component.html',
-  styleUrl: './doctor-create.component.scss',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatIconModule,
-    MatChipsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-    MatTabsModule
-  ]
+    selector: 'app-admin-doctor-create',
+    templateUrl: './doctor-create.component.html',
+    styleUrl: './doctor-create.component.scss',
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatIconModule,
+        MatChipsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatProgressSpinnerModule,
+        MatTabsModule
+    ]
 })
 export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<AdminDoctorCreateComponent>);

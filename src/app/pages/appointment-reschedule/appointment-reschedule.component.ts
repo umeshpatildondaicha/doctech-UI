@@ -18,21 +18,20 @@ interface TimeSlot {
 }
 
 @Component({
-  selector: 'app-appointment-reschedule',
-  templateUrl: './appointment-reschedule.component.html',
-  styleUrl: './appointment-reschedule.component.scss',
-  standalone: true,
-  imports: [
-    AppInputComponent,
-    AppButtonComponent,
-    ImageComponent,
-    IconComponent,
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    CalendarComponent
-  ]
+    selector: 'app-appointment-reschedule',
+    templateUrl: './appointment-reschedule.component.html',
+    styleUrl: './appointment-reschedule.component.scss',
+    imports: [
+        AppInputComponent,
+        AppButtonComponent,
+        ImageComponent,
+        IconComponent,
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        CalendarComponent
+    ]
 })
 export class AppointmentRescheduleComponent implements OnInit {
   rescheduleForm: FormGroup;

@@ -26,21 +26,20 @@ export interface ExerciseSetsConfigDialogData {
 }
 
 @Component({
-  selector: 'app-exercise-sets-config-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule
-  ],
-  templateUrl: './exercise-sets-config-dialog.component.html',
-  styleUrl: './exercise-sets-config-dialog.component.scss'
+    selector: 'app-exercise-sets-config-dialog',
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTooltipModule
+    ],
+    templateUrl: './exercise-sets-config-dialog.component.html',
+    styleUrl: './exercise-sets-config-dialog.component.scss'
 })
 export class ExerciseSetsConfigDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<ExerciseSetsConfigDialogComponent>);

@@ -10,18 +10,17 @@ import { SafePipe } from '@lk/core';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
 
 @Component({
-  selector: 'app-diet-view',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    SafePipe,
-    BreadcrumbComponent
-  ],
-  templateUrl: './diet-view.component.html',
-  styleUrl: './diet-view.component.scss'
+    selector: 'app-diet-view',
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatIconModule,
+        MatProgressSpinnerModule,
+        SafePipe,
+        BreadcrumbComponent
+    ],
+    templateUrl: './diet-view.component.html',
+    styleUrl: './diet-view.component.scss'
 })
 export class DietViewComponent implements OnInit {
   diet: Diet | null = null;

@@ -14,19 +14,18 @@ export interface AddRelativeDialogData {
 }
 
 @Component({
-  selector: 'app-add-relative-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatCheckboxModule,
-    AppInputComponent,
-    AppSelectboxComponent
-  ],
-  templateUrl: './add-relative-dialog.component.html',
-  styleUrls: ['./add-relative-dialog.component.scss']
+    selector: 'app-add-relative-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatCheckboxModule,
+        AppInputComponent,
+        AppSelectboxComponent
+    ],
+    templateUrl: './add-relative-dialog.component.html',
+    styleUrls: ['./add-relative-dialog.component.scss']
 })
 export class AddRelativeDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<AddRelativeDialogComponent>);

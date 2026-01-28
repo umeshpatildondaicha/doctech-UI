@@ -12,21 +12,20 @@ import { CheckboxComponent } from "@lk/core";
 import { Mode } from '../../types/mode.type';
 
 @Component({
-  selector: 'app-doctor-create',
-  templateUrl: './doctor-create.component.html',
-  styleUrl: './doctor-create.component.scss',
-  standalone: true,
-  imports: [
-    AppInputComponent, 
-    AppButtonComponent, 
-    AppSelectboxComponent,
-    IconComponent,
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    CheckboxComponent
-  ] // Add form controls, app-input, app-selectbox, app-button, etc. as needed
+    selector: 'app-doctor-create',
+    templateUrl: './doctor-create.component.html',
+    styleUrl: './doctor-create.component.scss',
+    imports: [
+        AppInputComponent,
+        AppButtonComponent,
+        AppSelectboxComponent,
+        IconComponent,
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        CheckboxComponent
+    ] // Add form controls, app-input, app-selectbox, app-button, etc. as needed
 })
 export class DoctorCreateComponent {
   doctorForm: FormGroup;

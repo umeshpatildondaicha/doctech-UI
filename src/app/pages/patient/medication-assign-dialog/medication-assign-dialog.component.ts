@@ -16,11 +16,10 @@ export interface MedicationAssignDialogData {
 }
 
 @Component({
-  selector: 'app-medication-assign-dialog',
-  standalone: true,
-  imports: [CommonModule, FormsModule, MatButtonModule, MatIconModule],
-  templateUrl: './medication-assign-dialog.component.html',
-  styleUrls: ['./medication-assign-dialog.component.scss']
+    selector: 'app-medication-assign-dialog',
+    imports: [CommonModule, FormsModule, MatButtonModule, MatIconModule],
+    templateUrl: './medication-assign-dialog.component.html',
+    styleUrls: ['./medication-assign-dialog.component.scss']
 })
 export class MedicationAssignDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<MedicationAssignDialogComponent>);

@@ -39,11 +39,10 @@ export interface InvoicePreviewData {
 }
 
 @Component({
-  selector: 'app-invoice-preview-dialog',
-  standalone: true,
-  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule, MatTooltipModule, DatePipe, CurrencyPipe],
-  templateUrl: './invoice-preview-dialog.component.html',
-  styleUrl: './invoice-preview-dialog.component.scss'
+    selector: 'app-invoice-preview-dialog',
+    imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule, MatTooltipModule, DatePipe, CurrencyPipe],
+    templateUrl: './invoice-preview-dialog.component.html',
+    styleUrl: './invoice-preview-dialog.component.scss'
 })
 export class InvoicePreviewDialogComponent {
   @ViewChild('printContent', { static: false }) private readonly printContent?: ElementRef<HTMLElement>;

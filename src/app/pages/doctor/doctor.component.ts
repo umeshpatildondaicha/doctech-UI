@@ -48,30 +48,29 @@ interface DoctorStats {
 }
 
 @Component({
-  selector: 'app-doctor',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatSelectModule,
-    MatInputModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatIconModule,
-    MatTabsModule,
-    MatCardModule,
-    MatBadgeModule,
-    MatTooltipModule,
-    MatMenuModule,
-    MatCheckboxModule,
-    MatProgressBarModule,
-    IconComponent,
-    AppInputComponent,
-    AppButtonComponent,
-    AppSelectboxComponent
-  ],
-  templateUrl: './doctor.component.html',
-  styleUrl: './doctor.component.scss'
+    selector: 'app-doctor',
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatSelectModule,
+        MatInputModule,
+        MatButtonModule,
+        MatChipsModule,
+        MatIconModule,
+        MatTabsModule,
+        MatCardModule,
+        MatBadgeModule,
+        MatTooltipModule,
+        MatMenuModule,
+        MatCheckboxModule,
+        MatProgressBarModule,
+        IconComponent,
+        AppInputComponent,
+        AppButtonComponent,
+        AppSelectboxComponent
+    ],
+    templateUrl: './doctor.component.html',
+    styleUrl: './doctor.component.scss'
 })
 export class DoctorComponent implements OnInit {
   // View modes

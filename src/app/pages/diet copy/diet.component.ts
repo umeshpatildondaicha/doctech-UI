@@ -30,32 +30,31 @@ import { DietCardComponent } from '../../components/diet-card/diet-card.componen
 import { DietPlanCardComponent } from '../../components/diet-plan-card/diet-plan-card.component';
 
 @Component({
-  selector: 'app-diet',
-  standalone: true,
-  imports: [
-    CommonModule, 
-    FormsModule,
-    MatTabsModule, 
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTableModule,
-    MatTooltipModule,
-    MatProgressBarModule,
-    MatDialogModule,
-    GridComponent, 
-    AppButtonComponent,
-    AppInputComponent,
-    IconComponent,
-    DietSelectionDialogComponent,
-    MealTimeDialogComponent,
-    DietCardComponent,
-    DietPlanCardComponent
-  ],
-  templateUrl: './diet.component.html',
-  styleUrl: './diet.component.scss'
+    selector: 'app-diet',
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatTabsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTableModule,
+        MatTooltipModule,
+        MatProgressBarModule,
+        MatDialogModule,
+        GridComponent,
+        AppButtonComponent,
+        AppInputComponent,
+        IconComponent,
+        DietSelectionDialogComponent,
+        MealTimeDialogComponent,
+        DietCardComponent,
+        DietPlanCardComponent
+    ],
+    templateUrl: './diet.component.html',
+    styleUrl: './diet.component.scss'
 })
 export class DietComponent implements OnInit {
   selectedTabIndex = 0;

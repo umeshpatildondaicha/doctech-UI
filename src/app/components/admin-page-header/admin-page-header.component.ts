@@ -11,11 +11,10 @@ export interface HeaderAction {
 }
 
 @Component({
-  selector: 'app-admin-page-header',
-  standalone: true,
-  imports: [CommonModule, AppButtonComponent, IconComponent],
-  templateUrl: './admin-page-header.component.html',
-  styleUrl: './admin-page-header.component.scss'
+    selector: 'app-admin-page-header',
+    imports: [CommonModule, AppButtonComponent, IconComponent],
+    templateUrl: './admin-page-header.component.html',
+    styleUrl: './admin-page-header.component.scss'
 })
 export class AdminPageHeaderComponent {
   @Input() title: string = '';

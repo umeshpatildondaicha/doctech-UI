@@ -9,19 +9,18 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
 
 @Component({
-  selector: 'app-diet-plan-view',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatCardModule,
-    MatChipsModule,
-    MatProgressBarModule,
-    BreadcrumbComponent
-  ],
-  templateUrl: './diet-plan-view.component.html',
-  styleUrl: './diet-plan-view.component.scss'
+    selector: 'app-diet-plan-view',
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatIconModule,
+        MatCardModule,
+        MatChipsModule,
+        MatProgressBarModule,
+        BreadcrumbComponent
+    ],
+    templateUrl: './diet-plan-view.component.html',
+    styleUrl: './diet-plan-view.component.scss'
 })
 export class DietPlanViewComponent implements OnInit {
   planId: string = '';

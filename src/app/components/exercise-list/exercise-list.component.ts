@@ -26,23 +26,22 @@ export interface ExerciseListConfig {
 }
 
 @Component({
-  selector: 'app-exercise-list',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatTooltipModule,
-    ExerciseCardComponent
-  ],
-  templateUrl: './exercise-list.component.html',
-  styleUrl: './exercise-list.component.scss'
+    selector: 'app-exercise-list',
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule,
+        MatChipsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatTooltipModule,
+        ExerciseCardComponent
+    ],
+    templateUrl: './exercise-list.component.html',
+    styleUrl: './exercise-list.component.scss'
 })
 export class ExerciseListComponent implements OnInit {
   @Input() exercises: Exercise[] = [];

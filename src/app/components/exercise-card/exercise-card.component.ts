@@ -13,18 +13,17 @@ import {
 } from '../listing-card/listing-card.component';
 
 @Component({
-  selector: 'app-exercise-card',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatTooltipModule,
-    ListingCardComponent
-  ],
-  templateUrl: './exercise-card.component.html',
-  styleUrl: './exercise-card.component.scss'
+    selector: 'app-exercise-card',
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatIconModule,
+        MatChipsModule,
+        MatTooltipModule,
+        ListingCardComponent
+    ],
+    templateUrl: './exercise-card.component.html',
+    styleUrl: './exercise-card.component.scss'
 })
 export class ExerciseCardComponent {
   @Input() exercise!: Exercise;

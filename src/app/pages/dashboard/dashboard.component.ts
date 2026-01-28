@@ -48,21 +48,20 @@ interface AppointmentRequest {
 }
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [
-    CommonModule,
-    DashboardDetailsComponent,
-    HighchartsChartModule,
-    AppButtonComponent,
-    GridComponent,
-    IconComponent,
-    PageComponent,
-    PageBodyDirective,
-    ImageComponent
-  ],
-  templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+    selector: 'app-dashboard',
+    imports: [
+        CommonModule,
+        DashboardDetailsComponent,
+        HighchartsChartModule,
+        AppButtonComponent,
+        GridComponent,
+        IconComponent,
+        PageComponent,
+        PageBodyDirective,
+        ImageComponent
+    ],
+    templateUrl: './dashboard.component.html',
+    styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
   Highcharts: typeof Highcharts = Highcharts;

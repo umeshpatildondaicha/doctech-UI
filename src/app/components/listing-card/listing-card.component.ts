@@ -30,11 +30,10 @@ export interface ListingCardAction {
 }
 
 @Component({
-  selector: 'app-listing-card',
-  standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatTooltipModule],
-  templateUrl: './listing-card.component.html',
-  styleUrl: './listing-card.component.scss'
+    selector: 'app-listing-card',
+    imports: [CommonModule, MatButtonModule, MatIconModule, MatTooltipModule],
+    templateUrl: './listing-card.component.html',
+    styleUrl: './listing-card.component.scss'
 })
 export class ListingCardComponent {
   @Input() title!: string;

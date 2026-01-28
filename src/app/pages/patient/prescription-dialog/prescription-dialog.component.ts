@@ -11,17 +11,16 @@ export interface PrescriptionDialogData {
 }
 
 @Component({
-  selector: 'app-prescription-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    AppInputComponent,
-    AppSelectboxComponent,
-    AppButtonComponent
-  ],
-  templateUrl: './prescription-dialog.component.html',
-  styleUrls: ['./prescription-dialog.component.scss']
+    selector: 'app-prescription-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        AppInputComponent,
+        AppSelectboxComponent,
+        AppButtonComponent
+    ],
+    templateUrl: './prescription-dialog.component.html',
+    styleUrls: ['./prescription-dialog.component.scss']
 })
 export class PrescriptionDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<PrescriptionDialogComponent>);

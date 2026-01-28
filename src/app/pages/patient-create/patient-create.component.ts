@@ -23,24 +23,23 @@ export interface DialogData {
 }
 
 @Component({
-  selector: 'app-patient-create',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    AppButtonComponent,
-    AppInputComponent,
-    AppSelectboxComponent,
-    IconComponent
-  ],
-  templateUrl: './patient-create.component.html',
-  styleUrl: './patient-create.component.scss'
+    selector: 'app-patient-create',
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatIconModule,
+        AppButtonComponent,
+        AppInputComponent,
+        AppSelectboxComponent,
+        IconComponent
+    ],
+    templateUrl: './patient-create.component.html',
+    styleUrl: './patient-create.component.scss'
 })
 export class PatientCreateComponent implements OnInit, OnDestroy {
   patientForm: FormGroup;

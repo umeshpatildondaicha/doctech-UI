@@ -14,20 +14,19 @@ export interface DoctorScheduleDialogData {
 }
 
 @Component({
-  selector: 'app-doctor-schedule-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    AppInputComponent,
-    AppSelectboxComponent
-  ],
-  templateUrl: './doctor-schedule-dialog.component.html',
-  styleUrls: ['./doctor-schedule-dialog.component.scss']
+    selector: 'app-doctor-schedule-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        AppInputComponent,
+        AppSelectboxComponent
+    ],
+    templateUrl: './doctor-schedule-dialog.component.html',
+    styleUrls: ['./doctor-schedule-dialog.component.scss']
 })
 export class DoctorScheduleDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<DoctorScheduleDialogComponent>);

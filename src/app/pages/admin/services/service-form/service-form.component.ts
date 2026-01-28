@@ -48,11 +48,10 @@ interface UploadedDocument {
 }
 
 @Component({
-  selector: 'app-service-form',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, AppInputComponent, AppSelectboxComponent, AppButtonComponent, IconComponent],
-  templateUrl: './service-form.component.html',
-  styleUrls: ['./service-form.component.scss']
+    selector: 'app-service-form',
+    imports: [CommonModule, ReactiveFormsModule, FormsModule, AppInputComponent, AppSelectboxComponent, AppButtonComponent, IconComponent],
+    templateUrl: './service-form.component.html',
+    styleUrls: ['./service-form.component.scss']
 })
 export class ServiceFormComponent implements OnDestroy {
   dialogRef = inject(MatDialogRef<ServiceFormComponent>);

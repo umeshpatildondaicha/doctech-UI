@@ -117,26 +117,25 @@ interface ServiceRecommendation {
 }
 
 @Component({
-  selector: 'app-services',
-  standalone: true,
-  imports: [
-    CommonModule, 
-    FormsModule, 
-    MatIconModule, 
-    MatSelectModule, 
-    MatFormFieldModule, 
-    MatInputModule,
-    MatDialogModule,
-    MatTooltipModule,
-    AppInputComponent,
-    AppSelectboxComponent,
-    AppButtonComponent,
-    IconComponent,
-    GridComponent,
-    AdminPageHeaderComponent
-  ],
-  templateUrl: './services.component.html',
-  styleUrl: './services.component.scss'
+    selector: 'app-services',
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatIconModule,
+        MatSelectModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatDialogModule,
+        MatTooltipModule,
+        AppInputComponent,
+        AppSelectboxComponent,
+        AppButtonComponent,
+        IconComponent,
+        GridComponent,
+        AdminPageHeaderComponent
+    ],
+    templateUrl: './services.component.html',
+    styleUrl: './services.component.scss'
 })
 export class ServicesComponent implements OnInit, AfterViewInit {
   

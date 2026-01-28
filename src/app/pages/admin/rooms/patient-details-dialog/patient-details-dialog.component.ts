@@ -10,11 +10,10 @@ export interface PatientDetailsDialogData {
 }
 
 @Component({
-  selector: 'app-patient-details-dialog',
-  standalone: true,
-  imports: [CommonModule, IconComponent, AppButtonComponent],
-  templateUrl: './patient-details-dialog.component.html',
-  styleUrls: ['./patient-details-dialog.component.scss']
+    selector: 'app-patient-details-dialog',
+    imports: [CommonModule, IconComponent, AppButtonComponent],
+    templateUrl: './patient-details-dialog.component.html',
+    styleUrls: ['./patient-details-dialog.component.scss']
 })
 export class PatientDetailsDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<PatientDetailsDialogComponent>);

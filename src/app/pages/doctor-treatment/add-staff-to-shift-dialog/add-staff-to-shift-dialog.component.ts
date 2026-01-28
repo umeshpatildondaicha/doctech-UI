@@ -11,15 +11,14 @@ export interface AddStaffToShiftDialogData {
 }
 
 @Component({
-  selector: 'app-add-staff-to-shift-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    AppButtonComponent,
-    IconComponent
-  ],
-  templateUrl: './add-staff-to-shift-dialog.component.html',
-  styleUrls: ['./add-staff-to-shift-dialog.component.scss']
+    selector: 'app-add-staff-to-shift-dialog',
+    imports: [
+        CommonModule,
+        AppButtonComponent,
+        IconComponent
+    ],
+    templateUrl: './add-staff-to-shift-dialog.component.html',
+    styleUrls: ['./add-staff-to-shift-dialog.component.scss']
 })
 export class AddStaffToShiftDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<AddStaffToShiftDialogComponent>);

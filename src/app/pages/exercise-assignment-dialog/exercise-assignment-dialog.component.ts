@@ -36,23 +36,22 @@ export interface ExerciseGroup {
 }
 
 @Component({
-  selector: 'app-exercise-assignment-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatTooltipModule,
-    AppButtonComponent
-  ],
-  templateUrl: './exercise-assignment-dialog.component.html',
-  styleUrl: './exercise-assignment-dialog.component.scss'
+    selector: 'app-exercise-assignment-dialog',
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatIconModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatTooltipModule,
+        AppButtonComponent
+    ],
+    templateUrl: './exercise-assignment-dialog.component.html',
+    styleUrl: './exercise-assignment-dialog.component.scss'
 })
 export class ExerciseAssignmentDialogComponent implements OnInit, OnDestroy {
   searchQuery: string = '';

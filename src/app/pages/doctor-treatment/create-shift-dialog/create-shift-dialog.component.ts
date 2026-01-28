@@ -11,17 +11,16 @@ export interface CreateShiftDialogData {
 }
 
 @Component({
-  selector: 'app-create-shift-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    AppButtonComponent,
-    IconComponent,
-    AppInputComponent
-  ],
-  templateUrl: './create-shift-dialog.component.html',
-  styleUrls: ['./create-shift-dialog.component.scss']
+    selector: 'app-create-shift-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        AppButtonComponent,
+        IconComponent,
+        AppInputComponent
+    ],
+    templateUrl: './create-shift-dialog.component.html',
+    styleUrls: ['./create-shift-dialog.component.scss']
 })
 export class CreateShiftDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   dialogRef = inject(MatDialogRef<CreateShiftDialogComponent>);

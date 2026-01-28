@@ -11,17 +11,16 @@ export interface DoctorViewDialogData {
 }
 
 @Component({
-  selector: 'app-doctor-view-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatCardModule,
-    MatChipsModule,
-    IconComponent
-  ],
-  templateUrl: './doctor-view-dialog.component.html',
-  styleUrls: ['./doctor-view-dialog.component.scss']
+    selector: 'app-doctor-view-dialog',
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatCardModule,
+        MatChipsModule,
+        IconComponent
+    ],
+    templateUrl: './doctor-view-dialog.component.html',
+    styleUrls: ['./doctor-view-dialog.component.scss']
 })
 export class DoctorViewDialogComponent {
   dialogRef = inject(MatDialogRef<DoctorViewDialogComponent>);

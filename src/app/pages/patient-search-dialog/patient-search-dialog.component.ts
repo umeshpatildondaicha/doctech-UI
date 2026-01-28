@@ -41,26 +41,25 @@ export interface PatientSearchDialogData {
 }
 
 @Component({
-  selector: 'app-patient-search-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatCardModule,
-    MatChipsModule,
-    MatProgressSpinnerModule,
-    MatTooltipModule,
-    AppInputComponent,
-    AppButtonComponent,
-    AppSelectboxComponent,
-    IconComponent,
-    GridComponent
-  ],
-  templateUrl: './patient-search-dialog.component.html',
-  styleUrls: ['./patient-search-dialog.component.scss']
+    selector: 'app-patient-search-dialog',
+    imports: [
+        CommonModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatIconModule,
+        MatCardModule,
+        MatChipsModule,
+        MatProgressSpinnerModule,
+        MatTooltipModule,
+        AppInputComponent,
+        AppButtonComponent,
+        AppSelectboxComponent,
+        IconComponent,
+        GridComponent
+    ],
+    templateUrl: './patient-search-dialog.component.html',
+    styleUrls: ['./patient-search-dialog.component.scss']
 })
 export class PatientSearchDialogComponent implements OnInit {
   searchResults: PatientSearchResult[] = [];

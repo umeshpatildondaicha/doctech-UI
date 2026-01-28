@@ -41,26 +41,25 @@ export interface DoctorSearchDialogData {
 }
 
 @Component({
-  selector: 'app-doctor-search-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatCardModule,
-    MatChipsModule,
-    MatProgressSpinnerModule,
-    MatTooltipModule,
-    AppInputComponent,
-    AppButtonComponent,
-    AppSelectboxComponent,
-    IconComponent,
-    GridComponent
-  ],
-  templateUrl: './doctor-search-dialog.component.html',
-  styleUrls: ['./doctor-search-dialog.component.scss']
+    selector: 'app-doctor-search-dialog',
+    imports: [
+        CommonModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatIconModule,
+        MatCardModule,
+        MatChipsModule,
+        MatProgressSpinnerModule,
+        MatTooltipModule,
+        AppInputComponent,
+        AppButtonComponent,
+        AppSelectboxComponent,
+        IconComponent,
+        GridComponent
+    ],
+    templateUrl: './doctor-search-dialog.component.html',
+    styleUrls: ['./doctor-search-dialog.component.scss']
 })
 export class DoctorSearchDialogComponent implements OnInit, OnDestroy {
   searchResults: DoctorSearchResult[] = [];

@@ -12,11 +12,10 @@ export interface TabItem {
 }
 
 @Component({
-  selector: 'app-admin-tabs',
-  standalone: true,
-  imports: [CommonModule, IconComponent],
-  templateUrl: './admin-tabs.component.html',
-  styleUrl: './admin-tabs.component.scss'
+    selector: 'app-admin-tabs',
+    imports: [CommonModule, IconComponent],
+    templateUrl: './admin-tabs.component.html',
+    styleUrl: './admin-tabs.component.scss'
 })
 export class AdminTabsComponent {
   @Input() tabs: TabItem[] = [];

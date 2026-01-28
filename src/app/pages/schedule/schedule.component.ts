@@ -205,36 +205,35 @@ interface DoctorSchedule {
 }
 
 @Component({
-  selector: 'app-schedule',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatTabsModule,
-    MatCardModule,
-    MatIconModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatMenuModule,
-    MatTooltipModule,
-    MatBadgeModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
-    MatSlideToggleModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    ReactiveFormsModule,
-    FormsModule,
-    AppButtonComponent,
-    IconComponent,
-    CalendarComponent,
-    AppCardComponent,
-    AppCardActionsDirective
-  ],
-  templateUrl: './schedule.component.html',
-  styleUrls: ['./schedule.component.scss']
+    selector: 'app-schedule',
+    imports: [
+        CommonModule,
+        MatTabsModule,
+        MatCardModule,
+        MatIconModule,
+        MatButtonModule,
+        MatChipsModule,
+        MatMenuModule,
+        MatTooltipModule,
+        MatBadgeModule,
+        MatProgressBarModule,
+        MatProgressSpinnerModule,
+        MatSlideToggleModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        ReactiveFormsModule,
+        FormsModule,
+        AppButtonComponent,
+        IconComponent,
+        CalendarComponent,
+        AppCardComponent,
+        AppCardActionsDirective
+    ],
+    templateUrl: './schedule.component.html',
+    styleUrls: ['./schedule.component.scss']
 })
 export class ScheduleComponent implements OnInit {
   activeSection: 'schedule' | 'timings' = 'schedule';

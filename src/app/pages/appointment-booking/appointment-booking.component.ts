@@ -59,25 +59,24 @@ export interface AppointmentRequest {
 }
 
 @Component({
-  selector: 'app-appointment-booking',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatCardModule,
-    MatChipsModule,
-    MatCheckboxModule,
-    MatRadioModule,
-    MatTooltipModule,
-    MatProgressSpinnerModule,
-    AppInputComponent,
-    IconComponent
-  ],
-  templateUrl: './appointment-booking.component.html',
-  styleUrls: ['./appointment-booking.component.scss']
+    selector: 'app-appointment-booking',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatIconModule,
+        MatCardModule,
+        MatChipsModule,
+        MatCheckboxModule,
+        MatRadioModule,
+        MatTooltipModule,
+        MatProgressSpinnerModule,
+        AppInputComponent,
+        IconComponent
+    ],
+    templateUrl: './appointment-booking.component.html',
+    styleUrls: ['./appointment-booking.component.scss']
 })
 export class AppointmentBookingComponent implements OnInit, OnDestroy {
   appointmentForm: FormGroup;

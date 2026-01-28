@@ -19,26 +19,25 @@ import { Mode } from '../../types/mode.type';
 import { Subject, takeUntil, filter } from 'rxjs';
 
 @Component({
-  selector: 'app-exercise-create',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatCardModule,
-    MatDividerModule,
-    MatTooltipModule,
-    AppInputComponent,
-    AppSelectboxComponent
-  ],
-  templateUrl: './exercise-create.component.html',
-  styleUrl: './exercise-create.component.scss'
+    selector: 'app-exercise-create',
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatIconModule,
+        MatChipsModule,
+        MatCardModule,
+        MatDividerModule,
+        MatTooltipModule,
+        AppInputComponent,
+        AppSelectboxComponent
+    ],
+    templateUrl: './exercise-create.component.html',
+    styleUrl: './exercise-create.component.scss'
 })
 export class ExerciseCreateComponent implements OnInit, OnDestroy {
   exerciseForm: FormGroup;

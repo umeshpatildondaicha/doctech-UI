@@ -12,23 +12,22 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
-  selector: 'app-diet-selection-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSelectModule,
-    MatChipsModule,
-    MatTooltipModule,
-    MatCheckboxModule
-  ],
-  templateUrl: './diet-selection-dialog.component.html',
-  styleUrl: './diet-selection-dialog.component.scss'
+    selector: 'app-diet-selection-dialog',
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatIconModule,
+        MatSelectModule,
+        MatChipsModule,
+        MatTooltipModule,
+        MatCheckboxModule
+    ],
+    templateUrl: './diet-selection-dialog.component.html',
+    styleUrl: './diet-selection-dialog.component.scss'
 })
 export class DietSelectionDialogComponent implements OnInit {
   searchQuery: string = '';

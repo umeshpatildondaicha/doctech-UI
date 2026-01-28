@@ -13,10 +13,9 @@ export interface ConfirmDialogData {
 }
 
 @Component({
-  selector: 'app-confirm-dialog',
-  standalone: true,
-  imports: [CommonModule, MatButtonModule, AppButtonComponent],
-  template: `
+    selector: 'app-confirm-dialog',
+    imports: [CommonModule, MatButtonModule, AppButtonComponent],
+    template: `
     <div class="confirm-dialog">
       <div class="dialog-content">
         <p>{{ data.message }}</p>
@@ -35,7 +34,7 @@ export interface ConfirmDialogData {
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .confirm-dialog {
       padding: 24px;
     }

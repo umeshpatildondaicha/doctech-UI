@@ -14,11 +14,10 @@ interface Patient {
 }
 
 @Component({
-  selector: 'app-patient-form',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './patient-form.component.html',
-  styleUrl: './patient-form.component.scss'
+    selector: 'app-patient-form',
+    imports: [CommonModule, ReactiveFormsModule, RouterLink],
+    templateUrl: './patient-form.component.html',
+    styleUrl: './patient-form.component.scss'
 })
 export class PatientFormComponent implements OnInit {
   patientForm: FormGroup;

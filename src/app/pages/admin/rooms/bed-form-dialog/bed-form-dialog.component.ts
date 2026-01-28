@@ -20,17 +20,16 @@ export interface BedFormDialogData {
 }
 
 @Component({
-  selector: 'app-bed-form-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    AppInputComponent,
-    AppSelectboxComponent,
-    IconComponent
-  ],
-  templateUrl: './bed-form-dialog.component.html',
-  styleUrls: ['./bed-form-dialog.component.scss']
+    selector: 'app-bed-form-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        AppInputComponent,
+        AppSelectboxComponent,
+        IconComponent
+    ],
+    templateUrl: './bed-form-dialog.component.html',
+    styleUrls: ['./bed-form-dialog.component.scss']
 })
 export class BedFormDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<BedFormDialogComponent>);

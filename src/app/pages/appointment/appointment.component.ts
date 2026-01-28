@@ -16,11 +16,10 @@ import { AppointmentViewComponent } from '../appointment-view/appointment-view.c
 import { CoreEventService, DialogboxService, DialogFooterAction, PageComponent, BreadcrumbItem } from "@lk/core";
 
 @Component({
-  selector: 'app-appointment',
-  standalone: true,
-  imports: [CommonModule, GridComponent, AppButtonComponent, IconComponent, MatTabsModule, CalendarComponent, PageComponent],
-  templateUrl: './appointment.component.html',
-  styleUrl: './appointment.component.scss'
+    selector: 'app-appointment',
+    imports: [CommonModule, GridComponent, AppButtonComponent, IconComponent, MatTabsModule, CalendarComponent, PageComponent],
+    templateUrl: './appointment.component.html',
+    styleUrl: './appointment.component.scss'
 })
 export class AppointmentComponent implements OnInit {
   breadcrumb: BreadcrumbItem[] = [

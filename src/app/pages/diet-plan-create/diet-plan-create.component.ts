@@ -16,24 +16,23 @@ import { MealTimeDialogComponent } from '../meal-time-dialog/meal-time-dialog.co
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
 
 @Component({
-  selector: 'app-diet-plan-create',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSelectModule,
-    MatTabsModule,
-    MatTooltipModule,
-    MatProgressBarModule,
-    BreadcrumbComponent
-  ],
-  templateUrl: './diet-plan-create.component.html',
-  styleUrl: './diet-plan-create.component.scss'
+    selector: 'app-diet-plan-create',
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatIconModule,
+        MatSelectModule,
+        MatTabsModule,
+        MatTooltipModule,
+        MatProgressBarModule,
+        BreadcrumbComponent
+    ],
+    templateUrl: './diet-plan-create.component.html',
+    styleUrl: './diet-plan-create.component.scss'
 })
 export class DietPlanCreateComponent implements OnInit {
   isEditMode = false;

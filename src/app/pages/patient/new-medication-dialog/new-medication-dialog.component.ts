@@ -14,11 +14,10 @@ export interface NewMedicationDialogData {
 }
 
 @Component({
-  selector: 'app-new-medication-dialog',
-  standalone: true,
-  imports: [CommonModule, FormsModule, MatButtonModule, MatIconModule],
-  templateUrl: './new-medication-dialog.component.html',
-  styleUrls: ['./new-medication-dialog.component.scss']
+    selector: 'app-new-medication-dialog',
+    imports: [CommonModule, FormsModule, MatButtonModule, MatIconModule],
+    templateUrl: './new-medication-dialog.component.html',
+    styleUrls: ['./new-medication-dialog.component.scss']
 })
 export class NewMedicationDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<NewMedicationDialogComponent>);

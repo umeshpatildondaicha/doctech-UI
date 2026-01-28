@@ -47,24 +47,23 @@ export interface AssignedDietPlan {
 }
 
 @Component({
-  selector: 'app-diet-assignment-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatRadioModule,
-    MatCardModule,
-    MatTooltipModule
-  ],
-  templateUrl: './diet-assignment-dialog.component.html',
-  styleUrl: './diet-assignment-dialog.component.scss'
+    selector: 'app-diet-assignment-dialog',
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatIconModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatRadioModule,
+        MatCardModule,
+        MatTooltipModule
+    ],
+    templateUrl: './diet-assignment-dialog.component.html',
+    styleUrl: './diet-assignment-dialog.component.scss'
 })
 export class DietAssignmentDialogComponent implements OnInit {
   assignmentType: 'weekly' | 'individual' = 'weekly';

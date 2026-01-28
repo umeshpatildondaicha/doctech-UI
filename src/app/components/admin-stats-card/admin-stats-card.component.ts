@@ -17,11 +17,10 @@ export interface StatCard {
 }
 
 @Component({
-  selector: 'app-admin-stats-card',
-  standalone: true,
-  imports: [CommonModule, IconComponent],
-  templateUrl: './admin-stats-card.component.html',
-  styleUrl: './admin-stats-card.component.scss'
+    selector: 'app-admin-stats-card',
+    imports: [CommonModule, IconComponent],
+    templateUrl: './admin-stats-card.component.html',
+    styleUrl: './admin-stats-card.component.scss'
 })
 export class AdminStatsCardComponent {
   @Input() stats: StatCard[] = [];

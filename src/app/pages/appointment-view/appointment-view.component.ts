@@ -8,11 +8,10 @@ import { DIALOG_DATA_TOKEN } from "@lk/core";
 import { Subject } from 'rxjs';
 
 @Component({
-  selector: 'app-appointment-view',
-  standalone: true,
-  imports: [CommonModule, IconComponent, ImageComponent],
-  templateUrl: './appointment-view.component.html',
-  styleUrl: './appointment-view.component.scss'
+    selector: 'app-appointment-view',
+    imports: [CommonModule, IconComponent, ImageComponent],
+    templateUrl: './appointment-view.component.html',
+    styleUrl: './appointment-view.component.scss'
 })
 export class AppointmentViewComponent implements OnInit, OnDestroy {
   appointment: Appointment | undefined;

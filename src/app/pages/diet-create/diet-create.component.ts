@@ -18,20 +18,19 @@ export interface DialogData {
 }
 
 @Component({
-  selector: 'app-diet-create',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule
-  ],
-  templateUrl: './diet-create.component.html',
-  styleUrl: './diet-create.component.scss'
+    selector: 'app-diet-create',
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatIconModule
+    ],
+    templateUrl: './diet-create.component.html',
+    styleUrl: './diet-create.component.scss'
 })
 export class DietCreateComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<DietCreateComponent>);

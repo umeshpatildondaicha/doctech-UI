@@ -25,22 +25,21 @@ export interface Break {
 }
 
 @Component({
-  selector: 'app-timing-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatSelectModule,
-    MatFormFieldModule,
-    MatOptionModule,
-    AppButtonComponent,
-    AppInputComponent,
-    AppSelectboxComponent,
-    DatePickerComponent,
-    IconComponent
-  ],
-  templateUrl: './timing-dialog.component.html',
-  styleUrl: './timing-dialog.component.scss'
+    selector: 'app-timing-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MatSelectModule,
+        MatFormFieldModule,
+        MatOptionModule,
+        AppButtonComponent,
+        AppInputComponent,
+        AppSelectboxComponent,
+        DatePickerComponent,
+        IconComponent
+    ],
+    templateUrl: './timing-dialog.component.html',
+    styleUrl: './timing-dialog.component.scss'
 })
 export class TimingDialogComponent implements OnInit, OnDestroy {
   timingForm!: FormGroup;

@@ -21,11 +21,10 @@ export interface MedicationTemplateDialogData {
 }
 
 @Component({
-  selector: 'app-medication-template-dialog',
-  standalone: true,
-  imports: [CommonModule, FormsModule, MatButtonModule, MatIconModule],
-  templateUrl: './medication-template-dialog.component.html',
-  styleUrls: ['./medication-template-dialog.component.scss']
+    selector: 'app-medication-template-dialog',
+    imports: [CommonModule, FormsModule, MatButtonModule, MatIconModule],
+    templateUrl: './medication-template-dialog.component.html',
+    styleUrls: ['./medication-template-dialog.component.scss']
 })
 export class MedicationTemplateDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<MedicationTemplateDialogComponent>);

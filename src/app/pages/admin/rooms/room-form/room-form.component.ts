@@ -50,20 +50,19 @@ interface RoomFormModel {
 }
 
 @Component({
-  selector: 'app-room-form',
-  standalone: true,
-  imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
-    AppButtonComponent, 
-    AppInputComponent, 
-    AppSelectboxComponent, 
-    IconComponent,
-    PageComponent,
-    ButtonCheckboxComponent
-  ],
-  templateUrl: './room-form.component.html',
-  styleUrl: './room-form.component.scss'
+    selector: 'app-room-form',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        AppButtonComponent,
+        AppInputComponent,
+        AppSelectboxComponent,
+        IconComponent,
+        PageComponent,
+        ButtonCheckboxComponent
+    ],
+    templateUrl: './room-form.component.html',
+    styleUrl: './room-form.component.scss'
 })
 export class RoomFormComponent implements OnInit {
   roomForm: FormGroup;

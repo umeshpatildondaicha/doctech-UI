@@ -72,32 +72,31 @@ interface Service {
 }
 
 @Component({
-  selector: 'app-service-details',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatIconModule,
-    MatTabsModule,
-    MatChipsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatDividerModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
-    MatExpansionModule,
-    MatListModule,
-    MatBadgeModule,
-    MatTooltipModule,
-    AppButtonComponent,
-    AppInputComponent,
-    AppSelectboxComponent,
-    IconComponent,
-    PageComponent
-  ],
-  templateUrl: './service-details.component.html',
-  styleUrls: ['./service-details.component.scss']
+    selector: 'app-service-details',
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatIconModule,
+        MatTabsModule,
+        MatChipsModule,
+        MatCardModule,
+        MatButtonModule,
+        MatDividerModule,
+        MatProgressBarModule,
+        MatProgressSpinnerModule,
+        MatExpansionModule,
+        MatListModule,
+        MatBadgeModule,
+        MatTooltipModule,
+        AppButtonComponent,
+        AppInputComponent,
+        AppSelectboxComponent,
+        IconComponent,
+        PageComponent
+    ],
+    templateUrl: './service-details.component.html',
+    styleUrls: ['./service-details.component.scss']
 })
 export class ServiceDetailsComponent implements OnInit, OnDestroy {
   service: Service | null = null;

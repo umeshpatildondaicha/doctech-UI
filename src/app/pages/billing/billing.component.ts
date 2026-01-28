@@ -40,37 +40,36 @@ type StatusFilter = 'ALL' | 'UNPAID' | 'PARTIALLY_PAID' | 'PAID' | 'OVERDUE';
 const FORCE_DEMO_BILLING_DATA = false;
 
 @Component({
-  selector: 'app-billing',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatTableModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDialogModule,
-    MatSnackBarModule,
-    MatTooltipModule,
-    MatChipsModule,
-    MatProgressBarModule,
-    MatPaginatorModule,
-    MatSortModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    GridComponent,
-    BillingActionsRendererComponent,
-    BillingStatusRendererComponent,
-    BillingPatientRendererComponent,
-    AppCardComponent,
-    AdminPageHeaderComponent,
-    AdminStatsCardComponent,
-    AdminTabsComponent
-  ],
-  templateUrl: './billing.component.html',
-  styleUrl: './billing.component.scss'
+    selector: 'app-billing',
+    imports: [
+        CommonModule,
+        MatTableModule,
+        MatButtonModule,
+        MatIconModule,
+        MatDialogModule,
+        MatSnackBarModule,
+        MatTooltipModule,
+        MatChipsModule,
+        MatProgressBarModule,
+        MatPaginatorModule,
+        MatSortModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        GridComponent,
+        BillingActionsRendererComponent,
+        BillingStatusRendererComponent,
+        BillingPatientRendererComponent,
+        AppCardComponent,
+        AdminPageHeaderComponent,
+        AdminStatsCardComponent,
+        AdminTabsComponent
+    ],
+    templateUrl: './billing.component.html',
+    styleUrl: './billing.component.scss'
 })
 export class BillingComponent implements OnInit, AfterViewInit {
   displayedColumns = ['invoiceNo', 'patientName', 'date', 'total', 'balance', 'status', 'actions'];

@@ -9,20 +9,19 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 
 @Component({
-  selector: 'app-meal-time-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSelectModule
-  ],
-  templateUrl: './meal-time-dialog.component.html',
-  styleUrl: './meal-time-dialog.component.scss'
+    selector: 'app-meal-time-dialog',
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatIconModule,
+        MatSelectModule
+    ],
+    templateUrl: './meal-time-dialog.component.html',
+    styleUrl: './meal-time-dialog.component.scss'
 })
 export class MealTimeDialogComponent implements OnInit {
   mealTime: any = {

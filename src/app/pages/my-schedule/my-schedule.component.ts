@@ -64,36 +64,35 @@ interface ScheduleStats {
 }
 
 @Component({
-  selector: 'app-my-schedule',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatTabsModule,
-    MatCardModule,
-    MatIconModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatMenuModule,
-    MatTooltipModule,
-    MatBadgeModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
-    MatSlideToggleModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    ReactiveFormsModule,
-    FormsModule,
-    GridComponent,
-    AppButtonComponent,
-    IconComponent,
-    CalendarComponent,
-    BreadcrumbComponent
-  ],
-  templateUrl: './my-schedule.component.html',
-  styleUrls: ['./my-schedule.component.scss']
+    selector: 'app-my-schedule',
+    imports: [
+        CommonModule,
+        MatTabsModule,
+        MatCardModule,
+        MatIconModule,
+        MatButtonModule,
+        MatChipsModule,
+        MatMenuModule,
+        MatTooltipModule,
+        MatBadgeModule,
+        MatProgressBarModule,
+        MatProgressSpinnerModule,
+        MatSlideToggleModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        ReactiveFormsModule,
+        FormsModule,
+        GridComponent,
+        AppButtonComponent,
+        IconComponent,
+        CalendarComponent,
+        BreadcrumbComponent
+    ],
+    templateUrl: './my-schedule.component.html',
+    styleUrls: ['./my-schedule.component.scss']
 })
 export class MyScheduleComponent implements OnInit {
   /**

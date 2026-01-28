@@ -9,11 +9,10 @@ import { StatusCellRendererComponent } from "@lk/core";
 import { CoreEventService, DialogboxService, DialogFooterAction } from "@lk/core";
 
 @Component({
-  selector: 'app-patient',
-  standalone: true,
-  imports: [GridComponent, IconComponent],
-  templateUrl: './patient.component.html',
-  styleUrl: './patient.component.scss'
+    selector: 'app-patient',
+    imports: [GridComponent, IconComponent],
+    templateUrl: './patient.component.html',
+    styleUrl: './patient.component.scss'
 })
 export class PatientComponent {
   patientData: Patient[] = [

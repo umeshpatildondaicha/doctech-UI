@@ -14,11 +14,10 @@ export interface ActionButton {
 }
 
 @Component({
-  selector: 'app-admin-action-bar',
-  standalone: true,
-  imports: [CommonModule, AppButtonComponent, IconComponent],
-  templateUrl: './admin-action-bar.component.html',
-  styleUrl: './admin-action-bar.component.scss'
+    selector: 'app-admin-action-bar',
+    imports: [CommonModule, AppButtonComponent, IconComponent],
+    templateUrl: './admin-action-bar.component.html',
+    styleUrl: './admin-action-bar.component.scss'
 })
 export class AdminActionBarComponent {
   @Input() actions: ActionButton[] = [];

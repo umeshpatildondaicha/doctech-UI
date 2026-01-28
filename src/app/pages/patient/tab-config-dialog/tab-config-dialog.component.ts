@@ -20,17 +20,16 @@ export interface TabConfigDialogData {
 }
 
 @Component({
-  selector: 'app-tab-config-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatSlideToggleModule,
-    IconComponent,
-    AppButtonComponent
-  ],
-  templateUrl: './tab-config-dialog.component.html',
-  styleUrls: ['./tab-config-dialog.component.scss']
+    selector: 'app-tab-config-dialog',
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatSlideToggleModule,
+        IconComponent,
+        AppButtonComponent
+    ],
+    templateUrl: './tab-config-dialog.component.html',
+    styleUrls: ['./tab-config-dialog.component.scss']
 })
 export class TabConfigDialogComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<TabConfigDialogComponent>);
