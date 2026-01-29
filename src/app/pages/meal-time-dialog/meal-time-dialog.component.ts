@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
+import { AppButtonComponent } from '@lk/core';
 
 @Component({
     selector: 'app-meal-time-dialog',
@@ -17,7 +18,8 @@ import { MatSelectModule } from '@angular/material/select';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatSelectModule
+    MatSelectModule,
+    AppButtonComponent
 ],
     templateUrl: './meal-time-dialog.component.html',
     styleUrl: './meal-time-dialog.component.scss'

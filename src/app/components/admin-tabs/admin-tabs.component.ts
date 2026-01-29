@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 
-import { IconComponent } from '@lk/core';
+import { AppButtonComponent, IconComponent } from '@lk/core';
 
 export interface TabItem {
   id: string;
@@ -13,7 +13,7 @@ export interface TabItem {
 
 @Component({
     selector: 'app-admin-tabs',
-    imports: [IconComponent],
+    imports: [IconComponent,AppButtonComponent],
     templateUrl: './admin-tabs.component.html',
     styleUrl: './admin-tabs.component.scss'
 })

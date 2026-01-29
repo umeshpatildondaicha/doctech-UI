@@ -3,6 +3,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { AppButtonComponent } from '@lk/core';
 
 export type ListingCardVariant = 'default' | 'compact';
 export type ListingCardLayout = 'row' | 'column';
@@ -31,7 +32,7 @@ export interface ListingCardAction {
 
 @Component({
     selector: 'app-listing-card',
-    imports: [CommonModule, MatButtonModule, MatIconModule, MatTooltipModule],
+    imports: [CommonModule, MatButtonModule, MatIconModule, MatTooltipModule,AppButtonComponent],
     templateUrl: './listing-card.component.html',
     styleUrl: './listing-card.component.scss'
 })

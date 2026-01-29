@@ -2,17 +2,25 @@
   <!-- 1. Doctor Quick Actions Panel (Top Section) -->
   <div class="quick-actions-panel">
     <div class="actions-left">
-      <button class="action-btn primary" (click)="addNewDoctor()">
-        <mat-icon>add</mat-icon>
-        Add New Doctor
-      </button>
-
+      <app-button
+        type="button"
+        class="action-btn primary"
+        [fontIcon]="'add'"
+        [text]="'Add New Doctor'"
+        [color]="'primary'"
+        [appearance]="'raised'"
+        (btnClick)="addNewDoctor()">
+      </app-button>
     </div>
     <div class="actions-right">
-      <button class="action-btn secondary" (click)="toggleViewMode()">
-        <mat-icon>{{ viewMode === 'table' ? 'view_module' : 'table_view' }}</mat-icon>
-        {{ viewMode === 'table' ? 'Cards' : 'Table' }}
-      </button>
+      <app-button
+        type="button"
+        class="action-btn secondary"
+        [fontIcon]="viewMode === 'table' ? 'view_module' : 'table_view'"
+        [text]="viewMode === 'table' ? 'Cards' : 'Table'"
+        [appearance]="'stroked'"
+        (btnClick)="toggleViewMode()">
+      </app-button>
     </div>
   </div>
 
@@ -117,9 +125,13 @@
           <mat-option value="joinedDate">Joined Date</mat-option>
         </mat-select>
 
-        <button class="sort-btn" (click)="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; applyFilters()">
-          <mat-icon>{{ sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
-        </button>
+        <app-button
+          type="button"
+          class="sort-btn"
+          [fontIcon]="sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'"
+          [appearance]="'icon'"
+          (btnClick)="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; applyFilters()">
+        </app-button>
       </div>
     </div>
 
@@ -135,9 +147,9 @@
           </mat-checkbox>
         </div>
         <div class="bulk-buttons">
-          <button class="bulk-btn">Edit Selected</button>
-          <button class="bulk-btn danger">Delete Selected</button>
-          <button class="bulk-btn">Export Selected</button>
+          <app-button type="button" class="bulk-btn" [text]="'Edit Selected'" [appearance]="'stroked'"></app-button>
+          <app-button type="button" class="bulk-btn danger" [text]="'Delete Selected'" [appearance]="'stroked'"></app-button>
+          <app-button type="button" class="bulk-btn" [text]="'Export Selected'" [appearance]="'stroked'"></app-button>
         </div>
       </div>
     }
@@ -290,18 +302,34 @@
                   </div>
                 </div>
                 <div class="card-actions">
-                  <button class="card-btn" (click)="viewDoctor(doctor)">
-                    <mat-icon>visibility</mat-icon>
-                  </button>
-                  <button class="card-btn" (click)="editDoctor(doctor)">
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                  <button class="card-btn" (click)="scheduleDoctor(doctor)">
-                    <mat-icon>schedule</mat-icon>
-                  </button>
-                  <button class="card-btn danger" (click)="deleteDoctor(doctor)">
-                    <mat-icon>delete</mat-icon>
-                  </button>
+                  <app-button
+                    type="button"
+                    class="card-btn"
+                    [fontIcon]="'visibility'"
+                    [appearance]="'icon'"
+                    (btnClick)="viewDoctor(doctor)">
+                  </app-button>
+                  <app-button
+                    type="button"
+                    class="card-btn"
+                    [fontIcon]="'edit'"
+                    [appearance]="'icon'"
+                    (btnClick)="editDoctor(doctor)">
+                  </app-button>
+                  <app-button
+                    type="button"
+                    class="card-btn"
+                    [fontIcon]="'schedule'"
+                    [appearance]="'icon'"
+                    (btnClick)="scheduleDoctor(doctor)">
+                  </app-button>
+                  <app-button
+                    type="button"
+                    class="card-btn danger"
+                    [fontIcon]="'delete'"
+                    [appearance]="'icon'"
+                    (btnClick)="deleteDoctor(doctor)">
+                  </app-button>
                 </div>
               </div>
             }
@@ -317,10 +345,15 @@
           </div>
           <h3>No doctors found</h3>
           <p>No doctors match your current filters. Try adjusting your search criteria.</p>
-          <button class="primary-btn" (click)="addNewDoctor()">
-            <mat-icon>add</mat-icon>
-            Add First Doctor
-          </button>
+          <app-button
+            type="button"
+            class="primary-btn"
+            [fontIcon]="'add'"
+            [text]="'Add First Doctor'"
+            [color]="'primary'"
+            [appearance]="'raised'"
+            (btnClick)="addNewDoctor()">
+          </app-button>
         </div>
       }
     </div>

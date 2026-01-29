@@ -98,15 +98,27 @@
       </div>
       @if (showActions) {
         <div class="footer-actions">
-          <button mat-icon-button (click)="onView($event)" matTooltip="View">
-            <mat-icon>visibility</mat-icon>
-          </button>
-          <button mat-icon-button (click)="onEdit($event)" matTooltip="Edit">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button mat-icon-button (click)="onDelete($event)" matTooltip="Delete">
-            <mat-icon>delete</mat-icon>
-          </button>
+          <app-button
+          appearance="icon"
+          matTooltip="View"
+          (click)="onView($event)">
+          <mat-icon>visibility</mat-icon>
+        </app-button>
+        
+        <app-button
+          appearance="icon"
+          matTooltip="Edit"
+          (click)="onEdit($event)">
+          <mat-icon>edit</mat-icon>
+        </app-button>
+        
+        <app-button
+          appearance="icon"
+          matTooltip="Delete"
+          (click)="onDelete($event)">
+          <mat-icon>delete</mat-icon>
+        </app-button>
+        
         </div>
       }
     </div>

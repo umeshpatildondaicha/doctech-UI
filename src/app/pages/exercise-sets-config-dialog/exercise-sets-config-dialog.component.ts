@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Exercise, ExerciseSet } from '../../interfaces/exercise.interface';
-import { DIALOG_DATA_TOKEN } from "@lk/core";
+import { DIALOG_DATA_TOKEN, AppButtonComponent } from "@lk/core";
 import { Subject, takeUntil, filter } from 'rxjs';
 
 export interface ExerciseSetsConfigDialogData {
@@ -35,7 +35,8 @@ export interface ExerciseSetsConfigDialogData {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatTooltipModule
+    MatTooltipModule,
+    AppButtonComponent
 ],
     templateUrl: './exercise-sets-config-dialog.component.html',
     styleUrl: './exercise-sets-config-dialog.component.scss'

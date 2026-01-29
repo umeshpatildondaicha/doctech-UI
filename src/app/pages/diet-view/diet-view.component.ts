@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Diet } from '../../interfaces/diet.interface';
-import { SafePipe } from '@lk/core';
+import { SafePipe, AppButtonComponent } from '@lk/core';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
 
 @Component({
@@ -16,7 +16,8 @@ import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.comp
     MatIconModule,
     MatProgressSpinnerModule,
     SafePipe,
-    BreadcrumbComponent
+    BreadcrumbComponent,
+    AppButtonComponent
 ],
     templateUrl: './diet-view.component.html',
     styleUrl: './diet-view.component.scss'

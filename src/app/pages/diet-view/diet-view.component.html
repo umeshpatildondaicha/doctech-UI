@@ -54,16 +54,25 @@
             <!-- Quick Actions -->
             <div class="quick-actions">
               @if (diet.videoUrl) {
-                <button mat-raised-button color="accent" class="quick-btn" (click)="scrollToVideo()">
-                  <mat-icon>play_arrow</mat-icon>
-                  Watch Video
-                </button>
+                <app-button
+                  type="button"
+                  class="quick-btn"
+                  [fontIcon]="'play_arrow'"
+                  [text]="'Watch Video'"
+                  [color]="'accent'"
+                  [appearance]="'raised'"
+                  (btnClick)="scrollToVideo()">
+                </app-button>
               }
               @if (diet.documentUrl) {
-                <button mat-stroked-button class="quick-btn" (click)="scrollToDocument()">
-                  <mat-icon>description</mat-icon>
-                  View Document
-                </button>
+                <app-button
+                  type="button"
+                  class="quick-btn"
+                  [fontIcon]="'description'"
+                  [text]="'View Document'"
+                  [appearance]="'stroked'"
+                  (btnClick)="scrollToDocument()">
+                </app-button>
               }
             </div>
           </div>
@@ -71,33 +80,58 @@
         <!-- Content Tabs -->
         <div class="content-tabs">
           <div class="tab-nav">
-            <button class="tab-btn active" (click)="setActiveTab('nutrition')" [class.active]="activeTab === 'nutrition'">
-              <mat-icon>monitor_weight</mat-icon>
-              Nutrition
-            </button>
+            <app-button
+              type="button"
+              class="tab-btn"
+              [class.active]="activeTab === 'nutrition'"
+              [fontIcon]="'monitor_weight'"
+              [text]="'Nutrition'"
+              [appearance]="'stroked'"
+              (btnClick)="setActiveTab('nutrition')">
+            </app-button>
             @if (diet.videoUrl) {
-              <button class="tab-btn" (click)="setActiveTab('video')" [class.active]="activeTab === 'video'">
-                <mat-icon>video_library</mat-icon>
-                Video Guide
-              </button>
+              <app-button
+                type="button"
+                class="tab-btn"
+                [class.active]="activeTab === 'video'"
+                [fontIcon]="'video_library'"
+                [text]="'Video Guide'"
+                [appearance]="'stroked'"
+                (btnClick)="setActiveTab('video')">
+              </app-button>
             }
             @if (diet.ingredients && diet.ingredients.length > 0) {
-              <button class="tab-btn" (click)="setActiveTab('ingredients')" [class.active]="activeTab === 'ingredients'">
-                <mat-icon>restaurant</mat-icon>
-                Ingredients
-              </button>
+              <app-button
+                type="button"
+                class="tab-btn"
+                [class.active]="activeTab === 'ingredients'"
+                [fontIcon]="'restaurant'"
+                [text]="'Ingredients'"
+                [appearance]="'stroked'"
+                (btnClick)="setActiveTab('ingredients')">
+              </app-button>
             }
             @if (diet.recipe) {
-              <button class="tab-btn" (click)="setActiveTab('recipe')" [class.active]="activeTab === 'recipe'">
-                <mat-icon>menu_book</mat-icon>
-                Recipe
-              </button>
+              <app-button
+                type="button"
+                class="tab-btn"
+                [class.active]="activeTab === 'recipe'"
+                [fontIcon]="'menu_book'"
+                [text]="'Recipe'"
+                [appearance]="'stroked'"
+                (btnClick)="setActiveTab('recipe')">
+              </app-button>
             }
             @if (diet.documentUrl) {
-              <button class="tab-btn" (click)="setActiveTab('document')" [class.active]="activeTab === 'document'">
-                <mat-icon>description</mat-icon>
-                Document
-              </button>
+              <app-button
+                type="button"
+                class="tab-btn"
+                [class.active]="activeTab === 'document'"
+                [fontIcon]="'description'"
+                [text]="'Document'"
+                [appearance]="'stroked'"
+                (btnClick)="setActiveTab('document')">
+              </app-button>
             }
           </div>
           <!-- Tab Content -->

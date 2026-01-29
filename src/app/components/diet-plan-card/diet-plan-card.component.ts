@@ -3,6 +3,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { AppButtonComponent } from '@lk/core';
 
 export interface DietPlan {
   planId: string;
@@ -38,7 +39,8 @@ export interface DietPlanMealPreview {
     imports: [
     MatButtonModule,
     MatIconModule,
-    MatTooltipModule
+    MatTooltipModule,
+    AppButtonComponent
 ],
     templateUrl: './diet-plan-card.component.html',
     styleUrl: './diet-plan-card.component.scss'

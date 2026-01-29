@@ -1,28 +1,24 @@
 <div class="schedule-container">
   <!-- Section Switcher -->
   <div class="section-tabs" role="tablist" aria-label="Schedule sections">
-    <button
+    <app-button
       type="button"
       class="section-tab"
       [class.active]="activeSection === 'schedule'"
-      (click)="setSection('schedule')"
-      role="tab"
-      [attr.aria-selected]="activeSection === 'schedule'"
-      >
-      <app-icon fontIcon="schedule" [size]="18"></app-icon>
-      <span>Schedule</span>
-    </button>
-    <button
+      [fontIcon]="'schedule'"
+      [text]="'Schedule'"
+      
+      (btnClick)="setSection('schedule')">
+    </app-button>
+    <app-button
       type="button"
       class="section-tab"
       [class.active]="activeSection === 'timings'"
-      (click)="setSection('timings')"
-      role="tab"
-      [attr.aria-selected]="activeSection === 'timings'"
-      >
-      <app-icon fontIcon="access_time" [size]="18"></app-icon>
-      <span>Timings</span>
-    </button>
+      [fontIcon]="'access_time'"
+      [text]="'Timings'"
+      
+      (btnClick)="setSection('timings')">
+    </app-button>
   </div>
 
   @if (activeSection === 'schedule') {
@@ -44,15 +40,14 @@
       <div class="week-strip-card">
         <div class="week-strip" aria-label="Week day selector">
           @for (d of scheduleWeekStrip; track d) {
-            <button
+            <app-button
               type="button"
               class="week-day-btn"
               [class.active]="d.isSelected"
-              (click)="selectScheduleDate(d.date)"
-              >
-              <div class="wd">{{ d.weekdayShort }}</div>
-              <div class="dn">{{ d.dayNumber }}</div>
-            </button>
+              [text]="d.weekdayShort + ' ' + d.dayNumber"
+              
+              (btnClick)="selectScheduleDate(d.date)">
+            </app-button>
           }
         </div>
       </div>
@@ -176,13 +171,13 @@
                 <div class="avail-right">
                   <div class="time-chips">
                     @for (t of getAvailabilityTimeChips(10); track t) {
-                      <button
+                      <app-button
                         type="button"
                         class="time-chip"
-                        (click)="openQuickAddAt(t)"
-                        >
-                        {{ formatTimeForDisplay(t) }}
-                      </button>
+                        [text]="formatTimeForDisplay(t)"
+                        
+                        (btnClick)="openQuickAddAt(t)">
+                      </app-button>
                     }
                     @if (getAvailabilityExtraCount(10) > 0) {
                       <span class="time-chip more">+{{ getAvailabilityExtraCount(10) }} more</span>
@@ -205,19 +200,26 @@
               </div>
               <div class="avail-right">
                 <span class="cap-pill">{{ scheduleAvailability.remainingToday ?? 0 }} slots left</span>
-                <button type="button" class="cap-add-btn" (click)="openNextAvailableSlot()" [disabled]="(scheduleAvailability.remainingToday ?? 0) <= 0">
-                  Add patient
-                </button>
+                <app-button
+                  type="button"
+                  class="cap-add-btn"
+                  [text]="'Add patient'"
+                  
+                  [disabled]="(scheduleAvailability.remainingToday ?? 0) <= 0"
+                  (btnClick)="openNextAvailableSlot()">
+                </app-button>
               </div>
             </div>
           }
           @if (getScheduleListAppointments().length > 0) {
             @for (appointment of getScheduleListAppointments(); track appointment) {
-              <button
-                type="button"
+              <div
                 class="apt-row"
+                role="button"
+                tabindex="0"
                 (click)="viewAppointment(appointment)"
-                >
+                (keydown.enter)="viewAppointment(appointment)"
+                (keydown.space)="$event.preventDefault(); viewAppointment(appointment)">
                 <div class="apt-left">
                   <div class="time-pill">{{ appointment.slotTime }}</div>
                 </div>
@@ -236,12 +238,12 @@
                     {{ appointment.status }}
                   </span>
                   <span class="row-actions" (click)="$event.stopPropagation()">
-                    <button mat-icon-button type="button" aria-label="View" (click)="viewAppointment(appointment)"><mat-icon>visibility</mat-icon></button>
-                    <button mat-icon-button type="button" aria-label="Edit" (click)="editAppointment(appointment)"><mat-icon>edit</mat-icon></button>
-                    <button mat-icon-button type="button" aria-label="Delete" (click)="deleteAppointment(appointment)"><mat-icon>delete</mat-icon></button>
+                    <app-button type="button" [fontIcon]="'visibility'" title="View" [appearance]="'icon'" (btnClick)="viewAppointment(appointment)"></app-button>
+                    <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'" (btnClick)="editAppointment(appointment)"></app-button>
+                    <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" (btnClick)="deleteAppointment(appointment)"></app-button>
                   </span>
                 </div>
-              </button>
+              </div>
             }
           } @else {
             <div class="sched-empty">
@@ -304,31 +306,15 @@
             </div>
           </div>
           <div class="mode-tabs" role="tablist" aria-label="Timings mode">
-            <button type="button" class="mode-tab" [class.active]="timingsMode === 'view'" (click)="setTimingsMode('view')" role="tab" [attr.aria-selected]="timingsMode === 'view'">
-              View
-            </button>
-            <button type="button" class="mode-tab" [class.active]="timingsMode === 'manage'" (click)="setTimingsMode('manage')" role="tab" [attr.aria-selected]="timingsMode === 'manage'">
-              Manage
-            </button>
+            <app-button type="button" class="mode-tab" [class.active]="timingsMode === 'view'" [text]="'View'"  (btnClick)="setTimingsMode('view')"></app-button>
+            <app-button type="button" class="mode-tab" [class.active]="timingsMode === 'manage'" [text]="'Manage'"  (btnClick)="setTimingsMode('manage')"></app-button>
           </div>
           @if (timingsMode === 'view') {
             <div class="priority-tabs in-card" role="tablist" aria-label="Timing priorities">
-              <button type="button" class="priority-tab" [class.active]="timingsTab === 'p4'" (click)="setTimingsTab('p4')">
-                <span class="tab-label">Daily Timing</span>
-                <span class="p-pill p4">P4</span>
-              </button>
-              <button type="button" class="priority-tab" [class.active]="timingsTab === 'p3'" (click)="setTimingsTab('p3')">
-                <span class="tab-label">Weekly Rules</span>
-                <span class="p-pill p3">P3</span>
-              </button>
-              <button type="button" class="priority-tab" [class.active]="timingsTab === 'p2'" (click)="setTimingsTab('p2')">
-                <span class="tab-label">Date Override</span>
-                <span class="p-pill p2">P2</span>
-              </button>
-              <button type="button" class="priority-tab" [class.active]="timingsTab === 'p1'" (click)="setTimingsTab('p1')">
-                <span class="tab-label">Leave Management</span>
-                <span class="p-pill p1">P1</span>
-              </button>
+              <app-button type="button" class="priority-tab" [class.active]="timingsTab === 'p4'" [text]="'Daily Timing P4'"  (btnClick)="setTimingsTab('p4')"></app-button>
+              <app-button type="button" class="priority-tab" [class.active]="timingsTab === 'p3'" [text]="'Weekly Rules P3'"  (btnClick)="setTimingsTab('p3')"></app-button>
+              <app-button type="button" class="priority-tab" [class.active]="timingsTab === 'p2'" [text]="'Date Override P2'"  (btnClick)="setTimingsTab('p2')"></app-button>
+              <app-button type="button" class="priority-tab" [class.active]="timingsTab === 'p1'" [text]="'Leave Management P1'"  (btnClick)="setTimingsTab('p1')"></app-button>
             </div>
             <div class="timings-card-grid">
               <!-- Left: Configuration -->
@@ -407,20 +393,14 @@
                         <ul class="selector-list">
                           @for (day of getWeeklyDaysWithRules(); track day) {
                             <li class="selector-li">
-                              <button
+                              <app-button
                                 type="button"
                                 class="selector-item"
                                 [class.active]="day === selectedWeeklyDay"
-                                (click)="selectWeeklyDay(day)"
-                                >
-                                <div class="sel-top">
-                                  <span class="weekday-pill">{{ day }}</span>
-                                  <span class="muted">{{ timingsWeeklyRules[day]?.start }} - {{ timingsWeeklyRules[day]?.end }}</span>
-                                </div>
-                                <div class="sel-sub">
-                                  {{ timingsWeeklyRules[day]?.breaks?.length || 0 }} breaks
-                                </div>
-                              </button>
+                                [text]="day + ' ' + (timingsWeeklyRules[day]?.start || '') + ' - ' + (timingsWeeklyRules[day]?.end || '') + ' (' + (timingsWeeklyRules[day]?.breaks?.length || 0) + ' breaks)'"
+                                
+                                (btnClick)="selectWeeklyDay(day)">
+                              </app-button>
                             </li>
                           }
                         </ul>
@@ -494,18 +474,14 @@
                         <ul class="selector-list">
                           @for (o of timingsOverrides; track o) {
                             <li class="selector-li">
-                              <button
+                              <app-button
                                 type="button"
                                 class="selector-item"
                                 [class.active]="o.date === selectedOverrideDate"
-                                (click)="selectOverrideDate(o.date)"
-                                >
-                                <div class="sel-top">
-                                  <span class="weekday-pill">{{ o.date }}</span>
-                                  <span class="muted">{{ o.start }} - {{ o.end }}</span>
-                                </div>
-                                <div class="sel-sub">{{ o.breaks.length }} breaks</div>
-                              </button>
+                                [text]="o.date + ' ' + o.start + ' - ' + o.end + ' (' + o.breaks.length + ' breaks)'"
+                                
+                                (btnClick)="selectOverrideDate(o.date)">
+                              </app-button>
                             </li>
                           }
                         </ul>
@@ -636,10 +612,7 @@
               <app-card class="manage-card prio-card p1" [dense]="true" [divider]="true" title="Leave &amp; Absences" subtitle="Priority 1 (highest)">
                 <div appCardActions class="prio-actions">
                   <span class="count">{{ manageLeaves.length }} item(s)</span>
-                  <button mat-stroked-button type="button" class="add-btn" (click)="addManageItem('p1')">
-                    <mat-icon>add</mat-icon>
-                    Add
-                  </button>
+                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  (btnClick)="addManageItem('p1')"></app-button>
                 </div>
                 <div class="manage-list">
                   @for (item of manageLeaves; track item; let i = $index) {
@@ -660,8 +633,8 @@
                         </div>
                       </div>
                       <div class="actions">
-                        <button mat-icon-button aria-label="Edit"><mat-icon>edit</mat-icon></button>
-                        <button mat-icon-button aria-label="Delete" (click)="deleteManageItem('p1', i)"><mat-icon>delete</mat-icon></button>
+                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'"></app-button>
+                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" (btnClick)="deleteManageItem('p1', i)"></app-button>
                       </div>
                     </div>
                   }
@@ -671,10 +644,7 @@
               <app-card class="manage-card prio-card p2" [dense]="true" [divider]="true" title="Specific Day Overrides" subtitle="Priority 2 (date-specific)">
                 <div appCardActions class="prio-actions">
                   <span class="count">{{ manageSpecificDays.length }} item(s)</span>
-                  <button mat-stroked-button type="button" class="add-btn" (click)="addManageItem('p2')">
-                    <mat-icon>add</mat-icon>
-                    Add
-                  </button>
+                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  (btnClick)="addManageItem('p2')"></app-button>
                 </div>
                 <div class="manage-list">
                   @for (item of manageSpecificDays; track item; let i = $index) {
@@ -695,8 +665,8 @@
                         </div>
                       </div>
                       <div class="actions">
-                        <button mat-icon-button aria-label="Edit"><mat-icon>edit</mat-icon></button>
-                        <button mat-icon-button aria-label="Delete" (click)="deleteManageItem('p2', i)"><mat-icon>delete</mat-icon></button>
+                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'"></app-button>
+                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" (btnClick)="deleteManageItem('p2', i)"></app-button>
                       </div>
                     </div>
                   }
@@ -706,10 +676,7 @@
               <app-card class="manage-card prio-card p3" [dense]="true" [divider]="true" title="Weekly Routine" subtitle="Priority 3 (recurring)">
                 <div appCardActions class="prio-actions">
                   <span class="count">{{ manageWeeklyRoutines.length }} item(s)</span>
-                  <button mat-stroked-button type="button" class="add-btn" (click)="addManageItem('p3')">
-                    <mat-icon>add</mat-icon>
-                    Add
-                  </button>
+                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  (btnClick)="addManageItem('p3')"></app-button>
                 </div>
                 <div class="manage-list">
                   @for (item of manageWeeklyRoutines; track item; let i = $index) {
@@ -740,8 +707,8 @@
                         </div>
                       </div>
                       <div class="actions">
-                        <button mat-icon-button aria-label="Edit"><mat-icon>edit</mat-icon></button>
-                        <button mat-icon-button aria-label="Delete" (click)="deleteManageItem('p3', i)"><mat-icon>delete</mat-icon></button>
+                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'"></app-button>
+                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" (btnClick)="deleteManageItem('p3', i)"></app-button>
                       </div>
                     </div>
                   }
@@ -752,10 +719,7 @@
                 <div appCardActions class="prio-actions">
                   <span class="singleton">Singleton</span>
                   <span class="count">{{ manageBaseAvailability.length }} item(s)</span>
-                  <button mat-stroked-button type="button" class="add-btn" (click)="addManageItem('p4')">
-                    <mat-icon>add</mat-icon>
-                    Add
-                  </button>
+                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  (btnClick)="addManageItem('p4')"></app-button>
                 </div>
                 <div class="manage-list">
                   @for (item of manageBaseAvailability; track item; let i = $index) {
@@ -778,8 +742,8 @@
                         </div>
                       </div>
                       <div class="actions">
-                        <button mat-icon-button aria-label="Edit"><mat-icon>edit</mat-icon></button>
-                        <button mat-icon-button aria-label="Delete" (click)="deleteManageItem('p4', i)"><mat-icon>delete</mat-icon></button>
+                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'"></app-button>
+                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" (btnClick)="deleteManageItem('p4', i)"></app-button>
                       </div>
                     </div>
                   }
@@ -793,7 +757,7 @@
           <div class="week-schedule-card">
             <div class="week-head">
               <h3>This Week Schedule</h3>
-              <button type="button" class="week-add-btn" disabled>+ Add New Schedule</button>
+              <app-button type="button" class="week-add-btn" [text]="'+ Add New Schedule'"  [disabled]="true"></app-button>
             </div>
             <div class="week-row" aria-label="This week schedule">
               @for (d of thisWeekScheduleCards; track d) {
@@ -829,7 +793,7 @@
                         </div>
                       </div>
                     </div>
-                    <button type="button" class="day-footer-btn" disabled>Edit Details</button>
+                    <app-button type="button" class="day-footer-btn" [text]="'Edit Details'"  [disabled]="true"></app-button>
                   } @else {
                     <div class="day-empty-body">
                       <div class="plus-circle"><span class="plus">+</span></div>

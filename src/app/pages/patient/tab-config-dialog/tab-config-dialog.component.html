@@ -5,18 +5,22 @@
       @for (item of tabConfigItems; track item; let i = $index) {
         <div class="tab-config-item">
           <div class="left">
-            <button
+            <app-button
+              type="button"
               class="reorder-btn"
-              (click)="moveTabUp(i)"
-              [disabled]="i===0 || item.id==='overview' || (i>0 && tabConfigItems[i-1].id==='overview')">
-              <app-icon fontIcon="arrow_upward" [size]="16"></app-icon>
-            </button>
-            <button
+              [fontIcon]="'arrow_upward'"
+              [appearance]="'icon'"
+              [disabled]="i===0 || item.id==='overview' || (i>0 && tabConfigItems[i-1].id==='overview')"
+              (btnClick)="moveTabUp(i)">
+            </app-button>
+            <app-button
+              type="button"
               class="reorder-btn"
-              (click)="moveTabDown(i)"
-              [disabled]="i===tabConfigItems.length-1 || item.id==='overview'">
-              <app-icon fontIcon="arrow_downward" [size]="16"></app-icon>
-            </button>
+              [fontIcon]="'arrow_downward'"
+              [appearance]="'icon'"
+              [disabled]="i===tabConfigItems.length-1 || item.id==='overview'"
+              (btnClick)="moveTabDown(i)">
+            </app-button>
           </div>
           <div class="center">
             <app-icon [fontIcon]="item.icon" [size]="18"></app-icon>

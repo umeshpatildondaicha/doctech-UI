@@ -7,9 +7,14 @@
           <div class="staff-avatar" [style.background-color]="'#10b981'">
             {{ getStaffInitial(staff.name) }}
           </div>
-          <button class="edit-avatar-btn" (click)="editProfile()" title="Edit Profile">
-            <app-icon fontIcon="edit" [size]="14" [color]="'#fff'"></app-icon>
-          </button>
+          <app-button
+            type="button"
+            class="edit-avatar-btn"
+            [fontIcon]="'edit'"
+            title="Edit Profile"
+            [appearance]="'icon'"
+            (btnClick)="editProfile()">
+          </app-button>
         </div>
 
         <div class="profile-info">
@@ -125,8 +130,8 @@
       <!-- Tasks / Performance Section -->
       <div class="tasks-section">
         <div class="section-tabs">
-          <button class="tab-button active">Tasks</button>
-          <button class="tab-button">Performance</button>
+          <app-button type="button" class="tab-button active" [text]="'Tasks'" [appearance]="'stroked'"></app-button>
+          <app-button type="button" class="tab-button" [text]="'Performance'" [appearance]="'stroked'"></app-button>
         </div>
         <div class="tasks-table">
           <div class="table-header">

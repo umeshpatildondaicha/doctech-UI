@@ -78,30 +78,33 @@
 @if (primaryAction || (iconActions && iconActions.length > 0)) {
   <div class="card-footer">
     @if (primaryAction && !primaryAction.hidden) {
-      <button
-        class="primary-footer-action"
-        [disabled]="primaryAction.disabled"
-        [matTooltip]="primaryAction.tooltip || ''"
-        [matTooltipDisabled]="!primaryAction.tooltip"
-        (click)="onActionClick($event, primaryAction)"
-        >
-        <mat-icon>{{ primaryAction.icon }}</mat-icon>
-        <span>{{ primaryAction.label }}</span>
-      </button>
+      <app-button
+  class="primary-footer-action"
+  appearance="raised"
+  [disabled]="primaryAction.disabled || false"
+  [matTooltip]="primaryAction.tooltip || ''"
+  [matTooltipDisabled]="!primaryAction.tooltip"
+  (click)="onActionClick($event, primaryAction)">
+
+  <mat-icon>{{ primaryAction.icon }}</mat-icon>
+  <span>{{ primaryAction.label }}</span>
+</app-button>
+
     }
     @if (iconActions && iconActions.length > 0) {
       <div class="icon-actions">
         @for (action of iconActions; track trackByActionId($index, action)) {
-          <button
-            mat-icon-button
-            class="icon-action"
-            [disabled]="action.disabled"
-            [matTooltip]="action.tooltip || ''"
-            [matTooltipDisabled]="!action.tooltip"
-            (click)="onActionClick($event, action)"
-            >
-            <mat-icon>{{ action.icon }}</mat-icon>
-          </button>
+          <app-button
+          appearance="icon"
+          class="icon-action"
+          [disabled]="action.disabled||false"
+          [matTooltip]="action.tooltip || ''"
+          [matTooltipDisabled]="!action.tooltip"
+          (click)="onActionClick($event, action)">
+          
+          <mat-icon>{{ action.icon }}</mat-icon>
+        </app-button>
+        
         }
       </div>
     }

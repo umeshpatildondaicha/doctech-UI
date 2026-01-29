@@ -135,7 +135,7 @@
               <mat-icon>warning</mat-icon>
               Critical Patients Monitoring
             </h3>
-            <button mat-stroked-button>View All</button>
+            <app-button type="button" [text]="'View All'" [appearance]="'stroked'"></app-button>
           </div>
 
           <div class="critical-patients-grid">
@@ -165,15 +165,9 @@
                   </div>
                 </div>
                 <div class="patient-actions">
-                  <button mat-icon-button matTooltip="View Details">
-                    <mat-icon>visibility</mat-icon>
-                  </button>
-                  <button mat-icon-button matTooltip="Start Round">
-                    <mat-icon>assessment</mat-icon>
-                  </button>
-                  <button mat-icon-button matTooltip="View Vitals">
-                    <mat-icon>monitor_heart</mat-icon>
-                  </button>
+                  <app-button type="button" [fontIcon]="'visibility'" title="View Details" [appearance]="'icon'"></app-button>
+                  <app-button type="button" [fontIcon]="'assessment'" title="Start Round" [appearance]="'icon'"></app-button>
+                  <app-button type="button" [fontIcon]="'monitor_heart'" title="View Vitals" [appearance]="'icon'"></app-button>
                 </div>
               </div>
             }
@@ -187,7 +181,7 @@
               <mat-icon>schedule</mat-icon>
               Pending Rounds
             </h3>
-            <button mat-stroked-button>View All</button>
+            <app-button type="button" [text]="'View All'" [appearance]="'stroked'"></app-button>
           </div>
 
           <div class="rounds-list">
@@ -205,10 +199,8 @@
                   </div>
                 </div>
                 <div class="round-actions">
-                  <button mat-raised-button color="primary" size="small">Start Round</button>
-                  <button mat-icon-button matTooltip="Reschedule">
-                    <mat-icon>schedule</mat-icon>
-                  </button>
+                  <app-button type="button" [text]="'Start Round'" [color]="'primary'" [appearance]="'raised'"></app-button>
+                  <app-button type="button" [fontIcon]="'schedule'" title="Reschedule" [appearance]="'icon'"></app-button>
                 </div>
               </div>
             }
@@ -222,7 +214,7 @@
               <mat-icon>medication</mat-icon>
               Due Medications
             </h3>
-            <button mat-stroked-button>View All</button>
+            <app-button type="button" [text]="'View All'" [appearance]="'stroked'"></app-button>
           </div>
 
           <div class="medications-list">
@@ -241,10 +233,8 @@
                   </div>
                 </div>
                 <div class="medication-actions">
-                  <button mat-raised-button color="primary" size="small">Administer</button>
-                  <button mat-icon-button matTooltip="View Details">
-                    <mat-icon>info</mat-icon>
-                  </button>
+                  <app-button type="button" [text]="'Administer'" [color]="'primary'" [appearance]="'raised'"></app-button>
+                  <app-button type="button" [fontIcon]="'info'" title="View Details" [appearance]="'icon'"></app-button>
                 </div>
               </div>
             }
@@ -258,7 +248,7 @@
               <mat-icon>exit_to_app</mat-icon>
               Discharge Ready Patients
             </h3>
-            <button mat-stroked-button>View All</button>
+            <app-button type="button" [text]="'View All'" [appearance]="'stroked'"></app-button>
           </div>
 
           <div class="discharge-patients-grid">
@@ -284,10 +274,8 @@
                   </div>
                 </div>
                 <div class="patient-actions">
-                  <button mat-raised-button color="primary" size="small">Process Discharge</button>
-                  <button mat-icon-button matTooltip="View Details">
-                    <mat-icon>visibility</mat-icon>
-                  </button>
+                  <app-button type="button" [text]="'Process Discharge'" [color]="'primary'" [appearance]="'raised'"></app-button>
+                  <app-button type="button" [fontIcon]="'visibility'" title="View Details" [appearance]="'icon'"></app-button>
                 </div>
               </div>
             }
@@ -367,7 +355,7 @@
             <div class="admitted-sidebar">
               <div class="dashboard-header">
                 <div class="title">My Dashboard</div>
-                <button class="link-button" (click)="$event.preventDefault()">Customize</button>
+                <app-button type="button" class="link-button" [text]="'Customize'" [appearance]="'basic'" (btnClick)="$event.preventDefault()"></app-button>
               </div>
 
 
@@ -384,13 +372,9 @@
                         </div>
                         <div class="task-actions">
                           @if (!task.completed) {
-                            <button mat-icon-button matTooltip="Complete" (click)="completeTask(i); $event.stopPropagation()">
-                              <mat-icon>done</mat-icon>
-                            </button>
+                            <app-button type="button" [fontIcon]="'done'" title="Complete" [appearance]="'icon'" (btnClick)="completeTask(i); $event.stopPropagation()"></app-button>
                           }
-                          <button mat-icon-button matTooltip="Delete" (click)="deleteTask(i); $event.stopPropagation()">
-                            <mat-icon>delete</mat-icon>
-                          </button>
+                          <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" (btnClick)="deleteTask(i); $event.stopPropagation()"></app-button>
                         </div>
                       </div>
                     }
@@ -473,12 +457,8 @@
                     </div>
                   </div>
                   <div class="card-actions">
-                    <button mat-icon-button (click)="quickStartRound(patient); $event.stopPropagation()" matTooltip="Start Round">
-                      <mat-icon>assessment</mat-icon>
-                    </button>
-                    <button mat-icon-button (click)="navigateToPatientProfile(patient); $event.stopPropagation()" matTooltip="View Profile">
-                      <mat-icon>visibility</mat-icon>
-                    </button>
+                    <app-button type="button" [fontIcon]="'assessment'" title="Start Round" [appearance]="'icon'" (btnClick)="quickStartRound(patient); $event.stopPropagation()"></app-button>
+                    <app-button type="button" [fontIcon]="'visibility'" title="View Profile" [appearance]="'icon'" (btnClick)="navigateToPatientProfile(patient); $event.stopPropagation()"></app-button>
                   </div>
                 </div>
                 <!-- Vital Signs Section -->
@@ -573,18 +553,9 @@
                 </div>
                 <!-- Quick Actions -->
                 <div class="quick-actions">
-                  <button mat-stroked-button (click)="quickViewVitals(patient); $event.stopPropagation()" class="action-btn">
-                    <mat-icon>favorite</mat-icon>
-                    Vitals
-                  </button>
-                  <button mat-stroked-button (click)="quickAddMedication(patient); $event.stopPropagation()" class="action-btn">
-                    <mat-icon>medication</mat-icon>
-                    Meds
-                  </button>
-                  <button mat-stroked-button (click)="quickOrderTest(patient); $event.stopPropagation()" class="action-btn">
-                    <mat-icon>science</mat-icon>
-                    Tests
-                  </button>
+                  <app-button type="button" class="action-btn" [fontIcon]="'favorite'" [text]="'Vitals'" [appearance]="'stroked'" (btnClick)="quickViewVitals(patient); $event.stopPropagation()"></app-button>
+                  <app-button type="button" class="action-btn" [fontIcon]="'medication'" [text]="'Meds'" [appearance]="'stroked'" (btnClick)="quickAddMedication(patient); $event.stopPropagation()"></app-button>
+                  <app-button type="button" class="action-btn" [fontIcon]="'science'" [text]="'Tests'" [appearance]="'stroked'" (btnClick)="quickOrderTest(patient); $event.stopPropagation()"></app-button>
                 </div>
               </div>
             }
@@ -598,10 +569,7 @@
               </div>
               <h3>No patients found</h3>
               <p>No patients match your current search criteria. Try adjusting your filters.</p>
-              <button mat-raised-button (click)="clearFilters()" class="clear-filters-btn">
-                <mat-icon>refresh</mat-icon>
-                Clear All Filters
-              </button>
+              <app-button type="button" class="clear-filters-btn" [fontIcon]="'refresh'" [text]="'Clear All Filters'" [appearance]="'raised'" (btnClick)="clearFilters()"></app-button>
             </div>
           }
         </div>
@@ -619,13 +587,15 @@
         <div class="staff-tabs-container">
           <div class="staff-tabs">
             @for (tab of staffTabs; track tab) {
-              <button
+              <app-button
+                type="button"
                 class="staff-tab"
                 [class.active]="selectedStaffTab === tab.id"
-                (click)="selectedStaffTab = tab.id">
-                <mat-icon>{{ tab.icon }}</mat-icon>
-                <span>{{ tab.label }}</span>
-              </button>
+                [fontIcon]="tab.icon"
+                [text]="tab.label"
+                [appearance]="'stroked'"
+                (btnClick)="selectedStaffTab = tab.id">
+              </app-button>
             }
           </div>
         </div>
@@ -711,12 +681,8 @@
               <div class="section-header">
                 <h3>Staff Members</h3>
                 <div class="section-actions">
-                  <button mat-icon-button matTooltip="Refresh">
-                    <mat-icon>refresh</mat-icon>
-                  </button>
-                  <button mat-icon-button matTooltip="Filter">
-                    <mat-icon>filter_list</mat-icon>
-                  </button>
+                  <app-button type="button" [fontIcon]="'refresh'" title="Refresh" [appearance]="'icon'"></app-button>
+                  <app-button type="button" [fontIcon]="'filter_list'" title="Filter" [appearance]="'icon'"></app-button>
                 </div>
               </div>
               <div class="staff-grid">
@@ -793,14 +759,8 @@
             <div class="schedule-header">
               <h3>Staff Schedule</h3>
               <div class="schedule-actions">
-                <button mat-stroked-button>
-                  <mat-icon>today</mat-icon>
-                  Today
-                </button>
-                <button mat-stroked-button>
-                  <mat-icon>date_range</mat-icon>
-                  Week
-                </button>
+                <app-button type="button" [fontIcon]="'today'" [text]="'Today'" [appearance]="'stroked'"></app-button>
+                <app-button type="button" [fontIcon]="'date_range'" [text]="'Week'" [appearance]="'stroked'"></app-button>
                 <app-button
                   appearance="raised"
                   color="primary"
@@ -839,10 +799,7 @@
             <div class="tasks-header">
               <h3>Task Management</h3>
               <div class="tasks-actions">
-                <button mat-stroked-button>
-                  <mat-icon>filter_list</mat-icon>
-                  Filter
-                </button>
+                <app-button type="button" [fontIcon]="'filter_list'" [text]="'Filter'" [appearance]="'stroked'"></app-button>
                 <app-button
                   appearance="raised"
                   color="primary"
@@ -872,12 +829,8 @@
                       {{ task.status.replace('_', ' ') }}
                     </div>
                     <div class="action-buttons">
-                      <button mat-icon-button matTooltip="Edit Task" (click)="editTask(task)">
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                      <button mat-icon-button matTooltip="Complete Task" (click)="updateTaskStatus(task.id, 'completed')">
-                        <mat-icon>check</mat-icon>
-                      </button>
+                      <app-button type="button" [fontIcon]="'edit'" title="Edit Task" [appearance]="'icon'" (btnClick)="editTask(task)"></app-button>
+                      <app-button type="button" [fontIcon]="'check'" title="Complete Task" [appearance]="'icon'" (btnClick)="updateTaskStatus(task.id, 'completed')"></app-button>
                     </div>
                   </div>
                 </div>
@@ -892,14 +845,8 @@
             <div class="doctor-tasks-header">
               <h3>Doctor Task Management</h3>
               <div class="doctor-tasks-actions">
-                <button mat-stroked-button>
-                  <mat-icon>filter_list</mat-icon>
-                  Filter by Category
-                </button>
-                <button mat-stroked-button>
-                  <mat-icon>schedule</mat-icon>
-                  Filter by Priority
-                </button>
+                <app-button type="button" [fontIcon]="'filter_list'" [text]="'Filter by Category'" [appearance]="'stroked'"></app-button>
+                <app-button type="button" [fontIcon]="'schedule'" [text]="'Filter by Priority'" [appearance]="'stroked'"></app-button>
                 <app-button
                   appearance="raised"
                   color="primary"
@@ -972,12 +919,8 @@
                           {{ task.status.replace('_', ' ') }}
                         </div>
                         <div class="action-buttons">
-                          <button mat-icon-button matTooltip="View Patient" (click)="viewPatientFromTask(task)">
-                            <mat-icon>visibility</mat-icon>
-                          </button>
-                          <button mat-icon-button matTooltip="Complete Task" (click)="updateTaskStatus(task.id, 'completed')">
-                            <mat-icon>check</mat-icon>
-                          </button>
+                          <app-button type="button" [fontIcon]="'visibility'" title="View Patient" [appearance]="'icon'" (btnClick)="viewPatientFromTask(task)"></app-button>
+                          <app-button type="button" [fontIcon]="'check'" title="Complete Task" [appearance]="'icon'" (btnClick)="updateTaskStatus(task.id, 'completed')"></app-button>
                         </div>
                       </div>
                     </div>
@@ -1006,12 +949,8 @@
                           {{ task.status.replace('_', ' ') }}
                         </div>
                         <div class="action-buttons">
-                          <button mat-icon-button matTooltip="Emergency Response">
-                            <mat-icon>emergency</mat-icon>
-                          </button>
-                          <button mat-icon-button matTooltip="Complete Task" (click)="updateTaskStatus(task.id, 'completed')">
-                            <mat-icon>check</mat-icon>
-                          </button>
+                          <app-button type="button" [fontIcon]="'emergency'" title="Emergency Response" [appearance]="'icon'"></app-button>
+                          <app-button type="button" [fontIcon]="'check'" title="Complete Task" [appearance]="'icon'" (btnClick)="updateTaskStatus(task.id, 'completed')"></app-button>
                         </div>
                       </div>
                     </div>
@@ -1040,12 +979,8 @@
                           {{ task.status.replace('_', ' ') }}
                         </div>
                         <div class="action-buttons">
-                          <button mat-icon-button matTooltip="Edit Task" (click)="editTask(task)">
-                            <mat-icon>edit</mat-icon>
-                          </button>
-                          <button mat-icon-button matTooltip="Complete Task" (click)="updateTaskStatus(task.id, 'completed')">
-                            <mat-icon>check</mat-icon>
-                          </button>
+                          <app-button type="button" [fontIcon]="'edit'" title="Edit Task" [appearance]="'icon'" (btnClick)="editTask(task)"></app-button>
+                          <app-button type="button" [fontIcon]="'check'" title="Complete Task" [appearance]="'icon'" (btnClick)="updateTaskStatus(task.id, 'completed')"></app-button>
                         </div>
                       </div>
                     </div>
@@ -1094,14 +1029,8 @@
             <div class="performance-header">
               <h3>Staff Performance</h3>
               <div class="performance-actions">
-                <button mat-stroked-button>
-                  <mat-icon>download</mat-icon>
-                  Export Report
-                </button>
-                <button mat-raised-button color="primary">
-                  <mat-icon>assessment</mat-icon>
-                  Performance Review
-                </button>
+                <app-button type="button" [fontIcon]="'download'" [text]="'Export Report'" [appearance]="'stroked'"></app-button>
+                <app-button type="button" [fontIcon]="'assessment'" [text]="'Performance Review'" [color]="'primary'" [appearance]="'raised'"></app-button>
               </div>
             </div>
             <div class="performance-metrics">
@@ -1214,20 +1143,22 @@
                     </div>
                     <div class="alert-actions">
                       @if (!alert.acknowledged) {
-                        <button
-                          mat-button
-                          color="primary"
-                          (click)="acknowledgeAlert(alert)">
-                          Acknowledge
-                        </button>
+                        <app-button
+                          type="button"
+                          [text]="'Acknowledge'"
+                          [color]="'primary'"
+                          [appearance]="'basic'"
+                          (btnClick)="acknowledgeAlert(alert)">
+                        </app-button>
                       }
                       @if (!alert.resolved) {
-                        <button
-                          mat-button
-                          color="accent"
-                          (click)="resolveAlert(alert)">
-                          Resolve
-                        </button>
+                        <app-button
+                          type="button"
+                          [text]="'Resolve'"
+                          [color]="'accent'"
+                          [appearance]="'basic'"
+                          (btnClick)="resolveAlert(alert)">
+                        </app-button>
                       }
                     </div>
                   </div>

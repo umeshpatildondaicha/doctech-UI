@@ -3,11 +3,11 @@ import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { MatIconModule } from '@angular/material/icon';
-import { BreadcrumbItem } from '@lk/core';
+import { BreadcrumbItem, AppButtonComponent } from '@lk/core';
 
 @Component({
     selector: 'app-breadcrumb',
-    imports: [MatIconModule],
+    imports: [MatIconModule, AppButtonComponent],
     templateUrl: './breadcrumb.component.html',
     styleUrl: './breadcrumb.component.scss'
 })

@@ -9,15 +9,15 @@
       
       <!-- Quick Actions -->
       <div class="quick-actions">
-        <button 
-          *ngFor="let action of quickActions" 
-          mat-raised-button 
-          [style.background-color]="action.color"
-          (click)="action.action()"
-          class="quick-action-btn">
-          <app-icon [fontIcon]="action.icon" [size]="18"></app-icon>
-          {{ action.label }}
-        </button>
+        <app-button
+          *ngFor="let action of quickActions"
+          type="button"
+          class="quick-action-btn"
+          [fontIcon]="action.icon"
+          [text]="action.label"
+          [appearance]="'raised'"
+          (btnClick)="action.action()">
+        </app-button>
       </div>
     </div>
   </div>
@@ -118,9 +118,7 @@
               </div>
               
               <div class="staff-actions">
-                <button mat-icon-button (click)="onStaffSelect(staff)">
-                  <mat-icon>info</mat-icon>
-                </button>
+                <app-button type="button" [fontIcon]="'info'" [appearance]="'icon'" (btnClick)="onStaffSelect(staff)"></app-button>
               </div>
             </div>
           </div>
@@ -202,10 +200,14 @@
             <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>
           
-          <button mat-raised-button color="primary" (click)="openRoundScheduleDialog()">
-            <mat-icon>schedule</mat-icon>
-            Schedule Round
-          </button>
+          <app-button
+            type="button"
+            [fontIcon]="'schedule'"
+            [text]="'Schedule Round'"
+            [color]="'primary'"
+            [appearance]="'raised'"
+            (btnClick)="openRoundScheduleDialog()">
+          </app-button>
         </div>
       </div>
 
@@ -232,9 +234,13 @@
                 </ul>
               </div>
               <div class="template-actions">
-                <button mat-button color="primary" (click)="useTemplate(template)">
-                  Use Template
-                </button>
+                <app-button
+                  type="button"
+                  [text]="'Use Template'"
+                  [color]="'primary'"
+                  [appearance]="'basic'"
+                  (btnClick)="useTemplate(template)">
+                </app-button>
               </div>
             </mat-card-content>
           </mat-card>
@@ -258,10 +264,14 @@
     <div *ngIf="selectedTab === 'tasks'" class="tasks-tab">
       <div class="tasks-header">
         <h3>Care Tasks Management</h3>
-        <button mat-raised-button color="primary" (click)="openCareTaskDialog()">
-          <mat-icon>add_task</mat-icon>
-          Create Task
-        </button>
+        <app-button
+          type="button"
+          [fontIcon]="'add_task'"
+          [text]="'Create Task'"
+          [color]="'primary'"
+          [appearance]="'raised'"
+          (btnClick)="openCareTaskDialog()">
+        </app-button>
       </div>
 
       <div class="tasks-content">
@@ -279,10 +289,14 @@
     <div *ngIf="selectedTab === 'handover'" class="handover-tab">
       <div class="handover-header">
         <h3>Handover Notes</h3>
-        <button mat-raised-button color="primary" (click)="openHandoverDialog()">
-          <mat-icon>swap_horiz</mat-icon>
-          Create Handover
-        </button>
+        <app-button
+          type="button"
+          [fontIcon]="'swap_horiz'"
+          [text]="'Create Handover'"
+          [color]="'primary'"
+          [appearance]="'raised'"
+          (btnClick)="openHandoverDialog()">
+        </app-button>
       </div>
 
       <div class="handover-content">
@@ -380,9 +394,7 @@
     <div class="dialog-content" (click)="$event.stopPropagation()">
       <div class="dialog-header">
         <h2>Assign Staff to Patient</h2>
-        <button mat-icon-button (click)="closeDialogs()">
-          <mat-icon>close</mat-icon>
-        </button>
+        <app-button type="button" [fontIcon]="'close'" [appearance]="'icon'" (btnClick)="closeDialogs()"></app-button>
       </div>
       
       <form [formGroup]="staffAssignmentForm" (ngSubmit)="assignStaff()">
@@ -451,10 +463,8 @@
         </div>
         
         <div class="dialog-actions">
-          <button mat-button type="button" (click)="closeDialogs()">Cancel</button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="staffAssignmentForm.invalid">
-            Assign Staff
-          </button>
+          <app-button type="button" [text]="'Cancel'" [appearance]="'basic'" (btnClick)="closeDialogs()"></app-button>
+          <app-button type="button" [text]="'Assign Staff'" [color]="'primary'" [appearance]="'raised'" [disabled]="staffAssignmentForm.invalid" (btnClick)="assignStaff()"></app-button>
         </div>
       </form>
     </div>
@@ -465,9 +475,7 @@
     <div class="dialog-content" (click)="$event.stopPropagation()">
       <div class="dialog-header">
         <h2>Create Care Task</h2>
-        <button mat-icon-button (click)="closeDialogs()">
-          <mat-icon>close</mat-icon>
-        </button>
+        <app-button type="button" [fontIcon]="'close'" [appearance]="'icon'" (btnClick)="closeDialogs()"></app-button>
       </div>
       
       <form [formGroup]="careTaskForm" (ngSubmit)="createCareTask()">
@@ -548,10 +556,8 @@
         </div>
         
         <div class="dialog-actions">
-          <button mat-button type="button" (click)="closeDialogs()">Cancel</button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="careTaskForm.invalid">
-            Create Task
-          </button>
+          <app-button type="button" [text]="'Cancel'" [appearance]="'basic'" (btnClick)="closeDialogs()"></app-button>
+          <app-button type="button" [text]="'Create Task'" [color]="'primary'" [appearance]="'raised'" [disabled]="careTaskForm.invalid" (btnClick)="createCareTask()"></app-button>
         </div>
       </form>
     </div>
@@ -562,9 +568,7 @@
     <div class="dialog-content" (click)="$event.stopPropagation()">
       <div class="dialog-header">
         <h2>Create Handover Note</h2>
-        <button mat-icon-button (click)="closeDialogs()">
-          <mat-icon>close</mat-icon>
-        </button>
+        <app-button type="button" [fontIcon]="'close'" [appearance]="'icon'" (btnClick)="closeDialogs()"></app-button>
       </div>
       
       <form [formGroup]="handoverForm" (ngSubmit)="createHandoverNote()">
@@ -628,10 +632,8 @@
         </div>
         
         <div class="dialog-actions">
-          <button mat-button type="button" (click)="closeDialogs()">Cancel</button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="handoverForm.invalid">
-            Create Handover
-          </button>
+          <app-button type="button" [text]="'Cancel'" [appearance]="'basic'" (btnClick)="closeDialogs()"></app-button>
+          <app-button type="button" [text]="'Create Handover'" [color]="'primary'" [appearance]="'raised'" [disabled]="handoverForm.invalid" (btnClick)="createHandoverNote()"></app-button>
         </div>
       </form>
     </div>
@@ -642,9 +644,7 @@
     <div class="dialog-content" (click)="$event.stopPropagation()">
       <div class="dialog-header">
         <h2>Schedule Patient Round</h2>
-        <button mat-icon-button (click)="closeDialogs()">
-          <mat-icon>close</mat-icon>
-        </button>
+        <app-button type="button" [fontIcon]="'close'" [appearance]="'icon'" (btnClick)="closeDialogs()"></app-button>
       </div>
       
       <form [formGroup]="roundScheduleForm" (ngSubmit)="scheduleRound()">
@@ -713,10 +713,8 @@
         </div>
         
         <div class="dialog-actions">
-          <button mat-button type="button" (click)="closeDialogs()">Cancel</button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="roundScheduleForm.invalid">
-            Schedule Round
-          </button>
+          <app-button type="button" [text]="'Cancel'" [appearance]="'basic'" (btnClick)="closeDialogs()"></app-button>
+          <app-button type="button" [text]="'Schedule Round'" [color]="'primary'" [appearance]="'raised'" [disabled]="roundScheduleForm.invalid" (btnClick)="scheduleRound()"></app-button>
         </div>
       </form>
     </div>

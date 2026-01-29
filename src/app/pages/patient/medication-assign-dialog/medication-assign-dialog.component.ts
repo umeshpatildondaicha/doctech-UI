@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef } from '@angular/material/dialog';
-import { DIALOG_DATA_TOKEN } from "@lk/core";
+import { DIALOG_DATA_TOKEN, AppButtonComponent } from "@lk/core";
 import { Subject, takeUntil, filter } from 'rxjs';
 
 export interface MedicationAssignDialogData {
@@ -17,7 +17,7 @@ export interface MedicationAssignDialogData {
 
 @Component({
     selector: 'app-medication-assign-dialog',
-    imports: [CommonModule, FormsModule, MatButtonModule, MatIconModule],
+    imports: [CommonModule, FormsModule, MatButtonModule, MatIconModule, AppButtonComponent],
     templateUrl: './medication-assign-dialog.component.html',
     styleUrls: ['./medication-assign-dialog.component.scss']
 })

@@ -4,9 +4,13 @@
       <mat-icon>schedule</mat-icon>
       Add Meal Time
     </h2>
-    <button mat-icon-button (click)="onCancel()" class="close-btn">
-      <mat-icon>close</mat-icon>
-    </button>
+    <app-button
+      type="button"
+      class="close-btn"
+      [fontIcon]="'close'"
+      [appearance]="'icon'"
+      (btnClick)="onCancel()">
+    </app-button>
   </div>
 
   <div mat-dialog-content class="dialog-content">
@@ -46,12 +50,22 @@
   </div>
 
   <div mat-dialog-actions class="dialog-actions">
-    <button mat-stroked-button (click)="onCancel()" class="cancel-btn">
-      Cancel
-    </button>
-    <button mat-raised-button color="primary" (click)="onSave()" [disabled]="!isFormValid()" class="save-btn">
-      <mat-icon>add</mat-icon>
-      Add Meal Time
-    </button>
+    <app-button
+      type="button"
+      class="cancel-btn"
+      [text]="'Cancel'"
+      [appearance]="'stroked'"
+      (btnClick)="onCancel()">
+    </app-button>
+    <app-button
+      type="button"
+      class="save-btn"
+      [fontIcon]="'add'"
+      [text]="'Add Meal Time'"
+      [color]="'primary'"
+      [appearance]="'raised'"
+      [disabled]="!isFormValid()"
+      (btnClick)="onSave()">
+    </app-button>
   </div>
 </div>

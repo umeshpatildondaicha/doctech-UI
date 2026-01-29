@@ -51,13 +51,14 @@
       <div class="days-selection">
         <div class="days-grid">
           @for (day of weekDays; track day) {
-            <button
+            <app-button
               type="button"
               class="day-button"
               [class.selected]="isDaySelected(day)"
-              (click)="toggleDay(day)">
-              {{ day }}
-            </button>
+              [text]="day"
+              [appearance]="'stroked'"
+              (btnClick)="toggleDay(day)">
+            </app-button>
           }
         </div>
         @if (daysError) {

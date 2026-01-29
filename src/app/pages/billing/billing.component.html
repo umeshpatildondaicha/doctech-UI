@@ -27,8 +27,6 @@
       [fontIcon]="'payments'"
       [text]="'Record Payment'"
       (btnClick)="onMainTabChanged('payments')"
-      [appearance]="'stroked'"
-      [color]="'primary'"
       ></app-button>
       <!-- <button mat-stroked-button (click)="onMainTabChanged('payments')">Record Payment</button> -->
       <app-button
@@ -36,8 +34,6 @@
       [fontIcon]="'visibility'"
       [text]="'View Statement'"
       (btnClick)="openPatientProfile()"
-      [appearance]="'stroked'"
-      [color]="'primary'"
       ></app-button>
       <!-- <button mat-stroked-button (click)="openPatientProfile()" matTooltip="Statements are generated from patient profile billing">
         View Statement
@@ -49,7 +45,7 @@
   <app-admin-tabs
     [tabs]="mainTabs"
     [activeTabId]="activeMainTab"
-    variant="underline"
+   
     (tabChanged)="onMainTabChanged($event)">
   </app-admin-tabs>
 
@@ -78,7 +74,13 @@
       @if (!loading && visibleInvoices.length === 0) {
         <div class="empty">
           No invoices found.
-          <button mat-stroked-button color="primary" (click)="applyStatusFilter('ALL')">Clear filter</button>
+          <app-button
+          type="button"
+          [text]="'Clear filter'"
+          
+          
+          (btnClick)="applyStatusFilter('ALL')">
+        </app-button>
         </div>
       }
     </div>

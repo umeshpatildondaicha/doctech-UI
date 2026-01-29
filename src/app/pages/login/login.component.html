@@ -19,14 +19,20 @@
 
         <!-- Quick Login Buttons -->
         <div class="quick-login-buttons">
-          <button type="button" class="quick-btn doctor" (click)="fillDoctorCredentials()">
-            <mat-icon>medical_services</mat-icon>
-            <span>Login as Doctor</span>
-          </button>
-          <button type="button" class="quick-btn hospital" (click)="fillHospitalCredentials()">
-            <mat-icon>business</mat-icon>
-            <span>Login as Admin</span>
-          </button>
+          <app-button
+            type="button"
+            class="quick-btn doctor"
+            [fontIcon]="'medical_services'"
+            [text]="'Login as Doctor'"
+            (btnClick)="fillDoctorCredentials()">
+          </app-button>
+          <app-button
+            type="button"
+            class="quick-btn hospital"
+            [fontIcon]="'business'"
+            [text]="'Login as Admin'"
+            (btnClick)="fillHospitalCredentials()">
+          </app-button>
         </div>
 
         <!-- Login Form -->
@@ -63,12 +69,13 @@
                   placeholder="Enter your password"
                   class="form-input"
                   autocomplete="current-password">
-                  <button
+                  <app-button
                     type="button"
                     class="password-toggle"
-                    (click)="togglePasswordVisibility()">
-                    <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-                  </button>
+                    [fontIcon]="showPassword ? 'visibility_off' : 'visibility'"
+                    [appearance]="'icon'"
+                    (btnClick)="togglePasswordVisibility()">
+                  </app-button>
                 </div>
                 @if (isFieldInvalid('password')) {
                   <div class="error-message">
@@ -104,21 +111,16 @@
               }
 
               <!-- Submit Button -->
-              <button
-                type="submit"
+              <app-button
+                type="button"
                 class="submit-button"
+                [fontIcon]="'login'"
+                [text]="isLoading ? 'Signing In...' : 'Sign In'"
                 [disabled]="loginForm.invalid || isLoading"
-                [class.loading]="isLoading">
-                <div class="button-content">
-                  @if (isLoading) {
-                    <mat-spinner diameter="20"></mat-spinner>
-                  }
-                  @if (!isLoading) {
-                    <mat-icon>login</mat-icon>
-                  }
-                  <span>{{ isLoading ? 'Signing In...' : 'Sign In' }}</span>
-                </div>
-              </button>
+                [appearance]="'raised'"
+                [color]="'primary'"
+                (btnClick)="onSubmit()">
+              </app-button>
             </form>
 
             <!-- Footer -->

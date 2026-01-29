@@ -1,13 +1,14 @@
 <div class="breadcrumb-container">
   <!-- Back Button -->
-  <button
+  <app-button
+    type="button"
     class="back-button"
-    (click)="goBack()"
+    [fontIcon]="'arrow_back'"
+    [text]="'Back'"
     title="Go Back"
-    aria-label="Go back to previous page">
-    <mat-icon>arrow_back</mat-icon>
-    <span>Back</span>
-  </button>
+    [appearance]="'stroked'"
+    (btnClick)="goBack()">
+  </app-button>
 
   <!-- Breadcrumb Path -->
   <nav class="breadcrumb-nav" aria-label="Breadcrumb navigation">
@@ -53,12 +54,13 @@
   }
 
   <!-- Home Button -->
-  <button
+  <app-button
+    type="button"
     class="home-button"
-    (click)="goHome()"
+    [fontIcon]="'home'"
+    [text]="'Home'"
     title="Go to Home"
-    aria-label="Go to home page">
-    <mat-icon>home</mat-icon>
-    <span>Home</span>
-  </button>
+    [appearance]="'stroked'"
+    (btnClick)="goHome()">
+  </app-button>
 </div>

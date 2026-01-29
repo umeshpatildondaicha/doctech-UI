@@ -184,14 +184,27 @@
               (btnClick)="applySetToAll(i)"
             ></app-button>
             </div>
-          }
+          }          <app-button
+            type="button"
+            class="add-set-btn"
+            [fontIcon]="'add'"
+            [text]="'+ Add Set'"
+            [color]="'primary'"
+            [appearance]="'stroked'"
+            (btnClick)="addSet()"
+          ></app-button>
         </div>
 
         <div class="sets-actions">
-          <button type="button" mat-stroked-button color="primary" (click)="addSet()" class="add-set-btn">
-            <mat-icon>add</mat-icon>
-            + Add Set
-          </button>
+          <app-button
+            type="button"
+            class="add-set-btn"
+            [fontIcon]="'add'"
+            text="'+ Add Set'"
+            [color]="'primary'"
+            [appearance]="'stroked'"
+            (btnClick)="addSet()">
+          </app-button>
         </div>
       </div>
     </form>

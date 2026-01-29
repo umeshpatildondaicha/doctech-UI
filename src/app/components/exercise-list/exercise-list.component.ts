@@ -11,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ExerciseCardComponent } from '../exercise-card/exercise-card.component';
 import { Exercise } from '../../interfaces/exercise.interface';
+import { AppButtonComponent } from '@lk/core';
 
 export interface ExerciseListConfig {
   showFilters?: boolean;
@@ -37,7 +38,8 @@ export interface ExerciseListConfig {
     MatInputModule,
     MatSelectModule,
     MatTooltipModule,
-    ExerciseCardComponent
+    ExerciseCardComponent,
+    AppButtonComponent
 ],
     templateUrl: './exercise-list.component.html',
     styleUrl: './exercise-list.component.scss'

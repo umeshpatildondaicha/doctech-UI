@@ -237,22 +237,24 @@
             (click)="createTimingSlot()"
           ></app-icon>
         </div>
-        <button
+        <app-button
+          type="button"
           class="toggle-btn"
           [class.active]="selectedView === 'weekly'"
-          (click)="onViewChange('weekly')"
-          >
-          <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'view_week'"></app-icon>
-          Schedule View
-        </button>
-        <button
+          [fontIcon]="'view_week'"
+          [text]="'Schedule View'"
+          [appearance]="'stroked'"
+          (btnClick)="onViewChange('weekly')">
+        </app-button>
+        <app-button
+          type="button"
           class="toggle-btn"
           [class.active]="selectedView === 'grid'"
-          (click)="onViewChange('grid')"
-          >
-          <app-icon [fontSet]="'material-icons-outlined'" [fontIcon]="'grid_view'"></app-icon>
-          List View
-        </button>
+          [fontIcon]="'grid_view'"
+          [text]="'List View'"
+          [appearance]="'stroked'"
+          (btnClick)="onViewChange('grid')">
+        </app-button>
       </div>
     </div>
 

@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { AppButtonComponent } from '@lk/core';
 
 @Component({
     selector: 'app-diet-selection-dialog',
@@ -23,7 +24,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     MatSelectModule,
     MatChipsModule,
     MatTooltipModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    AppButtonComponent
 ],
     templateUrl: './diet-selection-dialog.component.html',
     styleUrl: './diet-selection-dialog.component.scss'

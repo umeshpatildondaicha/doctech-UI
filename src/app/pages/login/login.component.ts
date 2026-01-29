@@ -17,7 +17,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-import { AuthService, LoginRequest, UserType } from "@lk/core";
+import { AppButtonComponent, AuthService, LoginRequest, UserType } from "@lk/core";
 import { environment } from '../../../environments/environment';
 
 /**
@@ -33,7 +33,8 @@ import { environment } from '../../../environments/environment';
     MatIconModule,
     MatSelectModule,
     MatCheckboxModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    AppButtonComponent
 ],
     templateUrl: './login.component.html',
     styleUrl: './login.component.scss',

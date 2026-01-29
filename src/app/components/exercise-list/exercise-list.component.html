@@ -42,10 +42,14 @@
           </mat-form-field>
         </div>
         <div class="filter-actions">
-          <button mat-stroked-button (click)="clearFilters()" class="clear-filters-btn">
-            <mat-icon>clear_all</mat-icon>
-            Clear Filters
-          </button>
+          <app-button
+            type="button"
+            class="clear-filters-btn"
+            [fontIcon]="'clear_all'"
+            [text]="'Clear Filters'"
+            [appearance]="'flat'"
+            (btnClick)="clearFilters()">
+          </app-button>
         </div>
       </div>
     </div>
@@ -67,14 +71,12 @@
                 <p class="group-exercise-count">{{ group.exercises?.length || 0 }} exercises</p>
               </div>
               @if (config.allowSelection) {
-                <button
-                  mat-stroked-button
-                  color="primary"
-                  (click)="onSelectGroup(group)"
-                  class="select-group-btn">
-                  <mat-icon>add</mat-icon>
-                  Add Group
-                </button>
+                <app-button
+                  type="button"
+                  class="select-group-btn"   
+                  text="'Add Group'"
+                  (btnClick)="onSelectGroup(group)">
+                </app-button>
               }
             </div>
           </mat-card>

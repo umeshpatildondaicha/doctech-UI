@@ -9,13 +9,14 @@
           <span class="difficulty-badge">{{ exercise.difficulty }}</span>
         </div>
       </div>
-      <button
-        mat-icon-button
-        (click)="toggleEditMode()"
-        [matTooltip]="mode === 'view' ? 'Edit' : 'View'"
-        class="toggle-edit-btn">
-        <mat-icon>{{ mode === 'view' ? 'edit' : 'visibility' }}</mat-icon>
-      </button>
+      <app-button
+        type="button"
+        class="toggle-edit-btn"
+        [fontIcon]="mode === 'view' ? 'edit' : 'visibility'"
+        [title]="mode === 'view' ? 'Edit' : 'View'"
+        [appearance]="'icon'"
+        (btnClick)="toggleEditMode()">
+      </app-button>
     </div>
   </div>
 
@@ -31,14 +32,14 @@
               <div class="set-header">
                 <h4>Set {{ i + 1 }}</h4>
                 @if (setsArray.length > 1 && mode === 'edit') {
-                  <button
+                  <app-button
                     type="button"
-                    mat-icon-button
-                    (click)="removeSet(i)"
                     class="remove-set"
-                    matTooltip="Remove set">
-                    <mat-icon>delete</mat-icon>
-                  </button>
+                    [fontIcon]="'delete'"
+                    title="Remove set"
+                    [appearance]="'icon'"
+                    (btnClick)="removeSet(i)">
+                  </app-button>
                 }
               </div>
               <div class="set-fields">
@@ -83,15 +84,15 @@
                         </mat-form-field>
                       </div>
                       @if (mode === 'edit') {
-                        <button
+                        <app-button
                           type="button"
-                          mat-stroked-button
-                          (click)="applySetToAll(i)"
                           class="apply-set-btn"
-                          matTooltip="Apply this set configuration to all sets">
-                          <mat-icon>content_copy</mat-icon>
-                          Apply to all sets
-                        </button>
+                          [fontIcon]="'content_copy'"
+                          [text]="'Apply to all sets'"
+                          [appearance]="'stroked'"
+                          title="Apply this set configuration to all sets"
+                          (btnClick)="applySetToAll(i)">
+                        </app-button>
                       }
                     </div>
                   }
@@ -99,15 +100,15 @@
 
                 @if (mode === 'edit') {
                   <div class="sets-actions">
-                    <button
+                    <app-button
                       type="button"
-                      mat-stroked-button
-                      color="primary"
-                      (click)="addSet()"
-                      class="add-set-btn">
-                      <mat-icon>add</mat-icon>
-                      Add Set
-                    </button>
+                      class="add-set-btn"
+                      [fontIcon]="'add'"
+                      [text]="'Add Set'"
+                      [color]="'primary'"
+                      [appearance]="'stroked'"
+                      (btnClick)="addSet()">
+                    </app-button>
                   </div>
                 }
               </div>

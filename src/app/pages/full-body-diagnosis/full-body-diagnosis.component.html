@@ -307,13 +307,21 @@
                                                   <app-icon fontIcon="location_on" [size]="16" color="var(--primary-color)"></app-icon>
                                                   <span>{{ getBodyPartName(comment.bodyPart) }}</span>
                                                 </div>
-                                                <button
+                                                <app-button
+                                                type="button"
+                                                class="delete-comment-btn"
+                                                [fontIcon]="'delete'"
+                                                title="Delete comment"
+                                                (btnClick)="deleteComment(comment.id)"
+                                                [appearance]="'icon'"
+                                                ></app-button>
+                                                <!-- <button
                                                   mat-icon-button
                                                   class="delete-comment-btn"
                                                   (click)="deleteComment(comment.id)"
                                                   [matTooltip]="'Delete comment'">
                                                   <mat-icon>delete</mat-icon>
-                                                </button>
+                                                </button> -->
                                               </div>
                                               <div class="comment-content">{{ comment.comment }}</div>
                                               <div class="comment-footer">

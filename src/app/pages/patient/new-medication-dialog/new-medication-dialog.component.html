@@ -25,34 +25,10 @@
         <div class="form-field">
           <label>Timing</label>
           <div class="timing-pills">
-            <button
-              type="button"
-              class="pill"
-              [class.active]="formData.timing === 'Morning'"
-              (click)="setTiming('Morning')">
-              Morning
-            </button>
-            <button
-              type="button"
-              class="pill"
-              [class.active]="formData.timing === 'Afternoon'"
-              (click)="setTiming('Afternoon')">
-              Afternoon
-            </button>
-            <button
-              type="button"
-              class="pill"
-              [class.active]="formData.timing === 'Evening'"
-              (click)="setTiming('Evening')">
-              Evening
-            </button>
-            <button
-              type="button"
-              class="pill"
-              [class.active]="formData.timing === 'Night'"
-              (click)="setTiming('Night')">
-              Night
-            </button>
+            <app-button type="button" class="pill" [class.active]="formData.timing === 'Morning'" [text]="'Morning'" [appearance]="'stroked'" (btnClick)="setTiming('Morning')"></app-button>
+            <app-button type="button" class="pill" [class.active]="formData.timing === 'Afternoon'" [text]="'Afternoon'" [appearance]="'stroked'" (btnClick)="setTiming('Afternoon')"></app-button>
+            <app-button type="button" class="pill" [class.active]="formData.timing === 'Evening'" [text]="'Evening'" [appearance]="'stroked'" (btnClick)="setTiming('Evening')"></app-button>
+            <app-button type="button" class="pill" [class.active]="formData.timing === 'Night'" [text]="'Night'" [appearance]="'stroked'" (btnClick)="setTiming('Night')"></app-button>
           </div>
         </div>
       </div>
@@ -74,7 +50,7 @@
       </div>
       @if (mode === 'create') {
         <div class="form-actions">
-          <button mat-stroked-button (click)="onAddToCart()" [disabled]="!isFormValid">Add to Cart</button>
+          <app-button type="button" [text]="'Add to Cart'" [appearance]="'stroked'" [disabled]="!isFormValid" (btnClick)="onAddToCart()"></app-button>
         </div>
       }
     </div>
@@ -89,12 +65,8 @@
                 <div class="summary-sub">{{ med.dosage }} • {{ med.frequency }}</div>
               </div>
               <div class="summary-actions">
-                <button mat-icon-button (click)="onEditMedicine(med)">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button (click)="onRemoveMedicine(med.id)">
-                  <mat-icon>delete</mat-icon>
-                </button>
+                <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" (btnClick)="onEditMedicine(med)"></app-button>
+                <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" (btnClick)="onRemoveMedicine(med.id)"></app-button>
               </div>
             </div>
           }

@@ -2,28 +2,33 @@
   <div class="tabs-container">
     <div class="tabs-list">
       @for (tab of tabs; track tab) {
-        <button
-          type="button"
-          class="tab-item"
-          [class.active]="isActive(tab.id)"
-          [class.disabled]="tab.disabled"
-          [disabled]="tab.disabled"
-          (click)="onTabClick(tab)">
-          @if (tab.icon) {
-            <app-icon
-              [fontIcon]="tab.icon"
-              [size]="size === 'small' ? 16 : size === 'large' ? 24 : 20">
-            </app-icon>
-          }
-          <span class="tab-label">{{ tab.label }}</span>
-          @if (tab.badge) {
-            <span
-              class="tab-badge"
-              [style.background-color]="tab.badgeColor">
-              {{ tab.badge }}
-            </span>
-          }
-        </button>
+        <app-button
+        type="button"
+        appearance="flat"
+        class="tab-item"
+        [class.active]="isActive(tab.id)"
+        [class.disabled]="tab.disabled"
+        [disabled]="tab.disabled || false"
+        (click)="onTabClick(tab)">
+      
+        @if (tab.icon) {
+          <app-icon
+            [fontIcon]="tab.icon"
+            [size]="size === 'small' ? 16 : size === 'large' ? 24 : 20">
+          </app-icon>
+        }
+      
+        <span class="tab-label">{{ tab.label }}</span>
+      
+        @if (tab.badge) {
+          <span
+            class="tab-badge"
+            [style.background-color]="tab.badgeColor">
+            {{ tab.badge }}
+          </span>
+        }
+      </app-button>
+      
       }
     </div>
   </div>

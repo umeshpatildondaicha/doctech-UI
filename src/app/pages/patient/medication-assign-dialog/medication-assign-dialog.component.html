@@ -4,18 +4,22 @@
     <div class="dialog-left">
       <!-- Tabs -->
       <div class="tabs-toggle">
-        <button
+        <app-button
+          type="button"
           class="tab-btn"
           [class.active]="activeTab === 'medicines'"
-          (click)="setTab('medicines')">
-          Medicines
-        </button>
-        <button
+          [text]="'Medicines'"
+          [appearance]="'stroked'"
+          (btnClick)="setTab('medicines')">
+        </app-button>
+        <app-button
+          type="button"
           class="tab-btn"
           [class.active]="activeTab === 'template'"
-          (click)="setTab('template')">
-          Template
-        </button>
+          [text]="'Template'"
+          [appearance]="'stroked'"
+          (btnClick)="setTab('template')">
+        </app-button>
       </div>
 
       <!-- Medicines Tab Content -->
@@ -65,34 +69,10 @@
                   <div class="form-field full-width">
                     <label>Timing</label>
                     <div class="timing-pills">
-                      <button
-                        type="button"
-                        class="pill"
-                        [class.active]="formData.timing === 'Morning'"
-                        (click)="formData.timing = 'Morning'">
-                        Morning
-                      </button>
-                      <button
-                        type="button"
-                        class="pill"
-                        [class.active]="formData.timing === 'Afternoon'"
-                        (click)="formData.timing = 'Afternoon'">
-                        Afternoon
-                      </button>
-                      <button
-                        type="button"
-                        class="pill"
-                        [class.active]="formData.timing === 'Evening'"
-                        (click)="formData.timing = 'Evening'">
-                        Evening
-                      </button>
-                      <button
-                        type="button"
-                        class="pill"
-                        [class.active]="formData.timing === 'Night'"
-                        (click)="formData.timing = 'Night'">
-                        Night
-                      </button>
+                      <app-button type="button" class="pill" [class.active]="formData.timing === 'Morning'" [text]="'Morning'" [appearance]="'stroked'" (btnClick)="formData.timing = 'Morning'"></app-button>
+                      <app-button type="button" class="pill" [class.active]="formData.timing === 'Afternoon'" [text]="'Afternoon'" [appearance]="'stroked'" (btnClick)="formData.timing = 'Afternoon'"></app-button>
+                      <app-button type="button" class="pill" [class.active]="formData.timing === 'Evening'" [text]="'Evening'" [appearance]="'stroked'" (btnClick)="formData.timing = 'Evening'"></app-button>
+                      <app-button type="button" class="pill" [class.active]="formData.timing === 'Night'" [text]="'Night'" [appearance]="'stroked'" (btnClick)="formData.timing = 'Night'"></app-button>
                     </div>
                   </div>
                 </div>
@@ -114,10 +94,8 @@
                 </div>
               </div>
               <div class="inner-footer">
-                <button mat-stroked-button (click)="resetForm()">Cancel</button>
-                <button mat-raised-button color="primary" (click)="onAddToCart()">
-                  Add
-                </button>
+                <app-button type="button" [text]="'Cancel'" [appearance]="'stroked'" (btnClick)="resetForm()"></app-button>
+                <app-button type="button" [text]="'Add'" [color]="'primary'" [appearance]="'raised'" (btnClick)="onAddToCart()"></app-button>
               </div>
             </div>
           }
@@ -145,12 +123,8 @@
                         <div class="medicine-stock">Quantity Available: {{ med.quantityAvailable }} units</div>
                       </div>
                       <div class="medicine-actions">
-                        <button mat-icon-button>
-                          <mat-icon>visibility</mat-icon>
-                        </button>
-                        <button mat-icon-button (click)="onAddMedicineClick(med)">
-                          <mat-icon>add</mat-icon>
-                        </button>
+                        <app-button type="button" [fontIcon]="'visibility'" [appearance]="'icon'"></app-button>
+                        <app-button type="button" [fontIcon]="'add'" [appearance]="'icon'" (btnClick)="onAddMedicineClick(med)"></app-button>
                       </div>
                     </div>
                   }
@@ -237,12 +211,8 @@
                     </div>
                   </div>
                   <div class="summary-actions">
-                    <button mat-icon-button (click)="onEditSelected(med)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button mat-icon-button (click)="onRemoveSelected(med.id)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
+                    <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" (btnClick)="onEditSelected(med)"></app-button>
+                    <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" (btnClick)="onRemoveSelected(med.id)"></app-button>
                   </div>
                 </div>
               }

@@ -4,9 +4,13 @@
       <mat-icon>restaurant</mat-icon>
       Select Diets
     </h2>
-    <button mat-icon-button (click)="onCancel()" class="close-btn">
-      <mat-icon>close</mat-icon>
-    </button>
+    <app-button
+      type="button"
+      class="close-btn"
+      [fontIcon]="'close'"
+      [appearance]="'icon'"
+      (btnClick)="onCancel()">
+    </app-button>
   </div>
 
   <div mat-dialog-content class="dialog-content">
@@ -38,10 +42,14 @@
         </mat-form-field>
       </div>
 
-      <button mat-stroked-button (click)="clearFilters()" class="clear-filters-btn">
-        <mat-icon>clear_all</mat-icon>
-        Clear Filters
-      </button>
+      <app-button
+        type="button"
+        class="clear-filters-btn"
+        [fontIcon]="'clear_all'"
+        [text]="'Clear Filters'"
+        [appearance]="'stroked'"
+        (btnClick)="clearFilters()">
+      </app-button>
     </div>
 
     <!-- Selection Summary -->
@@ -51,10 +59,14 @@
           <span class="selected-count">{{ getSelectedCount() }} diets selected</span>
           <span class="total-calories">{{ getTotalCalories() }} total calories</span>
         </div>
-        <button mat-stroked-button (click)="selectedDiets = []" class="clear-selection-btn">
-          <mat-icon>clear</mat-icon>
-          Clear Selection
-        </button>
+        <app-button
+          type="button"
+          class="clear-selection-btn"
+          [fontIcon]="'clear'"
+          [text]="'Clear Selection'"
+          [appearance]="'stroked'"
+          (btnClick)="selectedDiets = []">
+        </app-button>
       </div>
     }
 
@@ -146,12 +158,22 @@
   </div>
 
   <div mat-dialog-actions class="dialog-actions">
-    <button mat-stroked-button (click)="onCancel()" class="cancel-btn">
-      Cancel
-    </button>
-    <button mat-raised-button color="primary" (click)="onConfirm()" [disabled]="selectedDiets.length === 0" class="confirm-btn">
-      <mat-icon>check</mat-icon>
-      Select {{ getSelectedCount() }} Diet{{ getSelectedCount() !== 1 ? 's' : '' }}
-    </button>
+    <app-button
+      type="button"
+      class="cancel-btn"
+      [text]="'Cancel'"
+      [appearance]="'stroked'"
+      (btnClick)="onCancel()">
+    </app-button>
+    <app-button
+      type="button"
+      class="confirm-btn"
+      [fontIcon]="'check'"
+      [text]="'Select ' + getSelectedCount() + ' Diet' + (getSelectedCount() !== 1 ? 's' : '')"
+      [color]="'primary'"
+      [appearance]="'raised'"
+      [disabled]="selectedDiets.length === 0"
+      (btnClick)="onConfirm()">
+    </app-button>
   </div>
 </div>

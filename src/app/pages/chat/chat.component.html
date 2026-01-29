@@ -12,6 +12,8 @@
     <div class="sidebar-header">
       @if (!isMobile) {
         <app-button
+       class="toggle-btn"
+       appearance ="icon"
         [fontIcon]="'close'"
         title="Close"
         (btnClick)="togglePatientList()"

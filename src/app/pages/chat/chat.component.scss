@@ -179,6 +179,7 @@ $gradient-accent: linear-gradient(135deg, $accent-color 0%, $secondary-color 100
   border-right: 1px solid $border-color;
   display: flex;
   flex-direction: column;
+  color: var(--secondary-color);
   z-index: 1000;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
   opacity: 0;

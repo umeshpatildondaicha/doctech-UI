@@ -126,9 +126,13 @@
                     </div>
                   </div>
                   <div class="exercise-actions">
-                    <button type="button" mat-icon-button (click)="removeExerciseFromGroup(i)" class="remove-btn">
-                      <mat-icon>remove_circle</mat-icon>
-                    </button>
+                    <app-button
+                      type="button"
+                      class="remove-btn"
+                      [fontIcon]="'remove_circle'"
+                      [appearance]="'icon'"
+                      (btnClick)="removeExerciseFromGroup(i)">
+                    </app-button>
                   </div>
                 </div>
               }
