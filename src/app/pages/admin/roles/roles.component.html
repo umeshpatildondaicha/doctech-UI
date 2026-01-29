@@ -10,7 +10,7 @@
     </app-admin-tabs>
 
     <!-- Bulk Actions Toolbar -->
-    @if (showBulkActions) {
+    <!-- @if (showBulkActions) {
       <div class="bulk-actions-toolbar">
         <div class="selected-count">{{ bulkSelectedStaff.size }} staff members selected</div>
         <div class="bulk-actions">
@@ -24,9 +24,9 @@
           </app-button>
         </div>
       </div>
-    }
+    } -->
     <!-- -----Tab Content ------------>
-    <app-tabs [selectedIndex]="selectedTabIndex">
+    <app-tabs [selectedIndex]="selectedTabIndex" class="tabs-content">
       <!-- Overview Tab -->
       <app-tab label="overview">
         <div class="overview-dashboard">

@@ -81,13 +81,12 @@
       <app-button
   class="primary-footer-action"
   appearance="raised"
+  [fontIcon]="primaryAction.icon"
+  [text]="primaryAction.label"
   [disabled]="primaryAction.disabled || false"
   [matTooltip]="primaryAction.tooltip || ''"
   [matTooltipDisabled]="!primaryAction.tooltip"
-  (click)="onActionClick($event, primaryAction)">
-
-  <mat-icon>{{ primaryAction.icon }}</mat-icon>
-  <span>{{ primaryAction.label }}</span>
+  (btnClick)="onActionClick($event, primaryAction)">
 </app-button>
 
     }
@@ -97,12 +96,11 @@
           <app-button
           appearance="icon"
           class="icon-action"
+          [fontIcon]="action.icon"
           [disabled]="action.disabled||false"
           [matTooltip]="action.tooltip || ''"
           [matTooltipDisabled]="!action.tooltip"
-          (click)="onActionClick($event, action)">
-          
-          <mat-icon>{{ action.icon }}</mat-icon>
+          (btnClick)="onActionClick($event, action)">
         </app-button>
         
         }

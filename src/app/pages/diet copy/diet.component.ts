@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -68,7 +68,16 @@ export class DietComponent implements OnInit {
     { label: 'Dinner', value: 'dinner' },
     { label: 'Snack', value: 'snack' }
   ];
-  
+  @Input() diet!: Diet;
+  @Input() showActions = false;
+  @Input() clickable = false;
+
+  @Output() cardClick = new EventEmitter<Diet>();
+  @Output() viewClick = new EventEmitter<Diet>();
+  @Output() editClick = new EventEmitter<Diet>();
+  @Output() deleteClick = new EventEmitter<Diet>();
+  @Output() videoClick = new EventEmitter<string>();
+  @Output() pdfClick = new EventEmitter<string>();
 
   
   // Diets Tab
@@ -337,20 +346,21 @@ export class DietComponent implements OnInit {
   initializeDietGridOptions() {
     this.gridOptions.menuActions = [
       {
-        "title": "View",
-        "icon": "remove_red_eye",
-        "click": (param: any) => { this.onViewDiet(param?.data) }
+        title: "View",
+        icon: "visibility",
+        click: (param: any) => { this.onViewDiet(param?.data) }
       },
       {
-        "title": "Edit",
-        "icon": "edit",
-        "click": (param: any) => { this.onEditDiet(param?.data) }
+        title: "Edit",
+        icon: "edit",
+        click: (param: any) => { this.onEditDiet(param?.data) }
       },
       {
-        "title": "Delete",
-        "icon": "delete",
-        "click": (param: any) => { this.onDeleteDiet(param?.data) }
-      },
+        title: "Delete",
+        icon: "delete",
+        click: (param: any) => { this.onDeleteDiet(param?.data) }
+      }
+      
     ];
   }
 

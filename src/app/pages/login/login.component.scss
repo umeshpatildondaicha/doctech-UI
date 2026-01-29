@@ -414,7 +414,7 @@
       background: var(--gradient-primary);
       border: none;
       border-radius: var(--small-border-radius);
-      color: white;
+      //color: white;
       font-size: var(--font-size-base);
       font-weight: var(--font-weight-semibold);
       cursor: pointer;
@@ -424,7 +424,7 @@
 
       &:hover:not(:disabled) {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(16, 179, 179, 0.3);
+         box-shadow: 0 8px 25px rgba(16, 179, 179, 0.3);
       }
 
       &:disabled {

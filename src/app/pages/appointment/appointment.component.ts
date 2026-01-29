@@ -40,7 +40,7 @@ export class AppointmentComponent implements OnInit {
       },
       {
         title: 'Reschedule',
-        icon: 'clock',
+        icon: 'schedule',
         click: (param: any) => this.openRescheduleDialog(param.data)
       },
       {

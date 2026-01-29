@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 import { ColDef } from 'ag-grid-community';
 import { 
@@ -6,11 +7,33 @@ import {
   AdminActionBarComponent,
   type HeaderAction
 } from '../../../components';
-import { GridComponent, StatusCellRendererComponent, ChipCellRendererComponent, PageComponent, BreadcrumbItem, DialogboxService } from '@lk/core';
+import {
+  ListingCardComponent,
+  type ListingCardAction,
+  type ListingCardStat,
+  type ListingCardBadge
+} from '../../../components/listing-card/listing-card.component';
+import { GridComponent, StatusCellRendererComponent, ChipCellRendererComponent, PageComponent, BreadcrumbItem, DialogboxService, AppButtonComponent } from '@lk/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'app-plans',
-    imports: [AdminPageHeaderComponent, AdminActionBarComponent, GridComponent, PageComponent],
+    imports: [
+      FormsModule,
+      MatFormFieldModule,
+      MatInputModule,
+      MatSelectModule,
+      MatIconModule,
+      AdminPageHeaderComponent,
+      AdminActionBarComponent,
+      GridComponent,
+      PageComponent,
+      ListingCardComponent,
+      AppButtonComponent
+    ],
     templateUrl: './plans.component.html',
     styleUrl: './plans.component.scss'
 })
@@ -18,9 +41,27 @@ export class PlansComponent implements OnInit {
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Plans & Offers', route: '/admin/plans', icon: 'payments', isActive: true }
   ];
-  // Grid configuration
+  // Grid configuration (kept for optional grid view)
   columnDefs: ColDef[] = [];
   gridOptions: any = {};
+
+  // Card view state (same pattern as diet)
+  searchQuery = '';
+  selectedStatus = '';
+  filteredPlans: any[] = [];
+
+  primaryPlanAction: ListingCardAction = {
+    id: 'view',
+    label: 'View',
+    icon: 'visibility',
+    tooltip: 'View plan details'
+  };
+
+  planIconActions: ListingCardAction[] = [
+    { id: 'edit', label: 'Edit', icon: 'edit', tooltip: 'Edit plan' },
+    { id: 'toggle', label: 'Toggle status', icon: 'power_settings_new', tooltip: 'Activate/Deactivate' },
+    { id: 'delete', label: 'Delete', icon: 'delete', tooltip: 'Delete plan' }
+  ];
   
   plans = [
     { 
@@ -86,6 +127,67 @@ export class PlansComponent implements OnInit {
 
   ngOnInit() {
     this.setupGrid();
+    this.filterPlans();
+  }
+
+  // Card view: filter and stats (same pattern as diet)
+  filterPlans() {
+    let list = [...this.plans];
+    if (this.searchQuery?.trim()) {
+      const q = this.searchQuery.trim().toLowerCase();
+      list = list.filter(p => (p.name || '').toLowerCase().includes(q));
+    }
+    if (this.selectedStatus) {
+      list = list.filter(p => (p.status || '') === this.selectedStatus);
+    }
+    this.filteredPlans = list;
+  }
+
+  onSearchChange() {
+    this.filterPlans();
+  }
+
+  clearFilters() {
+    this.searchQuery = '';
+    this.selectedStatus = '';
+    this.filterPlans();
+  }
+
+  getActivePlansCount(): number {
+    return this.plans.filter(p => (p.status || '').toLowerCase() === 'active').length;
+  }
+
+  getTotalSubscribers(): number {
+    return this.plans.reduce((sum, p) => sum + (p.subscribers || 0), 0);
+  }
+
+  getTotalFeaturesCount(): number {
+    return this.plans.reduce((sum, p) => sum + (p.featuresCount || 0), 0);
+  }
+
+  getPlanCardStats(plan: any): ListingCardStat[] {
+    return [
+      { label: 'Subscribers', value: plan.subscribers ?? 0, icon: 'groups' },
+      { label: 'Status', value: plan.status ?? '—', icon: 'info' },
+      { label: 'Features', value: plan.featuresCount ?? 0, unit: 'features', icon: 'featured_play_list' }
+    ];
+  }
+
+  getPlanStatusBadge(plan: any): ListingCardBadge {
+    const isActive = (plan?.status || '').toLowerCase() === 'active';
+    return {
+      text: plan?.status || '—',
+      backgroundColor: isActive ? '#2e7d32' : '#6c757d'
+    };
+  }
+
+  onPlanCardAction(action: ListingCardAction, plan: any) {
+    switch (action.id) {
+      case 'view': this.viewPlan(plan); break;
+      case 'edit': this.editPlan(plan); break;
+      case 'toggle': this.togglePlanStatus(plan); break;
+      case 'delete': this.deletePlan(plan); break;
+    }
   }
 
   setupGrid() {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AppButtonComponent, AppInputComponent, AppSelectboxComponent, IconComponent, CheckboxComponent, DialogboxService, PageComponent, BreadcrumbItem, TabComponent, TabsComponent } from '@lk/core';
@@ -104,6 +104,8 @@ export class RolesComponent implements OnInit {
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Roles & Staff', route: '/admin/roles', icon: 'badge', isActive: true }
   ];
+  @Output() actionClicked = new EventEmitter<string>(); 
+
 
   // Page header configuration
   headerActions: HeaderAction[] = [

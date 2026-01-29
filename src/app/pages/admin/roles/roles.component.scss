@@ -15,6 +15,7 @@
   box-shadow: var(--card-shadow);
   border: var(--card-border);
   
+  
   .header-content {
     h1 {
       margin: 0 0 var(--spacing-xs) 0;
@@ -123,10 +124,17 @@
 }
 
 // Tab Content
-.tab-content {
-  .tab-panel {
-    min-height: 600px;
-  }
+// .tab-content {
+//   .tab-panel {
+//     min-height: 600px;
+//   }
+// }
+.tabs-content{
+  padding-bottom: 20px;
+  padding-top: 20px;
+  background-color: var(--secondary-background-color);
+  border-radius: var(--card-border-radius);
+  color: var(--primary-color);
 }
 
 // Overview Dashboard

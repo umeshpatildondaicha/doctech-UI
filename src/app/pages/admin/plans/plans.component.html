@@ -1,24 +1,129 @@
 <app-page [breadcrumb]="breadcrumb" [isFooter]="false">
   <div page-body class="plans-page">
-  <!-- Page Header -->
-  <app-admin-page-header
-    title="Plans & Offers"
-    subtitle="Manage healthcare plans and offers"
-    [actions]="headerActions"
-    (actionClicked)="onHeaderAction($event)">
-  </app-admin-page-header>
-  
-  <!-- Data Grid -->
-  <div class="grid-section">
-    <app-grid
-      [rowData]="plans"
-      [columnDefs]="columnDefs"
-      [gridOptions]="gridOptions"
-      [height]="'600px'"
-      [animateRows]="true"
-      searchPlaceholder="Search plans..."
-      class="plans-grid">
-    </app-grid>
+    <!-- Page Header (same label style as diet) -->
+    <app-admin-page-header
+      title="Plans & Offers"
+      subtitle="Manage healthcare plans and offers"
+      [actions]="headerActions"
+      (actionClicked)="onHeaderAction($event)">
+    </app-admin-page-header>
+
+    <!-- Stats Row (same structure/labels as diet.component.html) -->
+    <div class="stats-row">
+      <div class="mini-stat">
+        <div class="mini-icon bg-blue">
+          <mat-icon>payments</mat-icon>
+        </div>
+        <div class="mini-text">
+          <div class="mini-label">Total Plans</div>
+          <div class="mini-value">{{ plans.length }}</div>
+        </div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-icon bg-orange">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="mini-text">
+          <div class="mini-label">Active Plans</div>
+          <div class="mini-value">{{ getActivePlansCount() }}</div>
+        </div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-icon bg-green">
+          <mat-icon>groups</mat-icon>
+        </div>
+        <div class="mini-text">
+          <div class="mini-label">Total Subscribers</div>
+          <div class="mini-value">{{ getTotalSubscribers() }}</div>
+        </div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-icon bg-purple">
+          <mat-icon>featured_play_list</mat-icon>
+        </div>
+        <div class="mini-text">
+          <div class="mini-label">Features</div>
+          <div class="mini-value">{{ getTotalFeaturesCount() }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters Row (same style as diet) -->
+    <div class="filters-row">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Search plans..." />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="select-field">
+        <mat-select [(ngModel)]="selectedStatus" (selectionChange)="filterPlans()" placeholder="Status">
+          <mat-option value="">All Status</mat-option>
+          <mat-option value="Active">Active</mat-option>
+          <mat-option value="Inactive">Inactive</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <app-button
+        class="clear-link"
+        [fontIcon]="'clear_all'"
+        title="Clear Filters"
+        (btnClick)="clearFilters()">
+      </app-button>
+      <app-button
+        class="add-btn"
+        [fontIcon]="'add'"
+        title="Add New Plan"
+        (btnClick)="addNewPlan()">
+      </app-button>
+    </div>
+
+    <!-- Cards Grid (same structure as diet cards grid) -->
+    <div class="cards-grid">
+      @for (plan of filteredPlans; track plan.id) {
+        <app-listing-card
+          [title]="plan.name"
+          [description]="plan.priceDisplay"
+          [stats]="getPlanCardStats(plan)"
+          [topRightBadge]="getPlanStatusBadge(plan)"
+          [primaryAction]="primaryPlanAction"
+          [iconActions]="planIconActions"
+          [clickable]="true"
+          placeholderIcon="payments"
+          placeholderText="No Image"
+          (cardClick)="viewPlan(plan)"
+          (actionClick)="onPlanCardAction($event, plan)">
+        </app-listing-card>
+      }
+    </div>
+
+    <!-- No Results (same as diet) -->
+    @if (filteredPlans.length === 0) {
+      <div class="no-results">
+        <div class="no-results-card">
+          <div class="no-results-content">
+            <mat-icon class="no-results-icon">payments</mat-icon>
+            <h3>No plans found</h3>
+            <p>Try adjusting your search or add a new plan.</p>
+            <app-button
+              class="add-btn"
+              [fontIcon]="'add'"
+              title="Add New Plan"
+              (btnClick)="addNewPlan()">
+            </app-button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Optional: Data Grid (keep for table view if needed) -->
+    <!-- <div class="grid-section">
+      <app-grid
+        [rowData]="plans"
+        [columnDefs]="columnDefs"
+        [gridOptions]="gridOptions"
+        [height]="'600px'"
+        [animateRows]="true"
+        searchPlaceholder="Search plans..."
+        class="plans-grid">
+      </app-grid>
+    </div> -->
   </div>
-</div> 
-</app-page> 
+</app-page>
