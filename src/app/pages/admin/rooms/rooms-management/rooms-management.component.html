@@ -343,7 +343,7 @@
                               [class]="'status-' + bed.status.toLowerCase()"
                               (click)="editBed(room, bed)">
                               <div class="bed-icon">
-                                <app-icon [fontIcon]="'hotel'" [size]="20"></app-icon>
+                                <app-icon [fontIcon]="'hotel'" [size]="20" ></app-icon>
                               </div>
                               <div class="bed-details">
                                 <div class="bed-id">{{ bed.id.split('-').pop() }}</div>
@@ -353,13 +353,15 @@
                                 <div class="action-btn-wrapper" (click)="editBed(room ,bed);$event.stopPropagation()">
                                   <app-button
                                     [fontIcon]="'edit'"
-                                    [color]="'accent'"
+                                    text="Edit"
+                                    [color]="'primary'"
                                     class="action-btn">
                                   </app-button>
                                 </div>
                                 <div class="action-btn-wrapper" (click)="deleteBed(room, bed); $event.stopPropagation()">
                                   <app-button
                                     [fontIcon]="'delete'"
+                                    text="Delete"
                                     [color]="'warn'"
                                     class="action-btn">
                                   </app-button>

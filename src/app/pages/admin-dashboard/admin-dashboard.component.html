@@ -35,53 +35,11 @@
     </div>
   </div>
 
-  <!-- Navigation Tabs -->
+  <!-- Navigation Tabs + Content -->
   <div class="navigation-tabs">
-    <div class="tabs-container">
-      <app-button 
-      class="tab-item"
-       [fontIcon]="'dashboard'" 
-       [text]="'Overview'"
-        [class.active]="isOverviewTab()"
-        (btnClick)="setActiveTab('overview')">
-      </app-button>
-      <app-button 
-      class="tab-item" 
-      [fontIcon]="'groups'"
-       [text]="'Staff Management'"
-        [class.active]="isStaffTab()"
-        (btnClick)="setActiveTab('staff')">
-      </app-button>
-     <app-button 
-     class="tab-item" 
-     [fontIcon]="'folder_shared'" 
-     [text]="'Patient Records'"
-      [class.active]="isPatientsTab()"
-       (btnClick)="setActiveTab('patients')">
-      </app-button>
-       <app-button
-        class="tab-item"
-        [fontIcon]="'account_balance'"
-        [text] = "'Billing & Finance'"
-        [class.active] = "isBillingTab()"
-        (btnClick)="setActiveTab('billing')">
-      </app-button>
-       <app-button
-       class="tab-item"
-       [fontIcon]="'insights'"
-       [text]="'Analytics & Reports'"
-       [class.active]="isAnalyticsTab()"
-       (btnClick)="setActiveTab('analytics')">
-      </app-button>
-
-    </div>
-  </div>
-
-  <!-- Tab Content -->
-  <div class="tab-content">
-    <!-- Overview Tab -->
-    @if (isOverviewTab()) {
-    <div class="tab-panel">
+    <app-tabs [selectedIndex]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)" class="tabs-container">
+      <app-tab label="Overview">
+        <div class="tab-panel">
       <!-- Statistics Cards -->
       <div class="stats-section">
         <div class="stats-header">
@@ -299,66 +257,59 @@
           </div>
         </div>
       </div>
-      <!-- Staff Management Tab -->
-      @if (isStaffTab()) {
-      <div class="tab-panel">
-        <div class="tab-content-placeholder">
-          <div class="placeholder-card">
-            <app-icon [fontIcon]="'groups'" [size]="64"></app-icon>
-            <h2>Staff Management</h2>
-            <p>Manage hospital staff, roles, and assignments</p>
-            <app-button [text]="'Go to Staff Management'" [color]="'primary'" (btnClick)="navigateToStaffManagement()"
-              class="navigate-btn">
-            </app-button>
+        </div>
+      </app-tab>
+
+      <app-tab label="Staff Management">
+        <div class="tab-panel">
+          <div class="tab-content-placeholder">
+            <div class="placeholder-card">
+              
+              <h2>Staff Management</h2>
+              <p>Manage hospital staff, roles, and assignments</p>
+             
+            </div>
           </div>
         </div>
-      </div>
-      }
-      <!-- Patient Records Tab -->
-      @if (isPatientsTab()) {
-      <div class="tab-panel">
-        <div class="tab-content-placeholder">
-          <div class="placeholder-card">
-            <app-icon [fontIcon]="'folder_shared'" [size]="64"></app-icon>
-            <h2>Patient Records</h2>
-            <p>Access and manage patient medical records</p>
-            <app-button [text]="'Go to Patient Records'" [color]="'primary'" (btnClick)="navigateToPatients()"
-              class="navigate-btn">
-            </app-button>
+      </app-tab>
+
+      <app-tab label="Patient Records">
+        <div class="tab-panel">
+          <div class="tab-content-placeholder">
+            <div class="placeholder-card">
+              
+              <h2>Patient Records</h2>
+              <p>Access and manage patient medical records</p>
+              
+            </div>
           </div>
         </div>
-      </div>
-      }
-      <!-- Billing & Finance Tab -->
-      @if (isBillingTab()) {
-      <div class="tab-panel">
-        <div class="tab-content-placeholder">
-          <div class="placeholder-card">
-            <app-icon [fontIcon]="'account_balance'" [size]="64"></app-icon>
-            <h2>Billing & Finance</h2>
-            <p>Manage billing, payments, and financial reports</p>
-            <app-button [text]="'Go to Billing'" [color]="'primary'" (btnClick)="navigateToBilling()"
-              class="navigate-btn">
-            </app-button>
+      </app-tab>
+
+      <app-tab label="Billing & Finance">
+        <div class="tab-panel">
+          <div class="tab-content-placeholder">
+            <div class="placeholder-card">
+             
+              <h2>Billing & Finance</h2>
+              <p>Manage billing, payments, and financial reports</p>
+             
+            </div>
           </div>
         </div>
-      </div>
-      }
-      <!-- Analytics & Reports Tab -->
-      @if (isAnalyticsTab()) {
-      <div class="tab-panel">
-        <div class="tab-content-placeholder">
-          <div class="placeholder-card">
-            <app-icon [fontIcon]="'analytics'" [size]="64"></app-icon>
-            <h2>Analytics & Reports</h2>
-            <p>View detailed analytics and generate reports</p>
-            <app-button [text]="'Go to Analytics'" [color]="'primary'" (btnClick)="navigateToReports()"
-              class="navigate-btn">
-            </app-button>
+      </app-tab>
+
+      <app-tab label="Analytics & Reports">
+        <div class="tab-panel">
+          <div class="tab-content-placeholder">
+            <div class="placeholder-card">
+              
+              <h2>Analytics & Reports</h2>
+              <p>View detailed analytics and generate reports</p>
+             
+            </div>
           </div>
         </div>
-      </div>
-      }
-    </div>
-    }
+      </app-tab>
+    </app-tabs>
   </div>

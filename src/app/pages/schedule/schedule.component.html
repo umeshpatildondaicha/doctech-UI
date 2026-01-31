@@ -1,7 +1,11 @@
 <div class="schedule-container">
   <!-- Section Switcher -->
   <div class="section-tabs" role="tablist" aria-label="Schedule sections">
-    <app-button
+    <app-tabs (tabChange)="OnTabChange($any($event))">
+      <app-tab class="section-tab" name="schedule" label="Schedule"></app-tab>
+      <app-tab class="section-tab" name="timings" label="Timing"></app-tab>
+    </app-tabs>
+    <!-- <app-button
       type="button"
       class="section-tab"
       [class.active]="activeSection === 'schedule'"
@@ -18,7 +22,7 @@
       [text]="'Timings'"
       
       (btnClick)="setSection('timings')">
-    </app-button>
+    </app-button> -->
   </div>
 
   @if (activeSection === 'schedule') {

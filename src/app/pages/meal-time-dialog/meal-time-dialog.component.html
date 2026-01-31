@@ -54,7 +54,6 @@
       type="button"
       class="cancel-btn"
       [text]="'Cancel'"
-      [appearance]="'stroked'"
       (btnClick)="onCancel()">
     </app-button>
     <app-button
@@ -62,9 +61,7 @@
       class="save-btn"
       [fontIcon]="'add'"
       [text]="'Add Meal Time'"
-      [color]="'primary'"
-      [appearance]="'raised'"
-      [disabled]="!isFormValid()"
+      
       (btnClick)="onSave()">
     </app-button>
   </div>

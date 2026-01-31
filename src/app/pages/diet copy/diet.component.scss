@@ -74,7 +74,7 @@
   background: #fff;
   border-radius: 12px;
 //  border: 1px solid rgba(0, 0, 0, 0.06);
-  padding: 12px;
+  padding: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -107,8 +107,8 @@
 }
 
 .search-field {
-  flex: 1.4;
-  min-width: 240px;
+   flex: 1.4;
+  min-width: 100pxpx;
 }
 
 .select-field {
@@ -395,7 +395,7 @@
 .diet-plans-content {
   .plans-grid {
     display: grid;
-    gap: 24px;
+    gap: 20px;
     --plan-card-width: 340px;
     grid-template-columns: repeat(
       auto-fill,
@@ -1055,6 +1055,8 @@
 .tab-content {
   display: flex;
   flex-direction: column;
+  margin-top: 5px;
+  margin-left: 5px;
   gap: 1em;
 }
 

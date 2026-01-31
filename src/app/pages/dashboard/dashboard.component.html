@@ -159,20 +159,20 @@
                 </div>
               </div>
               <div class="next-patient-details-grid">
-                <div class="detail-item">
+                <!-- <div class="detail-item">
                   <app-icon [fontIcon]="'person'" [size]="20"></app-icon>
                   <div>
                     <span class="detail-label">Age & Gender</span>
                     <span class="detail-value">{{ nextPatient.age }} years, {{ nextPatient.gender }}</span>
                   </div>
-                </div>
-                <div class="detail-item">
+                </div> -->
+                <!-- <div class="detail-item">
                   <app-icon [fontIcon]="'height'" [size]="20"></app-icon>
                   <div>
                     <span class="detail-label">Height</span>
                     <span class="detail-value">{{ nextPatient.height || 'N/A' }}</span>
                   </div>
-                </div>
+                </div> -->
                 <div class="detail-item">
                   <app-icon [fontIcon]="'monitor_weight'" [size]="20"></app-icon>
                   <div>
@@ -180,13 +180,13 @@
                     <span class="detail-value">{{ nextPatient.weight || 'N/A' }}</span>
                   </div>
                 </div>
-                <div class="detail-item">
+                <!-- <div class="detail-item">
                   <app-icon [fontIcon]="'cake'" [size]="20"></app-icon>
                   <div>
                     <span class="detail-label">DOB</span>
                     <span class="detail-value">{{ formatDate(nextPatient.dateOfBirth) }}</span>
                   </div>
-                </div>
+                </div> -->
                 <div class="detail-item">
                   <app-icon [fontIcon]="'event'" [size]="20"></app-icon>
                   <div>
@@ -205,7 +205,7 @@
               @if (nextPatient.lastDiseases && nextPatient.lastDiseases.length > 0) {
                 <div class="next-patient-history">
                   <div class="history-label">
-                    <app-icon [fontIcon]="'history'" [size]="18"></app-icon>
+                    <app-icon [fontIcon]="'history'" [size]="15"></app-icon>
                     <span>Patient History - Last Diseases</span>
                   </div>
                   <div class="disease-tags">
@@ -231,7 +231,7 @@
                   </app-button>
                 }
                 <app-button
-                  [appearance]="'stroked'"
+                [appearance]="'stroked'"
                   [text]="'Chat'"
                   [fontIcon]="'chat'"
                   (btnClick)="openChat(nextPatient.id)"
@@ -241,9 +241,8 @@
                   [appearance]="'stroked'"
                   [text]="'Profile'"
                   [fontIcon]="'person'"
-                  [color]="'primary'"
                   (btnClick)="viewPatientProfile()"
-                  class="action-btn primary">
+                  class="action-btn ">
                 </app-button>
               </div>
             </div>

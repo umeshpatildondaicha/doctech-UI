@@ -395,7 +395,7 @@ export class DietComponent implements OnInit {
 
     const dialogRef = this.dialogService.openDialog(DietCreateComponent, {
       title: 'Edit Diet',
-      data: { diet, mode: 'edit' },
+      
       width: '90%',
       height: '90%',
       footerActions: footerActions

@@ -1,9 +1,10 @@
 import { Component, OnInit, AfterViewInit, PLATFORM_ID, Inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { isPlatformBrowser } from '@angular/common';
-import { AuthService, AppButtonComponent, AppInputComponent, IconComponent } from '@lk/core';
+import { AuthService, AppButtonComponent, AppInputComponent, IconComponent, TabComponent, TabsComponent} from '@lk/core';
 import * as Highcharts from 'highcharts';
 import { HighchartsChartModule } from 'highcharts-angular';
+import { RouterLink } from '@angular/router';
 
 interface StatCard {
   title: string;
@@ -47,7 +48,7 @@ type TabType = 'overview' | 'staff' | 'patients' | 'billing' | 'analytics';
 
 @Component({
     selector: 'app-admin-dashboard',
-    imports: [CommonModule, HighchartsChartModule, AppButtonComponent, AppInputComponent, IconComponent],
+    imports: [CommonModule, HighchartsChartModule,RouterLink, AppButtonComponent, AppInputComponent, IconComponent,AppInputComponent,TabComponent,TabsComponent,NgIf],
     templateUrl: './admin-dashboard.component.html',
     styleUrl: './admin-dashboard.component.scss'
 })
@@ -55,7 +56,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   Highcharts: typeof Highcharts = Highcharts;
   isBrowser = false;
   activeTab: TabType = 'overview';
-
+  selectedTabIndex = 0;
   // Chart configurations
   revenueChartOptions: Highcharts.Options = {};
   patientFlowChartOptions: Highcharts.Options = {};
@@ -486,30 +487,13 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
     return `₹${value.toLocaleString()}`;
   }
 
-  // Tab Management
-  setActiveTab(tab: TabType) {
-    this.activeTab = tab;
-  }
+  // Tab Management (synced with app-tabs selectedIndex)
+  private readonly tabOrder: TabType[] = ['overview', 'staff', 'patients', 'billing', 'analytics'];
 
-  // Helper methods for template comparisons
-  isOverviewTab(): boolean {
-    return this.activeTab === 'overview';
-  }
-
-  isStaffTab(): boolean {
-    return this.activeTab === 'staff';
-  }
-
-  isPatientsTab(): boolean {
-    return this.activeTab === 'patients';
-  }
-
-  isBillingTab(): boolean {
-    return this.activeTab === 'billing';
-  }
-
-  isAnalyticsTab(): boolean {
-    return this.activeTab === 'analytics';
+  onTabChange(event: number | { index?: number }) {
+    const index = typeof event === 'number' ? event : (event?.index ?? 0);
+    this.selectedTabIndex = index;
+    this.activeTab = this.tabOrder[index] ?? 'overview';
   }
 
   // Action methods

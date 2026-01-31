@@ -18,7 +18,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormsModule } from '@angular/forms';
-import { AppButtonComponent, IconComponent, CalendarComponent, CoreEventService, DialogboxService, DialogFooterAction } from '@lk/core';
+import { AppButtonComponent, IconComponent, CalendarComponent, CoreEventService, DialogboxService, DialogFooterAction, TabComponent, TabsComponent } from '@lk/core';
 import { AppointmentCreateComponent } from '../appointment-create/appointment-create.component';
 import { AppointmentViewComponent } from '../appointment-view/appointment-view.component';
 import { PatientSearchDialogComponent, PatientSearchResult } from '../patient-search-dialog/patient-search-dialog.component';
@@ -230,7 +230,10 @@ interface DoctorSchedule {
         IconComponent,
         CalendarComponent,
         AppCardComponent,
-        AppCardActionsDirective
+        AppCardActionsDirective,
+        TabComponent,TabsComponent
+       
+       
     ],
     templateUrl: './schedule.component.html',
     styleUrls: ['./schedule.component.scss']
@@ -477,6 +480,9 @@ export class ScheduleComponent implements OnInit {
 
   setSection(section: 'schedule' | 'timings'): void {
     this.activeSection = section;
+  }
+  OnTabChange(event:{name:'schedule'|'timings'}):void{
+    this.setSection(event.name);
   }
 
   setTimingsMode(mode: TimingsMode): void {

@@ -731,9 +731,9 @@
           }
           
           .bed-actions {
-            position: absolute;
-            top: 4px;
-            right: 4px;
+            position: relative;
+            top: 3px;
+            right: 3px;
             display: flex;
             gap: 2px;
             opacity: 0;
@@ -741,12 +741,13 @@
             
             .action-btn {
               min-width: auto;
-              width: 24px;
-              height: 24px;
+              width: 10px;
+              height: 10px;
               border-radius: 6px;
               
+              
               app-icon {
-                font-size: 12px;
+                font-size: 15px;
               }
             }
           }

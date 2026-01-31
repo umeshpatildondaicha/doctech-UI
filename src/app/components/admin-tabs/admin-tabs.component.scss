@@ -43,12 +43,12 @@
         // }
         &:hover {
           color: var(--text-secondary);
-          // background-color: rgb(103, 106, 105);
+          //background-color: rgb(103, 106, 105);
         }
         &.active {
           color: white;
           font-weight: var(--font-weight-semibold);
-          background-color: rgb(37, 208, 208);
+          // background-color: rgb(37, 208, 208);
           
           app-icon {
             transform: scale(1.1);

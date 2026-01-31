@@ -14,6 +14,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DietSelectionDialogComponent } from '../diet-selection-dialog/diet-selection-dialog.component';
 import { MealTimeDialogComponent } from '../meal-time-dialog/meal-time-dialog.component';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
+import { AppButtonComponent } from '@lk/core';
 
 @Component({
     selector: 'app-diet-plan-create',
@@ -28,7 +29,8 @@ import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.comp
     MatTabsModule,
     MatTooltipModule,
     MatProgressBarModule,
-    BreadcrumbComponent
+    BreadcrumbComponent,
+    AppButtonComponent
 ],
     templateUrl: './diet-plan-create.component.html',
     styleUrl: './diet-plan-create.component.scss'

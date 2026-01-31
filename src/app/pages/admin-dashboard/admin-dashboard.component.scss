@@ -104,125 +104,117 @@
     }
   }
 
-  // Navigation Tabs
+  // Navigation Tabs (app-tabs uses mat-tab-group)
   .navigation-tabs {
     margin-bottom: var(--spacing-lg);
+    width: 100%;
+    box-sizing: border-box;
 
     .tabs-container {
-      display: flex;
+      display: block;
       background: var(--admin-card-bg);
       border-radius: var(--card-border-radius);
-      padding: var(--spacing-sm);
+      padding: var(--spacing-md);
       box-shadow: var(--primary-shadow);
       border: var(--admin-border);
-      gap: var(--spacing-xs);
       width: 100%;
       box-sizing: border-box;
 
-      .tab-item {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        padding: var(--spacing-md) var(--spacing-lg);
-        border-radius: var(--small-border-radius);
-        cursor: pointer;
-        transition: var(--transition-base);
-        font-weight: var(--font-weight-medium);
-        color: var(--admin-text-muted);
-        background: transparent;
-        border: none;
-        font-family: var(--primary-font-family);
+      // Style mat-tab headers for better click area and spacing
+      ::ng-deep .mat-mdc-tab-header,
+      ::ng-deep .mat-tab-header {
+        margin-bottom: 0;
+      }
+
+      ::ng-deep .mat-mdc-tab-labels,
+      ::ng-deep .mat-tab-labels {
+        gap: var(--spacing-xs);
+      }
+
+      ::ng-deep .mat-mdc-tab,
+      ::ng-deep .mat-tab-label {
+        min-height: 48px;
+        min-width: 90px;
+        padding: var(--spacing-md) var(--spacing-xl);
         font-size: var(--font-size-base);
-        flex: 1;
-        justify-content: center;
-        white-space: nowrap;
+        font-weight: var(--font-weight-medium);
+        cursor: pointer;
+        opacity: 0.8;
 
         &:hover {
-          background: var(--admin-hover-bg);
-          color: var(--admin-text-secondary);
-          transform: translateY(-1px);
+          opacity: 1;
         }
+      }
 
-        &.active {
-          background: var(--primary-color);
-          color: #fff;
-          font-size: var(--font-size-2xl);
-          ::ng-deep app-icon,
-          ::ng-deep app-icon * {
-            color: #fff !important;
-            fill: #fff !important;
-          }
+      ::ng-deep .mat-mdc-tab.mdc-tab--active,
+      ::ng-deep .mat-tab-label.mat-tab-label-active {
+        opacity: 1;
+        font-weight: var(--font-weight-semibold);
+      }
 
-          box-shadow: 0 2px 8px rgba(16, 179, 179, 0.3);
+      // Tab body: more space for content
+      ::ng-deep .mat-mdc-tab-body-content,
+      ::ng-deep .mat-tab-body-content {
+        padding: 0;
+        overflow: visible;
+      }
+    }
+  }
 
-          app-icon {
-            color: #ffffff;
-          }
-        }
+  // Tab content (panel inside app-tab; more space for information)
+  .navigation-tabs .tab-panel,
+  .tab-content .tab-panel {
+    min-height: 500px;
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-2xl);
+    box-sizing: border-box;
+
+    .tab-content-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 480px;
+      padding: var(--spacing-2xl);
+
+      .placeholder-card {
+        text-align: center;
+        background: var(--admin-card-bg);
+        border-radius: var(--card-border-radius);
+        padding: var(--spacing-3xl);
+        border: var(--admin-border);
+        box-shadow: var(--primary-shadow);
+        max-width: 400px;
 
         app-icon {
-          color: #2f2f2f;
-          font-size: var(--font-size-lg);
-          transition: var(--transition-base);
+          color: var(--admin-text-muted);
+          margin-bottom: var(--spacing-xl);
         }
 
-        span {
-          font-weight: var(--font-weight-medium);
+        h2 {
+          margin: 0 0 var(--spacing-md) 0;
+          color: var(--admin-text-primary);
+          font-size: var(--font-size-4xl);
+          font-weight: var(--font-weight-bold);
         }
-      }
-    }
-  }
 
-  // Tab Content
-  .tab-content {
-    .tab-panel {
-      min-height: 400px;
+        p {
+          margin: 0 0 var(--spacing-xl) 0;
+          color: var(--admin-text-secondary);
+          font-size: var(--font-size-base);
+          line-height: 1.5;
+        }
 
-      .tab-content-placeholder {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 500px;
-
-        .placeholder-card {
-          text-align: center;
-          background: var(--admin-card-bg);
-          border-radius: var(--card-border-radius);
-          padding: var(--spacing-3xl);
-          border: var(--admin-border);
-          box-shadow: var(--primary-shadow);
-          max-width: 400px;
-
-          app-icon {
-            color: var(--admin-text-muted);
-            margin-bottom: var(--spacing-xl);
-          }
-
-          h2 {
-            margin: 0 0 var(--spacing-md) 0;
-            color: var(--admin-text-primary);
-            font-size: var(--font-size-4xl);
-            font-weight: var(--font-weight-bold);
-          }
-
-          p {
-            margin: 0 0 var(--spacing-xl) 0;
-            color: var(--admin-text-secondary);
-            font-size: var(--font-size-base);
-            line-height: 1.5;
-          }
-
-          .navigate-btn {
-            min-width: 200px;
-          }
+        .navigate-btn {
+          min-width: 200px;
         }
       }
     }
   }
 
-  // Statistics Section
+  // Statistics Section (inside tab panel; more breathing room)
   .stats-section {
     margin-bottom: var(--spacing-3xl);
+    padding-bottom: var(--spacing-xl);
 
     .stats-header {
       margin-bottom: var(--spacing-xl);
@@ -345,8 +337,9 @@
   .dashboard-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-lg);
+    gap: var(--spacing-2xl);
     width: 100%;
+    margin-top: var(--spacing-md);
     max-width: 100%;
     box-sizing: border-box;
 
@@ -685,8 +678,10 @@
     }
 
     .navigation-tabs .tabs-container {
-      .tab-item span {
-        display: none;
+      ::ng-deep .mat-mdc-tab,
+      ::ng-deep .mat-tab-label {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: var(--font-size-sm);
       }
     }
   }
@@ -720,17 +715,13 @@
     }
 
     .navigation-tabs .tabs-container {
-      flex-wrap: wrap;
-      gap: var(--spacing-xs);
+      padding: var(--spacing-sm);
 
-      .tab-item {
-        flex: 1;
-        min-width: calc(50% - var(--spacing-xs));
-
-        span {
-          display: inline;
-          font-size: var(--font-size-xs);
-        }
+      ::ng-deep .mat-mdc-tab,
+      ::ng-deep .mat-tab-label {
+        min-width: 0;
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-sm);
       }
     }
 

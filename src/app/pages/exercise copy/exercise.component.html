@@ -62,7 +62,7 @@
             </mat-select>
           </mat-form-field>
 
-          <app-button class="clear-link" [fontIcon]="'clear_all'" title="Clear Filters"
+          <app-button class="clear-link" [fontIcon]="'clear_all'" [text] ="'Clear Filter'"
             (btnClick)="clearFilters()"></app-button>
           <!-- <button class="clear-link" type="button" (click)="clearFilters()">Clear Filters</button> -->
 
@@ -174,7 +174,7 @@
               }
             </mat-select>
           </mat-form-field>
-          <app-button class="clear-link" [fontIcon]="'clear_all'" title="Clear Filters"
+          <app-button class="clear-link" [fontIcon]="'clear_all'" [text] ="'Clear Filter'"
             (btnClick)="clearGroupFilters()"></app-button>
           <!-- <button class="clear-link" type="button" (click)="clearGroupFilters()">Clear Filters</button> -->
           <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Group'" [color]="'primary'"

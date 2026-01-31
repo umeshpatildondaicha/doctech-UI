@@ -128,6 +128,7 @@ export class PlansComponent implements OnInit {
   ngOnInit() {
     this.setupGrid();
     this.filterPlans();
+    console.log("plans" + this.plans);
   }
 
   // Card view: filter and stats (same pattern as diet)

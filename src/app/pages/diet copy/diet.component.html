@@ -1,11 +1,7 @@
 <div class="diet-dashboard">
 
   <!-- Tabs Section -->
-  <mat-tab-group
-    [selectedIndex]="selectedTabIndex"
-    (selectedIndexChange)="onTabChange($event)"
-    class="diet-tabs"
-    >
+  <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)" class="diet-tabs">
     <!-- Diets Tab -->
     <mat-tab label="Diets">
       <div class="tab-content">
@@ -60,7 +56,8 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="select-field">
-            <mat-select [(ngModel)]="selectedDietType" (selectionChange)="onDietTypeChange($event)" placeholder="Diet Type">
+            <mat-select [(ngModel)]="selectedDietType" (selectionChange)="onDietTypeChange($event)"
+              placeholder="Diet Type">
               <mat-option value="">Diet Type</mat-option>
               <mat-option value="mediterranean">Mediterranean</mat-option>
               <mat-option value="keto">Keto</mat-option>
@@ -74,68 +71,46 @@
           <mat-form-field appearance="outline" class="select-field">
             <mat-select [(ngModel)]="selectedMealType" (selectionChange)="filterDiets()" placeholder="Meal Type">
               @for (mt of mealTypes; track mt) {
-                <mat-option [value]="mt.value">{{ mt.label }}</mat-option>
+              <mat-option [value]="mt.value">{{ mt.label }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
-          <app-button
-          class="clear-link"
-          [fontIcon]="'clear_all'"
-          title="Clear Filters"
-          (btnClick)="clearFilters()"
-          ></app-button>
+          <app-button class="clear-link" [fontIcon]="'clear_all'" [text]="'Clear All'" title="Clear Filters"
+            (btnClick)="clearFilters()"></app-button>
           <!-- <button class="clear-link" type="button" (click)="clearFilters()">Clear Filters</button> -->
 
           <!-- <button mat-raised-button color="primary" class="add-btn" (click)="onCreateDiet()">
             <mat-icon>add</mat-icon>
             Add Diet
           </button> -->
-          <app-button
-          class="add-btn"
-          [fontIcon]="'add'"
-          title="Add Diet"
-          (btnClick)="onCreateDiet()"
-          ></app-button>
+          <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Diet'" (btnClick)="onCreateDiet()"></app-button>
         </div>
 
         <!-- Diet Cards Grid -->
         <div class="cards-grid">
           @for (diet of filteredDiets; track diet) {
-            <app-diet-card
-              [diet]="diet"
-              [showActions]="true"
-              [clickable]="true"
-              (cardClick)="onViewDiet($event)"
-              (viewClick)="onViewDiet($event)"
-              (editClick)="onEditDiet($event)"
-              (deleteClick)="onDeleteDiet($event)"
-              (videoClick)="onVideoClick($event)"
-              (pdfClick)="onPdfClick($event)"
-            ></app-diet-card>
+          <app-diet-card [diet]="diet" [showActions]="true" [clickable]="true" (cardClick)="onViewDiet($event)"
+            (viewClick)="onViewDiet($event)" (editClick)="onEditDiet($event)" (deleteClick)="onDeleteDiet($event)"
+            (videoClick)="onVideoClick($event)" (pdfClick)="onPdfClick($event)"></app-diet-card>
           }
         </div>
 
         <!-- No Results -->
         @if (filteredDiets.length === 0) {
-          <div class="no-results">
-            <div class="no-results-card">
-              <div class="no-results-content">
-                <mat-icon class="no-results-icon">restaurant</mat-icon>
-                <h3>No diets found</h3>
-                <p>Try adjusting your search criteria or create a new diet.</p>
-                <app-button
-                class="add-btn"
-                [fontIcon]="'add'"
-                title="Add Diet"
-                (btnClick)="onCreateDiet()"
-                ></app-button>
-                <!-- <button mat-raised-button color="primary" (click)="onCreateDiet()">
+        <div class="no-results">
+          <div class="no-results-card">
+            <div class="no-results-content">
+              <mat-icon class="no-results-icon">restaurant</mat-icon>
+              <h3>No diets found</h3>
+              <p>Try adjusting your search criteria or create a new diet.</p>
+              <app-button class="add-btn" [fontIcon]="'add'" title="Add Diet" (btnClick)="onCreateDiet()"></app-button>
+              <!-- <button mat-raised-button color="primary" (click)="onCreateDiet()">
                   <mat-icon>add</mat-icon>
                   Add Diet
                 </button> -->
-              </div>
             </div>
           </div>
+        </div>
         }
       </div>
     </mat-tab>
@@ -188,94 +163,70 @@
 
         <!-- Diet Plans Filters (same bar style) -->
         <div class="filters-row">
-          <mat-form-field appearance="outline" class="search-field">
+          <mat-form-field class="search-field">
             <mat-icon matPrefix>search</mat-icon>
-            <input
-              matInput
-              [(ngModel)]="planSearchQuery"
-              (input)="onPlanSearchChange($event)"
-              placeholder="Search Diet plans"
-              />
-            </mat-form-field>
+            <input matInput [(ngModel)]="planSearchQuery" (input)="onPlanSearchChange($event)"
+              placeholder="Search Diet plans" />
+          </mat-form-field>
 
-            <mat-form-field appearance="outline" class="select-field">
-              <mat-select [(ngModel)]="selectedPlanType" (selectionChange)="onPlanTypeChange($event)">
-                <mat-option value="">Plan Type</mat-option>
-                <mat-option value="weekly">Weekly</mat-option>
-                <mat-option value="monthly">Monthly</mat-option>
-                <mat-option value="custom">Custom</mat-option>
-              </mat-select>
-            </mat-form-field>
+          <mat-form-field appearance="outline" class="select-field">
+            <mat-select [(ngModel)]="selectedPlanType" (selectionChange)="onPlanTypeChange($event)">
+              <mat-option value="">Plan Type</mat-option>
+              <mat-option value="weekly">Weekly</mat-option>
+              <mat-option value="monthly">Monthly</mat-option>
+              <mat-option value="custom">Custom</mat-option>
+            </mat-select>
+          </mat-form-field>
 
-            <mat-form-field appearance="outline" class="select-field">
-              <mat-select [(ngModel)]="selectedPlanStatus" (selectionChange)="onPlanStatusChange($event)">
-                <mat-option value="">Plan Status</mat-option>
-                <mat-option value="active">Active</mat-option>
-                <mat-option value="inactive">Inactive</mat-option>
-                <mat-option value="draft">Draft</mat-option>
-              </mat-select>
-            </mat-form-field>
+          <mat-form-field appearance="outline" class="select-field">
+            <mat-select [(ngModel)]="selectedPlanStatus" (selectionChange)="onPlanStatusChange($event)">
+              <mat-option value="">Plan Status</mat-option>
+              <mat-option value="active">Active</mat-option>
+              <mat-option value="inactive">Inactive</mat-option>
+              <mat-option value="draft">Draft</mat-option>
+            </mat-select>
+          </mat-form-field>
 
-            <app-button
-            class="clear-link"
-            [fontIcon]="'clear_all'"
-            title="Clear Filters"
-            (btnClick)="clearPlanFilters()"
-            ></app-button>
-            <!-- <button class="clear-link" type="button" (click)="clearPlanFilters()">Clear Filters</button> -->
+          <app-button class="clear-link" [fontIcon]="'clear_all'" title="Clear Filters" [text]="'Clear Filters'"
+            (btnClick)="clearPlanFilters()"></app-button>
+          <!-- <button class="clear-link" type="button" (click)="clearPlanFilters()">Clear Filters</button> -->
 
-            <app-button
-            class="add-btn"
-            [fontIcon]="'add'"
-            title="Create Weekly Plan"
-            (btnClick)="onCreateDietPlan()"
-            ></app-button>
-            <!-- <button mat-raised-button color="primary" class="add-btn" (click)="onCreateDietPlan()">
+          <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Plan'" title="Create Weekly Plan"
+            (btnClick)="onCreateDietPlan()"></app-button>
+          <!-- <button mat-raised-button color="primary" class="add-btn" (click)="onCreateDietPlan()">
               <mat-icon>add</mat-icon>
               Create Weekly Plan
             </button>
           </div>
-
-          <!-- Diet Plans Content -->
-          <div class="diet-plans-content">
-            @if (filteredDietPlans.length > 0) {
-              <div class="plans-grid">
-                @for (plan of filteredDietPlans; track plan) {
-                  <app-diet-plan-card
-                    [plan]="plan"
-                    [showActions]="true"
-                    [showFooter]="true"
-                    (cardClick)="onViewPlan($event)"
-                    (viewClick)="onViewPlan($event)"
-                    (editClick)="onEditPlan($event)"
-                    (deleteClick)="onDeletePlan($event)"
-                  ></app-diet-plan-card>
-                }
-              </div>
-            } @else {
-              <div class="no-results">
-                <div class="no-results-card">
-                  <div class="no-results-content">
-                    <mat-icon class="no-results-icon">calendar_today</mat-icon>
-                    <h3>No diet plans found</h3>
-                    <p>Create your first weekly diet plan to get started.</p>
-                    <!-- <button mat-raised-button color="primary" (click)="onCreateDietPlan()">
+          
+           Diet Plans Content -->
+        </div>
+        <div class="diet-plans-content">
+          @if (filteredDietPlans.length > 0) {
+          <div class="plans-grid">
+            @for (plan of filteredDietPlans; track plan) {
+            <app-diet-plan-card [plan]="plan" [showActions]="true" [showFooter]="true" (cardClick)="onViewPlan($event)"
+              (viewClick)="onViewPlan($event)" (editClick)="onEditPlan($event)"
+              (deleteClick)="onDeletePlan($event)"></app-diet-plan-card>
+            }
+          </div>
+          } @else {
+          <div class="no-results">
+            <div class="no-results-card">
+              <div class="no-results-content">
+                <mat-icon class="no-results-icon">calendar_today</mat-icon>
+                <h3>No diet plans found</h3>
+                <p>Create your first weekly diet plan to get started.</p>
+                <!-- <button mat-raised-button color="primary" (click)="onCreateDietPlan()">
                       <mat-icon>add</mat-icon>
                       Create Weekly Plan
                     </button> -->
-                    <app-button
-                    class="add-btn"
-                    [fontIcon]="'add'"
-                    title="Create Weekly Plan"
-                    (btnClick)="onCreateDietPlan()"
-                    ></app-button>
-                  </div>
-                </div>
+                <app-button class="add-btn" [fontIcon]="'add'" title="Create Weekly Plan"
+                  (btnClick)="onCreateDietPlan()"></app-button>
               </div>
-            }
-
+            </div>
           </div>
+          }
+
         </div>
-     
-   
-  </div>
+      </div>
