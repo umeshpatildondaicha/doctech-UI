@@ -11,18 +11,37 @@
   // }
 }
 
-// Top-level Schedule/Timings switcher
+// Top-level Schedule/Timings switcher (app-tabs = mat-tab-group with headers + content)
 .section-tabs {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
+  display: block;
+  width: 100%;
   margin: 12px 0 14px;
-  background: rgba(255, 255, 255, 0.9);
-  // border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 999px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(10px);
+
+  .schedule-tabs {
+    width: 100%;
+  }
+
+  ::ng-deep .mat-mdc-tab-header,
+  ::ng-deep .mat-tab-header {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 999px;
+    padding: 8px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(10px);
+  }
+
+  ::ng-deep .mat-mdc-tab,
+  ::ng-deep .mat-tab-label {
+    min-height: 44px;
+    font-weight: 800;
+    color: #34448e;
+  }
+
+  ::ng-deep .mat-mdc-tab.mdc-tab--active,
+  ::ng-deep .mat-tab-label.mat-tab-label-active {
+    color: #4963d5;
+  }
 }
 
 .section-tab {

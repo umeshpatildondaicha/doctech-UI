@@ -1,32 +1,9 @@
 <div class="schedule-container">
-  <!-- Section Switcher -->
+  <!-- Section Switcher + Content -->
   <div class="section-tabs" role="tablist" aria-label="Schedule sections">
-    <app-tabs (tabChange)="OnTabChange($any($event))">
-      <app-tab class="section-tab" name="schedule" label="Schedule"></app-tab>
-      <app-tab class="section-tab" name="timings" label="Timing"></app-tab>
-    </app-tabs>
-    <!-- <app-button
-      type="button"
-      class="section-tab"
-      [class.active]="activeSection === 'schedule'"
-      [fontIcon]="'schedule'"
-      [text]="'Schedule'"
-      
-      (btnClick)="setSection('schedule')">
-    </app-button>
-    <app-button
-      type="button"
-      class="section-tab"
-      [class.active]="activeSection === 'timings'"
-      [fontIcon]="'access_time'"
-      [text]="'Timings'"
-      
-      (btnClick)="setSection('timings')">
-    </app-button> -->
-  </div>
-
-  @if (activeSection === 'schedule') {
-    <!-- Schedule Top (screenshot-style) -->
+    <app-tabs [selectedIndex]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)" class="schedule-tabs">
+      <app-tab label="Schedule">
+        <!-- Schedule Top (screenshot-style) -->
     <div class="schedule-top">
       <div class="schedule-top-head">
         <div class="schedule-top-left">
@@ -299,8 +276,10 @@
         </div>
       </div>
     }
-  } @else {
-    <div class="timings-shell">
+      </app-tab>
+
+      <app-tab label="Timing">
+        <div class="timings-shell">
       <div class="timings-grid">
         <div class="timings-card">
           <div class="card-head">
@@ -811,6 +790,7 @@
         }
       </div>
     </div>
-  }
-
+      </app-tab>
+    </app-tabs>
+  </div>
 </div>

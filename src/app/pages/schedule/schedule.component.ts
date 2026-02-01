@@ -239,7 +239,7 @@ interface DoctorSchedule {
     styleUrls: ['./schedule.component.scss']
 })
 export class ScheduleComponent implements OnInit {
-  activeSection: 'schedule' | 'timings' = 'schedule';
+  selectedTabIndex = 0;
   timingsTab: TimingPriorityTab = 'p4';
   forecastDays = 15;
   readonly weekdays: Weekday[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -478,11 +478,8 @@ export class ScheduleComponent implements OnInit {
     this.recomputeScheduleAvailability();
   }
 
-  setSection(section: 'schedule' | 'timings'): void {
-    this.activeSection = section;
-  }
-  OnTabChange(event:{name:'schedule'|'timings'}):void{
-    this.setSection(event.name);
+  onTabChange(index: number): void {
+    this.selectedTabIndex = index;
   }
 
   setTimingsMode(mode: TimingsMode): void {
