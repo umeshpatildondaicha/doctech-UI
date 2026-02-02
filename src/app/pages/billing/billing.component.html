@@ -1,131 +1,51 @@
-<div class="billing-dashboard">
-  <app-admin-page-header
-    [title]="'Billing Overview'"
-    [subtitle]="'Manage invoices, payments, and outstanding dues'"
-    [actions]="headerActions"
-    (actionClicked)="onHeaderAction($event)">
-  </app-admin-page-header>
+<app-page>
+  <div class="billing-dashboard" page-body>
+    <app-admin-page-header
+      [title]="'Billing Overview'"
+      [actions]="headerActions"
+      (actionClicked)="onHeaderAction($event)">
+    </app-admin-page-header>
 
-  @if (isDemoData) {
-    <div class="demo-pill">
-      Demo data (backend not connected)
-    </div>
-  }
-
-  <!-- Summary Cards -->
-  <app-admin-stats-card [stats]="statCards"></app-admin-stats-card>
-
-  <!-- Info Banner -->
-  <app-card class="info-banner" [dense]="true">
-    <div class="info-left">
-      <mat-icon class="info-icon">info</mat-icon>
-      <span>All billing actions are recorded automatically in patient history.</span>
-    </div>
-    <div class="info-actions">
-      <app-button
-      class="record-payment-btn"
-      [fontIcon]="'payments'"
-      [text]="'Record Payment'"
-      (btnClick)="onMainTabChanged('payments')"
-      ></app-button>
-      <!-- <button mat-stroked-button (click)="onMainTabChanged('payments')">Record Payment</button> -->
-      <app-button
-      class="view-statement-btn"
-      [fontIcon]="'visibility'"
-      [text]="'View Statement'"
-      (btnClick)="openPatientProfile()"
-      ></app-button>
-      <!-- <button mat-stroked-button (click)="openPatientProfile()" matTooltip="Statements are generated from patient profile billing">
-        View Statement
-      </button>
-    </div>
-  </app-card>
-
-  <!-- Tabs -->
-  <app-admin-tabs
-    [tabs]="mainTabs"
-    [activeTabId]="activeMainTab"
-   
-    (tabChanged)="onMainTabChanged($event)">
-  </app-admin-tabs>
-
-  <!-- Invoices -->
-  @if (activeMainTab === 'invoices') {
-    <div>
-      <app-admin-tabs
-        [tabs]="statusTabs"
-        [activeTabId]="activeStatus"
-        size="small"
-        (tabChanged)="onStatusTabChanged($event)">
-      </app-admin-tabs>
-      <div class="grid-wrapper">
-        <app-grid
-          [rowData]="visibleInvoices"
-          [columnDefs]="columnDefs"
-          [gridOptions]="gridOptions"
-          [showAddButton]="false"
-          [searchPlaceholder]="'Search invoices...'"
-          [height]="'calc(100vh - 520px)'"
-          [width]="'100%'"
-          (rowClicked)="onRowClick($event)">
-        </app-grid>
+    @if (isDemoData) {
+      <div class="demo-pill">
+        Demo data (backend not connected)
       </div>
-      @if (!loading && visibleInvoices.length === 0) {
-        <div class="empty">
-          No invoices found.
+    }
+
+    <!-- Summary Cards -->
+    <app-admin-stats-card [stats]="statCards"></app-admin-stats-card>
+
+    <div class="grid-wrapper">
+      <app-grid
+        class="billing-grid"
+        [rowData]="patientRows"
+        [columnDefs]="patientColumnDefs"
+        [gridOptions]="patientGridOptions"
+        [showAddButton]="false"
+        [searchPlaceholder]="'Search patients...'"
+        [height]="'100%'"
+        [width]="'100%'"
+        (rowClicked)="onPatientRowClick($event)">
+      </app-grid>
+    </div>
+
+    @if (!loading && patientRows.length === 0) {
+      <app-card class="empty-state" [dense]="true">
+        <div class="empty-state-body">
+          <app-icon fontIcon="people" [size]="22" class="empty-ico"></app-icon>
+          <div class="empty-text">
+            <div class="empty-title">No billing records found</div>
+            <div class="empty-sub">Create an invoice for a patient to see them here.</div>
+          </div>
+          <span class="spacer"></span>
           <app-button
-          type="button"
-          [text]="'Clear filter'"
-          
-          
-          (btnClick)="applyStatusFilter('ALL')">
-        </app-button>
+            type="button"
+            [appearance]="'raised'"
+            [text]="'Create Invoice'"
+            (btnClick)="openPatientProfile()">
+          </app-button>
         </div>
-      }
-    </div>
-  }
-
-  <!-- Payments -->
-  @if (activeMainTab === 'payments') {
-    <div>
-      <div class="grid-wrapper">
-        <app-grid
-          [rowData]="allPayments"
-          [columnDefs]="paymentsColumnDefs"
-          [gridOptions]="paymentsGridOptions"
-          [showAddButton]="false"
-          [searchPlaceholder]="'Search payments...'"
-          [height]="'calc(100vh - 520px)'"
-          [width]="'100%'">
-        </app-grid>
-      </div>
-      @if (!loading && allPayments.length === 0) {
-        <div class="empty">
-          No payments found.
-        </div>
-      }
-    </div>
-  }
-
-  <!-- Items / Services -->
-  @if (activeMainTab === 'items') {
-    <div>
-      <div class="grid-wrapper">
-        <app-grid
-          [rowData]="allItems"
-          [columnDefs]="itemsColumnDefs"
-          [gridOptions]="itemsGridOptions"
-          [showAddButton]="false"
-          [searchPlaceholder]="'Search items/services...'"
-          [height]="'calc(100vh - 520px)'"
-          [width]="'100%'">
-        </app-grid>
-      </div>
-      @if (!loading && allItems.length === 0) {
-        <div class="empty">
-          No items found.
-        </div>
-      }
-    </div>
-  }
-</div>
+      </app-card>
+    }
+  </div>
+</app-page>

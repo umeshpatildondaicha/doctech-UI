@@ -2,14 +2,13 @@ import { Component, OnInit, AfterViewInit, PLATFORM_ID, Inject } from '@angular/
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { AppButtonComponent, GridComponent, IconComponent, ImageComponent, PageBodyDirective, PageComponent, StatusCellRendererComponent } from '@lk/core';
+import { AppButtonComponent, DividerComponent, GridComponent, IconComponent, ImageComponent, PageBodyDirective, PageComponent, StatusCellRendererComponent } from '@lk/core';
 import { ColDef } from 'ag-grid-community';
 import * as Highcharts from 'highcharts';
 import { HighchartsChartModule } from 'highcharts-angular';
 
 import { DashboardDetailsComponent } from '../dashboard-details/dashboard-details.component';
 import { RoomsService } from '../../services/rooms.service';
-import { PatientQueueService } from '../../services/patient-queue.service';
 
 interface DashboardStats {
   roomAvailability: number;
@@ -17,23 +16,6 @@ interface DashboardStats {
   bookAppointment: number;
   totalPatients: number;
   overallVisitors: number;
-}
-
-interface NextPatient {
-  id: number;
-  name: string;
-  avatar?: string;
-  appointmentTime: string;
-  reason: string;
-  age: number;
-  gender: string;
-  height?: string;
-  weight?: string;
-  dateOfBirth: string;
-  registrationDate: string;
-  lastAppointment?: string;
-  lastDiseases?: string[];
-  contactNumber?: string;
 }
 
 interface AppointmentRequest {
@@ -54,6 +36,7 @@ interface AppointmentRequest {
         DashboardDetailsComponent,
         HighchartsChartModule,
         AppButtonComponent,
+        DividerComponent,
         GridComponent,
         IconComponent,
         PageComponent,
@@ -67,6 +50,15 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   Highcharts: typeof Highcharts = Highcharts;
   isBrowser = false;
 
+  // Recent activity for right column
+  recentActivity: { id: number; type: string; icon: string; text: string; time: string }[] = [
+    { id: 1, type: 'success', icon: 'check_circle', text: 'Appointment confirmed — Robert Chen', time: '2m ago' },
+    { id: 2, type: 'info', icon: 'person_add', text: 'New patient registered — Emily Davis', time: '15m ago' },
+    { id: 3, type: 'warning', icon: 'schedule', text: 'Appointment rescheduled — Michael Brown', time: '1h ago' },
+    { id: 4, type: 'success', icon: 'payment', text: 'Payment received — Sarah Johnson', time: '2h ago' },
+    { id: 5, type: 'info', icon: 'event_available', text: 'Room 3 now available', time: '3h ago' }
+  ];
+
   // Stats
   stats: DashboardStats = {
     roomAvailability: 50,
@@ -75,9 +67,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     totalPatients: 871,
     overallVisitors: 1210
   };
-
-  // Next Patient
-  nextPatient: NextPatient | null = null;
 
   // Appointment Requests
   appointmentRequests: AppointmentRequest[] = [];
@@ -92,11 +81,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   appointmentStatusChartOptions: Highcharts.Options = {};
 
   constructor(
-    private dialog: MatDialog,
+    private readonly dialog: MatDialog,
     private readonly router: Router,
     private readonly roomsService: RoomsService,
-    private readonly patientQueueService: PatientQueueService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private readonly platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
@@ -132,25 +120,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       // You can put any other logic that depends on rooms here, if needed
     });
 
-    // Next patient
-    this.nextPatient = {
-      id: 1,
-      name: 'Jenny Wilson',
-      avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-      appointmentTime: '09:00 AM',
-      reason: 'Regular Checkup',
-      age: 35,
-      gender: 'Female',
-      height: '5\'6"',
-      weight: '65 kg',
-      dateOfBirth: '1989-05-15',
-      registrationDate: '2020-03-10',
-      lastAppointment: '2024-11-15',
-      lastDiseases: ['Hypertension', 'Diabetes Type 2'],
-      contactNumber: '+1 555 0123'
-    };
-
-    // Appointment requests
+    // Appointment requests (10–20 items)
     this.appointmentRequests = [
       {
         id: 1,
@@ -191,6 +161,126 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         reason: 'Annual Checkup',
         priority: 'MEDIUM',
         paymentStatus: 'PAID'
+      },
+      {
+        id: 5,
+        patientName: 'James Wilson',
+        patientAvatar: 'https://randomuser.me/api/portraits/men/55.jpg',
+        requestedDate: 'Today',
+        requestedTime: '11:00 AM',
+        reason: 'Blood Pressure Check',
+        priority: 'LOW',
+        paymentStatus: 'PAID'
+      },
+      {
+        id: 6,
+        patientName: 'Lisa Anderson',
+        patientAvatar: 'https://randomuser.me/api/portraits/women/56.jpg',
+        requestedDate: 'Tomorrow',
+        requestedTime: '09:00 AM',
+        reason: 'Diabetes Follow-up',
+        priority: 'MEDIUM',
+        paymentStatus: 'PENDING'
+      },
+      {
+        id: 7,
+        patientName: 'David Martinez',
+        patientAvatar: 'https://randomuser.me/api/portraits/men/57.jpg',
+        requestedDate: 'Today',
+        requestedTime: '01:30 PM',
+        reason: 'Skin Allergy',
+        priority: 'LOW',
+        paymentStatus: 'UNPAID'
+      },
+      {
+        id: 8,
+        patientName: 'Jennifer Taylor',
+        patientAvatar: 'https://randomuser.me/api/portraits/women/58.jpg',
+        requestedDate: 'Tomorrow',
+        requestedTime: '04:00 PM',
+        reason: 'Vaccination',
+        priority: 'LOW',
+        paymentStatus: 'PAID'
+      },
+      {
+        id: 9,
+        patientName: 'Christopher Lee',
+        patientAvatar: 'https://randomuser.me/api/portraits/men/59.jpg',
+        requestedDate: 'Today',
+        requestedTime: '03:00 PM',
+        reason: 'Chest Pain Evaluation',
+        priority: 'HIGH',
+        paymentStatus: 'PENDING'
+      },
+      {
+        id: 10,
+        patientName: 'Amanda White',
+        patientAvatar: 'https://randomuser.me/api/portraits/women/60.jpg',
+        requestedDate: 'Tomorrow',
+        requestedTime: '11:30 AM',
+        reason: 'Prenatal Checkup',
+        priority: 'MEDIUM',
+        paymentStatus: 'PAID'
+      },
+      {
+        id: 11,
+        patientName: 'Daniel Harris',
+        patientAvatar: 'https://randomuser.me/api/portraits/men/61.jpg',
+        requestedDate: 'Today',
+        requestedTime: '10:00 AM',
+        reason: 'Knee Pain',
+        priority: 'MEDIUM',
+        paymentStatus: 'UNPAID'
+      },
+      {
+        id: 12,
+        patientName: 'Michelle Clark',
+        patientAvatar: 'https://randomuser.me/api/portraits/women/62.jpg',
+        requestedDate: 'Tomorrow',
+        requestedTime: '02:00 PM',
+        reason: 'Thyroid Review',
+        priority: 'LOW',
+        paymentStatus: 'PAID'
+      },
+      {
+        id: 13,
+        patientName: 'Kevin Robinson',
+        patientAvatar: 'https://randomuser.me/api/portraits/men/63.jpg',
+        requestedDate: 'Today',
+        requestedTime: '05:00 PM',
+        reason: 'Migraine',
+        priority: 'MEDIUM',
+        paymentStatus: 'PENDING'
+      },
+      {
+        id: 14,
+        patientName: 'Stephanie Lewis',
+        patientAvatar: 'https://randomuser.me/api/portraits/women/64.jpg',
+        requestedDate: 'Tomorrow',
+        requestedTime: '08:30 AM',
+        reason: 'Eye Checkup',
+        priority: 'LOW',
+        paymentStatus: 'PAID'
+      },
+      {
+        id: 15,
+        patientName: 'Ryan Walker',
+        patientAvatar: 'https://randomuser.me/api/portraits/men/65.jpg',
+        requestedDate: 'Today',
+        requestedTime: '12:00 PM',
+        reason: 'Sports Injury',
+        priority: 'HIGH',
+        paymentStatus: 'PAID'
+      },
+      {
+        id: 16,
+        patientName: 'Nicole Hall',
+        patientAvatar: 'https://randomuser.me/api/portraits/women/66.jpg',
+        requestedDate: 'Tomorrow',
+        requestedTime: '01:00 PM',
+        reason: 'Mental Health Follow-up',
+        priority: 'MEDIUM',
+        paymentStatus: 'PENDING'
       }
     ];
 
@@ -281,7 +371,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           name: 'This Year',
           type: 'spline',
           data: [120, 132, 101, 134, 90, 230, 210, 182, 191, 234, 290, 330],
-          color: '#10b3b3'
+          color: '#0d9488'
         },
         {
           name: 'Last Year',
@@ -327,7 +417,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       plotOptions: {
         column: {
           borderRadius: 6,
-          color: '#10b3b3',
+          color: '#0d9488',
           dataLabels: {
             enabled: true,
             style: { fontSize: '11px', fontWeight: '600', color: '#64748b' }
@@ -371,7 +461,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             format: '<b>{point.name}</b>: {point.percentage:.1f} %',
             style: { fontSize: '11px', color: '#64748b' }
           },
-          colors: ['#10b3b3', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b']
+          colors: ['#0d9488', '#3b82f6', '#6366f1', '#94a3b8', '#f59e0b']
         }
       },
       series: [{
@@ -429,7 +519,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         bar: {
           borderRadius: 6,
           colorByPoint: true,
-          colors: ['#10b3b3', '#f59e0b', '#ef4444', '#22c55e'],
+          colors: ['#0d9488', '#f59e0b', '#ef4444', '#16a34a'],
           dataLabels: {
             enabled: true,
             style: { fontSize: '11px', fontWeight: '600', color: '#ffffff' }
@@ -469,10 +559,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/appointment']);
   }
 
-  navigateToBookAppointment() {
-    this.router.navigate(['/appointment'], { state: { page: 'book-appointment' } });
-  }
-
   approveAppointmentRequest(request: AppointmentRequest) {
     // Handle approval logic
     this.appointmentRequests = this.appointmentRequests.filter(r => r.id !== request.id);
@@ -489,29 +575,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     // Handle reschedule logic - navigate to appointment reschedule page
     this.router.navigate(['/appointment'], { queryParams: { reschedule: request.id } });
   }
-
-  callPatient(phoneNumber?: string) {
-    if (phoneNumber && typeof globalThis !== 'undefined' && globalThis.location) {
-      globalThis.location.href = `tel:${phoneNumber}`;
-    }
-  }
-
-  openChat(patientId: number) {
-    this.router.navigate(['/chat'], { queryParams: { patientId } });
-  }
-
-  viewPatientProfile() {
-    if (this.nextPatient?.id) {
-      this.router.navigate(['/patient', this.nextPatient.id]);
-    }
-  }
-
-  formatDate(dateString: string): string {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  }
-
 
   getStatusClass(status: string): string {
     const statusMap: { [key: string]: string } = {

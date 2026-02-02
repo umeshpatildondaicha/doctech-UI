@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -12,7 +12,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
-import { GridComponent, DialogboxService, DialogFooterAction, AppInputComponent, AppButtonComponent } from "@lk/core";
+import { GridComponent, DialogboxService, DialogFooterAction, AppInputComponent, AppButtonComponent, CoreEventService, BreadcrumbItem } from "@lk/core";
 import { ExerciseSet, Exercise, ExerciseStats } from '../../interfaces/exercise.interface';
 import { IconComponent } from "@lk/core";
 import { ExerciseCreateComponent } from '../exercise-create/exercise-create.component';
@@ -46,14 +46,28 @@ import { ExerciseCardComponent } from '../../components/exercise-card/exercise-c
     templateUrl: './exercise.component.html',
     styleUrl: './exercise.component.scss'
 })
-export class ExerciseComponent implements OnInit {
+export class ExerciseComponent implements OnInit, OnDestroy {
+  breadcrumb: BreadcrumbItem[] = [{ label: 'Exercises', route: '/exercises' }];
   selectedTabIndex = 0;
   searchQuery: string = '';
   viewMode: 'cards' | 'table' = 'cards';
   selectedCategory: string = 'all';
   selectedDifficulty: string = 'all';
 
-  constructor(private dialogService: DialogboxService) {}
+  constructor(
+    private dialogService: DialogboxService,
+    private eventService: CoreEventService
+  ) {}
+
+  ngOnInit() {
+    this.eventService.setBreadcrumb(this.breadcrumb);
+    this.initializeGridOptions();
+    this.calculateStats();
+  }
+
+  ngOnDestroy() {
+    this.eventService.clearBreadcrumb();
+  }
 
   // Sample data for Exercises with enhanced structure
   exercises: Exercise[] = [
@@ -334,11 +348,6 @@ export class ExerciseComponent implements OnInit {
     { value: 'Intermediate', label: 'Intermediate' },
     { value: 'Advanced', label: 'Advanced' }
   ];
-
-  ngOnInit(): void {
-    this.initializeGridOptions();
-    this.calculateStats();
-  }
 
   calculateStats() {
     this.exerciseStats = {

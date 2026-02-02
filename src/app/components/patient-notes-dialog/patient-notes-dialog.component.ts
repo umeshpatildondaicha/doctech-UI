@@ -15,6 +15,7 @@ export interface PatientNotesDialogData {
 
 @Component({
     selector: 'app-patient-notes-dialog',
+    standalone: true,
     imports: [
     FormsModule,
     MatFormFieldModule,
@@ -46,7 +47,7 @@ export class PatientNotesDialogComponent implements OnInit, OnDestroy {
         }, 0);
         return;
       }
-      
+
       if (result?.action === 'save') {
         if (this.notes.trim()) {
           setTimeout(() => {
@@ -74,4 +75,3 @@ export class PatientNotesDialogComponent implements OnInit, OnDestroy {
     return this.notes.trim().length > 0;
   }
 }
-

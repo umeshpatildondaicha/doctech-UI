@@ -46,54 +46,24 @@ export class MenuService {
       userTypes: ['doctor']
     },
     { 
-      label: 'Patient Queue', 
-      icon: 'queue', 
-      route: '/patient-queue', 
-      section: 'main',
-      userTypes: ['doctor']
-    },
-    { 
-      label: 'Admitted Patients', 
-      icon: 'local_hospital', 
-      route: '/doctor-treatment', 
-      section: 'main',
-      userTypes: ['doctor']
-    },
-    { 
       label: 'Exercises', 
       icon: 'fitness_center', 
       route: '/exercises', 
-      section: 'services',
+      section: 'main',
       userTypes: ['doctor']
     },
     { 
       label: 'Diet Plans', 
       icon: 'track_changes', 
       route: '/diet', 
-      section: 'services',
+      section: 'main',
       userTypes: ['doctor']
     },
-
-
     { 
       label: 'Billing', 
       icon: 'credit_card', 
       route: '/billing', 
-      section: 'administration',
-      userTypes: ['doctor']
-    },
-    { 
-      label: 'Settings', 
-      icon: 'settings', 
-      route: '/settings', 
-      section: 'tools',
-      userTypes: ['doctor']
-    },
-    { 
-      label: 'Help & Support', 
-      icon: 'help_center', 
-      route: '/help', 
-      section: 'tools',
+      section: 'main',
       userTypes: ['doctor']
     }
   ];
@@ -154,20 +124,6 @@ export class MenuService {
       icon: 'account_balance', 
       route: '/admin/schemes', 
       section: 'administration',
-      userTypes: ['admin']
-    },
-    { 
-      label: 'Settings', 
-      icon: 'settings', 
-      route: '/admin/settings', 
-      section: 'tools',
-      userTypes: ['admin']
-    },
-    { 
-      label: 'Help & Support', 
-      icon: 'help_center', 
-      route: '/admin/help', 
-      section: 'tools',
       userTypes: ['admin']
     }
   ];

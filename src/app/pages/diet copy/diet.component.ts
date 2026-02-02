@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, OnDestroy, Output } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -15,6 +15,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import {
   AppButtonComponent,
   AppInputComponent,
+  CoreEventService,
+  BreadcrumbItem,
   DialogboxService,
   DialogFooterAction,
   GridComponent,
@@ -56,7 +58,8 @@ import { DietService } from '../../services/diet.service';
     templateUrl: './diet.component.html',
     styleUrl: './diet.component.scss'
 })
-export class DietComponent implements OnInit {
+export class DietComponent implements OnInit, OnDestroy {
+  breadcrumb: BreadcrumbItem[] = [];
   selectedTabIndex = 0;
   searchQuery: string = '';
   selectedDietType: string = '';
@@ -120,14 +123,29 @@ export class DietComponent implements OnInit {
   }
 
   constructor(
-    private dialog: MatDialog, 
-    private router: Router, 
+    private dialog: MatDialog,
+    private router: Router,
     private route: ActivatedRoute,
     private dialogService: DialogboxService,
-    private dietservice :DietService
+    private dietservice: DietService,
+    private eventService: CoreEventService
   ) {}
 
+  private updateBreadcrumb() {
+    const url = this.router.url;
+    if (url.includes('/diet/plans')) {
+      this.breadcrumb = [
+        { label: 'Diet', route: '/diet' },
+        { label: 'Diet Plans', route: '/diet/plans' }
+      ];
+    } else {
+      this.breadcrumb = [{ label: 'Diet', route: '/diet' }];
+    }
+    this.eventService.setBreadcrumb(this.breadcrumb);
+  }
+
   ngOnInit() {
+    this.updateBreadcrumb();
     this.initializeDietData();
     this.loadDietPlans();
     this.loadDietsFromApi();
@@ -142,16 +160,25 @@ export class DietComponent implements OnInit {
     }
   }
 
+  ngOnDestroy() {
+    this.eventService.clearBreadcrumb();
+  }
+
   onTabChange(index: number) {
     this.selectedTabIndex = index;
-    
-    // Update URL based on selected tab
-    if (index === 1) { // Diet Plans tab (second tab)
+
+    // Update URL and breadcrumb based on selected tab
+    if (index === 1) {
       this.router.navigate(['/diet/plans']);
+      this.breadcrumb = [
+        { label: 'Diet', route: '/diet' },
+        { label: 'Diet Plans', route: '/diet/plans' }
+      ];
     } else {
-      // Navigate to main diet page for other tabs
       this.router.navigate(['/diet']);
+      this.breadcrumb = [{ label: 'Diet', route: '/diet' }];
     }
+    this.eventService.setBreadcrumb(this.breadcrumb);
   }
 
   onSearchChange(event: any) {

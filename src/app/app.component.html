@@ -5,100 +5,29 @@
     <router-outlet></router-outlet>
   </div>
 } @else {
-  <!-- Show main app layout with sidebar and header for authenticated users -->
-  <app-template [sidebarCollapsed]="true" [headerTemplate]="rightSidebarHeader" [contentTemplate]="rightSidebarContent" (openPatientQueue)="onOpenPatientQueue($event)" class="theme-teal">
-    <main class="main-content">
-      <router-outlet></router-outlet>
-    </main>
-  </app-template>
-
-  
-  <ng-template #rightSidebarHeader>
-    <div class="sidebar-header">
-      
-      <div class="queue-stats">
-        <div class="stat-item">
-          <span class="stat-number">{{ getStatusCount('waiting') }}</span>
-          <span class="stat-label">Waiting</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">{{ getStatusCount('in-progress') }}</span>
-          <span class="stat-label">In Progress</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">{{ getStatusCount('completed') }}</span>
-          <span class="stat-label">Completed</span>
-        </div>
+  <!-- Main app layout - matches template-app reference implementation -->
+  <div class="app-layout theme-teal" [class.sidebar-collapsed]="sidebarCollapsed">
+    <app-sidebar
+      [collapsed]="sidebarCollapsed"
+      appTitle="Shree Clinic"
+      (toggle)="toggleSidebar()"
+    ></app-sidebar>
+    <div class="main-section" [class.right-sidebar-expanded]="rightSidebarOpen">
+      <app-app-topbar></app-app-topbar>
+      <div class="main-section-content">
+        <main class="main-content">
+          <router-outlet></router-outlet>
+        </main>
+        <app-right-sidebar
+          [expanded]="rightSidebarOpen"
+          (expandChange)="rightSidebarOpen = $event"
+        >
+          <app-app-patient-queue-content
+            (startClick)="onStartPatient($event)"
+            (patientClick)="onQueuePatientClick($event)"
+          ></app-app-patient-queue-content>
+        </app-right-sidebar>
       </div>
     </div>
-
-  </ng-template>
-
-  <ng-template #rightSidebarContent>
-    <div class="sidebar-content">
-      <div class="status-section" *ngFor="let status of ['waiting', 'in-progress', 'completed']">
-        <div class="status-header" *ngIf="getStatusCount(status) > 0">
-          <div class="status-title">
-            <mat-icon [style.color]="getStatusColor(status)">
-              {{ getStatusIcon(status) }}
-            </mat-icon>
-            <span>{{ status | titlecase }}</span>
-            <span class="count-badge">{{ getStatusCount(status) }}</span>
-          </div>
-        </div>
-  
-        <div class="patient-list">
-          <div 
-            *ngFor="let patient of getFilteredPatients(status)"
-            class="patient-item"
-            (click)="onPatientClick(patient)"
-          >
-            <div class="patient-avatar">
-              <img 
-                *ngIf="patient.avatar" 
-                [src]="patient.avatar" 
-                [alt]="patient.name"
-                class="avatar-img"
-              />
-              <div 
-                *ngIf="!patient.avatar" 
-                class="avatar-placeholder"
-                [style.background-color]="getPriorityColor(patient.priority)"
-              >
-                {{ patient.name.charAt(0) }}
-              </div>
-            </div>
-  
-            <div class="patient-info">
-              <div class="patient-name">{{ patient.name }}</div>
-              <div class="patient-details">
-                <span class="patient-reason">{{ patient.reason }}</span>
-                <span class="patient-room" *ngIf="patient.room">• Room {{ patient.room }}</span>
-              </div>
-              <div class="patient-time">{{ patient.estimatedTime }}</div>
-            </div>
-  
-            <div class="patient-priority">
-              <mat-chip 
-                [style.background-color]="getPriorityColor(patient.priority)"
-                [style.color]="'white'"
-                class="priority-chip"
-              >
-                <mat-icon class="priority-icon">{{ getPriorityIcon(patient.priority) }}</mat-icon>
-                {{ patient.priority | titlecase }}
-              </mat-chip>
-            </div>
-          </div>
-        </div>
-  
-        <mat-divider *ngIf="getStatusCount(status) > 0 && status !== 'completed'"></mat-divider>
-      </div>
-  
-      <div class="empty-state" *ngIf="patientQueue.length === 0">
-        <mat-icon class="empty-icon">people_outline</mat-icon>
-        <p>No patients in queue</p>
-        <span>All patients have been attended to</span>
-      </div>
-    </div>
-    </ng-template>
+  </div>
 }

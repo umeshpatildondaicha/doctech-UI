@@ -110,6 +110,20 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges {
           if (queryParams['patientName']) {
             this.patientName = decodeURIComponent(queryParams['patientName']);
           }
+          // Optional: open a specific tab when navigating from main billing page
+          // Accepts numeric index (0/1/2) or string ('invoices'/'items'/'payments')
+          if (queryParams['tab'] !== undefined) {
+            const raw = queryParams['tab'];
+            const n = Number.parseInt(String(raw), 10);
+            if (Number.isFinite(n) && n >= 0 && n <= 2) {
+              this.selectedTabIndex = n;
+            } else {
+              const s = String(raw).toLowerCase();
+              if (s === 'items') this.selectedTabIndex = 1;
+              else if (s === 'payments') this.selectedTabIndex = 2;
+              else this.selectedTabIndex = 0;
+            }
+          }
         });
         if (this.patientId) {
           this.loadPatientBilling();

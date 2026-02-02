@@ -1,0 +1,81 @@
+<header class="topbar">
+  <div class="topbar-left">
+    @if (breadcrumbItems.length > 0) {
+      <nav class="topbar-breadcrumb" aria-label="Breadcrumb">
+        <ol class="breadcrumb-list">
+          @for (item of breadcrumbItems; track item.label; let last = $last) {
+            <li class="breadcrumb-item">
+              @if ((item.route || item.path) && !last) {
+                <a class="breadcrumb-link" (click)="onBreadcrumbClick(item); $event.preventDefault()" href="javascript:void(0)">
+                  {{ item.label }}
+                </a>
+              } @else {
+                <span class="breadcrumb-current">{{ item.label }}</span>
+              }
+              @if (!last) {
+                <span class="breadcrumb-sep">&gt;</span>
+              }
+            </li>
+          }
+        </ol>
+      </nav>
+    } @else {
+      <span class="page-title">{{ pageTitle }}</span>
+    }
+  </div>
+
+  <div class="topbar-spacer"></div>
+
+  <div class="topbar-right">
+    <div class="search-box">
+      <span class="search-icon" aria-hidden="true">
+        <app-icon fontSet="material-icons-outlined" fontIcon="search" [size]="20"></app-icon>
+      </span>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search All"
+        [(ngModel)]="searchText"
+      />
+    </div>
+    <button
+      type="button"
+      class="icon-btn notification-btn"
+      [class.has-unread]="notificationService.hasUnread()"
+      aria-label="Notifications"
+      (click)="onNotificationClick($event)"
+    >
+      <app-icon fontSet="material-icons-outlined" fontIcon="notifications" [size]="22"></app-icon>
+    </button>
+    <button
+      type="button"
+      class="avatar-btn"
+      [matMenuTriggerFor]="profileMenu"
+      aria-label="Profile"
+    >
+      <span class="avatar-initials">{{ userInitials }}</span>
+    </button>
+
+    <mat-menu
+      #profileMenu="matMenu"
+      class="profile-menu"
+      panelClass="profile-menu-panel"
+      yPosition="below"
+      xPosition="after"
+      (opened)="onProfileMenuOpened()"
+    >
+      <button mat-menu-item (click)="onProfileClick()">
+        <app-icon fontSet="material-icons-outlined" fontIcon="person" class="menu-icon"></app-icon>
+        <span>My Profile</span>
+      </button>
+      <button mat-menu-item (click)="onSettingsClick()">
+        <app-icon fontSet="material-icons-outlined" fontIcon="settings" class="menu-icon"></app-icon>
+        <span>Profile setting</span>
+      </button>
+      <button mat-menu-item (click)="onLogoutClick()">
+        <app-icon fontSet="material-icons-outlined" fontIcon="logout" class="menu-icon"></app-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  </div>
+</header>

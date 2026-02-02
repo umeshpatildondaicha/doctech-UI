@@ -6,11 +6,13 @@ import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { MatNativeDateModule } from '@angular/material/core';
-import { HttpInterceptorService, API_BASE_URL } from '@lk/core';
+import { HttpInterceptorService, API_BASE_URL, MenuService } from '@lk/core';
 import { environment } from '../environments/environment';
+import { MenuService as AppMenuService } from './services/menu.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    { provide: MenuService, useClass: AppMenuService },
     provideRouter(routes),
     provideClientHydration(),
     provideAnimations(),

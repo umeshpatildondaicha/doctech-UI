@@ -1,3 +1,64 @@
+// Layout CSS variables (match template-app reference implementation)
+:host {
+  /* Sidebar widths */
+  --sidebar-open-width: 21em;
+  --sidebar-rail-width: 3em;
+
+  /* Backwards-compat */
+  --sidebar-width: var(--sidebar-open-width);
+  --sidebar-min-width: var(--sidebar-open-width);
+  --sidebar-collapsed-width: var(--sidebar-rail-width);
+  --sidebar-collapsed-min-width: var(--sidebar-rail-width);
+
+  --sidebar-box-shadow: none;
+  --sidebar-transition: width 0.2s ease;
+
+  /* Closed/collapsed sidebar (themeable; default white) */
+  --sidebar-collapsed-bg: #ffffff;
+  --sidebar-collapsed-text: #1e293b;
+  --sidebar-collapsed-item-hover: rgba(0, 0, 0, 0.06);
+  --sidebar-collapsed-item-active: rgba(0, 0, 0, 0.1);
+
+  /* Hover-expanded sidebar (themeable; default white) */
+  --sidebar-hover-expanded-bg: #ffffff;
+  --sidebar-hover-expanded-text: #1e293b;
+  --sidebar-hover-expanded-muted: #64748b;
+  --sidebar-hover-expanded-item-hover: #f1f5f9;
+  --sidebar-hover-expanded-item-active-bg: #1e293b;
+  --sidebar-hover-expanded-item-active-text: #ffffff;
+  --sidebar-hover-expanded-shadow: none;
+
+  /* Sidebar nav (themeable; colors and fonts from theme) */
+  --sidebar-active-bg: var(--primary-color, #10b3b3);
+  --sidebar-active-text: var(--primary-text-color, #ffffff);
+  --sidebar-hover-expanded-item-active-bg: var(--primary-color, #10b3b3);
+  --sidebar-hover-expanded-item-active-text: var(--primary-text-color, #ffffff);
+  --sidebar-nav-text: var(--text-primary, #1e293b);
+  --sidebar-header-title-color: var(--text-primary, #1e293b);
+  --sidebar-border-color: var(--border-color, #e8e8e8);
+  --sidebar-bg: var(--background-color, #ffffff);
+  --sidebar-nav-hover: rgba(0, 0, 0, 0.04);
+  --sidebar-nav-font-size: var(--font-size-base, 0.9375rem);
+  --sidebar-header-title-font-size: var(--font-size-lg, 0.95rem);
+  --sidebar-header-title-font-weight: var(--primary-font-weight, 600);
+
+  --page-background-color: #f7f8fa;
+
+  /* Right sidebar (queue) */
+  --right-sidebar-top: 3em;
+  --right-sidebar-rail-width: 56px;
+  --right-sidebar-rail-bg: #f8fafc;
+  --right-sidebar-expand-bg: #1e293b;
+  --right-sidebar-width: 360px;
+  --page-content-padding: 1em;
+}
+
+/* Override theme-teal's --right-sidebar-width: 25% - use fixed px for proper layout */
+.app-layout.theme-teal {
+  --right-sidebar-width: 360px;
+  --right-sidebar-min-width: 320px;
+}
+
 // Login view - takes full screen and hides main layout
 .login-view {
   position: fixed;
@@ -16,23 +77,25 @@
   display: flex;
   height: 100vh;
   width: 100%;
-  background: #f7f8fa;
+  max-width: 100vw;
+  background: var(--page-background-color);
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden; /* Don't clip fixed right sidebar; just prevent horizontal scroll */
+  overflow-y: hidden;
 }
 
 app-sidebar {
-  width: var(--sidebar-width);
-  min-width: var(--sidebar-min-width);
-  background: var(--sidebar-background-color);
-  box-shadow: var(--sidebar-box-shadow);
+  width: var(--sidebar-open-width);
+  min-width: var(--sidebar-open-width);
+  box-shadow: var(--sidebar-box-shadow, none);
   z-index: 10;
   transition: var(--sidebar-transition);
 }
 
 .app-layout.sidebar-collapsed app-sidebar {
-  width: 64px;
-  min-width: 64px;
+  width: var(--sidebar-rail-width);
+  min-width: var(--sidebar-rail-width);
+  background: var(--sidebar-collapsed-bg, #ffffff);
 }
 
 .main-section {
@@ -40,68 +103,119 @@ app-sidebar {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  transition: margin 0.2s cubic-bezier(0.4,0,0.2,1);
   position: relative;
   z-index: 1;
   height: 100%;
 }
 
-app-topbar {
-  height: 4em;
+.main-section-content {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  min-height: 0;
+  min-width: 0;
+  align-items: stretch;
+  justify-content: flex-start; /* Main content left, sidebar right - no gap */
+}
+
+app-topbar,
+app-app-topbar {
+  display: block;
+  height: 3em;
   width: 100%;
-  background: #fff;
+  background: var(--background-color, #fff);
   box-shadow: 0 2px 8px rgba(0,0,0,0.03);
   z-index: 9;
 }
 
 .main-content {
-  height: calc(100% - 4em);
   flex: 1;
+  min-width: 0; /* Allow shrinking when right sidebar takes space */
   padding: var(--page-content-padding);
   background-color: var(--page-background-color);
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
-// Right sidebar styles
+// Right sidebar - reserve flex space (exact width, no extra space)
 app-right-sidebar {
-  position: fixed;
-  top: 0;
-  right: 0;
-  height: 100vh;
-  z-index: 1000;
-
-  .right-sidebar {
-    pointer-events: auto;
-  }
+  flex: 0 0 var(--right-sidebar-rail-width, 56px);
+  width: var(--right-sidebar-rail-width, 56px);
+  min-width: var(--right-sidebar-rail-width, 56px);
+  margin: 0;
+  padding: 0;
+  transition: flex 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-// Backdrop for right sidebar
-.right-sidebar-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: calc(100% - var(--right-sidebar-width));
-  height: 100%;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: 999;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+.main-section.right-sidebar-expanded app-right-sidebar {
+  flex: 0 0 calc(var(--right-sidebar-rail-width, 56px) + var(--right-sidebar-width, 360px));
+  // width: calc(var(--right-sidebar-rail-width, 56px) + var(--right-sidebar-width, 360px));
+  // min-width: calc(var(--right-sidebar-rail-width, 56px) + var(--right-sidebar-width, 360px));
+}
 
-  &.visible {
-    opacity: 1;
-    visibility: visible;
-  }
+/* Override @lk/template: use normal flow, default row order [rail|expanded] - no gap */
+:host ::ng-deep app-right-sidebar .right-sidebar {
+  position: relative;
+  top: auto;
+  right: auto;
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  flex-wrap: nowrap;
+  align-items: stretch;
+}
+
+:host ::ng-deep app-right-sidebar .right-sidebar .rail-panel {
+  flex: 0 0 var(--right-sidebar-rail-width, 56px);
+}
+
+:host ::ng-deep app-right-sidebar .right-sidebar .expanded-panel {
+  flex: 0 0 0;
+  min-width: 0;
+}
+
+:host ::ng-deep app-right-sidebar .right-sidebar.expanded .expanded-panel {
+  flex: 0 0 var(--right-sidebar-width, 360px);
+  // min-width: var(--right-sidebar-width, 360px);
+}
+
+:host ::ng-deep app-right-sidebar .right-sidebar .expanded-content {
+  width: 100%;
+  min-width: var(--right-sidebar-width, 360px);
+  box-sizing: border-box;
+}
+
+/* Ensure app-right-sidebar fills exactly its flex slot */
+:host ::ng-deep app-right-sidebar {
+  display: block;
+  min-height: 0;
+  overflow: hidden;
 }
 
 @media (max-width: 900px) {
   app-sidebar {
-    width: 64px;
-    min-width: 64px;
+    width: var(--sidebar-rail-width);
+    min-width: var(--sidebar-rail-width);
   }
   .main-content {
     padding: 16px 8px 0 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  app-right-sidebar {
+    flex: 0 0 0;
+    width: 0;
+    min-width: 0;
+  }
+  .main-section.right-sidebar-expanded app-right-sidebar {
+    flex: 0 0 0;
+    width: 0;
+    min-width: 0;
   }
 }
 
@@ -118,7 +232,8 @@ app-right-sidebar {
   .main-section {
     flex: 1;
   }
-  app-topbar {
+  app-topbar,
+  app-app-topbar {
     position: sticky;
     top: 0;
   }
@@ -353,342 +468,3 @@ app-right-sidebar {
 
 
 
-.right-sidebar {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  width: 0;
-  background: var(--sidebar-background-color, #fff);
-  box-shadow: var(--sidebar-box-shadow, -4px 0 16px rgba(0, 0, 0, 0.1));
-  transition: var(--sidebar-transition, right 0.3s cubic-bezier(0.4, 0, 0.2, 1));
-  z-index: 10;
-  position: fixed;
-  top: 0;
-  right: calc(-1 * var(--sidebar-width, 400px));
-  border-left: 1px solid var(--sidebar-border-color, #e0e0e0);
-  overflow: hidden;
-
-  &.opened {
-    right: 0;
-    transition: var(--sidebar-transition, right 0.3s cubic-bezier(0.4, 0, 0.2, 1));
-    width: var(--right-sidebar-width, 400px);
-    min-width: var(--right-sidebar-min-width, 320px);
-  }
-
-  &.collapsed {
-    width: var(--sidebar-collapsed-width, 64px);
-    min-width: var(--sidebar-collapsed-min-width, 64px);
-    
-    .sidebar-header {
-      justify-content: center;
-      
-      .header-content {
-        h2, .queue-stats {
-          display: none;
-        }
-      }
-    }
-    
-    .sidebar-content {
-      height: calc(100% - 9em);
-      max-height: calc(100% - 9em);
-      .status-section {
-        .status-header {
-          .status-title {
-            span, .count-badge {
-              display: none;
-            }
-          }
-        }
-        
-        .patient-list {
-          .patient-item {
-            .patient-info, .patient-priority {
-              display: none;
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-.sidebar-header {
-  padding: var(--right-sidebar-header-padding, 20px);
-  background: var(--sidebar-header-background, #fafafa);
-  border-bottom: 1px solid var(--sidebar-border-color, #e0e0e0);
-  flex-shrink: 0;
-  height: 7em;
-
-  .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    h2 {
-      margin: 0;
-      font-size: var(--sidebar-title-font-size, 20px);
-      font-weight: var(--sidebar-title-font-weight, 600);
-      color: var(--sidebar-title-color, #333);
-    }
-
-    .close-btn {
-      color: var(--sidebar-icon-color, #666);
-      
-      &:hover {
-        background: var(--sidebar-icon-hover-background, #f0f0f0);
-      }
-    }
-  }
-
-  .queue-stats {
-    display: flex;
-    gap: var(--sidebar-stats-gap, 16px);
-
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex: 1;
-
-      .stat-number {
-        font-size: var(--sidebar-stats-number-size, 24px);
-        font-weight: var(--sidebar-stats-number-weight, 700);
-        color: var(--sidebar-stats-number-color, #333);
-        line-height: 1;
-      }
-
-      .stat-label {
-        font-size: var(--sidebar-stats-label-size, 12px);
-        color: var(--sidebar-stats-label-color, #666);
-        margin-top: var(--sidebar-stats-label-margin, 4px);
-        text-align: center;
-      }
-    }
-  }
-}
-
-.sidebar-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--sidebar-content-padding, 0);
-
-  &::-webkit-scrollbar {
-    width: var(--sidebar-scrollbar-width, 4px);
-  }
-
-  &::-webkit-scrollbar-track {
-    background: var(--sidebar-scrollbar-track-color, #f1f1f1);
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--sidebar-scrollbar-thumb-color, #c1c1c1);
-    border-radius: var(--sidebar-scrollbar-thumb-radius, 2px);
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: var(--sidebar-scrollbar-thumb-hover-color, #a8a8a8);
-  }
-}
-
-.status-section {
-  .status-header {
-    padding: var(--sidebar-section-padding, 16px 20px 8px 20px);
-
-    .status-title {
-      display: flex;
-      align-items: center;
-      gap: var(--sidebar-title-gap, 8px);
-      font-weight: var(--sidebar-section-title-weight, 600);
-      color: var(--sidebar-section-title-color, #333);
-      font-size: var(--sidebar-section-title-size, 14px);
-
-      mat-icon {
-        // font-size: var(--sidebar-section-icon-size, 18px);
-        width: var(--sidebar-section-icon-size, 18px);
-        height: var(--sidebar-section-icon-size, 18px);
-      }
-
-      .count-badge {
-        background: var(--sidebar-badge-background, #e0e0e0);
-        color: var(--sidebar-badge-color, #666);
-        border-radius: var(--sidebar-badge-radius, 12px);
-        padding: var(--sidebar-badge-padding, 2px 8px);
-        font-size: var(--sidebar-badge-size, 11px);
-        font-weight: var(--sidebar-badge-weight, 600);
-        margin-left: auto;
-      }
-    }
-  }
-}
-
-.patient-list {
-  padding: var(--sidebar-list-padding, 0);
-
-  .patient-item {
-    display: flex;
-    padding: var(--sidebar-item-padding, 12px 20px);
-    cursor: pointer;
-    transition: var(--sidebar-item-transition, background-color 0.2s);
-    border-bottom: 1px solid var(--sidebar-item-border-color, #f8f8f8);
-
-    &:hover {
-      background: var(--sidebar-item-hover-background, #fafafa);
-    }
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    .patient-avatar {
-      margin-right: var(--sidebar-avatar-margin, 12px);
-
-      .avatar-img {
-        width: var(--sidebar-avatar-size, 40px);
-        height: var(--sidebar-avatar-size, 40px);
-        border-radius: var(--sidebar-avatar-radius, 50%);
-        object-fit: cover;
-      }
-
-      .avatar-placeholder {
-        width: var(--sidebar-avatar-size, 40px);
-        height: var(--sidebar-avatar-size, 40px);
-        border-radius: var(--sidebar-avatar-radius, 50%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: var(--sidebar-avatar-font-weight, 600);
-        font-size: var(--sidebar-avatar-font-size, 16px);
-      }
-    }
-
-    .patient-info {
-      flex: 1;
-      min-width: 0;
-
-      .patient-name {
-        font-weight: var(--sidebar-patient-name-weight, 600);
-        font-size: var(--sidebar-patient-name-size, 14px);
-        color: var(--sidebar-patient-name-color, #333);
-        margin-bottom: var(--sidebar-patient-name-margin, 4px);
-        line-height: var(--sidebar-patient-name-line-height, 1.3);
-      }
-
-      .patient-details {
-        font-size: var(--sidebar-patient-details-size, 12px);
-        color: var(--sidebar-patient-details-color, #666);
-        margin-bottom: var(--sidebar-patient-details-margin, 4px);
-        line-height: var(--sidebar-patient-details-line-height, 1.4);
-
-        .patient-room {
-          color: var(--sidebar-patient-room-color, #999);
-        }
-      }
-
-      .patient-time {
-        font-size: var(--sidebar-patient-time-size, 11px);
-        color: var(--sidebar-patient-time-color, #999);
-        font-weight: var(--sidebar-patient-time-weight, 500);
-      }
-    }
-
-    .patient-priority {
-      .priority-chip {
-        font-size: var(--sidebar-priority-chip-size, 10px);
-        font-weight: var(--sidebar-priority-chip-weight, 600);
-        padding: var(--sidebar-priority-chip-padding, 4px 8px);
-        border-radius: var(--sidebar-priority-chip-radius, 12px);
-        display: flex;
-        align-items: center;
-        gap: var(--sidebar-priority-chip-gap, 4px);
-
-        .priority-icon {
-          font-size: var(--sidebar-priority-icon-size, 12px);
-          width: var(--sidebar-priority-icon-size, 12px);
-          height: var(--sidebar-priority-icon-size, 12px);
-        }
-      }
-    }
-  }
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--sidebar-empty-padding, 60px 20px);
-  text-align: center;
-
-  .empty-icon {
-    font-size: var(--sidebar-empty-icon-size, 48px);
-    width: var(--sidebar-empty-icon-size, 48px);
-    height: var(--sidebar-empty-icon-size, 48px);
-    color: var(--sidebar-empty-icon-color, #ccc);
-    margin-bottom: var(--sidebar-empty-icon-margin, 16px);
-  }
-
-  p {
-    margin: 0 0 var(--sidebar-empty-text-margin, 8px) 0;
-    font-size: var(--sidebar-empty-text-size, 16px);
-    font-weight: var(--sidebar-empty-text-weight, 600);
-    color: var(--sidebar-empty-text-color, #666);
-  }
-
-  span {
-    font-size: var(--sidebar-empty-subtext-size, 13px);
-    color: var(--sidebar-empty-subtext-color, #999);
-  }
-}
-
-// Responsive design
-@media (max-width: 768px) {
-  .right-sidebar {
-    width: 100vw;
-    max-width: 100vw;
-    right: -100vw;
-
-    &.opened {
-      right: 0;
-    }
-  }
-
-  .sidebar-header {
-    padding: var(--sidebar-mobile-header-padding, 16px);
-
-    .queue-stats {
-      gap: var(--sidebar-mobile-stats-gap, 12px);
-
-      .stat-item {
-        .stat-number {
-          font-size: var(--sidebar-mobile-stats-number-size, 20px);
-        }
-
-        .stat-label {
-          font-size: var(--sidebar-mobile-stats-label-size, 11px);
-        }
-      }
-    }
-  }
-
-  .patient-list {
-    .patient-item {
-      padding: var(--sidebar-mobile-item-padding, 10px 16px);
-
-      .patient-info {
-        .patient-name {
-          font-size: var(--sidebar-mobile-patient-name-size, 13px);
-        }
-
-        .patient-details {
-          font-size: var(--sidebar-mobile-patient-details-size, 11px);
-        }
-
-        .patient-time {
-          font-size: var(--sidebar-mobile-patient-time-size, 10px);
-        }
-      }
-    }
-  }
-} 

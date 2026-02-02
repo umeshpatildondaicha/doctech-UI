@@ -45,7 +45,7 @@ import { AdmissionDialogComponent } from '../admission-dialog/admission-dialog.c
 import { PrescriptionDialogComponent } from '../prescription-dialog/prescription-dialog.component';
 import { MedicineRequestDialogComponent } from '../medicine-request-dialog/medicine-request-dialog.component';
 import { TabConfigDialogComponent } from '../tab-config-dialog/tab-config-dialog.component';
-import { PatientNotesDialogComponent } from '../../patient-queue/patient-notes-dialog/patient-notes-dialog.component';
+import { PatientNotesDialogComponent } from '../../../components/patient-notes-dialog/patient-notes-dialog.component';
 import { LabTestOrderDialogComponent } from '../lab-test-order-dialog/lab-test-order-dialog.component';
 import { AddRoundDialogComponent } from '../add-round-dialog/add-round-dialog.component';
 import { ScheduleRoundsDialogComponent } from '../schedule-rounds-dialog/schedule-rounds-dialog.component';

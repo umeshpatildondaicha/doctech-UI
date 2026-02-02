@@ -1,0 +1,30 @@
+<h2 mat-dialog-title>Add Emergency / Walk-in Patient</h2>
+<mat-dialog-content>
+  <p class="hint">Add a patient to the queue with flexibility to place them between existing appointments.</p>
+  <form [formGroup]="form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Patient Name</mat-label>
+      <input matInput formControlName="name" placeholder="Enter patient name" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Reason</mat-label>
+      <input matInput formControlName="reason" placeholder="e.g. Emergency, Walk-in" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Scheduled Time</mat-label>
+      <input matInput formControlName="scheduledTime" placeholder="e.g. 10:30 AM" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Insert Position</mat-label>
+      <mat-select formControlName="insertAt">
+        @for (opt of positionOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="save()">Add to Queue</button>
+</mat-dialog-actions>

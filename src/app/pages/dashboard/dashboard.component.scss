@@ -1,87 +1,94 @@
-// Using theme CSS variables
+// =============================================================================
+// Dashboard — Theme-only: all colors, sizes, spacing from @lk/theme (theme-teal)
+// Uses: --page-background-color, --surface-color, --text-*, --spacing-*, --font-size-*, --card-*, --status-*
+// =============================================================================
+
+// Theme-only tokens (no hardcoded values)
+$page-bg: var(--page-background-color);
+$card-bg: var(--surface-color);
+$text-primary: var(--text-primary);
+$text-secondary: var(--text-muted);
+$text-tertiary: var(--text-tertiary);
+$border-subtle: var(--border-color);
+$border-hover: var(--admin-border);
+$radius-card: var(--card-border-radius);
+$radius-icon: var(--small-border-radius);
+$shadow-soft: var(--card-shadow);
+$shadow-hover: var(--card-hover-shadow);
+$spacing-unit: var(--spacing-2xl);
+$spacing-tight: var(--spacing-lg);
+
 .dashboard-page {
   width: 100%;
-  background: var(--page-background-color, #f8fafc);
+  min-height: 100%;
+  padding-top: var(--spacing-xs);
+  background: $page-bg;
   overflow-x: hidden;
   box-sizing: border-box;
-  padding: 20px;
+  font-family: var(--primary-font-family);
 }
 
-// Dashboard Header
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-
-  h2 {
-    font-size: var(--font-size-3xl, 20px);
-    font-weight: var(--font-weight-semibold, 600);
-    margin: 0;
-    color: var(--text-primary, #1e293b);
-    letter-spacing: -0.01em;
-  }
-
-  .subtitle {
-    color: var(--text-muted, #64748b);
-    font-size: var(--font-size-lg, 14px);
-    margin-top: 4px;
-    font-weight: var(--font-weight-normal, 400);
-  }
-
-  .header-actions {
-    .action-btn {
-      font-size: var(--font-size-lg, 14px);
-      padding: 8px 16px;
-      height: 36px;
-    }
-  }
+// Page Title — large, bold, primary (theme typography)
+.page-title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: $text-primary;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  margin: 0 0 $spacing-unit 0;
 }
 
-// Stats Cards
+// -----------------------------------------------------------------------------
+// KPI stat cards — small label, large value, icon with semantic tint
+// -----------------------------------------------------------------------------
 .dashboard-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: $spacing-unit;
+  margin-bottom: $spacing-unit;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
 }
 
 .stat-card {
-  background: var(--surface-color, #fff);
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  padding: 16px;
+  background: $card-bg;
+  border-radius: $radius-card;
+  box-shadow: $shadow-soft;
+  padding: $spacing-unit;
   display: flex;
-  gap: 12px;
-  transition: all 0.2s ease;
-  position: relative;
-  border: 1px solid #e2e8f0;
+  align-items: center;
+  gap: $spacing-tight;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  border: 1px solid $border-subtle;
   cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  width: 100%;
+
+  // Reset button defaults when stat-card is a <button>
+  &:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
 
   &:hover {
+    box-shadow: $shadow-hover;
+    border-color: $border-hover;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    border-color: #cbd5e1;
   }
 
   .stat-icon {
     width: 44px;
     height: 44px;
-    border-radius: 10px;
+    border-radius: $radius-icon;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    background: var(--page-background-color, #f8fafc);
-    border: 1px solid #e2e8f0;
-
-    mat-icon,
-    app-icon {
-      color: var(--primary-color, #10b3b3);
-    }
 
     app-icon {
       display: inline-flex;
@@ -90,78 +97,79 @@
     }
   }
 
-  .stat-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
+  .stat-icon--primary {
+    background: var(--primary-bg-color);
+    color: var(--primary-color);
   }
 
-  .stat-title {
-    color: #64748b;
-    font-size: var(--font-size-base, 13px);
-    font-weight: var(--font-weight-medium, 500);
+  .stat-icon--accent {
+    background: var(--status-info-bg);
+    color: var(--status-info-color);
+  }
+
+  .stat-icon--success {
+    background: var(--status-success-bg);
+    color: var(--status-success-color);
+  }
+
+  .stat-icon--neutral {
+    background: var(--status-neutral-bg);
+    color: var(--status-neutral-color);
+  }
+
+  .stat-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: $text-secondary;
+    line-height: 1.3;
     letter-spacing: 0.01em;
-    line-height: 1.4;
   }
 
   .stat-value {
-    font-size: var(--font-size-5xl, 24px);
-    font-weight: var(--font-weight-semibold, 600);
-    color: #1e293b;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+    color: $text-primary;
+    line-height: 1.2;
     display: flex;
     align-items: baseline;
-    gap: 6px;
-    line-height: 1.2;
+    gap: var(--spacing-xs);
   }
 
-  .stat-growth {
-    color: var(--primary-color, #10b3b3);
-    font-size: var(--font-size-md, 12px);
-    font-weight: var(--font-weight-semibold, 600);
-    background: var(--primary-bg-color, #10b3b35c);
-    border-radius: 4px;
-    padding: 2px 6px;
-    margin-left: 4px;
+  .stat-value-muted {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-normal);
+    color: $text-tertiary;
   }
 
-  .stat-secondary {
-    color: #94a3b8;
-    font-size: var(--font-size-xl, 16px);
-    font-weight: var(--font-weight-normal, 400);
+  .stat-badge {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--small-border-radius);
+    margin-left: var(--spacing-xs);
   }
 
-  .stat-desc {
-    color: #64748b;
-    font-size: var(--font-size-base, 13px);
-    line-height: 1.4;
-  }
-
-  .stat-btn {
-    margin-top: 4px;
-    background: transparent;
-    color: var(--primary-color, #10b3b3);
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: var(--font-size-base, 13px);
-    font-weight: var(--font-weight-semibold, 600);
-    cursor: pointer;
-    transition: all 0.2s;
-    align-self: flex-start;
-
-    &:hover {
-      background: var(--primary-bg-color, #10b3b35c);
-    }
+  .stat-badge--success {
+    background: var(--status-success-bg);
+    color: var(--status-success-color);
   }
 }
 
-// Main Content
+// -----------------------------------------------------------------------------
+// Main content grid — left 2fr, right 1fr
+// -----------------------------------------------------------------------------
 .dashboard-main {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 16px;
+  gap: $spacing-unit;
   align-items: start;
   width: 100%;
   max-width: 100%;
@@ -172,345 +180,201 @@
 .main-right {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: $spacing-unit;
   width: 100%;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
 }
 
-// Card Styles
+// -----------------------------------------------------------------------------
+// Section cards — pure white, 14px radius, soft shadow, 16–24px padding
+// -----------------------------------------------------------------------------
 .card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  padding: 16px;
-  transition: all 0.2s ease;
+  background: $card-bg;
+  border-radius: $radius-card;
+  box-shadow: $shadow-soft;
+  padding: 0;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  border: 1px solid $border-subtle;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
 
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    border-color: #cbd5e1;
+  &.card--elevated:hover {
+    box-shadow: $shadow-hover;
+    border-color: $border-hover;
   }
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
+  .card-head {
+    padding: $spacing-unit 24px 0;
+  }
 
-    h3 {
-      font-size: var(--font-size-xl, 16px);
-      font-weight: var(--font-weight-semibold, 600);
-      margin: 0;
-      color: #1e293b;
-      letter-spacing: -0.01em;
-    }
+  .card-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: $text-primary;
+    letter-spacing: -0.01em;
+    margin: 0;
+    line-height: 1.3;
+  }
 
-    .card-subtitle {
-      color: #64748b;
-      font-size: var(--font-size-base, 13px);
-      margin-top: 2px;
-      display: block;
-      font-weight: var(--font-weight-normal, 400);
-    }
+  .card-meta {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-normal);
+    color: $text-secondary;
+    margin-top: var(--spacing-xs);
+  }
 
-    .icon-btn {
-      color: #64748b;
-      transition: all 0.2s;
-      width: 32px;
-      height: 32px;
-
-      &:hover {
-        color: var(--primary-color, #10b3b3);
-        background: var(--primary-bg-color, #10b3b35c);
-      }
-    }
+  app-divider {
+    margin: $spacing-tight 0 0 0;
   }
 }
 
-// Next Patient Card
-.next-patient-card {
-  .next-patient-content {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+// Override lk-core divider in cards for subtle line
+:host ::ng-deep .card app-divider,
+:host ::ng-deep app-divider {
+  opacity: 0.9;
+}
+
+// -----------------------------------------------------------------------------
+// Appointment requests — embedded grid (16–24px padding)
+// -----------------------------------------------------------------------------
+.requests-grid-container {
+  height: 400px;
+  padding: 0 24px $spacing-unit;
+}
+
+:host ::ng-deep .requests-grid-component {
+  .grid-container {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 10px;
   }
 
-  .next-patient-header {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #e2e8f0;
-
-    .next-patient-avatar {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      border: 2px solid var(--primary-bg-color, #10b3b35c);
-      overflow: hidden;
-      flex-shrink: 0;
-
-      img,
-      app-image {
-        width: 100%;
-        height: 100%;
-        max-width: 100%;
-        object-fit: cover;
-        border-radius: 50%;
-      }
-
-      .avatar-image {
-        border-radius: 50%;
-      }
-    }
-
-    .next-patient-basic-info {
-      flex: 1;
-
-      .next-patient-name {
-        font-size: var(--font-size-xl, 16px);
-        font-weight: var(--font-weight-semibold, 600);
-        color: #1e293b;
-        margin-bottom: 6px;
-        line-height: 1.3;
-      }
-
-      .next-patient-appointment-time {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: var(--primary-color, #10b3b3);
-        font-weight: var(--font-weight-semibold, 600);
-        font-size: var(--font-size-lg, 14px);
-
-        mat-icon,
-        app-icon {
-          font-size: 16px;
-          width: 18px;
-          height: 18px;
-        }
-      }
-    }
+  .grid-toolbar {
+    min-height: 3rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 10px 10px 0 0;
   }
 
-  .next-patient-details-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-
-    .detail-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-
-      mat-icon,
-      app-icon {
-        color: var(--primary-color, #10b3b3);
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        margin-top: 2px;
-        flex-shrink: 0;
-      }
-
-      div {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        flex: 1;
-        min-width: 0;
-
-        .detail-label {
-          font-size: var(--font-size-sm, 11px);
-          color: #94a3b8;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          font-weight: var(--font-weight-semibold, 600);
-        }
-
-        .detail-value {
-          font-size: var(--font-size-base, 13px);
-          color: #1e293b;
-          font-weight: var(--font-weight-medium, 500);
-          line-height: 1.4;
-        }
-      }
-    }
+  .grid-content {
+    background: transparent;
   }
 
-  .next-patient-history {
-    padding: 12px;
-    background: #fff7ed;
-    border-radius: 8px;
-    border-left: 3px solid #f59e0b;
-
-    .history-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 8px;
-      font-weight: var(--font-weight-semibold, 600);
-      color: #92400e;
-      font-size: var(--font-size-base, 13px);
-
-      mat-icon,
-      app-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
-      }
-    }
-
-    .disease-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-
-      .disease-tag {
-        padding: 4px 10px;
-        background: #fef3c7;
-        color: #92400e;
-        border-radius: 12px;
-        font-size: var(--font-size-md, 12px);
-        font-weight: var(--font-weight-medium, 500);
-      }
-    }
-  }
-
-  .next-patient-reason {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px;
-    background: var(--primary-bg-color, #10b3b35c);
-    border-radius: 8px;
-    color: var(--primary-color, #10b3b3);
-    font-weight: var(--font-weight-medium, 500);
-    font-size: var(--font-size-base, 13px);
-
-    mat-icon,
-    app-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-    }
-  }
-
-  .next-patient-actions {
-    display: flex;
-    gap: 8px;
-    padding-top: 12px;
-    border-top: 1px solid #e2e8f0;
-
-    .action-btn {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      color: #64748b;
-      border-color: #cbd5e1;
-      font-weight: var(--font-weight-medium, 500);
-      font-size: var(--font-size-base, 13px);
-      padding: 8px 12px;
-      height: 36px;
-      transition: all 0.2s;
-
-      mat-icon,
-      app-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
-      }
-
-      &:hover {
-        background: #f8fafc;
-      }
-
-      &.primary {
-        color: var(--primary-color, #10b3b3);
-        border-color: var(--primary-color, #10b3b3);
-
-        &:hover {
-          background: var(--primary-bg-color, #10b3b35c);
-        }
-      }
-    }
+  .pagination-info,
+  .ag-paging-panel {
+    display: none !important;
   }
 }
 
-// Appointment Requests
-.requests-card {
-  .requests-grid-container {
-    height: 420px;
-  }
+// -----------------------------------------------------------------------------
+// Recent activity list — icon + text + time
+// -----------------------------------------------------------------------------
+.activity-list {
+  list-style: none;
+  margin: 0;
+  padding: $spacing-tight 24px $spacing-unit;
+}
 
-  // Make embedded grid match the dashboard card instead of reintroducing its own "page" chrome.
-  ::ng-deep .requests-grid-component {
-    .grid-container {
-      background: transparent;
-      box-shadow: none;
-      border-radius: 10px;
-    }
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-tight;
+  padding: 10px 0;
+  border-bottom: 1px solid $border-subtle;
 
-    .grid-toolbar {
-      min-height: 3.5em;
-      padding: 0.5em 0.75em;
-      border-radius: 10px 10px 0 0;
-    }
-
-    .grid-content {
-      background: transparent;
-    }
-
-    // Hide pagination footer + the "Displaying X of Y" counter for this grid
-    .pagination-info {
-      display: none !important;
-    }
-
-    .ag-paging-panel {
-      display: none !important;
-    }
-
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
   }
 }
 
-// Chart Cards
-.chart-card {
-  .chart-container {
-    width: 100%;
-    max-width: 100%;
-    min-height: 250px;
+.activity-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  app-icon {
+    display: inline-flex;
+  }
+}
+
+.activity-icon--success {
+  background: var(--status-success-bg);
+  color: var(--status-success-color);
+}
+
+.activity-icon--info {
+  background: var(--status-info-bg);
+  color: var(--status-info-color);
+}
+
+.activity-icon--warning {
+  background: var(--status-warning-bg);
+  color: var(--status-warning-color);
+}
+
+.activity-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-text {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: $text-primary;
+  line-height: 1.4;
+  display: block;
+}
+
+.activity-time {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: $text-tertiary;
+  margin-top: var(--spacing-xs);
+}
+
+// -----------------------------------------------------------------------------
+// Chart cards
+// -----------------------------------------------------------------------------
+.chart-container {
+  width: 100%;
+  max-width: 100%;
+  min-height: 240px;
+  padding: 0 24px $spacing-unit;
+  overflow: hidden;
+  box-sizing: border-box;
+
+  highcharts-chart {
+    width: 100% !important;
+    max-width: 100% !important;
     overflow: hidden;
-    box-sizing: border-box;
-
-    highcharts-chart {
-      width: 100% !important;
-      max-width: 100% !important;
-      overflow: hidden;
-    }
-  }
-
-  .chart-placeholder {
-    width: 100%;
-    height: 250px;
-    background: linear-gradient(90deg, #f8fafc 0%, #e2e8f0 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #64748b;
-    font-size: var(--font-size-base, 13px);
-    border-radius: 8px;
   }
 }
 
-// Responsive Design
+.chart-placeholder {
+  width: 100%;
+  min-height: 240px;
+  background: $page-bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $text-secondary;
+  font-size: var(--font-size-sm);
+  border-radius: $radius-icon;
+  margin: 0 var(--spacing-2xl) $spacing-unit;
+}
+
+// -----------------------------------------------------------------------------
+// Responsive
+// -----------------------------------------------------------------------------
 @media (max-width: 1400px) {
   .dashboard-cards {
     grid-template-columns: repeat(2, 1fr);
@@ -529,92 +393,47 @@
 
 @media (max-width: 768px) {
   .dashboard-page {
-    padding: 16px;
-  }
-
-  .dashboard-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-
-    h2 {
-      font-size: var(--font-size-5xl, 24px);
-    }
+    padding: $spacing-tight;
   }
 
   .dashboard-cards {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: $spacing-tight;
   }
 
   .dashboard-main {
-    gap: 16px;
+    gap: $spacing-tight;
   }
 
   .main-left,
   .main-right {
-    gap: 16px;
+    gap: $spacing-tight;
   }
 
-  .card {
-    padding: 16px;
+  .card .card-head {
+    padding: $spacing-tight 16px 0;
   }
 
-  .requests-card {
-    .requests-grid-container {
-      height: 520px;
-    }
+  .requests-grid-container {
+    height: 480px;
+    padding: 0 16px $spacing-tight;
+  }
 
-    ::ng-deep .requests-grid-component {
-      .grid-toolbar {
-        gap: 0.75em;
-      }
+  .activity-list {
+    padding: $spacing-tight 16px $spacing-unit;
+  }
 
-      .toolbar-center {
-        flex-basis: 100%;
-        max-width: 100%;
-      }
-    }
+  .chart-container {
+    padding: 0 16px $spacing-unit;
   }
 
   .stat-card {
-    padding: 16px;
-
-    .stat-icon {
-      width: 48px;
-      height: 48px;
-
-      mat-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
-      }
-    }
-
-    .stat-value {
-      font-size: var(--font-size-5xl, 24px);
-    }
+    padding: $spacing-tight;
   }
-
-  // Requests grid responsive
-  .requests-card { }
 }
 
 @media (max-width: 480px) {
   .dashboard-page {
     padding: 12px;
   }
-
-  .appointment-item {
-    flex-wrap: wrap;
-
-    .appointment-time,
-    .appointment-status {
-      width: 100%;
-      margin-top: 8px;
-    }
-  }
-
-  // Appointment Requests responsive
-  .requests-card { }
 }

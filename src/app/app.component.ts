@@ -1,23 +1,15 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, PLATFORM_ID, inject } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { SidebarComponent, TemplateComponent, TopbarComponent } from '@lk/template';
-import { AppButtonComponent, AuthService } from '@lk/core';
+import {
+  SidebarComponent,
+  RightSidebarComponent,
+  PatientQueueService
+} from '@lk/template';
+import { AppPatientQueueContentComponent } from './components/app-patient-queue-content/app-patient-queue-content.component';
+import { AuthService } from '@lk/core';
+import { AppTopbarComponent } from './components/app-topbar/app-topbar.component';
 import { Subject, takeUntil, filter } from 'rxjs';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDividerModule } from '@angular/material/divider';
-
-export interface PatientQueueItem {
-  id: string;
-  name: string;
-  status: 'waiting' | 'in-progress' | 'completed' | 'cancelled';
-  priority: 'low' | 'medium' | 'high' | 'emergency';
-  estimatedTime: string;
-  avatar?: string;
-  reason: string;
-  room?: string;
-}
 
 @Component({
     selector: 'app-root',
@@ -25,79 +17,24 @@ export interface PatientQueueItem {
     RouterOutlet,
     CommonModule,
     SidebarComponent,
-    TopbarComponent,
-    MatIconModule,
-    MatChipsModule,
-    MatDividerModule,
-    TemplateComponent
+    AppTopbarComponent,
+    RightSidebarComponent,
+    AppPatientQueueContentComponent
 ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'Shree Clinic Management System';
-  sidebarCollapsed = false;
-  rightSidebarOpened = false;
+  sidebarCollapsed = true;
+  rightSidebarOpen = false;
   isAuthenticated = false;
+  private patientQueueService = inject(PatientQueueService);
   userType: string | null = null;
   currentRoute = '';
   isAuthInitialized = false; // Track if auth state has been initialized
   viewMode: 'login' | 'main' = 'login'; // Explicit property instead of getter
   private destroy$ = new Subject<void>();
-
-    // Keep these methods and data for backward compatibility if needed
-    patientQueue: PatientQueueItem[] = [
-      {
-        id: '1',
-        name: 'John Doe',
-        status: 'waiting',
-        priority: 'medium',
-        estimatedTime: '10:30 AM',
-        reason: 'Regular checkup',
-        room: '101',
-        avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
-      },
-      {
-        id: '2',
-        name: 'Sarah Smith',
-        status: 'in-progress',
-        priority: 'high',
-        estimatedTime: '10:45 AM',
-        reason: 'Follow-up consultation',
-        room: '102',
-        avatar: 'https://randomuser.me/api/portraits/women/2.jpg'
-      },
-      {
-        id: '3',
-        name: 'Mike Johnson',
-        status: 'waiting',
-        priority: 'low',
-        estimatedTime: '11:00 AM',
-        reason: 'Prescription refill',
-        room: '103',
-        avatar: 'https://randomuser.me/api/portraits/men/3.jpg'
-      },
-      {
-        id: '4',
-        name: 'Emily Davis',
-        status: 'waiting',
-        priority: 'emergency',
-        estimatedTime: 'ASAP',
-        reason: 'Chest pain',
-        room: '104',
-        avatar: 'https://randomuser.me/api/portraits/women/4.jpg'
-      },
-      {
-        id: '5',
-        name: 'Robert Wilson',
-        status: 'completed',
-        priority: 'medium',
-        estimatedTime: '10:15 AM',
-        reason: 'Blood test results',
-        room: '105',
-        avatar: 'https://randomuser.me/api/portraits/men/5.jpg'
-      }
-    ];
 
   constructor(
     private authService: AuthService,
@@ -139,6 +76,11 @@ export class AppComponent implements OnInit, OnDestroy {
     // Update view mode after initial setup (will be called again when state initializes)
     this.updateViewMode();
 
+    // Load patient queue sample data when authenticated (template reference implementation)
+    if (hasStoredAuth) {
+      this.patientQueueService.loadSampleData();
+    }
+
     // Subscribe to auth state changes
     this.authService.authState$.pipe(
       takeUntil(this.destroy$)
@@ -151,6 +93,10 @@ export class AppComponent implements OnInit, OnDestroy {
       const wasAuthenticated = this.isAuthenticated;
       this.isAuthenticated = state.isAuthenticated;
       this.userType = state.currentUser?.user?.userType || null;
+
+      if (state.isAuthenticated) {
+        this.patientQueueService.loadSampleData();
+      }
       
       // Update current route
       this.currentRoute = this.router.url || (isPlatformBrowser(this.platformId) ? window.location.pathname : '/');
@@ -254,72 +200,16 @@ export class AppComponent implements OnInit, OnDestroy {
     this.sidebarCollapsed = !this.sidebarCollapsed;
   }
 
-  openPatientQueue(event: any) {
-    this.rightSidebarOpened = true;
+  onStartPatient(patient: { id: string; name: string }) {
+    console.log('Start patient:', patient);
   }
 
-  closeRightSidebar() {
-    this.rightSidebarOpened = false;
+  onQueuePatientClick(patient: { id: string; name: string }) {
+    console.log('Queue patient clicked:', patient);
   }
 
-
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'waiting': return '#ff9800';
-      case 'in-progress': return '#2196f3';
-      case 'completed': return '#4caf50';
-      case 'cancelled': return '#f44336';
-      default: return '#888';
-    }
+  onViewSchedule() {
+    console.log('View full schedule');
   }
 
-  getPriorityColor(priority: string): string {
-    switch (priority) {
-      case 'low': return '#4caf50';
-      case 'medium': return '#ff9800';
-      case 'high': return '#f44336';
-      case 'emergency': return '#9c27b0';
-      default: return '#888';
-    }
-  }
-
-  getStatusIcon(status: string): string {
-    switch (status) {
-      case 'waiting': return 'schedule';
-      case 'in-progress': return 'play_circle';
-      case 'completed': return 'check_circle';
-      case 'cancelled': return 'cancel';
-      default: return 'help';
-    }
-  }
-
-  getPriorityIcon(priority: string): string {
-    switch (priority) {
-      case 'low': return 'arrow_downward';
-      case 'medium': return 'remove';
-      case 'high': return 'arrow_upward';
-      case 'emergency': return 'warning';
-      default: return 'help';
-    }
-  }
-
-  getFilteredPatients(status?: string): PatientQueueItem[] {
-    if (!status) return this.patientQueue;
-    return this.patientQueue.filter(patient => patient.status === status);
-  }
-
-  getStatusCount(status: string): number {
-    return this.patientQueue.filter(patient => patient.status === status).length;
-  }
-
-  onPatientClick(patient: PatientQueueItem) {
-    console.log('Patient clicked:', patient);
-    // Handle patient selection
-  }
-  onClose() {
-    this.closeRightSidebar();
-  }
-  onOpenPatientQueue(event: any) {
-    this.rightSidebarOpened = true;
-  }
 }

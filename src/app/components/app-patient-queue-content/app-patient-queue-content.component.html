@@ -1,0 +1,73 @@
+<!-- Next Up section -->
+@if (displayNextUp(); as patient) {
+  <section class="next-up-section">
+    <h3 class="section-title">
+      <span class="play-icon">
+        <app-icon fontSet="material-icons-outlined" fontIcon="play_arrow" [size]="20" [color]="'#10b981'"></app-icon>
+      </span>
+      Next Up
+    </h3>
+    <div class="next-up-card">
+      <div class="patient-header">
+        <div class="patient-avatar">
+          @if (patient.avatar) {
+            <img [src]="patient.avatar" [alt]="patient.name" />
+          } @else {
+            <div class="avatar-placeholder">{{ patient.name.charAt(0) }}</div>
+          }
+        </div>
+        <div class="patient-main">
+          <span class="patient-name">{{ patient.name }}</span>
+          <span class="patient-id">ID: {{ patient.id }}</span>
+        </div>
+      </div>
+      <div class="patient-details">
+        <span class="reason"><strong>Reason:</strong> {{ patient.reason }}</span>
+        <span class="waiting">Waiting: {{ patient.waitingTime }}</span>
+      </div>
+      <div class="action-buttons">
+        <button type="button" class="btn-start" (click)="onStartClick(patient)">START</button>
+        <button type="button" class="btn-icon btn-reschedule" aria-label="Reschedule" (click)="onRescheduleClick(patient)">
+          <app-icon fontSet="material-icons-outlined" fontIcon="schedule" [size]="20" [color]="'#d97706'"></app-icon>
+        </button>
+        <button type="button" class="btn-icon btn-complete" aria-label="Complete" (click)="onCompleteClick(patient)">
+          <app-icon fontSet="material-icons-outlined" fontIcon="task_alt" [size]="20"></app-icon>
+        </button>
+      </div>
+    </div>
+  </section>
+}
+
+<!-- Patient Queue section -->
+<section class="queue-section">
+  <h3 class="section-title">
+    Patient Queue
+    <span class="waiting-badge">{{ displayWaitingCount() }} WAITING</span>
+  </h3>
+  <button type="button" class="btn-add-emergency" (click)="onAddEmergencyClick()">
+    <app-icon fontSet="material-icons-outlined" fontIcon="medical_services" [size]="18"></app-icon>
+    Add Emergency / Walk-in
+  </button>
+  <div class="queue-list">
+    @for (patient of displayQueue(); track patient.id) {
+      <div
+        class="queue-item"
+        [class.active]="patient.isActive"
+        (click)="onPatientClick(patient)"
+      >
+        <div class="patient-avatar">
+          @if (patient.avatar) {
+            <img [src]="patient.avatar" [alt]="patient.name" />
+          } @else {
+            <div class="avatar-placeholder">{{ patient.name.charAt(0) }}</div>
+          }
+        </div>
+        <div class="patient-info">
+          <span class="patient-name">{{ patient.name }}</span>
+          <span class="scheduled">Scheduled: {{ patient.scheduledTime }}</span>
+        </div>
+        <span class="status-dot" [class.active]="patient.isActive"></span>
+      </div>
+    }
+  </div>
+</section>

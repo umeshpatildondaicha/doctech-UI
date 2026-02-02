@@ -1107,54 +1107,8 @@
         text-align: center;
         align-self: flex-start;
       }
-
-      .schedule-content {
-        flex: 1;
-
-        .schedule-activity {
-          font-size: 16px;
-          font-weight: 600;
-          color: var(--text-primary);
-          margin-bottom: 4px;
-        }
-
-        .schedule-description {
-          font-size: 14px;
-          color: var(--text-muted);
-          margin-bottom: 8px;
-          line-height: 1.4;
-        }
-
-        .schedule-meta {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-
-          .schedule-type {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 600;
-            color: white;
-            text-transform: uppercase;
-
-            app-icon {
-              color: white;
-            }
-          }
-
-          .schedule-assignee {
-            font-size: 12px;
-            color: var(--text-muted);
-            font-weight: 500;
-                }
-              }
-            }
-          }
-        }
+    }
+  }
 }
 
 // Tabs Container

@@ -1,12 +1,12 @@
 <div class="patient-notes-dialog">
   <div class="dialog-content">
     <p class="dialog-message">Add notes for {{ data.patientName }}</p>
-    
+
     <mat-form-field class="notes-field" appearance="outline">
       <mat-label>Notes</mat-label>
-      <textarea 
-        matInput 
-        [(ngModel)]="notes" 
+      <textarea
+        matInput
+        [(ngModel)]="notes"
         [placeholder]="data.placeholder || 'Enter medical notes, observations, or instructions...'"
         rows="6"
         class="notes-textarea">
@@ -14,4 +14,3 @@
     </mat-form-field>
   </div>
 </div>
-

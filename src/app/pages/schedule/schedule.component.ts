@@ -18,7 +18,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormsModule } from '@angular/forms';
-import { AppButtonComponent, IconComponent, CalendarComponent, CoreEventService, DialogboxService, DialogFooterAction, TabComponent, TabsComponent } from '@lk/core';
+import { AppButtonComponent, AppInputComponent, DividerComponent, IconComponent, CalendarComponent, CoreEventService, DialogboxService, DialogFooterAction, PageComponent, PageBodyDirective, ToggleButtonComponent, type ToggleButtonOption } from '@lk/core';
 import { AppointmentCreateComponent } from '../appointment-create/appointment-create.component';
 import { AppointmentViewComponent } from '../appointment-view/appointment-view.component';
 import { PatientSearchDialogComponent, PatientSearchResult } from '../patient-search-dialog/patient-search-dialog.component';
@@ -118,6 +118,7 @@ interface ScheduleWeekDay {
   date: Date;
   weekdayShort: string; // Mon, Tue...
   dayNumber: number;
+  monthShort: string;   // Feb, Mar (for display when spanning months)
   isSelected: boolean;
 }
 
@@ -227,23 +228,33 @@ interface DoctorSchedule {
         ReactiveFormsModule,
         FormsModule,
         AppButtonComponent,
+        AppInputComponent,
+        DividerComponent,
         IconComponent,
         CalendarComponent,
+        PageComponent,
+        PageBodyDirective,
         AppCardComponent,
         AppCardActionsDirective,
-        TabComponent,TabsComponent
-       
-       
+        ToggleButtonComponent
     ],
     templateUrl: './schedule.component.html',
     styleUrls: ['./schedule.component.scss']
 })
 export class ScheduleComponent implements OnInit {
-  selectedTabIndex = 0;
+  activeSection: 'schedule' | 'timings' = 'schedule';
   timingsTab: TimingPriorityTab = 'p4';
   forecastDays = 15;
+  /** Number of days from today the doctor has set for scheduling (today + next N-1 days). Patient/doctor can view and book within this window. */
+  scheduleWindowDays = 15;
   readonly weekdays: Weekday[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   timingsMode: TimingsMode = 'view';
+
+  /** Options for View/Manage toggle (lk-core ToggleButtonComponent) */
+  readonly timingsModeOptions: ToggleButtonOption[] = [
+    { value: 'view', label: 'View' },
+    { value: 'manage', label: 'Manage' }
+  ];
 
   // Timings (P4 standard / P3 weekly / P2 overrides / P1 leave)
   timingsDaily = {
@@ -462,8 +473,22 @@ export class ScheduleComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Demo-friendly: default to the first mocked appointment date (if present)
-    this.selectedDate = new Date(this.mockAppointments[0]?.appointment_date_time ?? new Date());
+    // Default to first mocked appointment date if within schedule window, else today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const windowEnd = new Date(today);
+    windowEnd.setDate(windowEnd.getDate() + this.scheduleWindowDays - 1);
+    const mockDate = this.mockAppointments[0]?.appointment_date_time ? new Date(this.mockAppointments[0].appointment_date_time) : null;
+    if (mockDate) {
+      mockDate.setHours(0, 0, 0, 0);
+      if (mockDate >= today && mockDate <= windowEnd) {
+        this.selectedDate = new Date(this.mockAppointments[0].appointment_date_time);
+      } else {
+        this.selectedDate = new Date();
+      }
+    } else {
+      this.selectedDate = new Date();
+    }
 
     this.generateTimeSlots();
     this.loadDoctorSchedule();
@@ -478,8 +503,8 @@ export class ScheduleComponent implements OnInit {
     this.recomputeScheduleAvailability();
   }
 
-  onTabChange(index: number): void {
-    this.selectedTabIndex = index;
+  setSection(section: 'schedule' | 'timings'): void {
+    this.activeSection = section;
   }
 
   setTimingsMode(mode: TimingsMode): void {
@@ -1148,6 +1173,11 @@ export class ScheduleComponent implements OnInit {
     this.onDateChange(date);
   }
 
+  /** Whether the given date is today (for week strip "Today" label and styling). */
+  isToday(date: Date): boolean {
+    return this.isSameDay(date, new Date());
+  }
+
   getScheduleListAppointments(): Appointment[] {
     const q = this.scheduleSearch.trim().toLowerCase();
     const selectedKey = this.selectedDate.toDateString();
@@ -1183,21 +1213,26 @@ export class ScheduleComponent implements OnInit {
     if (next) this.startQuickAddFlow(next);
   }
 
+  /** Builds the schedule strip as today + next (scheduleWindowDays - 1) days — the window the doctor has set for scheduling. Patient and doctor can view/book within this window. */
   private rebuildScheduleWeekStrip(): void {
-    const base = new Date(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDate());
-    const weekStart = this.getWeekStartMonday(base);
-    const selectedKey = base.toDateString();
+    const calendarToday = new Date();
+    calendarToday.setHours(0, 0, 0, 0);
+    const selectedKey = this.selectedDate.toDateString();
+    const strip: ScheduleWeekDay[] = [];
 
-    this.scheduleWeekStrip = this.weekdays.map((w, i) => {
-      const d = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + i);
+    for (let i = 0; i < this.scheduleWindowDays; i++) {
+      const d = new Date(calendarToday.getFullYear(), calendarToday.getMonth(), calendarToday.getDate() + i);
       const weekdayShort = d.toLocaleString(undefined, { weekday: 'short' });
-      return {
+      const monthShort = d.toLocaleString(undefined, { month: 'short' });
+      strip.push({
         date: d,
         weekdayShort,
         dayNumber: d.getDate(),
+        monthShort,
         isSelected: d.toDateString() === selectedKey
-      };
-    });
+      });
+    }
+    this.scheduleWeekStrip = strip;
   }
 
   private recomputeScheduleSummary(): void {
@@ -1454,11 +1489,11 @@ export class ScheduleComponent implements OnInit {
   // UI Helpers
   getStatusColor(status: string): string {
     switch (status) {
-      case 'SCHEDULED': return '#4CAF50';
-      case 'COMPLETED': return '#2196F3';
-      case 'PENDING': return '#FF9800';
-      case 'CANCELED': return '#F44336';
-      default: return '#757575';
+      case 'SCHEDULED': return 'var(--primary-color)';
+      case 'COMPLETED': return 'var(--status-success-color)';
+      case 'PENDING': return 'var(--status-warn-color)';
+      case 'CANCELED': return 'var(--status-danger-color)';
+      default: return 'var(--status-neutral-color)';
     }
   }
 
