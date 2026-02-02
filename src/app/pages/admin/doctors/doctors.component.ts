@@ -19,6 +19,7 @@ import {
 import { AdminDoctorCreateComponent } from './doctor-create/doctor-create.component';
 import { DoctorViewDialogComponent } from './doctor-view-dialog/doctor-view-dialog.component';
 import { DoctorScheduleDialogComponent } from './doctor-schedule-dialog/doctor-schedule-dialog.component';
+import { DoctorService } from '../../../services/doctor.service';
 
 
 
@@ -89,6 +90,7 @@ export class DoctorsComponent implements OnInit, OnDestroy {
 
   constructor(
     private dialogService: DialogboxService,
+    private doctorService:DoctorService,
     private snackBar: MatSnackBar,
     private router: Router,
     private eventService: CoreEventService
@@ -132,13 +134,6 @@ export class DoctorsComponent implements OnInit, OnDestroy {
         filter: true
       },
       {
-        headerName: 'Hospital',
-        field: 'hospital',
-        width: 150,
-        sortable: true,
-        filter: true
-      },
-      {
         headerName: 'Availability',
         field: 'availability',
         width: 140,
@@ -169,8 +164,8 @@ export class DoctorsComponent implements OnInit, OnDestroy {
         filter: true
       },
       {
-        headerName: 'Experience',
-        field: 'experience',
+        headerName: 'Qualifications',
+        field: 'qualifications',
         width: 120,
         sortable: true,
         filter: true
@@ -220,77 +215,21 @@ export class DoctorsComponent implements OnInit, OnDestroy {
 
   loadDoctorData() {
     // Sample data
-    this.rowData = [
-      {
-        id: 'DOC001',
-        name: 'Dr. Amit Sharma',
-        specialization: 'Cardiology',
-        hospital: 'Main Hospital',
-        availability: 'Available',
-        status: 'Active',
-        phone: '+91 98765 43210',
-        email: 'amit.sharma@hospital.com',
-        experience: '8 years',
-        joinedDate: '2020-03-15',
-        hospitalAssociations: [
-          { hospitalName: 'City Branch' },
-          { hospitalName: 'North Medical Center' }
-        ]
-      },
-      {
-        id: 'DOC002',
-        name: 'Dr. Priya Verma',
-        specialization: 'Neurology',
-        hospital: 'City Branch',
-        availability: 'On Leave',
-        status: 'On Leave',
-        phone: '+91 98765 43211',
-        email: 'priya.verma@hospital.com',
-        experience: '12 years',
-        joinedDate: '2018-07-22'
-      },
-      {
-        id: 'DOC003',
-        name: 'Dr. Rajesh Kumar',
-        specialization: 'Orthopedics',
-        hospital: 'Main Hospital',
-        availability: 'Emergency Only',
-        status: 'Active',
-        phone: '+91 98765 43212',
-        email: 'rajesh.kumar@hospital.com',
-        experience: '15 years',
-        joinedDate: '2015-11-08',
-        hospitalAssociations: [
-          'City Branch',
-          'South Clinic',
-          'Emergency Care Unit'
-        ]
-      },
-      {
-        id: 'DOC004',
-        name: 'Dr. Sneha Patel',
-        specialization: 'Pediatrics',
-        hospital: 'City Branch',
-        availability: 'Available',
-        status: 'Active',
-        phone: '+91 98765 43213',
-        email: 'sneha.patel@hospital.com',
-        experience: '6 years',
-        joinedDate: '2021-09-12'
-      },
-      {
-        id: 'DOC005',
-        name: 'Dr. Vikram Singh',
-        specialization: 'Dermatology',
-        hospital: 'Main Hospital',
-        availability: 'Available',
-        status: 'Inactive',
-        phone: '+91 98765 43214',
-        email: 'vikram.singh@hospital.com',
-        experience: '10 years',
-        joinedDate: '2019-05-20'
-      }
-    ];
+     this.doctorService.getDoctors(0,10).subscribe((res:any)=>{
+      this.rowData =res.doctorDetails.map((d:any)=>({
+        id:d.registrationNumber,
+        name:`${d.firstName}  ${d.lastName}`,
+        specialization:d.specialization,
+        phone:d.contactNumber,
+        qualifications:d.qualifications,
+        email:d.email,
+        status:d.doctorStatus,
+        availability:this.mapDoctorStatusToAvailability(d.doctorStatus),
+        joinedDate:d.createdAt
+
+      }));
+      this.updateStatsCards();
+     })
   }
 
   openPermissions(doctor: any) {
@@ -546,6 +485,29 @@ export class DoctorsComponent implements OnInit, OnDestroy {
         return 'INACTIVE';
       default:
         return 'PENDING';
+    }
+
+  }
+  private mapDoctorStatusToAvailability(
+    status: string
+  ): 'Available' | 'On Leave' | 'Emergency Only' | 'Inactive' {
+
+    switch (status?.toUpperCase()) {
+      case 'APPROVED':
+        return 'Available';
+
+      case 'ON_LEAVE':
+        return 'On Leave';
+
+      case 'EMERGENCY':
+        return 'Emergency Only';
+
+      case 'INACTIVE':
+      case 'SUSPENDED':
+        return 'Inactive';
+
+      default:
+        return 'Inactive';
     }
   }
 } 

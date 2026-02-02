@@ -124,10 +124,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   loadDashboardData() {
     // Load room availability
-    const rooms = this.roomsService.getRooms();
-    const availableRooms = rooms.filter(r => r.status === 'Available').length;
-    this.stats.roomAvailability = availableRooms;
-    this.stats.totalRooms = rooms.length;
+    this.roomsService.getRooms().subscribe((rooms: any[]) => {
+      const availableRooms = rooms.filter((r: any) => r.status === 'Available').length;
+      this.stats.roomAvailability = availableRooms;
+      this.stats.totalRooms = rooms.length;
+
+      // You can put any other logic that depends on rooms here, if needed
+    });
 
     // Next patient
     this.nextPatient = {

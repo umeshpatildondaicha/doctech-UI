@@ -194,26 +194,44 @@ export class RoomFormComponent implements OnInit {
   }
 
   loadRoom(id: number) {
-    const room = this.roomsService.getRoomById(id);
-    if (room) {
-      this.roomForm.patchValue({
-        number: room.number,
-        type: room.type,
-        floor: room.floor,
-
-        capacity: room.capacity,
-        status: room.status,
-        facilities: room.facilities,
-        icuLevel: room.icuLevel || ''
-      });
-      
-      // Load beds
-      this.bedsFormArray.clear();
-      room.beds.forEach(bed => {
-        this.bedsFormArray.push(this.createBedFormGroup(bed));
-      });
-    }
+    this.roomsService.getRoomById(id).subscribe({
+      next: (res: any) => {
+  
+        // 🔁 Backend → UI mapping
+        const room = {
+          number: res.roomNumber,
+          type: res.roomType,
+          floor: res.floorId,
+          capacity: res.capacity,
+          status: res.status,
+          facilities: res.facilities,
+          icuLevel: res.icuLevel,
+          beds: res.beds || []   // backend मध्ये beds असतील तर
+        };
+  
+        this.roomForm.patchValue({
+          number: room.number,
+          type: room.type,
+          floor: room.floor,
+          capacity: room.capacity,
+          status: room.status,
+          facilities: room.facilities,
+          icuLevel: room.icuLevel || ''
+        });
+  
+        // 🛏 beds load
+        this.bedsFormArray.clear();
+        room.beds.forEach((bed: any) => {
+          this.bedsFormArray.push(this.createBedFormGroup(bed));
+        });
+      },
+  
+      error: (err) => {
+        console.error('❌ Failed to load room', err);
+      }
+    });
   }
+  
 
   createBedFormGroup(bed?: any): FormGroup {
     return this.fb.group({
@@ -432,11 +450,11 @@ export class RoomFormComponent implements OnInit {
       try {
         if (this.isEditMode && this.roomId) {
           // Update existing room
-          this.roomsService.updateRoom(this.roomId, formData);
+          this.roomsService.createdRoom(formData);
           console.log('Room updated successfully');
         } else {
           // Add new room
-          this.roomsService.addRoom(formData);
+          this.roomsService.createdRoom(formData);
           console.log('Room added successfully');
         }
         

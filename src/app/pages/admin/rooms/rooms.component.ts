@@ -23,7 +23,7 @@ export class RoomsComponent implements OnInit {
   columnDefs: ColDef[] = [];
   gridOptions: any = {};
 
-  rooms: any[] = [];
+  roomData:any[]=[];
 
   // Header actions configuration
   headerActions: HeaderAction[] = [
@@ -57,11 +57,62 @@ export class RoomsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.rooms = this.roomsService.getRooms();
-    this.setupGrid();
-    this.computeKpis();
-    this.updateStatsCards();
+  this.setupGrid();
+
+  this.roomsService.getRooms().subscribe({
+    next: (res: any) => {
+      console.log('Rooms API response:', res);
+
+      // ✅ content मधून data काढ
+      this.roomData = res.content.map((r: any) => ({
+        id: r.roomId,
+        number: r.roomNumber,
+        type: this.mapRoomType(r.roomType),
+        floor: r.floorNumber,
+        capacity: r.capacity,
+        occupied: r.currentOccupancy,
+        status: this.mapRoomStatus(r.status),
+        facilities: this.parseFacilities(r.facilities),
+        icuLevel: r.icuLevel
+      }));
+
+      // ✅ API नंतरच KPIs
+      this.computeKpis();
+      this.updateStatsCards();
+    },
+    error: err => {
+      console.error('Failed to load rooms', err);
+    }
+  });
+}
+mapRoomType(type: string): string {
+  switch (type) {
+    case 'GENERAL': return 'General Ward';
+    case 'ICU': return 'ICU';
+    case 'PRIVATE': return 'Private';
+    case 'SEMI_PRIVATE': return 'Semi-Private';
+    default: return type;
   }
+}
+mapRoomStatus(status: string): string {
+  switch (status) {
+    case 'ACTIVE': return 'Available';
+    case 'MAINTENANCE': return 'Maintenance';
+    case 'FULL': return 'Full';
+    default: return 'Available';
+  }
+}
+parseFacilities(f: any) {
+  if (!f) return null;
+  return {
+    ac: f.includes?.('AC'),
+    oxygen: f.includes?.('OXYGEN'),
+    ventilator: f.includes?.('VENTILATOR'),
+    monitor: f.includes?.('MONITOR')
+  };
+}
+
+
 
   setupGrid() {
     this.columnDefs = [
@@ -102,14 +153,14 @@ export class RoomsComponent implements OnInit {
   }
 
   computeKpis() {
-    this.totalRooms = this.rooms.length;
-    this.totalBeds = this.rooms.reduce((a, r) => a + r.capacity, 0);
-    this.occupiedBeds = this.rooms.reduce((a, r) => a + r.occupied, 0);
+    this.totalRooms = this.roomData.length;
+    this.totalBeds = this.roomData.reduce((a, r) => a + r.capacity, 0);
+    this.occupiedBeds = this.roomData.reduce((a, r) => a + r.occupied, 0);
     this.availableBeds = this.totalBeds - this.occupiedBeds;
-    this.icuBeds = this.rooms
+    this.icuBeds = this.roomData
       .filter(r => r.type === 'ICU')
       .reduce((a, r) => a + r.capacity, 0);
-    this.icuBedsAvailable = this.rooms
+    this.icuBedsAvailable = this.roomData
       .filter(r => r.type === 'ICU')
       .reduce((a, r) => a + (r.capacity - r.occupied), 0);
     this.occupancyRate = this.totalBeds ? Math.round((this.occupiedBeds / this.totalBeds) * 100) : 0;
@@ -162,7 +213,7 @@ export class RoomsComponent implements OnInit {
 
   exportCSV() {
     const headers = ['Room No','Type','Floor','Wing','Capacity','Occupied','Status','ICU Level'];
-    const rows = this.rooms.map(r => [r.number, r.type, r.floor, r.wing, r.capacity, r.occupied, r.status, r.icuLevel || '']);
+    const rows = this.roomData.map(r => [r.number, r.type, r.floor, r.wing, r.capacity, r.occupied, r.status, r.icuLevel || '']);
     const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');

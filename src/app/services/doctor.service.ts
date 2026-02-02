@@ -67,7 +67,21 @@ export interface Affiliation {
   endDate?: string;
   description: string;
 }
-
+ export interface DoctorListItem{
+  registrationNumber: string;
+  publicDoctorCode: string;
+  firstName: string;
+  lastName: string;
+  specialization: string;
+  contactNumber: string;
+  email: string;
+  doctorStatus: string;
+  createdAt: string;
+  createdByHospitalId: string;
+ }
+ export interface DoctorListResponse{
+  doctorDetails :DoctorListItem[];
+ }
 @Injectable({
   providedIn: 'root'
 })
@@ -139,4 +153,17 @@ export class DoctorService {
     // TODO: Replace with actual API call when backend is ready
     // return this.httpService.put<DoctorProfileResponse>(`/api/doctors/${registrationNumber}/profile`, profileData);
   }
+
+  /**
+   * Get list of doctors
+   */
+  getDoctors(page=0,size=10) {
+    const url =`/api/doctors?page=${page}&size=${size}`;
+    return this.httpService.sendGETRequest(url);
+  }
+
+  createDoctor(payload:any){
+    return this.httpService.sendPOSTRequest('https://doctech.solutions/api/doctors',payload);
+  }
+  
 }

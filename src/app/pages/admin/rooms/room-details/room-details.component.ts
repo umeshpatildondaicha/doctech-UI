@@ -69,7 +69,7 @@ export class RoomDetailsComponent implements OnInit {
       this.updateBreadcrumb();
     } else if (roomId) {
       // Fallback: fetch room by ID (for direct navigation/refresh)
-      this.room = this.roomsService.getRoomById(+roomId) || null;
+      const room = this.roomsService.getRoomById(+roomId) || null;
       this.loading = false;
       this.updateBreadcrumb();
     }

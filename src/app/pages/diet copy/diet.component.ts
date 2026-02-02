@@ -28,6 +28,7 @@ import { DietSelectionDialogComponent } from '../diet-selection-dialog/diet-sele
 import { MealTimeDialogComponent } from '../meal-time-dialog/meal-time-dialog.component';
 import { DietCardComponent } from '../../components/diet-card/diet-card.component';
 import { DietPlanCardComponent } from '../../components/diet-plan-card/diet-plan-card.component';
+import { DietService } from '../../services/diet.service';
 
 @Component({
     selector: 'app-diet',
@@ -90,6 +91,7 @@ export class DietComponent implements OnInit {
   displayedColumns: string[] = ['image', 'name', 'type', 'calories', 'protein', 'actions'];
 
   // Diet Plans Tab
+  doctorCode='DR1';
   dietPlans: any[] = [];
   filteredDietPlans: any[] = [];
   selectedPlanType: string = '';
@@ -121,13 +123,14 @@ export class DietComponent implements OnInit {
     private dialog: MatDialog, 
     private router: Router, 
     private route: ActivatedRoute,
-    private dialogService: DialogboxService
+    private dialogService: DialogboxService,
+    private dietservice :DietService
   ) {}
 
   ngOnInit() {
     this.initializeDietData();
-    this.loadMockData();
-    this.loadMockDietPlans();
+    this.loadDietPlans();
+    this.loadDietsFromApi();
     // default preview: first weekly plan if available
     const firstWeekly = this.dietPlans.find(p => p.type === 'weekly') || null;
     this.selectedPlanPreview = firstWeekly;
@@ -184,156 +187,19 @@ export class DietComponent implements OnInit {
     });
   }
 
-  loadMockData() {
-    // Mock data for demonstration
-    this.dietList = [
-      {
-        dietId: '1',
-        name: 'Balanced Veg Bowl',
-        description: 'Quinoa, chickpeas, mixed veggies, olive oil dressing.',
-        dietType: 'Mediterranean',
-        calories: 520,
-        protein: 22,
-        carbs: 68,
-        fat: 18,
-        fiber: 11,
-        createdByDoctorId: 'doc1',
-        createdAt: new Date(),
-        isActive: true,
-        imageUrl: 'https://arohanyoga.com/wp-content/uploads/2024/03/The-Yogic-Diet-Food-for-Mind-and-Body-.jpg',
-        videoUrl: 'https://youtu.be/oX_iH0CbZzg?si=jkzW8WP0xBasAYdB',
-        documentUrl: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-        tags: ['lunch', 'quick']
+ loadDietsFromApi() {
+  this.dietservice.getDietPlans(this.doctorCode)
+    .subscribe({
+      next: (res) => {
+        this.dietList = res.data || res;
+        this.filteredDiets = [...this.dietList];
       },
-      {
-        dietId: '2',
-        name: 'Keto Chicken Salad',
-        description: 'Grilled chicken, avocado, mixed greens, olive oil.',
-        dietType: 'Keto',
-        calories: 450,
-        protein: 35,
-        carbs: 8,
-        fat: 32,
-        fiber: 6,
-        createdByDoctorId: 'doc1',
-        createdAt: new Date(),
-        isActive: true,
-        imageUrl: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop',
-        videoUrl: 'https://youtu.be/oX_iH0CbZzg?si=jkzW8WP0xBasAYdB',
-        documentUrl: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-        tags: ['lunch', 'high-protein']
-      },
-      {
-        dietId: '3',
-        name: 'Vegan Buddha Bowl',
-        description: 'Brown rice, tofu, vegetables, tahini dressing.',
-        dietType: 'Vegan',
-        calories: 380,
-        protein: 18,
-        carbs: 45,
-        fat: 15,
-        fiber: 12,
-        createdByDoctorId: 'doc1',
-        createdAt: new Date(),
-        isActive: true,
-        imageUrl: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=300&fit=crop',
-        videoUrl: 'https://youtu.be/oX_iH0CbZzg?si=jkzW8WP0xBasAYdB',
-        documentUrl: 'https://morth.nic.in/sites/default/files/dd12-13_0.pdf',
-        tags: ['dinner', 'plant-based']
-      },
-      {
-        dietId: '4',
-        name: 'Morning Oatmeal',
-        description: 'Steel-cut oats with berries, nuts, and honey.',
-        dietType: 'Mediterranean',
-        calories: 320,
-        protein: 12,
-        carbs: 55,
-        fat: 8,
-        fiber: 8,
-        createdByDoctorId: 'doc1',
-        createdAt: new Date(),
-        isActive: true,
-        imageUrl: 'https://images.unsplash.com/photo-1517686469429-8bdb88b9f907?w=400&h=300&fit=crop',
-        videoUrl: '',
-        documentUrl: '',
-        tags: ['breakfast', 'fiber-rich']
-      },
-      {
-        dietId: '5',
-        name: 'Greek Yogurt Parfait',
-        description: 'Greek yogurt with granola, honey, and fresh fruits.',
-        dietType: 'Mediterranean',
-        calories: 280,
-        protein: 20,
-        carbs: 35,
-        fat: 6,
-        fiber: 4,
-        createdByDoctorId: 'doc1',
-        createdAt: new Date(),
-        isActive: true,
-        imageUrl: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop',
-        videoUrl: '',
-        documentUrl: '',
-        tags: ['breakfast', 'protein-rich']
-      },
-      {
-        dietId: '6',
-        name: 'Grilled Salmon',
-        description: 'Grilled salmon with steamed vegetables and quinoa.',
-        dietType: 'Mediterranean',
-        calories: 480,
-        protein: 42,
-        carbs: 25,
-        fat: 22,
-        fiber: 6,
-        createdByDoctorId: 'doc1',
-        createdAt: new Date(),
-        isActive: true,
-        imageUrl: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400&h=300&fit=crop',
-        videoUrl: '',
-        documentUrl: '',
-        tags: ['dinner', 'omega-3']
-      },
-      {
-        dietId: '7',
-        name: 'Mixed Nuts Snack',
-        description: 'Almonds, walnuts, and cashews with dried fruits.',
-        dietType: 'Mediterranean',
-        calories: 180,
-        protein: 6,
-        carbs: 12,
-        fat: 14,
-        fiber: 3,
-        createdByDoctorId: 'doc1',
-        createdAt: new Date(),
-        isActive: true,
-        imageUrl: 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=400&h=300&fit=crop',
-        videoUrl: '',
-        documentUrl: '',
-        tags: ['snack', 'healthy-fats']
-      },
-      {
-        dietId: '8',
-        name: 'Vegetable Soup',
-        description: 'Homemade vegetable soup with lentils and herbs.',
-        dietType: 'Vegan',
-        calories: 220,
-        protein: 12,
-        carbs: 35,
-        fat: 4,
-        fiber: 10,
-        createdByDoctorId: 'doc1',
-        createdAt: new Date(),
-        isActive: true,
-        imageUrl: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=300&fit=crop',
-        videoUrl: '',
-        documentUrl: '',
-        tags: ['lunch', 'soup']
+      error: (err) => {
+        console.error('Diet API error', err);
       }
-    ];
-    this.filteredDiets = [...this.dietList];
-  }
+    });
+}
+
 
 
 
@@ -381,7 +247,7 @@ export class DietComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result && result !== false) {
         // Refresh diet list
-        this.loadMockData();
+        
         this.filterDiets();
       }
     });
@@ -404,7 +270,7 @@ export class DietComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result && result !== false) {
         // Refresh diet list
-        this.loadMockData();
+  
         this.filterDiets();
       }
     });
@@ -449,171 +315,21 @@ export class DietComponent implements OnInit {
   }
 
   // Diet Plans Methods
-  loadMockDietPlans() {
-    this.dietPlans = [
-      {
-        planId: 'plan1',
-        name: 'Weekly Mediterranean Diet',
-        description: 'A balanced 7-day diet plan focused on heart health and weight management.',
-        type: 'weekly',
-        status: 'active',
-        duration: 7,
-        dietsCount: 21,
-        progress: 72,
-        goal: 'Weight Loss',
-        mealsIncluded: [
-          {
-            title: 'Breakfast',
-            subtitle: 'Oats with fruits & nuts',
-            tags: ['High fiber', 'Heart healthy'],
-            imageUrl: 'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=120&h=120&fit=crop'
-          },
-          {
-            title: 'Lunch',
-            subtitle: 'Grilled vegetables with olive oil',
-            tags: ['Low fat', 'Mediterranean'],
-            imageUrl: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=120&h=120&fit=crop'
-          },
-          {
-            title: 'Dinner',
-            subtitle: 'Baked salmon with quinoa',
-            tags: ['High protein', 'Omega-3'],
-            imageUrl: 'https://images.unsplash.com/photo-1546069901-eacef0df6022?w=120&h=120&fit=crop'
-          },
-          {
-            title: 'Snack',
-            subtitle: 'Greek yogurt with berries',
-            tags: ['High protein', 'Low sugar'],
-            imageUrl: 'https://images.unsplash.com/photo-1514996937319-344454492b37?w=120&h=120&fit=crop'
-          }
-        ],
-        reviewedByName: 'Dr. Umesh',
-        reviewedAt: new Date('2024-10-24T10:30:00'),
-        createdAt: new Date('2024-01-15')
+  loadDietPlans() {
+  this.dietservice.getWeeklyDietPlans(this.doctorCode)
+    .subscribe({
+      next:(res:any) => {
+        console.log('weekly diet plans res',res);
+        this.dietPlans = res.data || res;
+        this.filteredDietPlans = [...this.dietPlans];
       },
-      {
-        planId: 'plan2',
-        name: 'Keto Weight Loss Diet',
-        description: 'A low-carb, high-fat diet plan designed to support fast and healthy weight loss.',
-        type: 'monthly',
-        status: 'active',
-        duration: 14,
-        dietsCount: 42,
-        progress: 64,
-        goal: 'Weight Loss',
-        mealsIncluded: [
-          {
-            title: 'Breakfast',
-            subtitle: 'Boiled eggs with avocado',
-            tags: ['Low carb', 'High fat'],
-            imageUrl: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=120&h=120&fit=crop'
-          },
-          {
-            title: 'Lunch',
-            subtitle: 'Quinoa salad with vegetables',
-            tags: ['Protein rich', 'Keto friendly'],
-            imageUrl: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=120&h=120&fit=crop'
-          },
-          {
-            title: 'Dinner',
-            subtitle: 'Grilled chicken with greens',
-            tags: ['Low carb', 'High protein'],
-            imageUrl: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=120&h=120&fit=crop'
-          },
-          {
-            title: 'Snack',
-            subtitle: 'Nuts & cheese plate',
-            tags: ['High fat', 'Keto'],
-            imageUrl: 'https://images.unsplash.com/photo-1604909053199-0edc0f6c09e0?w=120&h=120&fit=crop'
-          }
-        ],
-        reviewedByName: 'Dr. Umesh',
-        reviewedAt: new Date('2024-10-24T10:30:00'),
-        createdAt: new Date('2024-01-10')
-      },
-      {
-        planId: 'plan3',
-        name: 'Vegan Wellness Diet',
-        description: 'A plant-based diet plan focused on overall wellness and balanced nutrition.',
-        type: 'custom',
-        status: 'active',
-        duration: 7,
-        dietsCount: 21,
-        progress: 78,
-        goal: 'Wellness',
-        mealsIncluded: [
-          {
-            title: 'Breakfast',
-            subtitle: 'Smoothie with banana & chia seeds',
-            tags: ['Plant protein', 'High fiber'],
-            imageUrl: 'https://images.unsplash.com/photo-1553530666-ba11a90a0868?w=120&h=120&fit=crop'
-          },
-          {
-            title: 'Dinner',
-            subtitle: 'Vegetable stir-fry with tofu & brown rice',
-            tags: ['Plant protein', 'Low fat', 'High fiber'],
-            imageUrl: 'https://images.unsplash.com/photo-1604908176997-125f25cc500f?w=120&h=120&fit=crop'
-          },
-          {
-            title: 'Lunch',
-            subtitle: 'Chickpea salad bowl',
-            tags: ['Plant protein', 'Iron rich'],
-            imageUrl: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=120&h=120&fit=crop'
-          },
-          {
-            title: 'Snack',
-            subtitle: 'Hummus with veggies',
-            tags: ['High fiber', 'Low fat'],
-            imageUrl: 'https://images.unsplash.com/photo-1546069901-eacef0df6022?w=120&h=120&fit=crop'
-          }
-        ],
-        reviewedByName: 'Dr. Umesh',
-        reviewedAt: new Date('2024-10-24T10:30:00'),
-        createdAt: new Date('2024-01-20')
-      },
-      {
-        planId: 'plan4',
-        name: 'Cardiac Care Diet',
-        description: 'A heart-friendly diet plan designed to manage cholesterol and blood pressure.',
-        type: 'weekly',
-        status: 'active',
-        duration: 7,
-        dietsCount: 21,
-        progress: 72,
-        goal: 'Heart Health',
-        mealsIncluded: [
-          {
-            title: 'Lunch',
-            subtitle: 'Steamed vegetables with olive oil',
-            tags: ['Heart healthy', 'Low fat'],
-            imageUrl: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=120&h=120&fit=crop'
-          },
-          {
-            title: 'Dinner',
-            subtitle: 'Lentil soup with whole-grain roti',
-            tags: ['Low sodium', 'High fiber', 'Heart healthy'],
-            imageUrl: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=120&h=120&fit=crop'
-          },
-          {
-            title: 'Breakfast',
-            subtitle: 'Oatmeal with banana',
-            tags: ['High fiber', 'Low sodium'],
-            imageUrl: 'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=120&h=120&fit=crop'
-          },
-          {
-            title: 'Snack',
-            subtitle: 'Fresh fruit bowl',
-            tags: ['Low fat', 'Heart healthy'],
-            imageUrl: 'https://images.unsplash.com/photo-1519996529931-28324d5a630e?w=120&h=120&fit=crop'
-          }
-        ],
-        reviewedByName: 'Dr. Umesh',
-        reviewedAt: new Date('2024-10-24T10:30:00'),
-        createdAt: new Date('2024-01-22')
+      error:(err:any)=>{
+        console.log('weekly diet plans AIP errer ',err)
       }
-    ];
-    this.filteredDietPlans = [...this.dietPlans];
-  }
+     
+    });
+}
+
 
   getActivePlansCount(): number {
     return this.dietPlans.filter(plan => plan.status === 'active').length;

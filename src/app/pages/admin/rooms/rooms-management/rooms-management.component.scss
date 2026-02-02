@@ -3,6 +3,62 @@
   background: linear-gradient(135deg, var(--page-background-color) 0%, var(--secondary-background-color) 100%);
   font-family: var(--primary-font-family);
 }
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  color: var(--text-primary);
+}
+.bed-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 14px 18px;
+  margin-bottom: 12px;
+
+  background: #f9fbfc;
+  border: 1px solid #e5eef3;
+  border-radius: 12px;
+
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+}
+
+.floor-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+
+  &::before {
+    content: '🏢';
+    font-size: 18px;
+  }
+}
+
+.bed-count {
+  font-size: 14px;
+  font-weight: 500;
+  color: #475569;
+
+  span {
+    font-weight: 600;
+  }
+}
+
 
 .page-header {
   display: flex;
