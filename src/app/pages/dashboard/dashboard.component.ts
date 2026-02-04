@@ -9,6 +9,8 @@ import { HighchartsChartModule } from 'highcharts-angular';
 
 import { DashboardDetailsComponent } from '../dashboard-details/dashboard-details.component';
 import { RoomsService } from '../../services/rooms.service';
+import { AppointmentService } from '../../services/appointment.service';
+import { AuthService } from '../../services/auth.service';
 
 interface DashboardStats {
   roomAvailability: number;
@@ -18,8 +20,27 @@ interface DashboardStats {
   overallVisitors: number;
 }
 
+/** API response shape for GET /api/appointments/doctor/:doctorCode/requests */
+interface AppointmentRequestApi {
+  appointmentPublicId: string;
+  doctorName?: string;
+  patientPublicId?: string;
+  patientName: string;
+  appointmentDate: string;
+  startTime: string;
+  endTime?: string | null;
+  tokenNumber?: number | null;
+  reason: string;
+  priority: string;
+  paymentStatus: string;
+  slotId?: string | null;
+  bookingMode?: string;
+}
+
+/** Row model for the appointment requests grid (mapped from API + used for Approve) */
 interface AppointmentRequest {
-  id: number;
+  id: string;
+  appointmentPublicId: string;
   patientName: string;
   patientAvatar?: string;
   requestedDate: string;
@@ -84,6 +105,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     private readonly dialog: MatDialog,
     private readonly router: Router,
     private readonly roomsService: RoomsService,
+    private readonly appointmentService: AppointmentService,
+    private readonly authService: AuthService,
     @Inject(PLATFORM_ID) private readonly platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -106,8 +129,68 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   private updateRequestRowData() {
     // Keep a stable rowData reference for ag-grid to avoid re-render thrash.
-    // No quick filters now; just mirror the source list.
     this.requestRowData = [...this.appointmentRequests];
+  }
+
+  /** Map API request item to grid row; id and appointmentPublicId are set for Approve API. */
+  private mapRequestApiToRow(item: AppointmentRequestApi): AppointmentRequest {
+    const priority = (item.priority === 'NORMAL' ? 'MEDIUM' : item.priority ?? 'MEDIUM').toUpperCase() as AppointmentRequest['priority'];
+    const paymentStatus = (item.paymentStatus ?? 'PENDING').toUpperCase() as AppointmentRequest['paymentStatus'];
+    return {
+      id: item.appointmentPublicId,
+      appointmentPublicId: item.appointmentPublicId,
+      patientName: item.patientName ?? '—',
+      requestedDate: item.appointmentDate ?? '—',
+      requestedTime: item.startTime ?? '—',
+      reason: item.reason ?? '—',
+      priority,
+      paymentStatus
+    };
+  }
+
+  /** First and last day of current month for status-counts API (YYYY-MM-DD). */
+  private getDefaultStatusCountDateRange(): { from: string; to: string } {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
+    return {
+      from: `${y}-${m}-01`,
+      to: `${y}-${m}-${String(lastDay).padStart(2, '0')}`
+    };
+  }
+
+  /** Map status-counts API response to chart order: [Confirmed, Pending, Cancelled, Completed]. */
+  private mapStatusCountsToChartData(res: any): number[] {
+    const counts = res?.counts ?? res?.data ?? res?.content ?? {};
+    const n = (key: string): number => {
+      const v = counts[key] ?? counts[key?.toLowerCase()];
+      return typeof v === 'number' ? v : 0;
+    };
+    return [
+      n('SCHEDULED') || n('CONFIRMED'),
+      n('PENDING'),
+      n('CANCELLED'),
+      n('COMPLETED')
+    ];
+  }
+
+  /** Map age-groups API response to pie chart data [{ name, y }, ...]. */
+  private mapAgeGroupDemographicsToChartData(res: any): { name: string; y: number }[] {
+    const raw = res?.data ?? res?.ageGroups ?? res?.content ?? res;
+    if (Array.isArray(raw) && raw.length > 0) {
+      return raw.map((item: any) => ({
+        name: item.name ?? item.ageGroup ?? item.label ?? String(item.key ?? '—'),
+        y: typeof item.count === 'number' ? item.count : Number(item.value ?? item.y ?? 0) || 0
+      })).filter((d: { name: string; y: number }) => d.name && d.y >= 0);
+    }
+    if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+      return Object.entries(raw).map(([name, value]) => ({
+        name: name.includes('Age') ? name : `Age ${name}`,
+        y: typeof value === 'number' ? value : Number(value) || 0
+      })).filter((d: { name: string; y: number }) => d.y > 0 || d.name);
+    }
+    return [];
   }
 
   loadDashboardData() {
@@ -120,169 +203,54 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       // You can put any other logic that depends on rooms here, if needed
     });
 
-    // Appointment requests (10–20 items)
-    this.appointmentRequests = [
-      {
-        id: 1,
-        patientName: 'Robert Chen',
-        patientAvatar: 'https://randomuser.me/api/portraits/men/51.jpg',
-        requestedDate: 'Today',
-        requestedTime: '04:00 PM',
-        reason: 'Emergency Consultation',
-        priority: 'HIGH',
-        paymentStatus: 'PAID'
+    // Appointment requests from API (GET .../requests)
+    const doctorCode = this.authService.getCurrentUser()?.id ?? 'DR2';
+    this.appointmentService.getAppointmentRequests('DR1').subscribe({
+      next: (res: any) => {
+        const list: AppointmentRequestApi[] = Array.isArray(res) ? res : res?.data ?? res?.content ?? [];
+        this.appointmentRequests = list.map((item: AppointmentRequestApi) => this.mapRequestApiToRow(item));
+        this.updateRequestRowData();
       },
-      {
-        id: 2,
-        patientName: 'Emily Davis',
-        patientAvatar: 'https://randomuser.me/api/portraits/women/52.jpg',
-        requestedDate: 'Tomorrow',
-        requestedTime: '10:00 AM',
-        reason: 'Follow-up Visit',
-        priority: 'MEDIUM',
-        paymentStatus: 'PENDING'
-      },
-      {
-        id: 3,
-        patientName: 'Michael Brown',
-        patientAvatar: 'https://randomuser.me/api/portraits/men/53.jpg',
-        requestedDate: 'Tomorrow',
-        requestedTime: '02:00 PM',
-        reason: 'General Consultation',
-        priority: 'LOW',
-        paymentStatus: 'UNPAID'
-      },
-      {
-        id: 4,
-        patientName: 'Sarah Johnson',
-        patientAvatar: 'https://randomuser.me/api/portraits/women/54.jpg',
-        requestedDate: 'Tomorrow',
-        requestedTime: '03:00 PM',
-        reason: 'Annual Checkup',
-        priority: 'MEDIUM',
-        paymentStatus: 'PAID'
-      },
-      {
-        id: 5,
-        patientName: 'James Wilson',
-        patientAvatar: 'https://randomuser.me/api/portraits/men/55.jpg',
-        requestedDate: 'Today',
-        requestedTime: '11:00 AM',
-        reason: 'Blood Pressure Check',
-        priority: 'LOW',
-        paymentStatus: 'PAID'
-      },
-      {
-        id: 6,
-        patientName: 'Lisa Anderson',
-        patientAvatar: 'https://randomuser.me/api/portraits/women/56.jpg',
-        requestedDate: 'Tomorrow',
-        requestedTime: '09:00 AM',
-        reason: 'Diabetes Follow-up',
-        priority: 'MEDIUM',
-        paymentStatus: 'PENDING'
-      },
-      {
-        id: 7,
-        patientName: 'David Martinez',
-        patientAvatar: 'https://randomuser.me/api/portraits/men/57.jpg',
-        requestedDate: 'Today',
-        requestedTime: '01:30 PM',
-        reason: 'Skin Allergy',
-        priority: 'LOW',
-        paymentStatus: 'UNPAID'
-      },
-      {
-        id: 8,
-        patientName: 'Jennifer Taylor',
-        patientAvatar: 'https://randomuser.me/api/portraits/women/58.jpg',
-        requestedDate: 'Tomorrow',
-        requestedTime: '04:00 PM',
-        reason: 'Vaccination',
-        priority: 'LOW',
-        paymentStatus: 'PAID'
-      },
-      {
-        id: 9,
-        patientName: 'Christopher Lee',
-        patientAvatar: 'https://randomuser.me/api/portraits/men/59.jpg',
-        requestedDate: 'Today',
-        requestedTime: '03:00 PM',
-        reason: 'Chest Pain Evaluation',
-        priority: 'HIGH',
-        paymentStatus: 'PENDING'
-      },
-      {
-        id: 10,
-        patientName: 'Amanda White',
-        patientAvatar: 'https://randomuser.me/api/portraits/women/60.jpg',
-        requestedDate: 'Tomorrow',
-        requestedTime: '11:30 AM',
-        reason: 'Prenatal Checkup',
-        priority: 'MEDIUM',
-        paymentStatus: 'PAID'
-      },
-      {
-        id: 11,
-        patientName: 'Daniel Harris',
-        patientAvatar: 'https://randomuser.me/api/portraits/men/61.jpg',
-        requestedDate: 'Today',
-        requestedTime: '10:00 AM',
-        reason: 'Knee Pain',
-        priority: 'MEDIUM',
-        paymentStatus: 'UNPAID'
-      },
-      {
-        id: 12,
-        patientName: 'Michelle Clark',
-        patientAvatar: 'https://randomuser.me/api/portraits/women/62.jpg',
-        requestedDate: 'Tomorrow',
-        requestedTime: '02:00 PM',
-        reason: 'Thyroid Review',
-        priority: 'LOW',
-        paymentStatus: 'PAID'
-      },
-      {
-        id: 13,
-        patientName: 'Kevin Robinson',
-        patientAvatar: 'https://randomuser.me/api/portraits/men/63.jpg',
-        requestedDate: 'Today',
-        requestedTime: '05:00 PM',
-        reason: 'Migraine',
-        priority: 'MEDIUM',
-        paymentStatus: 'PENDING'
-      },
-      {
-        id: 14,
-        patientName: 'Stephanie Lewis',
-        patientAvatar: 'https://randomuser.me/api/portraits/women/64.jpg',
-        requestedDate: 'Tomorrow',
-        requestedTime: '08:30 AM',
-        reason: 'Eye Checkup',
-        priority: 'LOW',
-        paymentStatus: 'PAID'
-      },
-      {
-        id: 15,
-        patientName: 'Ryan Walker',
-        patientAvatar: 'https://randomuser.me/api/portraits/men/65.jpg',
-        requestedDate: 'Today',
-        requestedTime: '12:00 PM',
-        reason: 'Sports Injury',
-        priority: 'HIGH',
-        paymentStatus: 'PAID'
-      },
-      {
-        id: 16,
-        patientName: 'Nicole Hall',
-        patientAvatar: 'https://randomuser.me/api/portraits/women/66.jpg',
-        requestedDate: 'Tomorrow',
-        requestedTime: '01:00 PM',
-        reason: 'Mental Health Follow-up',
-        priority: 'MEDIUM',
-        paymentStatus: 'PENDING'
+      error: () => {
+        this.appointmentRequests = [];
+        this.updateRequestRowData();
       }
-    ];
+    });
+
+    // Appointment Status chart data (GET .../status-counts)
+    const statusDoctorCode = this.authService.getCurrentUser()?.id ?? 'DR1';
+    const { from, to } = this.getDefaultStatusCountDateRange();
+    this.appointmentService.getAppointmentStatusCounts('DR1', from, to).subscribe({
+      next: (res: any) => {
+        const data = this.mapStatusCountsToChartData(res);
+        if (this.appointmentStatusChartOptions.series?.[0]) {
+          this.appointmentStatusChartOptions = {
+            ...this.appointmentStatusChartOptions,
+            series: [{ ...this.appointmentStatusChartOptions.series[0], data }]
+          };
+        }
+      },
+      error: () => {
+        // Keep chart default/fallback data
+      }
+    });
+
+    // Patient Demographics (age-groups) chart data
+    const demographicsDoctorCode = this.authService.getCurrentUser()?.id ?? 'DR1';
+    this.appointmentService.getAgeGroupDemographics('DR1').subscribe({
+      next: (res: any) => {
+        const data = this.mapAgeGroupDemographicsToChartData(res);
+        if (this.patientDemographicsChartOptions.series?.[0]) {
+          this.patientDemographicsChartOptions = {
+            ...this.patientDemographicsChartOptions,
+            series: [{ ...this.patientDemographicsChartOptions.series[0], data }]
+          };
+        }
+      },
+      error: () => {
+        // Keep chart default/fallback data
+      }
+    });
 
     // Appointment Requests grid config (core app-grid)
     this.requestColumns = [
@@ -322,9 +290,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       pagination: false,
       suppressCellFocus: true,
       menuActions: [
-        { title: 'Approve', icon: 'check_circle', click: (param: any) => this.approveAppointmentRequest(param.data) },
-        { title: 'Reschedule', icon: 'event_available', click: (param: any) => this.rescheduleAppointmentRequest(param.data) },
-        { title: 'Reject', icon: 'cancel', click: (param: any) => this.rejectAppointmentRequest(param.data) }
+        { title: 'Approve', icon: 'check_circle', click: (param: any) => this.approveAppointmentRequest(param?.data ?? param) },
+        { title: 'Reschedule', icon: 'event_available', click: (param: any) => this.rescheduleAppointmentRequest(param?.data ?? param) },
+        { title: 'Reject', icon: 'cancel', click: (param: any) => this.rejectAppointmentRequest(param?.data ?? param) }
       ]
     };
 
@@ -560,20 +528,30 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   approveAppointmentRequest(request: AppointmentRequest) {
-    // Handle approval logic
-    this.appointmentRequests = this.appointmentRequests.filter(r => r.id !== request.id);
-    this.updateRequestRowData();
+    if (!request) return;
+    const appointmentPublicId = request.appointmentPublicId ?? request.id;
+    if (!appointmentPublicId || typeof appointmentPublicId !== 'string') return;
+    const doctorCode = this.authService.getCurrentUser()?.id ?? 'DR2';
+    this.appointmentService.approveAppointmentRequest("DR1", appointmentPublicId).subscribe({
+      next: () => {
+        this.appointmentRequests = this.appointmentRequests.filter(r => r.appointmentPublicId !== appointmentPublicId);
+        this.updateRequestRowData();
+      },
+      error: () => {
+        // Optionally show error toast; list stays unchanged
+      }
+    });
   }
 
   rejectAppointmentRequest(request: AppointmentRequest) {
-    // Handle rejection logic
-    this.appointmentRequests = this.appointmentRequests.filter(r => r.id !== request.id);
+    const appointmentPublicId = request.appointmentPublicId ?? request.id;
+    this.appointmentRequests = this.appointmentRequests.filter(r => r.appointmentPublicId !== appointmentPublicId);
     this.updateRequestRowData();
   }
 
   rescheduleAppointmentRequest(request: AppointmentRequest) {
-    // Handle reschedule logic - navigate to appointment reschedule page
-    this.router.navigate(['/appointment'], { queryParams: { reschedule: request.id } });
+    const appointmentPublicId = request.appointmentPublicId ?? request.id;
+    this.router.navigate(['/appointment'], { queryParams: { reschedule: appointmentPublicId } });
   }
 
   getStatusClass(status: string): string {
