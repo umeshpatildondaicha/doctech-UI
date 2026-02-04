@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 
-import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ColDef } from 'ag-grid-community';
 import { Appointment } from '../../interfaces/appointment.interface';
@@ -13,12 +12,13 @@ import { ChipCellRendererComponent } from "@lk/core";
 import { Mode } from '../../types/mode.type';
 import { AppointmentRescheduleComponent } from '../appointment-reschedule/appointment-reschedule.component';
 import { AppointmentViewComponent } from '../appointment-view/appointment-view.component';
-import { CoreEventService, DialogboxService, DialogFooterAction, PageComponent, BreadcrumbItem } from "@lk/core";
+import { CoreEventService, DialogboxService, DialogFooterAction, PageComponent, BreadcrumbItem, UserType } from "@lk/core";
 import { AppointmentService } from '../../services/appointment.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
     selector: 'app-appointment',
-    imports: [GridComponent, AppButtonComponent, IconComponent, MatTabsModule, CalendarComponent, PageComponent],
+    imports: [GridComponent, AppButtonComponent, IconComponent, CalendarComponent, PageComponent],
     templateUrl: './appointment.component.html',
     styleUrl: './appointment.component.scss'
 })
@@ -27,11 +27,9 @@ export class AppointmentComponent implements OnInit {
     { label: 'Dashboard', route: '/dashboard', icon: 'dashboard' },
     { label: 'Appointments', route: '/appointment', icon: 'event', isActive: true }
   ];
-  selectedTabIndex = 0;
-
   // All appointments data
   allAppointments: Appointment[] = [];
-  isLoading =false;
+  isLoading = false;
   appointmentColumns: ColDef[] = [];
   appointmentGridOptions = {
     menuActions: [
@@ -53,35 +51,13 @@ export class AppointmentComponent implements OnInit {
     ]
   };
 
-  // Pending appointments data
-  pendingAppointments: Appointment[] = [];
-  pendingColumns: ColDef[] = [];
-  pendingGridOptions = {
-    menuActions: [
-      {
-        title: 'View',
-        icon: 'visibility',
-        click: (param: any) => this.openViewDialog(param.data)
-      },
-      {
-        title: 'Approve',
-        icon: 'check_circle',
-        click: (param: any) => this.approveAppointment(param.data)
-      },
-      {
-        title: 'Reject',
-        icon: 'cancel',
-        click: (param: any) => this.rejectAppointment(param.data)
-      }
-    ]
-  };
-
   constructor(
     private dialogService: DialogboxService,
     private router: Router,
     private eventService: CoreEventService,
     private route: ActivatedRoute,
-    private appointmentService :AppointmentService
+    private appointmentService: AppointmentService,
+    private authService: AuthService
   ) {
     this.eventService.setBreadcrumb({
       label: 'Appointments',
@@ -92,25 +68,18 @@ export class AppointmentComponent implements OnInit {
   ngOnInit() {
     this.getQueryParams();
     this.initializeAppointmentGrid();
-    this.initializePendingGrid();
     this.loadAppointmentData();
-    this.loadPendingData();
   }
 
   getQueryParams() {
     this.route.queryParams.subscribe((params) => {
       if (params['page'] === 'book-appointment') {
-        this.selectedTabIndex = 1;
         this.eventService.setBreadcrumb({
           label: 'Book Appointment',
           icon: 'event'
         });
       }
     });
-  }
-
-  onTabChange(index: number) {
-    this.selectedTabIndex = index;
   }
 
 
@@ -183,22 +152,40 @@ export class AppointmentComponent implements OnInit {
     ];
   }
 
-  loadAppointmentData():void {
+  loadAppointmentData(): void {
     this.isLoading = true;
 
-    this.appointmentService.getAppointments().subscribe({
-      next: (res) => {
-        console.log('My appointments response 👉', res);
+    const userType = this.authService.getUserType();
+    const user = this.authService.getCurrentUser() as { role?: string } | null;
+    const isDoctor =
+      this.authService.isUserType(UserType.DOCTOR) ||
+      userType === 'DOCTOR' ||
+      user?.role === 'DOCTOR';
+    const doctorCode = this.authService.getDoctorRegistrationNumber() || 'DR1';
 
-        // 🔴 response structure safe handling
-        this.allAppointments = res?.data || res || [];
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error loading appointments ❌', err);
-        this.isLoading = false;
-      }
-    });
+    if (isDoctor) {
+      this.appointmentService.getDoctorAppointments(doctorCode).subscribe({
+        next: (res) => {
+          this.allAppointments = res?.data ?? res ?? [];
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Error loading doctor appointments', err);
+          this.isLoading = false;
+        }
+      });
+    } else {
+      this.appointmentService.getAppointments().subscribe({
+        next: (res) => {
+          this.allAppointments = res?.data ?? res ?? [];
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Error loading appointments', err);
+          this.isLoading = false;
+        }
+      });
+    }
   }
 
   onAppointmentRowClick(event: any) {
@@ -319,105 +306,10 @@ export class AppointmentComponent implements OnInit {
     }
   }
 
-  approveAppointment(appointment: Appointment) {
-    // Handle appointment approval
-    console.log('Approving appointment:', appointment);
-  }
-
-  rejectAppointment(appointment: Appointment) {
-    // Handle appointment rejection
-    console.log('Rejecting appointment:', appointment);
-  }
-
-  // Pending appointments methods
-  initializePendingGrid() {
-    this.pendingColumns = [
-      {
-        headerName: 'Status',
-        field: 'status',
-        width: 120,
-        sortable: true,
-        filter: true,
-        cellRenderer: ChipCellRendererComponent
-      },
-      {
-        headerName: 'Patient Name',
-        field: 'patientName',
-        width: 150,
-        sortable: true,
-        filter: true
-      },
-      {
-        headerName: 'Doctor Name',
-        field: 'doctorName',
-        width: 150,
-        sortable: true,
-        filter: true
-      },
-      {
-        headerName: 'Appointment Date',
-        field: 'appointment_date_time',
-        width: 150,
-        sortable: true,
-        filter: true,
-        valueFormatter: (params: any) => {
-          return new Date(params.value).toLocaleDateString();
-        }
-      },
-      {
-        headerName: 'Slot Time',
-        field: 'slotTime',
-        width: 120,
-        sortable: true,
-        filter: true
-      },
-      {
-        headerName: 'Referred By',
-        field: 'referred_by_doctor_name',
-        width: 150,
-        sortable: true,
-        filter: true,
-        cellRenderer: (params: any) => {
-          if (params.data.is_referred && params.data.referred_by_doctor_name) {
-            return `<span style="background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
-              <i class="material-icons" style="font-size: 14px; vertical-align: middle; margin-right: 4px;">person_add</i>
-              ${params.data.referred_by_doctor_name}
-            </span>`;
-          }
-          return '<span style="color: #6b7280; font-style: italic;">Direct appointment</span>';
-        }
-      },
-      {
-        headerName: 'Notes',
-        field: 'notes',
-        width: 200,
-        sortable: true,
-        filter: true
-      }
-    ];
-  }
-
-  loadPendingData() {
-    this.pendingAppointments = this.allAppointments.filter(appointment => appointment.status === 'PENDING');
-  }
-
-  onPendingRowClick(event: any) {
-    console.log('Pending appointment row clicked:', event.data);
-  }
-
-
-
-  // Add missing methods referenced in template
   createAppointment() {
     this.openDialog('create');
   }
 
-  refreshPending() {
-    console.log('Refreshing pending appointments');
-    this.loadPendingData();
-  }
-
-  // Navigation method for My Schedule
   navigateToMySchedule() {
     this.router.navigate(['/my-schedule']);
   }

@@ -17,6 +17,14 @@ export class AppointmentService {
     );
   }
 
+  /** GET all appointments for a doctor. */
+  getDoctorAppointments(doctorCode: string): Observable<any> {
+    const safeDoctor = encodeURIComponent((doctorCode || '').trim());
+    return this.httpService.sendGETRequest(
+      `${this.baseUrl}/appointments/doctor/${safeDoctor}/appointments`
+    );
+  }
+
   getAppointmentRequests(doctorCode: string): Observable<any> {
     return this.httpService.sendGETRequest(
       `${this.baseUrl}/appointments/doctor/${doctorCode}/requests`
