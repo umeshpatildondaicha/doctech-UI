@@ -1,5 +1,13 @@
 <app-page [breadcrumb]="breadcrumb" [isFooter]="false">
-  <div page-body class="rooms-management-page">
+  <div page-body class="rooms-management-page" style="padding: 20px;">
+    <!-- Debug: Test if content renders -->
+    <div style="background: #e3f2fd; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+      <h3>Rooms Management</h3>
+      <p>Floors loaded: {{ floors.length }}</p>
+      <p>Wards loaded: {{ wards.length }}</p>
+      <p>Rooms loaded: {{ roomData.length }}</p>
+    </div>
+    
     <app-tabs [selectedIndex]="selectedTabIndex">
       <app-tab label="Floors">
         <div class="tab-panel">
@@ -22,6 +30,10 @@
                       [value]="floorForm.controls['name'].value"
                       (valueChange)="floorForm.controls['name'].setValue($event)" [required]="true">
                     </app-input>
+                    <!-- <app-input [label]="'Total Rooms'" [placeholder]="'e.g., 10'"
+                      [value]="floorForm.controls['totalRooms'].value"
+                      (valueChange)="floorForm.controls['totalRooms'].setValue($event)" [required]="true" [type]="'number'">
+                    </app-input> -->
                   </div>
                 </div>
 
@@ -89,44 +101,77 @@
             <!-- Add Ward Form -->
             <div class="add-form-card">
               <h3>Add New Ward</h3>
+            
               <form [formGroup]="wardForm" class="add-form">
+
                 <div class="form-row">
                   <div class="form-field">
-                    <app-input [label]="'Ward Name'" [placeholder]="'e.g., ICU Ward 1, General Ward A'"
-                      [value]="wardForm.controls['name'].value"
-                      (valueChange)="wardForm.controls['name'].setValue($event)" [required]="true">
+                    <app-input
+                      [label]="'Ward Name'"
+                      [placeholder]="'e.g., ICU Ward 1, General Ward A'"
+                      [value]="wardForm.controls['wardName'].value"
+                      (valueChange)="wardForm.controls['wardName'].setValue($event)"
+                      [required]="true">
                     </app-input>
                   </div>
+              
                   <div class="form-field">
-                    <app-selectbox [label]="'Ward Type'" [data]="wardForm.controls['type'].value"
-                      (dataChange)="wardForm.controls['type'].setValue($event)" [options]="wardTypeOptions"
-                      [valueField]="'value'" [displayExpr]="'label'" [required]="true">
+                    <app-selectbox
+                      [label]="'Ward Type'"
+                      [data]="wardForm.controls['wardType'].value"
+                      (dataChange)="wardForm.controls['wardType'].setValue($event.value)"
+                      [options]="wardTypeOptions"
+                      [valueField]="'value'"
+                      [displayExpr]="'label'"
+                      [required]="true">
                     </app-selectbox>
                   </div>
                 </div>
+              
                 <div class="form-row">
                   <div class="form-field">
-                    <app-selectbox [label]="'Floor'" [data]="roomForm.controls['floor'].value"
-                      (dataChange)="roomForm.controls['floor'].setValue($event)" [options]="getFloorOptions()"
-                      [valueField]="'value'" [displayExpr]="'label'" [required]="true">
+                    <app-selectbox
+                      [label]="'Floor'"
+                      [data]="wardForm.controls['floorId'].value"
+                      (dataChange)="wardForm.controls['floorId'].setValue($event.value)"
+                      [options]="getFloorOptions()"
+                      [valueField]="'value'"
+                      [displayExpr]="'label'"
+                      [required]="true">
                     </app-selectbox>
-
                   </div>
-
+              
                   <div class="form-field">
-                    <app-input [label]="'Capacity'" [placeholder]="'Total bed capacity'"
+                    <app-input
+                      [label]="'Capacity'"
+                      [placeholder]="'Total bed capacity'"
                       [value]="wardForm.controls['capacity'].value"
-                      (valueChange)="wardForm.controls['capacity'].setValue(+$event)" [type]="'number'"
+                      (valueChange)="wardForm.controls['capacity'].setValue(+$event)"
+                      [type]="'number'"
                       [required]="true">
                     </app-input>
                   </div>
                 </div>
-
-                <app-button [text]="'Add Ward'" [color]="'primary'" [fontIcon]="'add'" (btnClick)="onAddWard()"
-                  [disabled]="!wardForm.valid">
+              
+                <app-button
+                  [text]="selectedWardId ? 'Update Ward' : 'Add Ward'"
+                  [color]="'primary'"
+                  [fontIcon]="selectedWardId ? 'save' : 'add'"
+                  (btnClick)="onAddWard()"
+                  [disabled]="wardForm.invalid">
                 </app-button>
+                @if (selectedWardId) {
+                  <app-button
+                    [text]="'Cancel'"
+                    [color]="'secondary'"
+                    (btnClick)="wardForm.reset(); selectedWardId = null;">
+                  </app-button>
+                }
+              
               </form>
+              
             </div>
+            
 
             <!-- Wards List -->
             <div class="items-grid">
@@ -140,9 +185,14 @@
                       <span class="card-subtitle">{{ward.wardType}} Ward</span>
                     </div>
                   </div>
-                  <app-button [fontIcon]="'delete'" [color]="'warn'" (btnClick)="removeWard(ward.wardId)"
-                    class="delete-btn">
-                  </app-button>
+                  <div class="card-actions">
+                    <app-button appearance="icon" [fontIcon]="'edit'" 
+                      (btnClick)="onEditWard(ward)">
+                    </app-button>
+                    <app-button appearance="icon" [fontIcon]="'delete'" [color]="'warn'"
+                      (btnClick)="removeWard(ward.wardId)">
+                    </app-button>
+                  </div>
                 </div>
                 <div class="card-content">
                   <div class="stat-item">
@@ -210,9 +260,17 @@
                   </div>
                 </div>
 
-                <app-button [text]="'Add Room'" [color]="'primary'" [fontIcon]="'add'" (btnClick)="onAddRoom()"
-                  [disabled]="roomForm.valid">
+                <app-button [text]="selectedRoomId ? 'Update Room' : 'Add Room'" [color]="'primary'" 
+                  [fontIcon]="selectedRoomId ? 'save' : 'add'" (btnClick)="onAddRoom()"
+                  [disabled]="roomForm.invalid">
                 </app-button>
+                @if (selectedRoomId) {
+                  <app-button
+                    [text]="'Cancel'"
+                    [color]="'secondary'"
+                    (btnClick)="roomForm.reset(); selectedRoomId = null;">
+                  </app-button>
+                }
               </form>
             </div>
 
@@ -228,8 +286,14 @@
                       <span class="card-subtitle">{{ room.type }}</span>
                     </div>
                   </div>
-                  <app-button [fontIcon]="'delete'" [color]="'warn'" class="delete-btn">
-                  </app-button>
+                  <div class="card-actions">
+                    <app-button appearance="icon" [fontIcon]="'edit'" 
+                      (btnClick)="onEditRoom(room)">
+                    </app-button>
+                    <app-button appearance="icon" [fontIcon]="'delete'" [color]="'warn'"
+                      (btnClick)="removeRoom(room.id)">
+                    </app-button>
+                  </div>
                 </div>
                 <div class="card-content">
                   <div class="stat-item">
@@ -262,15 +326,17 @@
                 </app-button>
               </div>
             </div>
-            <div *ngFor="let floor of bedsByFloor" class="bed-row">
-              <div class="floor-name">
-                {{ floor.floorName }}
-              </div>
+            @for (floor of bedsByFloor; track floor.floorName) {
+              <div class="bed-row">
+                <div class="floor-name">
+                  {{ floor.floorName }}
+                </div>
 
-              <div class="bed-count">
-                {{ floor.totalBeds }} beds &nbsp; {{ floor.occupiedBeds }} occupied
+                <div class="bed-count">
+                  {{ floor.totalBeds }} beds &nbsp; {{ floor.occupiedBeds }} occupied
+                </div>
               </div>
-            </div>
+            }
 
             <!-- Bed Management Form -->
 
@@ -293,7 +359,7 @@
                   <div class="room-card">
                     <div class="room-header">
                       <div class="room-info">
-                        <h4 class="room-number">{{ room.floorNumber }}</h4>
+                        <h4 class="room-number">{{ room.number }}</h4>
                         <span class="room-type">{{ room.type }}</span>
                       </div>
                       <div class="room-stats">
@@ -493,8 +559,6 @@
         </div>
       </app-tab>
     </app-tabs>
-
-
 
     <!-- Bed Form Dialog -->
   </div>

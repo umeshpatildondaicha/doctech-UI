@@ -444,27 +444,48 @@ export class RoomFormComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.roomForm.valid) {
-      const formData = this.roomForm.value;
-      
-      try {
-        if (this.isEditMode && this.roomId) {
-          // Update existing room
-          this.roomsService.createdRoom(formData);
-          console.log('Room updated successfully');
-        } else {
-          // Add new room
-          this.roomsService.createdRoom(formData);
-          console.log('Room added successfully');
-        }
-        
-        // Navigate back to rooms list
-        this.router.navigate(['/admin/rooms']);
-      } catch (error) {
-        console.error('Error saving room:', error);
-      }
-    } else {
+    if (this.roomForm.invalid) {
       this.markFormGroupTouched();
+      return;
+    }
+
+    const formData = this.roomForm.value;
+    
+    // Transform form data to API payload format
+    const payload = {
+      roomNumber: formData.number,
+      roomType: formData.type,
+      capacity: formData.capacity,
+      status: formData.status === 'Available' ? 'ACTIVE' : formData.status.toUpperCase(),
+      floorId: formData.floor,
+      wardId: null, // Can be added if needed
+      hospitalId: 'H1',
+      createdBy: 'ADMIN',
+      updatedBy: 'ADMIN'
+    };
+
+    if (this.isEditMode && this.roomId) {
+      // Update existing room
+      this.roomsService.updateRoom(this.roomId, payload).subscribe({
+        next: (res) => {
+          console.log('Room updated successfully ✅', res);
+          this.router.navigate(['/admin/rooms']);
+        },
+        error: (err) => {
+          console.error('Error updating room ❌', err);
+        }
+      });
+    } else {
+      // Create new room
+      this.roomsService.createRoom(payload).subscribe({
+        next: (res) => {
+          console.log('Room created successfully ✅', res);
+          this.router.navigate(['/admin/rooms']);
+        },
+        error: (err) => {
+          console.error('Error creating room ❌', err);
+        }
+      });
     }
   }
 

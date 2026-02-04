@@ -21,17 +21,27 @@ export interface Room {
   providedIn: 'root'
 })
 export class RoomsService {
-  constructor(private http:HttpService) { 
-  }
-  getRoomById(id: number) {
-    return this.http.sendGETRequest(`https://doctech.solutions/api/rooms/${id}`);
+  private baseUrl = 'https://doctech.solutions/api/rooms';
+
+  constructor(private http: HttpService) {}
+
+  getRoomById(id: number): Observable<any> {
+    return this.http.sendGETRequest(`${this.baseUrl}/${id}`);
   }
   
-  getRooms(){
-    return this.http.sendGETRequest('https://doctech.solutions/api/rooms');
+  getRooms(): Observable<any> {
+    return this.http.sendGETRequest(this.baseUrl);
   }
- createdRoom(payload:any):Observable<any>{
-  return this.http.sendPOSTRequest('https://doctech.solutions/api/rooms',payload);
- }
 
+  createRoom(payload: any): Observable<any> {
+    return this.http.sendPOSTRequest(this.baseUrl, payload);
+  }
+
+  updateRoom(roomId: number, payload: any): Observable<any> {
+    return this.http.sendPUTRequest(`${this.baseUrl}/${roomId}`, payload);
+  }
+
+  deleteRoom(roomId: number): Observable<any> {
+    return this.http.sendDELETERequest(`${this.baseUrl}/${roomId}`);
+  }
 }

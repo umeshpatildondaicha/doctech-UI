@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { GridComponent } from "@lk/core";
 import { Patient } from '../../interfaces/patient.interface';
@@ -7,6 +7,7 @@ import { IconComponent } from "@lk/core";
 import { PatientCreateComponent } from '../patient-create/patient-create.component';
 import { StatusCellRendererComponent } from "@lk/core";
 import { CoreEventService, DialogboxService, DialogFooterAction } from "@lk/core";
+import { PatientService } from '../../services/patient.service';
 
 @Component({
     selector: 'app-patient',
@@ -14,17 +15,17 @@ import { CoreEventService, DialogboxService, DialogFooterAction } from "@lk/core
     templateUrl: './patient.component.html',
     styleUrl: './patient.component.scss'
 })
-export class PatientComponent {
-  patientData: Patient[] = [
-    { patientId: 1, firstName: 'John', lastName: 'Doe', dateOfBirth: '1990-01-01', gender: 'Male', contact: 1234567890, email: 'john.doe@email.com', address: '123 Main St, Anytown, USA', bloodGroup: 'A_POSITIVE', createdDate: '2024-01-15', updatedDate: '2024-01-15' },
-    { patientId: 2, firstName: 'Jane', lastName: 'Smith', dateOfBirth: '1995-05-10', gender: 'Female', contact: 1234567890, email: 'jane.smith@email.com', address: '456 Elm St, Anytown, USA', bloodGroup: 'B_NEGATIVE', createdDate: '2024-01-20', updatedDate: '2024-01-20' },
-    { patientId: 3, firstName: 'Mike', lastName: 'Johnson', dateOfBirth: '1988-12-15', gender: 'Male', contact: 1234567890, email: 'mike.johnson@email.com', address: '789 Oak St, Anytown, USA', bloodGroup: 'O_POSITIVE', createdDate: '2024-01-18', updatedDate: '2024-01-18' },
-    { patientId: 4, firstName: 'Sarah', lastName: 'Wilson', dateOfBirth: '1992-03-20', gender: 'Female', contact: 1234567890, email: 'sarah.wilson@email.com', address: '101 Pine St, Anytown, USA', bloodGroup: 'AB_NEGATIVE', createdDate: '2024-01-16', updatedDate: '2024-01-16' },
-    { patientId: 5, firstName: 'David', lastName: 'Brown', dateOfBirth: '1985-07-15', gender: 'Male', contact: 1234567890, email: 'david.brown@email.com', address: '555 Maple Ave, Anytown, USA', bloodGroup: 'O_NEGATIVE', createdDate: '2024-01-05', updatedDate: '2024-01-05' },
-    { patientId: 6, firstName: 'Lisa', lastName: 'Davis', dateOfBirth: '1993-11-25', gender: 'Female', contact: 1234567890, email: 'lisa.davis@email.com', address: '777 Pine St, Anytown, USA', bloodGroup: 'A_POSITIVE', createdDate: '2024-01-14', updatedDate: '2024-01-14' },
-    { patientId: 7, firstName: 'Robert', lastName: 'Miller', dateOfBirth: '1980-06-10', gender: 'Male', contact: 1234567890, email: 'robert.miller@email.com', address: '999 Oak St, Anytown, USA', bloodGroup: 'B_POSITIVE', createdDate: '2024-01-03', updatedDate: '2024-01-03' },
-    { patientId: 8, firstName: 'Emily', lastName: 'Garcia', dateOfBirth: '1991-09-18', gender: 'Female', contact: 1234567890, email: 'emily.garcia@email.com', address: '111 Pine St, Anytown, USA', bloodGroup: 'AB_POSITIVE', createdDate: '2024-01-11', updatedDate: '2024-01-11' }
-  ];
+export class PatientComponent  implements OnInit{
+  // patientData: Patient[] = [
+  //   { patientId: 1, firstName: 'John', lastName: 'Doe', dateOfBirth: '1990-01-01', gender: 'Male', contact: 1234567890, email: 'john.doe@email.com', address: '123 Main St, Anytown, USA', bloodGroup: 'A_POSITIVE', createdDate: '2024-01-15', updatedDate: '2024-01-15' },
+  //   { patientId: 2, firstName: 'Jane', lastName: 'Smith', dateOfBirth: '1995-05-10', gender: 'Female', contact: 1234567890, email: 'jane.smith@email.com', address: '456 Elm St, Anytown, USA', bloodGroup: 'B_NEGATIVE', createdDate: '2024-01-20', updatedDate: '2024-01-20' },
+  //   { patientId: 3, firstName: 'Mike', lastName: 'Johnson', dateOfBirth: '1988-12-15', gender: 'Male', contact: 1234567890, email: 'mike.johnson@email.com', address: '789 Oak St, Anytown, USA', bloodGroup: 'O_POSITIVE', createdDate: '2024-01-18', updatedDate: '2024-01-18' },
+  //   { patientId: 4, firstName: 'Sarah', lastName: 'Wilson', dateOfBirth: '1992-03-20', gender: 'Female', contact: 1234567890, email: 'sarah.wilson@email.com', address: '101 Pine St, Anytown, USA', bloodGroup: 'AB_NEGATIVE', createdDate: '2024-01-16', updatedDate: '2024-01-16' },
+  //   { patientId: 5, firstName: 'David', lastName: 'Brown', dateOfBirth: '1985-07-15', gender: 'Male', contact: 1234567890, email: 'david.brown@email.com', address: '555 Maple Ave, Anytown, USA', bloodGroup: 'O_NEGATIVE', createdDate: '2024-01-05', updatedDate: '2024-01-05' },
+  //   { patientId: 6, firstName: 'Lisa', lastName: 'Davis', dateOfBirth: '1993-11-25', gender: 'Female', contact: 1234567890, email: 'lisa.davis@email.com', address: '777 Pine St, Anytown, USA', bloodGroup: 'A_POSITIVE', createdDate: '2024-01-14', updatedDate: '2024-01-14' },
+  //   { patientId: 7, firstName: 'Robert', lastName: 'Miller', dateOfBirth: '1980-06-10', gender: 'Male', contact: 1234567890, email: 'robert.miller@email.com', address: '999 Oak St, Anytown, USA', bloodGroup: 'B_POSITIVE', createdDate: '2024-01-03', updatedDate: '2024-01-03' },
+  //   { patientId: 8, firstName: 'Emily', lastName: 'Garcia', dateOfBirth: '1991-09-18', gender: 'Female', contact: 1234567890, email: 'emily.garcia@email.com', address: '111 Pine St, Anytown, USA', bloodGroup: 'AB_POSITIVE', createdDate: '2024-01-11', updatedDate: '2024-01-11' }
+  // ];
 
   columnDefs: ColDef[] = [
     { field: 'bloodGroup', headerName: 'Blood Group', width: 140, sortable: true, filter: true, cellRenderer: StatusCellRendererComponent },
@@ -40,14 +41,46 @@ export class PatientComponent {
   ];
 
   gridOptions: any = {};
+  patientData: Patient[]=[];
+  loading=false;
 
-  constructor(private dialogService: DialogboxService, private router: Router, private eventService: CoreEventService) {
+  constructor(private dialogService: DialogboxService,
+     private router: Router,
+      private eventService: CoreEventService,
+      private patientService: PatientService
+    
+    ) {
     this.initializeGridOptions();
     this.eventService.setBreadcrumb({
       label: 'Patients',
       icon: 'groups'
     });
   }
+  ngOnInit(): void {
+    this.loadPatients();
+    
+  }
+
+  loadPatients(): void {
+    this.loading = true;
+  
+    this.patientService.getPatients().subscribe({
+      next: (res: any) => {
+        console.log('Patients API response 👉', res);
+  
+        // 🔥 THIS IS THE FIX
+        this.patientData = res.content || [];
+  
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Failed to load patients ❌', err);
+        this.loading = false;
+      }
+    });
+  }
+  
+  
 
   initializeGridOptions() {
     this.gridOptions = {
@@ -91,9 +124,11 @@ export class PatientComponent {
 
 
   onCreatePatient(mode: string = 'create', param?: Patient) {
+    debugger;
+
     const isViewMode = mode === 'view';
     const footerActions: DialogFooterAction[] = [];
-    
+  
     if (!isViewMode) {
       footerActions.push({
         id: 'cancel',
@@ -102,35 +137,83 @@ export class PatientComponent {
         appearance: 'basic'
       });
     }
-    
+    debugger;
     footerActions.push({
       id: 'submit',
       text: isViewMode ? 'Close' : mode === 'create' ? 'Create Patient' : 'Save Changes',
       color: 'primary',
       appearance: isViewMode ? 'basic' : 'raised'
     });
-
+  
     const dialogRef = this.dialogService.openDialog(PatientCreateComponent, {
       title: mode === 'create' ? 'Create Patient' : mode === 'edit' ? 'Edit Patient' : 'View Patient',
       width: '70%',
-      data: { 
+      data: {
         mode: mode,
         patient: param
       },
       footerActions: footerActions
     });
-
+  
     dialogRef.afterClosed().subscribe(result => {
-      // Skip if result is false (validation failed) or action is cancel
-      if (result === false || result?.action === 'cancel') {
+  
+      // ❌ cancel / invalid
+      if (!result || result === false || result?.action === 'cancel') {
         return;
       }
+  
+      // ✅ CREATE MODE
+      if (mode === 'create') {
+  
+        // Map UI values to backend expected format
+        // const genderMap: Record<string, string> = {
+        //   male: 'Male',
+        //   female: 'Female',
+        //   other: 'Other'
+        // };
+
+        // const bloodGroupMap: Record<string, string> = {
+        //   'A+': 'A_POSITIVE',
+        //   'A-': 'A_NEGATIVE',
+        //   'B+': 'B_POSITIVE',
+        //   'B-': 'B_NEGATIVE',
+        //   'AB+': 'AB_POSITIVE',
+        //   'AB-': 'AB_NEGATIVE',
+        //   'O+': 'O_POSITIVE',
+        //   'O-': 'O_NEGATIVE'
+        // };
+
+        const createPayload = {
+          firstName: result.firstName,
+          lastName: result.lastName,
+          dateOfBirth: result.dateOfBirth,
+          gender: result.gender,        // MUST be 'FEMALE'
+          contact: result.contact,
+          email: result.email,
+          password: result.password,    // 🔥 REQUIRED
+          address: result.address,
+          city: result.city,            // 🔥 REQUIRED
+          bloodGroup: result.bloodGroup // e.g. 'A_POSITIVE'
+        };
       
-      if (result) {
-        console.log('New patient created:', result);
-        this.patientData.push(result as Patient);
-        this.patientData = [...this.patientData];
+        console.log('📦 Create Patient Payload 👉', createPayload);
+      
+        this.patientService.createPatient(createPayload).subscribe({
+          next: () => {
+            console.log('✅ Patient created successfully');
+            this.loadPatients();
+          },
+          error: (err) => {
+            console.error('❌ Create patient failed', err);
+          }
+        });
+      }
+  
+      // ✏️ EDIT MODE (future)
+      if (mode === 'edit') {
+        // this.patientService.updatePatient(result).subscribe(...)
       }
     });
   }
+  
 }

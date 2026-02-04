@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { HttpService } from '@lk/core';
 import { Observable } from 'rxjs';
@@ -7,20 +6,23 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class FloorServicesService {
-   private baseUrl = 'https://doctech.solutions/api/floors';
-  constructor(private HttpService:HttpService,
-    private http :HttpClient
-  ){}
-  getFloors(){
-    return this.HttpService.sendGETRequest('https://doctech.solutions/api/floors');
+  private baseUrl = 'https://doctech.solutions/api/floors';
+  
+  constructor(private httpService: HttpService) {}
+
+  getFloors(): Observable<any> {
+    return this.httpService.sendGETRequest(this.baseUrl);
   }
-  createFloor(payload :any):Observable<any>{
-     return this.HttpService.sendPOSTRequest(this.baseUrl,payload);
+
+  createFloor(payload: any): Observable<any> {
+    return this.httpService.sendPOSTRequest(this.baseUrl, payload);
   }
-  updateFloor(floorId:number ,payload:any){
-    return this.HttpService.sendPUTRequest(`${this.baseUrl}/${floorId}`,payload)
+
+  updateFloor(floorId: number, payload: any): Observable<any> {
+    return this.httpService.sendPUTRequest(`${this.baseUrl}/${floorId}`, payload);
   }
-   deleteFloor(floorId:number):Observable<any>{
-    return this.http.delete(`${this.baseUrl}/floors/${floorId}`)
-   }
+
+  deleteFloor(floorId: number): Observable<any> {
+    return this.httpService.sendDELETERequest(`${this.baseUrl}/${floorId}`);
+  }
 }

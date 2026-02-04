@@ -6,14 +6,23 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class WardService {
-   constructor(private http:HttpService){}
-   getWards(){
-    return this.http.sendGETRequest('https://doctech.solutions/api/wards');
-   }
-   createWard(payload: any): Observable<any> {
-    return this.http.sendPOSTRequest(
-      'https://doctech.solutions/api/wards',
-      payload
-    );
+  private baseUrl = 'https://doctech.solutions/api/wards';
+
+  constructor(private http: HttpService) {}
+
+  getWards(): Observable<any> {
+    return this.http.sendGETRequest(this.baseUrl);
+  }
+
+  createWard(payload: any): Observable<any> {
+    return this.http.sendPOSTRequest(this.baseUrl, payload);
+  }
+
+  updateWard(wardId: number, payload: any): Observable<any> {
+    return this.http.sendPUTRequest(`${this.baseUrl}/${wardId}`, payload);
+  }
+
+  deleteWard(wardId: number): Observable<any> {
+    return this.http.sendDELETERequest(`${this.baseUrl}/${wardId}`);
   }
 }

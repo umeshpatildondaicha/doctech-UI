@@ -11,6 +11,7 @@ import { WardService } from '../../../../services/ward.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FloorEditComponent } from './floor-edit/floor-edit.component';
 import { BedService } from '../../../../services/bed.service';
+import { CommonModule } from '@angular/common';
 
 // interface Floor {
 //   id: number;
@@ -32,10 +33,22 @@ interface Ward {
   floorName: string;
   floorNumber: number;
 }
+export interface CreateWardPayload {
+  wardName: string;
+  wardType: string;
+  description?: string;
+  capacity: number;
+  floorId: number;
+  isActive: boolean;
+  createdBy: string;
+  updatedBy: string;
+}
+
 
 @Component({
-    selector: 'app-rooms-management',
-    imports: [
+  selector: 'app-rooms-management',
+  imports: [
+    CommonModule,
     ReactiveFormsModule,
     AppButtonComponent,
     AppInputComponent,
@@ -44,9 +57,9 @@ interface Ward {
     PageComponent,
     TabsComponent,
     TabComponent
-],
-    templateUrl: './rooms-management.component.html',
-    styleUrl: './rooms-management.component.scss'
+  ],
+  templateUrl: './rooms-management.component.html',
+  styleUrl: './rooms-management.component.scss'
 })
 export class RoomsManagementComponent implements OnInit, AfterViewInit {
   selectedTabIndex = 0;
@@ -55,18 +68,20 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
     { label: 'Management', route: '/admin/rooms/manage', icon: 'settings', isActive: true }
   ];
   selectedFloorId: number | null = null;
+  selectedWardId: number | null = null;
+  selectedRoomId: number | null = null;
   // Forms
   floorForm: FormGroup;
   wardForm: FormGroup;
   roomForm: FormGroup;
   bedForm: FormGroup;
-  
+
   // Bed Management State
   isEditingBed = false;
   selectedRoom: any = null;
   selectedBed: any = null;
-   beds:any[] =[];
-   bedsByFloor :any[] =[];
+  beds: any[] = [];
+  bedsByFloor: any[] = [];
   // Data
   // floors: Floor[] = [
   //   { id: 1, number: 0, name: 'Ground Floor', totalRooms: 15, totalBeds: 45 },
@@ -74,12 +89,12 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
   //   { id: 3, number: 2, name: '2nd Floor', totalRooms: 25, totalBeds: 75 },
   //   { id: 4, number: 3, name: '3rd Floor', totalRooms: 18, totalBeds: 54 }
   // ];
-  @Input()floors:Floor[]=[];
+  @Input() floors: Floor[] = [];
   //floors : Floor[] =[];
-  wards :Ward[]=[];
-  
+  wards: Ward[] = [];
+
   roomData: any[] = [];
-  
+
   // Options
   wardTypeOptions = [
     { label: 'ICU', value: 'ICU' },
@@ -112,18 +127,18 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
     { key: 'bed_scale', label: 'Bed Scale', icon: 'scale' },
     { key: 'adjustable_bed', label: 'Adjustable Bed', icon: 'bed' }
   ];
-  
+
 
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private roomsService: RoomsService,
-    private floorServices :FloorServicesService,
+    private floorServices: FloorServicesService,
     private dialogService: DialogboxService,
-    private wardService:WardService,
-    private dialog : MatDialog,
-    private bedService :BedService
+    private wardService: WardService,
+    private dialog: MatDialog,
+    private bedService: BedService
   ) {
     this.floorForm = this.createFloorForm();
     this.wardForm = this.createWardForm();
@@ -135,58 +150,111 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
     this.loadRooms();
     this.loadFloors();
     this.loadWards();
-    this.loadBeds();
-
   }
-  loadBeds() {
-    this.bedService.getAllBeds().subscribe({
-    
-      next: (res :any) => {
-        console.log("Beds Api response :",res);
-        this.beds = res.data || res;
+  //   onAddWard() {
+
+  //   console.log(
+  //     'FORM VALUE 👉',
+  //     this.wardForm.value,
+  //     'VALID 👉',
+  //     this.wardForm.valid
+  //   );
+
+  //   if (this.wardForm.invalid) {
+  //     this.wardForm.markAllAsTouched();
+  //     return;
+  //   }
+
+  //   const payload = {
+  //     ...this.wardForm.value,
+  //     description: 'Ward created from UI',
+  //     createdBy: 'admin',
+  //     updatedBy: 'admin',
+  //     isActive: true
+  //   };
+
+  //   this.wardService.createWard(payload).subscribe({
+  //     next: (res) => {
+  //       console.log('✅ Ward created', res);
+  //       this.wardForm.reset();
+  //     },
+  //     error: (err) => {
+  //       console.error('❌ Create ward failed', err);
+  //     }
+  //   });
+  // }
+
+  // loadBeds() {
+  //   this.bedService.getAllBeds().subscribe({
   
-        // floor wise grouping + count
-        this.bedsByFloor = this.groupBedsByFloor(this.beds);
-      },
-      error: (err) => {
-        console.error('Beds API failed', err);
-      }
-    });
-  }
+  //     next: (res: any) => {
+  //       console.log('Beds Api response :', res);
+  
+  //       // 🔴 STEP 1: beds always array मध्ये convert कर
+  //       const bedsArray = Array.isArray(res?.data)
+  //         ? res.data
+  //         : Array.isArray(res)
+  //           ? res
+  //           : [];
+  
+  //       this.beds = bedsArray;
+  
+  //       // 🔴 STEP 2: safe grouping call
+  //       this.bedsByFloor = this.groupBedsByFloor(this.beds);
+  //     },
+  
+  //     error: (err) => {
+  //       console.error('Beds API failed', err);
+  //       this.beds = [];
+  //       this.bedsByFloor = [];
+  //     }
+  //   });
+  // }
+  
+  // groupBedsByFloor(beds: any) {
 
-  groupBedsByFloor(beds: any[]) {
-  const map: any = {};
-
-  beds.forEach(bed => {
-    const floorName = bed.floorName || 'Unknown Floor';
-
-    if (!map[floorName]) {
-      map[floorName] = {
-        floorName,
-        totalBeds: 0,
-        occupiedBeds: 0
-      };
-    }
-
-    map[floorName].totalBeds += 1;
-
-    if (bed.isOccupied) {
-      map[floorName].occupiedBeds += 1;
-    }
-  });
-
-  return Object.values(map);
-}
+  //   // 🔴 STEP 1: Array check (CRITICAL)
+  //   if (!Array.isArray(beds)) {
+  //     console.error('❌ beds is not an array:', beds);
+  //     return [];   // app crash थांबवतो
+  //   }
+  
+  //   // 🔴 STEP 2: Existing logic
+  //   const map: any = {};
+  
+  //   beds.forEach(bed => {
+  //     const floorName = bed.floorName || 'Unknown Floor';
+  
+  //     if (!map[floorName]) {
+  //       map[floorName] = {
+  //         floorName,
+  //         totalBeds: 0,
+  //         occupiedBeds: 0
+  //       };
+  //     }
+  
+  //     map[floorName].totalBeds += 1;
+  
+  //     if (bed.isOccupied) {
+  //       map[floorName].occupiedBeds += 1;
+  //     }
+  //   });
+  
+  //   return Object.values(map);
+  // }
+  
 
   loadFloors() {
     this.floorServices.getFloors().subscribe({
+      
       next: (res: any) => {
         this.floors = res.content.map((f: any) => ({
-          id: f.id,
+          floorId: f.id,
           floorNumber: f.floorNumber,
           floorName: f.floorName,
           totalRooms: f.totalRooms || 0,
           totalBeds: f.totalBeds || 0
+          
         }));
       },
       error: (err) => {
@@ -194,7 +262,7 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
       }
     });
   }
-  
+
 
   createFloorForm(): FormGroup {
     return this.fb.group({
@@ -203,51 +271,70 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
     });
   }
   onEditFloor(floor: any) {
-    console.log('editing floor',floor);
+    console.log('editing floor', floor);
     const dialogRef = this.dialog.open(FloorEditComponent, {
       width: '420px',
-      panelClass:'floor-edit-dialog',
+      panelClass: 'floor-edit-dialog',
       data: { floor }
     });
-  
+
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.floorServices.updateFloor(result.id, result.payload)
-          .subscribe(() => {
-            this.loadFloors(); // refresh list
+        const floorId = result.floorId || result.id || floor.floorId;
+        this.floorServices.updateFloor(floorId, result.payload)
+          .subscribe({
+            next: () => {
+              this.loadFloors(); // refresh list
+            },
+            error: (err) => {
+              console.error('Update floor failed ❌', err);
+            }
           });
       }
     });
   }
-  
+
   onSubmitFloor() {
-    if (this.floorForm.invalid) return;
-  
+    if (this.floorForm.invalid) {
+      this.floorForm.markAllAsTouched();
+      return;
+    }
+
     const payload = {
       floorNumber: this.floorForm.value.number,
       floorName: this.floorForm.value.name,
       updatedBy: 'ADMIN'
     };
-  
+
     // 🔵 EDIT MODE → PUT
     if (this.selectedFloorId) {
       this.floorServices.updateFloor(this.selectedFloorId, payload)
-        .subscribe(() => {
-          this.resetFloorForm();
-          this.loadFloors();
+        .subscribe({
+          next: () => {
+            this.resetFloorForm();
+            this.loadFloors();
+          },
+          error: (err) => {
+            console.error('Update floor failed ❌', err);
+          }
         });
-  
-    // 🟢 CREATE MODE → POST
+
+      // 🟢 CREATE MODE → POST
     } else {
       const createPayload = {
         ...payload,
         createdBy: 'ADMIN'
       };
-  
+
       this.floorServices.createFloor(createPayload)
-        .subscribe(() => {
-          this.resetFloorForm();
-          this.loadFloors();
+        .subscribe({
+          next: () => {
+            this.resetFloorForm();
+            this.loadFloors();
+          },
+          error: (err) => {
+            console.error('Create floor failed ❌', err);
+          }
         });
     }
   }
@@ -255,36 +342,39 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
     this.floorForm.reset();
     this.selectedFloorId = null;   // ⭐ THIS FIXES CREATE/EDIT CONFUSION
   }
-  
 
-  removeFloors(floorId:number) {
-    console.log('delete floor Id',floorId);
+  removeFloors(floorId: number) {
+    console.log('delete floor Id', floorId);
+
     if (!confirm('Delete this floor ?')) return;
+
     this.floorServices.deleteFloor(floorId).subscribe({
       next: (res) => {
         console.log('Floor deleted ✅', res);
-        this.loadFloors();
+        this.loadFloors();   // refresh list
       },
       error: (err) => {
-        console.error('Delete failed ', err);
+        console.error('Delete failed ❌', err);
       }
     });
   }
-  
+
+
 
   createWardForm(): FormGroup {
     return this.fb.group({
-      name: ['', [Validators.required]],
-      type: [this.wardTypeOptions[0]?.value || '', [Validators.required]],
-      floor: ['', [Validators.required]],
+      wardName: ['', [Validators.required]],
+      wardType: [this.wardTypeOptions[0]?.value || '', [Validators.required]],
+      floorId: [null, [Validators.required]],
       capacity: [1, [Validators.required, Validators.min(1)]]
     });
   }
-  onAddFloor(){
+  onAddFloor() {
     if (this.floorForm.invalid) {
+      this.floorForm.markAllAsTouched();
       return;
     }
-  
+
     const payload = {
       floorNumber: this.floorForm.value.number,
       floorName: this.floorForm.value.name,
@@ -292,17 +382,15 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
       createdBy: 'ADMIN',
       updatedBy: 'ADMIN'
     };
-  
-    console.log('CREATE FLOOR PAYLOAD 👉', payload);
-  
+
     this.floorServices.createFloor(payload).subscribe({
       next: (res) => {
         console.log('Floor created successfully ✅', res);
         this.floorForm.reset();
-        this.loadFloors(); // optional but recommended
+        this.loadFloors();
       },
       error: (err) => {
-        console.error('Error creating floor', err);
+        console.error('Error creating floor ❌', err);
       }
     });
   }
@@ -348,6 +436,7 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
           number: r.roomNumber,
           type: r.roomType,
           floor: r.floorNumber,
+          floorNumber: r.floorNumber,
           capacity: r.capacity,
           occupied: r.currentOccupancy,
           status: r.status === 'ACTIVE' ? 'Available' : 'Maintenance'
@@ -358,36 +447,39 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
       }
     });
   }
-  
+
 
   createRoom() {
-    if (this.roomForm.invalid) return;
-  
+    if (this.roomForm.invalid) {
+      this.roomForm.markAllAsTouched();
+      return;
+    }
+
     const f = this.roomForm.value;
-  
+
     const payload = {
       roomNumber: f.number,
-      roomType: f.type,          // GENERAL / ICU / PRIVATE
+      roomType: f.type,
       capacity: f.capacity,
       status: 'ACTIVE',
       floorId: f.floor,
-      wardId: f.wardId,
+      wardId: f.ward || null,
       hospitalId: 'H1',
       createdBy: 'ADMIN'
     };
-  
-    this.roomsService.createdRoom(payload).subscribe({
+
+    this.roomsService.createRoom(payload).subscribe({
       next: () => {
-        console.log('Room created');
+        console.log('Room created ✅');
         this.roomForm.reset();
         this.loadRooms();
       },
       error: (err) => {
-        console.error('Create room failed', err);
+        console.error('Create room failed ❌', err);
       }
     });
   }
-  
+
 
   // removeFloor(floorId: number) {
   //   this.floors = this.floors.filter(f => f.floorId !== floorId);
@@ -412,78 +504,157 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
       }
     });
   }
-  
+
   // Ward Management
   onAddWard() {
-    if (this.wardForm.invalid) return;
-  
-    const form = this.wardForm.value;
-  
-    const payload = {
-      wardName: form.name,
-      wardType: form.type,
-      capacity: form.capacity,
-      floorId: form.floor,
+    if (this.wardForm.invalid) {
+      this.wardForm.markAllAsTouched();
+      return;
+    }
+
+    const payload: CreateWardPayload = {
+      wardName: this.wardForm.value.wardName,
+      wardType: this.wardForm.value.wardType,
+      description: 'Created from UI',
+      capacity: this.wardForm.value.capacity,
+      floorId: this.wardForm.value.floorId,
       isActive: true,
-      createdBy: 'ADMIN'
+      createdBy: 'admin',
+      updatedBy: 'admin'
     };
-  
-    this.wardService.createWard(payload).subscribe({
-      next: () => {
-        console.log('Ward created');
-        this.wardForm.reset();
-        this.loadWards(); // 🔥 refresh from backend
-      },
-      error: (error:any) => {
-        console.error('Failed to create ward', error.error.message);
-      }
+
+    if (this.selectedWardId) {
+      // Update mode
+      this.wardService.updateWard(this.selectedWardId, payload).subscribe({
+        next: (res: any) => {
+          console.log("Ward updated successfully ✅", res);
+          this.wardForm.reset();
+          this.selectedWardId = null;
+          this.loadWards();
+        },
+        error: (err: any) => {
+          console.error("Error updating ward ❌", err);
+        }
+      });
+    } else {
+      // Create mode
+      this.wardService.createWard(payload).subscribe({
+        next: (res: any) => {
+          console.log("Ward created successfully ✅", res);
+          this.wardForm.reset();
+          this.loadWards();
+        },
+        error: (err: any) => {
+          console.error("Error creating ward ❌", err);
+        }
+      });
+    }
+  }
+
+  onEditWard(ward: any) {
+    this.selectedWardId = ward.wardId;
+    this.wardForm.patchValue({
+      wardName: ward.wardName,
+      wardType: ward.wardType,
+      floorId: ward.floorId,
+      capacity: ward.capacity
     });
   }
-  
+
+
+
 
   removeWard(wardId: number) {
-    this.wards = this.wards.filter(w => w.wardId !== wardId);
+    console.log('delete ward Id', wardId);
+
+    if (!confirm('Delete this ward?')) return;
+
+    this.wardService.deleteWard(wardId).subscribe({
+      next: (res) => {
+        console.log('Ward deleted ✅', res);
+        this.loadWards();   // refresh list
+      },
+      error: (err) => {
+        console.error('Delete ward failed ❌', err);
+      }
+    });
   }
 
   // Room Management
   onAddRoom() {
-  if (this.roomForm.invalid) {
-    this.roomForm.markAllAsTouched();
-    return;
+    if (this.roomForm.invalid) {
+      this.roomForm.markAllAsTouched();
+      return;
+    }
+
+    const roomData = this.roomForm.value;
+
+    const payload = {
+      roomNumber: roomData.number,
+      roomType: roomData.type,
+      capacity: roomData.capacity,
+      status: 'ACTIVE',
+      floorId: roomData.floor,
+      wardId: roomData.ward || null,
+      hospitalId: 'H1',
+      createdBy: 'ADMIN',
+      updatedBy: 'ADMIN'
+    };
+
+    if (this.selectedRoomId) {
+      // Update mode
+      this.roomsService.updateRoom(this.selectedRoomId, payload).subscribe({
+        next: (res) => {
+          console.log('Room updated ✅', res);
+          this.loadRooms();
+          this.roomForm.reset();
+          this.selectedRoomId = null;
+        },
+        error: (err) => {
+          console.error('Update room failed ❌', err);
+        }
+      });
+    } else {
+      // Create mode
+      this.roomsService.createRoom(payload).subscribe({
+        next: (res) => {
+          console.log('Room created ✅', res);
+          this.loadRooms();
+          this.roomForm.reset();
+        },
+        error: (err) => {
+          console.error('Create room failed ❌', err);
+        }
+      });
+    }
   }
 
-  const roomData = this.roomForm.value;
+  onEditRoom(room: any) {
+    this.selectedFloorId = room.id;
+    this.roomForm.patchValue({
+      number: room.number,
+      type: room.type,
+      floor: room.floorNumber,
+      ward: room.wardId || '',
+      capacity: room.capacity
+    });
+  }
 
-  const newRoomData = {
-    number: roomData.number,
-    type: roomData.type,
-    floorId: roomData.floor,   // 👈 IMPORTANT (floorId number)
-    wing: 'A',
-    capacity: roomData.capacity,
-    occupied: 0,
-    status: 'Available',
-    facilities: {
-      ac: roomData.type === 'ICU',
-      oxygen: true,
-      ventilator: roomData.type === 'ICU',
-      monitor: roomData.type === 'ICU'
-    },
-    icuLevel: roomData.type === 'ICU' ? 'Level 1' : undefined,
-    beds: this.generateBedsForRoom(roomData.number, roomData.capacity)
-  };
+  removeRoom(roomId: number) {
+    console.log('delete room Id', roomId);
 
-  // ✅ CREATE API CALL
-  this.roomsService.createdRoom(newRoomData).subscribe({
-    next: (res) => {
-      console.log('Room created ✅', res);
-      this.loadRooms();
-      this.roomForm.reset();
-    },
-    error: (err) => {
-      console.error('Create room failed ❌', err);
-    }
-  });
-}
+    if (!confirm('Delete this room?')) return;
+
+    this.roomsService.deleteRoom(roomId).subscribe({
+      next: (res) => {
+        console.log('Room deleted ✅', res);
+        this.loadRooms();
+      },
+      error: (err) => {
+        console.error('Delete room failed ❌', err);
+      }
+    });
+  }
 
 
   generateBedsForRoom(roomNumber: string, capacity: number) {
@@ -507,14 +678,14 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
   getFloorOptions() {
     return this.floors.map(f => ({
       label: `Floor ${f.floorNumber}`,
-      value: Number(f.floorId )       // 🔥 IMPORTANT
+      value: Number(f.floorId)       // 🔥 IMPORTANT
     }));
   }
 
   getWardsByFloor(floorId: number) {
     return this.wards.filter(w => w.floorId === floorId);
   }
-  
+
 
   getRoomsByFloor(floorNumber: number) {
     return this.roomData.filter(room => room.floorNumber === floorNumber);
@@ -575,12 +746,12 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
         nurse_call: true
       }
     });
-    
+
     // Auto-generate next bed ID
     const existingBeds = room.beds || [];
     const nextBedLetter = String.fromCharCode(65 + existingBeds.length); // A, B, C, etc.
     this.bedForm.patchValue({ bedId: nextBedLetter });
-    
+
     this.openBedFormDialog();
   }
 
@@ -588,7 +759,7 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
     this.selectedRoom = room;
     this.selectedBed = bed;
     this.isEditingBed = true;
-    
+
     this.bedForm.patchValue({
       floor: room.floor,
       room: room.id,
@@ -596,7 +767,7 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
       status: bed.status,
       facilities: bed.facilities || {}
     });
-    
+
     this.openBedFormDialog();
   }
 
@@ -621,7 +792,7 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
     const dialogRef = this.dialogService.openDialog(BedFormDialogComponent, {
       title: this.isEditingBed ? 'Edit Bed' : 'Add New Bed',
       width: '65%',
-      height:'80%',
+      height: '80%',
       data: {
         bedForm: this.bedForm,
         isEditingBed: this.isEditingBed,
@@ -664,78 +835,110 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
     const formValue = result.formValue;
     const roomId = formValue.room;
     const targetRoom = this.roomData.find(room => room.id === roomId);
-    
-    if (targetRoom) {
-      const bedData = {
-        id: `${targetRoom.number}-${formValue.bedId}`,
-        status: formValue.status,
-        facilities: formValue.facilities,
-        patientInfo: formValue.status === 'Occupied' ? { name: 'Sample Patient' } : null
-      };
-      
-      if (result.isEditingBed && this.selectedBed) {
-        // Update existing bed
-        const bedIndex = targetRoom.beds.findIndex((b: any) => b.id === this.selectedBed.id);
-        if (bedIndex > -1) {
-          targetRoom.beds[bedIndex] = { ...targetRoom.beds[bedIndex], ...bedData };
-          console.log('Bed updated:', bedData.id);
+
+    if (!targetRoom) {
+      console.error('Room not found');
+      return;
+    }
+
+    const bedPayload = {
+      bedNumber: formValue.bedId,
+      roomId: roomId,
+      status: formValue.status,
+      facilities: formValue.facilities,
+      isOccupied: formValue.status === 'Occupied'
+    };
+
+    if (result.isEditingBed && this.selectedBed) {
+      // Update existing bed - need bedId from selectedBed
+      const bedId = this.selectedBed.bedId || this.selectedBed.id;
+      this.bedService.updateBed(bedId, bedPayload).subscribe({
+        next: () => {
+          console.log('Bed updated ✅');
+          this.loadRooms();
+          this.closeBedForm();
+        },
+        error: (err) => {
+          console.error('Update bed failed ❌', err);
         }
-      } else {
-        // Add new bed
-        if (!targetRoom.beds) {
-          targetRoom.beds = [];
+      });
+    } else {
+      // Create new bed
+      this.bedService.createBed(bedPayload).subscribe({
+        next: () => {
+          console.log('Bed created ✅');
+          this.loadRooms();
+          this.closeBedForm();
+        },
+        error: (err) => {
+          console.error('Create bed failed ❌', err);
         }
-        targetRoom.beds.push(bedData);
-        console.log('Bed added:', bedData.id);
-      }
-      
-      this.closeBedForm();
+      });
     }
   }
 
   deleteBed(room: any, bed: any) {
     console.log('Delete bed:', bed.id);
-    if (confirm(`Are you sure you want to delete bed ${bed.id}?`)) {
-      const bedIndex = room.beds.findIndex((b: any) => b.id === bed.id);
-      if (bedIndex > -1) {
-        room.beds.splice(bedIndex, 1);
-        console.log('Bed deleted:', bed.id);
+    if (!confirm(`Are you sure you want to delete bed ${bed.id}?`)) return;
+
+    const bedId = bed.bedId || bed.id;
+    this.bedService.deleteBed(bedId).subscribe({
+      next: () => {
+        console.log('Bed deleted ✅');
+        this.loadRooms();
+      },
+      error: (err) => {
+        console.error('Delete bed failed ❌', err);
       }
-    }
+    });
   }
 
   saveBed() {
-    if (this.bedForm.valid) {
-      const formValue = this.bedForm.value;
-      const roomId = formValue.room;
-      const targetRoom = this.roomData.find(room => room.id === roomId);
-      
-      if (targetRoom) {
-        const bedData = {
-          id: `${targetRoom.number}-${formValue.bedId}`,
-          status: formValue.status,
-          facilities: formValue.facilities,
-          patientInfo: formValue.status === 'Occupied' ? { name: 'Sample Patient' } : null
-        };
-        
-        if (this.isEditingBed && this.selectedBed) {
-          // Update existing bed
-          const bedIndex = targetRoom.beds.findIndex((b: any) => b.id === this.selectedBed.id);
-          if (bedIndex > -1) {
-            targetRoom.beds[bedIndex] = { ...targetRoom.beds[bedIndex], ...bedData };
-            console.log('Bed updated:', bedData.id);
-          }
-        } else {
-          // Add new bed
-          if (!targetRoom.beds) {
-            targetRoom.beds = [];
-          }
-          targetRoom.beds.push(bedData);
-          console.log('Bed added:', bedData.id);
+    if (this.bedForm.invalid) {
+      this.bedForm.markAllAsTouched();
+      return;
+    }
+
+    const formValue = this.bedForm.value;
+    const roomId = formValue.room;
+    const targetRoom = this.roomData.find(room => room.id === roomId);
+
+    if (!targetRoom) {
+      console.error('Room not found');
+      return;
+    }
+
+    const bedPayload = {
+      bedNumber: formValue.bedId,
+      roomId: roomId,
+      status: formValue.status,
+      facilities: formValue.facilities,
+      isOccupied: formValue.status === 'Occupied'
+    };
+
+    if (this.isEditingBed && this.selectedBed) {
+      const bedId = this.selectedBed.bedId || this.selectedBed.id;
+      this.bedService.updateBed(bedId, bedPayload).subscribe({
+        next: () => {
+          console.log('Bed updated ✅');
+          this.loadRooms();
+          this.closeBedForm();
+        },
+        error: (err) => {
+          console.error('Update bed failed ❌', err);
         }
-        
-        this.closeBedForm();
-      }
+      });
+    } else {
+      this.bedService.createBed(bedPayload).subscribe({
+        next: () => {
+          console.log('Bed created ✅');
+          this.loadRooms();
+          this.closeBedForm();
+        },
+        error: (err) => {
+          console.error('Create bed failed ❌', err);
+        }
+      });
     }
   }
 
@@ -746,7 +949,7 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
   onRoomChange() {
     const roomId = this.bedForm.get('room')?.value;
     const selectedRoom = this.roomData.find(room => room.id === roomId);
-    
+
     if (selectedRoom && !this.isEditingBed) {
       // Auto-generate next bed ID
       const existingBeds = selectedRoom.beds || [];
@@ -758,7 +961,7 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
   getAvailableRooms() {
     const selectedFloor = this.bedForm.get('floor')?.value;
     if (!selectedFloor) return [];
-    
+
     return this.roomData
       .filter(room => room.floor === selectedFloor)
       .map(room => ({
@@ -810,7 +1013,7 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
 
   getAvailableBeds(): number {
     return this.roomData.reduce((total, room) => {
-      const availableBeds = room.beds?.filter((bed: any) => 
+      const availableBeds = room.beds?.filter((bed: any) =>
         bed.status === 'Available'
       ).length || 0;
       return total + availableBeds;
@@ -894,7 +1097,7 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
         getAvailableRooms: () => this.getRoomsByFloor(this.bedForm.controls['floor'].value)
       },
       width: '65%',
-      height:'80%'
+      height: '80%'
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
@@ -916,13 +1119,13 @@ export class RoomsManagementComponent implements OnInit, AfterViewInit {
   }
 
   getFloorName(floorNumber: number): string {
-   return this.floors.find(f=>f.floorNumber ===floorNumber)?.floorName ?? '';
+    return this.floors.find(f => f.floorNumber === floorNumber)?.floorName ?? '';
 
   }
 
   getBedFacilitiesList(facilities: any): any[] {
     if (!facilities) return [];
-    
+
     return this.bedFacilitiesOptions.map(option => ({
       ...option,
       available: facilities[option.key] || false

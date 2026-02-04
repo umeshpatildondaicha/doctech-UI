@@ -14,6 +14,8 @@ import { AppSelectboxComponent } from "@lk/core";
 import { IconComponent } from "@lk/core";
 import { DIALOG_DATA_TOKEN } from "@lk/core";
 import { Patient } from '../../interfaces/patient.interface';
+import { PatientService } from '../../services/patient.service';
+import { DialogRef } from '@angular/cdk/dialog';
 
 export type DialogMode = 'create' | 'edit' | 'view';
 
@@ -67,7 +69,9 @@ export class PatientCreateComponent implements OnInit, OnDestroy {
   data = inject<DialogData>(DIALOG_DATA_TOKEN);
 
   constructor(
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private patientService:PatientService,
+    private dialogRefs :DialogRef
   ) {
     this.mode = this.data?.mode || 'create';
     this.submitButtonText = this.getsubmitButtonText();
@@ -76,11 +80,13 @@ export class PatientCreateComponent implements OnInit, OnDestroy {
       firstName: ['', [Validators.required, Validators.minLength(3)]],
       lastName: ['', [Validators.required, Validators.minLength(3)]],
       dateOfBirth: ['', Validators.required],
-      gender: ['', Validators.required],
+      gender: ['FEMALE', Validators.required],     // 🔥 default backend-compatible
       contact: ['', [Validators.required, Validators.minLength(10)]],
       email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required],         // 🔥 REQUIRED
       address: ['', [Validators.required, Validators.minLength(10)]],
-      bloodGroup: ['', Validators.required]
+      city: ['', Validators.required],              // 🔥 REQUIRED
+      bloodGroup: ['A_POSITIVE', Validators.required] // 🔥 backend enum
     });
 
     // If editing or viewing existing patient, populate form
@@ -104,53 +110,53 @@ export class PatientCreateComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // Listen for footer action clicks before dialog closes
     this.dialogRef.beforeClosed().pipe(
       takeUntil(this.destroy$),
       filter(result => result?.action === 'submit' || result?.action === 'cancel')
     ).subscribe((result) => {
+  
       if (result?.action === 'cancel') {
-        // Cancel action - dialog will close normally
         return;
       }
-      
+  
       if (result?.action === 'submit') {
+  
         if (this.isViewMode) {
-          // In view mode, just close
+          this.dialogRef.close();
           return;
         }
-        
-        // Validate form - if invalid, close with false to indicate failure
+  
         if (!this.patientForm.valid) {
           this.markFormGroupTouched();
-          // Close with false to indicate validation failure
           setTimeout(() => {
             this.dialogRef.close(false);
           }, 0);
-        } else {
-          // Form is valid - prepare data and close with it
-          const patientForm: Partial<Patient> = {
-            ...this.patientForm.value,
-            patientId: this.data?.patient?.patientId || this.generatePatientId(),
-            firstName: this.data?.patient?.firstName || this.patientForm.value.firstName,
-            lastName: this.data?.patient?.lastName || this.patientForm.value.lastName,
-            dateOfBirth: this.data?.patient?.dateOfBirth || this.patientForm.value.dateOfBirth,
-            gender: this.data?.patient?.gender || this.patientForm.value.gender,
-            contact: this.data?.patient?.contact || this.patientForm.value.contact,
-            email: this.data?.patient?.email || this.patientForm.value.email,
-            address: this.data?.patient?.address || this.patientForm.value.address,
-            bloodGroup: this.data?.patient?.bloodGroup || this.patientForm.value.bloodGroup,
-            createdDate: this.data?.patient?.createdDate || new Date(),
-            updatedDate: new Date()
-          };
-          // Close with data
-          setTimeout(() => {
-            this.dialogRef.close(patientForm);
-          }, 0);
+          return;
         }
+  
+        // 🔥 ONLY SWAGGER-COMPATIBLE PAYLOAD
+        const payload = {
+          firstName: this.patientForm.value.firstName,
+          lastName: this.patientForm.value.lastName,
+          dateOfBirth: this.patientForm.value.dateOfBirth,
+          gender: this.patientForm.value.gender,      // e.g. FEMALE
+          contact: this.patientForm.value.contact,
+          email: this.patientForm.value.email,
+          password: this.patientForm.value.password,  // MUST
+          address: this.patientForm.value.address,
+          city: this.patientForm.value.city,
+          bloodGroup: this.patientForm.value.bloodGroup // e.g. A_POSITIVE
+        };
+  
+        console.log('🟢 Dialog payload 👉', payload);
+  
+        setTimeout(() => {
+          this.dialogRef.close(payload);
+        }, 0);
       }
     });
   }
+  
 
   ngOnDestroy() {
     this.destroy$.next();
@@ -158,29 +164,38 @@ export class PatientCreateComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-    if (this.patientForm.valid && this.mode !== 'view') {
-      const patientForm: Partial<Patient> = {
-        ...this.patientForm.value,
-        patientId: this.data?.patient?.patientId || this.generatePatientId(),
-        firstName: this.data?.patient?.firstName || this.patientForm.value.firstName,
-        lastName: this.data?.patient?.lastName || this.patientForm.value.lastName,
-        dateOfBirth: this.data?.patient?.dateOfBirth || this.patientForm.value.dateOfBirth,
-        gender: this.data?.patient?.gender || this.patientForm.value.gender,
-        contact: this.data?.patient?.contact || this.patientForm.value.contact,
-        email: this.data?.patient?.email || this.patientForm.value.email,
-        address: this.data?.patient?.address || this.patientForm.value.address,
-        bloodGroup: this.data?.patient?.bloodGroup || this.patientForm.value.bloodGroup,
-        createdDate: this.data?.patient?.createdDate || new Date(),
-        updatedDate: new Date()
-      };
+    debugger;
 
-      this.dialogRef.close(patientForm);
-    } else if (this.mode === 'view') {
+    if (this.mode === 'view') {
       this.dialogRef.close();
-    } else {
-      this.markFormGroupTouched();
+      return;
     }
+  
+    if (this.patientForm.invalid) {
+      this.markFormGroupTouched();
+      return;
+    }
+  
+    // 🔥 EXACT SWAGGER PAYLOAD
+    const payload = {
+      firstName: this.patientForm.value.firstName,
+      lastName: this.patientForm.value.lastName,
+      dateOfBirth: this.patientForm.value.dateOfBirth,
+      gender: this.patientForm.value.gender || 'FEMALE',
+      contact: this.patientForm.value.contact,
+      email: this.patientForm.value.email,
+      password: this.patientForm.value.password, // MUST
+      address: this.patientForm.value.address,
+      city: this.patientForm.value.city,
+      bloodGroup: this.patientForm.value.bloodGroup || 'A_POSITIVE'
+    };
+  
+    console.log('🟢 Dialog payload 👉', payload);
+    console.log(this.patientForm.value);
+
+    this.dialogRef.close(payload);
   }
+  
 
   generatePatientId(): string {
     return 'D' + Date.now().toString().slice(-6);
