@@ -3618,8 +3618,17 @@ export class PatientProfileComponent implements OnInit {
     let total = 0;
     for (const diet of diets) {
       const dietObj = this.getDietObjectFromSchedule(diet);
-      const value = dietObj[nutritionType] || 0;
-      total += typeof value === 'number' ? value : 0;
+      let value = 0;
+      // Explicitly check for property existence and type
+      if (
+        dietObj &&
+        typeof dietObj === 'object' &&
+        Object.prototype.hasOwnProperty.call(dietObj, nutritionType)
+      ) {
+        const propValue = (dietObj as any)[nutritionType];
+        value = typeof propValue === 'number' ? propValue : 0;
+      }
+      total += value;
     }
     return total;
   }

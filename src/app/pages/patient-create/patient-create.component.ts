@@ -80,13 +80,13 @@ export class PatientCreateComponent implements OnInit, OnDestroy {
       firstName: ['', [Validators.required, Validators.minLength(3)]],
       lastName: ['', [Validators.required, Validators.minLength(3)]],
       dateOfBirth: ['', Validators.required],
-      gender: ['FEMALE', Validators.required],     // 🔥 default backend-compatible
+      gender: ['FEMALE', Validators.required],     //  default backend-compatible
       contact: ['', [Validators.required, Validators.minLength(10)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required],         // 🔥 REQUIRED
+      password: ['', Validators.required],         //  REQUIRED
       address: ['', [Validators.required, Validators.minLength(10)]],
-      city: ['', Validators.required],              // 🔥 REQUIRED
-      bloodGroup: ['A_POSITIVE', Validators.required] // 🔥 backend enum
+      city: ['', Validators.required],              //  REQUIRED
+      bloodGroup: ['A_POSITIVE', Validators.required] //  backend enum
     });
 
     // If editing or viewing existing patient, populate form
@@ -108,6 +108,8 @@ export class PatientCreateComponent implements OnInit, OnDestroy {
       }
     }
   }
+  modes!: 'create' | 'edit';
+patientId!: number;
 
   ngOnInit() {
     this.dialogRef.beforeClosed().pipe(
@@ -134,7 +136,7 @@ export class PatientCreateComponent implements OnInit, OnDestroy {
           return;
         }
   
-        // 🔥 ONLY SWAGGER-COMPATIBLE PAYLOAD
+       
         const payload = {
           firstName: this.patientForm.value.firstName,
           lastName: this.patientForm.value.lastName,
@@ -148,13 +150,20 @@ export class PatientCreateComponent implements OnInit, OnDestroy {
           bloodGroup: this.patientForm.value.bloodGroup // e.g. A_POSITIVE
         };
   
-        console.log('🟢 Dialog payload 👉', payload);
+        console.log(' Dialog payload ', payload);
   
         setTimeout(() => {
           this.dialogRef.close(payload);
         }, 0);
       }
     });
+    if (this.data?.mode === 'edit' && this.data.patient) {
+      this.mode = 'edit';
+      this.patientId = this.data.patient.patientId as number;
+
+      this.patientForm.patchValue(this.data.patient as { [key: string]: any });
+      this.patientForm.enable();
+    }
   }
   
 
@@ -164,19 +173,7 @@ export class PatientCreateComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-    debugger;
-
-    if (this.mode === 'view') {
-      this.dialogRef.close();
-      return;
-    }
   
-    if (this.patientForm.invalid) {
-      this.markFormGroupTouched();
-      return;
-    }
-  
-    // 🔥 EXACT SWAGGER PAYLOAD
     const payload = {
       firstName: this.patientForm.value.firstName,
       lastName: this.patientForm.value.lastName,
@@ -190,7 +187,7 @@ export class PatientCreateComponent implements OnInit, OnDestroy {
       bloodGroup: this.patientForm.value.bloodGroup || 'A_POSITIVE'
     };
   
-    console.log('🟢 Dialog payload 👉', payload);
+    console.log(' Dialog payload ', payload);
     console.log(this.patientForm.value);
 
     this.dialogRef.close(payload);
@@ -205,11 +202,10 @@ export class PatientCreateComponent implements OnInit, OnDestroy {
     this.dialogRef.close();
   }
 
-  onEdit() {
-    // Enable form for editing
-    this.mode = 'edit';
-    this.patientForm.enable();
-  }
+  // onEdit() {
+  //   // Enable form for editing
+  
+  // }
 
   private markFormGroupTouched() {
     Object.keys(this.patientForm.controls).forEach(key => {

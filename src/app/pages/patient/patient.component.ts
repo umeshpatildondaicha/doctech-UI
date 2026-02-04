@@ -43,6 +43,7 @@ export class PatientComponent  implements OnInit{
   gridOptions: any = {};
   patientData: Patient[]=[];
   loading=false;
+  selectedPatientId!: number; 
 
   constructor(private dialogService: DialogboxService,
      private router: Router,
@@ -116,10 +117,21 @@ export class PatientComponent  implements OnInit{
   }
   onEditPatient(param: any) {
     console.log('Edit patient:', param);
-    this.onCreatePatient('edit',param?.data);
+
+    this.selectedPatientId = param?.data?.patientId; // ✅ FIX
+    this.onCreatePatient('edit', param?.data)
   }
   onDeletePatient(param: any) {
-    console.log('Delete patient:', param);
+    console.log('Delete Patient',param);
+    this.patientService.deletePatient(param?.data?.patientId).subscribe({
+      next:()=>{
+        console.log('patient Deleted Successfully');
+        this.loadPatients();
+      },
+      error:(err)=>{
+        console.error('Failed to delete patient', err);
+      }
+    })
   }
 
 
@@ -157,7 +169,6 @@ export class PatientComponent  implements OnInit{
   
     dialogRef.afterClosed().subscribe(result => {
   
-      // ❌ cancel / invalid
       if (!result || result === false || result?.action === 'cancel') {
         return;
       }
@@ -187,16 +198,16 @@ export class PatientComponent  implements OnInit{
           firstName: result.firstName,
           lastName: result.lastName,
           dateOfBirth: result.dateOfBirth,
-          gender: result.gender,        // MUST be 'FEMALE'
+          gender: result.gender,        
           contact: result.contact,
           email: result.email,
-          password: result.password,    // 🔥 REQUIRED
+          password: result.password,  
           address: result.address,
-          city: result.city,            // 🔥 REQUIRED
-          bloodGroup: result.bloodGroup // e.g. 'A_POSITIVE'
+          city: result.city,            
+          bloodGroup: result.bloodGroup 
         };
       
-        console.log('📦 Create Patient Payload 👉', createPayload);
+        console.log(' Create Patient Payload ', createPayload);
       
         this.patientService.createPatient(createPayload).subscribe({
           next: () => {
@@ -204,7 +215,7 @@ export class PatientComponent  implements OnInit{
             this.loadPatients();
           },
           error: (err) => {
-            console.error('❌ Create patient failed', err);
+            console.error(' Create patient failed', err);
           }
         });
       }
@@ -212,6 +223,34 @@ export class PatientComponent  implements OnInit{
       // ✏️ EDIT MODE (future)
       if (mode === 'edit') {
         // this.patientService.updatePatient(result).subscribe(...)
+        const updatePayload = {
+          firstName: result.firstName,
+          lastName: result.lastName,
+          dateOfBirth: result.dateOfBirth,
+          gender: result.gender,
+          contact: result.contact,
+          email: result.email,
+          password: result.password,
+          address: result.address,
+          city: result.city,
+          bloodGroup: result.bloodGroup
+        };
+      
+        // const patientId = param?.patientId;
+        const patientId = this.selectedPatientId
+      
+        console.log('Updating patient ID ', patientId);
+        console.log('Update payload ', updatePayload);
+      
+        this.patientService.updatePatient(patientId as number, updatePayload).subscribe({
+          next: () => {
+            console.log('Patient updated successfully');
+            this.loadPatients(); // refresh list
+          },
+          error: (err) => {
+            console.error(' Update patient failed', err);
+          }
+        });
       }
     });
   }

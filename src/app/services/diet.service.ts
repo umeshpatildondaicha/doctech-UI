@@ -1,13 +1,16 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { HttpService } from "@lk/core";
+import { Observable } from "rxjs";
 
 @Injectable({ providedIn: 'root' })
 export class DietService {
 
   private baseUrl = 'https://doctech.solutions/api/doctors';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient,
+    private httpService :HttpService
+  ) {}
   getWeeklyDietPlans(doctorCode:string){
     return this.http.get<any>(
       `${this.baseUrl}/${doctorCode}/weekly-diet-plans`
@@ -20,9 +23,12 @@ export class DietService {
     );
   }
   // CREATE
-  createDietPlan(doctorCode: string, payload: any) {
-    return this.http.post(
-      `${this.baseUrl}/${doctorCode}/diet-plans/create`,
+  createDietPlan(payload:any):Observable<any>{
+    return this.httpService.sendPOSTRequest(`${this.baseUrl}/diet-plans`,payload)
+  }
+  updateDiet(dietId: number, payload: any) {
+    return this.httpService.sendPUTRequest(
+      `${this.baseUrl}/diet-plans/${dietId}`,
       payload
     );
   }
@@ -34,12 +40,6 @@ export class DietService {
     );
   }
 
-  // VIEW
-  getDietPlanById(doctorCode: string, id: number) {
-    return this.http.get(
-      `${this.baseUrl}/${doctorCode}/diet-plans/getDietPlan/${id}`
-    );
-  }
 
   // UPDATE
   updateDietPlan(doctorCode: string, id: number, payload: any) {

@@ -33,8 +33,8 @@ import { DietPlanCardComponent } from '../../components/diet-plan-card/diet-plan
 import { DietService } from '../../services/diet.service';
 
 @Component({
-    selector: 'app-diet',
-    imports: [
+  selector: 'app-diet',
+  imports: [
     FormsModule,
     MatTabsModule,
     MatFormFieldModule,
@@ -54,9 +54,9 @@ import { DietService } from '../../services/diet.service';
     MealTimeDialogComponent,
     DietCardComponent,
     DietPlanCardComponent
-],
-    templateUrl: './diet.component.html',
-    styleUrl: './diet.component.scss'
+  ],
+  templateUrl: './diet.component.html',
+  styleUrl: './diet.component.scss'
 })
 export class DietComponent implements OnInit, OnDestroy {
   breadcrumb: BreadcrumbItem[] = [];
@@ -83,7 +83,7 @@ export class DietComponent implements OnInit, OnDestroy {
   @Output() videoClick = new EventEmitter<string>();
   @Output() pdfClick = new EventEmitter<string>();
 
-  
+
   // Diets Tab
   dietList: Diet[] = [];
   filteredDiets: Diet[] = [];
@@ -94,7 +94,7 @@ export class DietComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['image', 'name', 'type', 'calories', 'protein', 'actions'];
 
   // Diet Plans Tab
-  doctorCode='DR1';
+  doctorCode = 'DR1';
   dietPlans: any[] = [];
   filteredDietPlans: any[] = [];
   selectedPlanType: string = '';
@@ -129,7 +129,7 @@ export class DietComponent implements OnInit, OnDestroy {
     private dialogService: DialogboxService,
     private dietservice: DietService,
     private eventService: CoreEventService
-  ) {}
+  ) { }
 
   private updateBreadcrumb() {
     const url = this.router.url;
@@ -152,7 +152,7 @@ export class DietComponent implements OnInit, OnDestroy {
     // default preview: first weekly plan if available
     const firstWeekly = this.dietPlans.find(p => p.type === 'weekly') || null;
     this.selectedPlanPreview = firstWeekly;
-    
+
     // Handle tab navigation from route
     const currentUrl = this.router.url;
     if (currentUrl.includes('/diet/plans')) {
@@ -198,34 +198,48 @@ export class DietComponent implements OnInit, OnDestroy {
 
   filterDiets() {
     this.filteredDiets = this.dietList.filter(diet => {
-      const matchesSearch = !this.searchQuery || 
+      const matchesSearch = !this.searchQuery ||
         diet.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         diet.description.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         diet.tags?.some(tag => tag.toLowerCase().includes(this.searchQuery.toLowerCase()));
-      
-      const matchesType = !this.selectedDietType || 
+
+      const matchesType = !this.selectedDietType ||
         diet.dietType.toLowerCase() === this.selectedDietType.toLowerCase();
 
       const matchesMeal =
         !this.selectedMealType ||
         (diet.tags || []).some(tag => tag.toLowerCase() === this.selectedMealType.toLowerCase());
-      
+
       return matchesSearch && matchesType && matchesMeal;
     });
   }
 
- loadDietsFromApi() {
-  this.dietservice.getDietPlans(this.doctorCode)
-    .subscribe({
-      next: (res) => {
-        this.dietList = res.data || res;
-        this.filteredDiets = [...this.dietList];
-      },
-      error: (err) => {
-        console.error('Diet API error', err);
-      }
-    });
-}
+  loadDietsFromApi() {
+    this.dietservice.getDietPlans(this.doctorCode)
+      .subscribe({
+        next: (res) => {
+  
+          const rawList = res.data || res;
+  
+          this.dietList = rawList.map((diet: any) => ({
+            ...diet,
+  
+            // 🔥 FLATTEN nutrition for UI
+            calories: diet.nutritionalInformation?.caloriesKcal ?? 0,
+            protein: diet.nutritionalInformation?.protein ?? 0,
+            carbs: diet.nutritionalInformation?.carbohydrates ?? 0,
+            fat: diet.nutritionalInformation?.fat ?? 0,
+            fiber: diet.nutritionalInformation?.fiber ?? 0
+          }));
+  
+          this.filteredDiets = [...this.dietList];
+        },
+        error: (err) => {
+          console.error('Diet API error', err);
+        }
+      });
+  }
+  
 
 
 
@@ -253,32 +267,64 @@ export class DietComponent implements OnInit, OnDestroy {
         icon: "delete",
         click: (param: any) => { this.onDeleteDiet(param?.data) }
       }
-      
+
     ];
   }
 
-  onCreateDiet() {
+  onCreateDiet(mode: 'create' | 'edit' = 'create', diet?: any) {
+
     const footerActions: DialogFooterAction[] = [
       { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
-      { id: 'save', text: 'Create Diet', color: 'primary', appearance: 'raised', fontIcon: 'save', disabled: false }
+      {
+        id: 'save',
+        text: mode === 'edit' ? 'Save Changes' : 'Create Diet',
+        color: 'primary',
+        appearance: 'raised',
+        fontIcon: 'save'
+      }
     ];
-
+  
     const dialogRef = this.dialogService.openDialog(DietCreateComponent, {
-      title: 'Create Diet',
-      data: { mode: 'create' },
+      title: mode === 'edit' ? 'Edit Diet' : 'Create Diet',
+      data: { mode, diet },
       width: '90%',
       height: '90%',
-      footerActions: footerActions
+      footerActions
     });
-
+  
     dialogRef.afterClosed().subscribe(result => {
-      if (result && result !== false) {
-        // Refresh diet list
-        
-        this.filterDiets();
+  
+      // ❌ cancel / invalid
+      if (!result || result === false || result?.action === 'cancel') {
+        return;
+      }
+  
+      // ✅ CREATE
+      if (mode === 'create') {
+        this.dietservice.createDietPlan(result).subscribe({
+          next: () => {
+            console.log('✅ Diet created successfully');
+            this.filterDiets();
+          },
+          error: (err) => console.error('❌ Diet create failed', err)
+        });
+      }
+  
+      // ✏️ EDIT
+      if (mode === 'edit') {
+        const dietId = diet?.id || diet?.dietId; // backend field confirm कर
+  
+        this.dietservice.updateDiet(dietId, result).subscribe({
+          next: () => {
+            console.log('✅ Diet updated successfully');
+            this.filterDiets();
+          },
+          error: (err) => console.error('❌ Diet update failed', err)
+        });
       }
     });
   }
+  
 
   onEditDiet(diet: Diet) {
     const footerActions: DialogFooterAction[] = [
@@ -288,7 +334,7 @@ export class DietComponent implements OnInit, OnDestroy {
 
     const dialogRef = this.dialogService.openDialog(DietCreateComponent, {
       title: 'Edit Diet',
-      
+
       width: '90%',
       height: '90%',
       footerActions: footerActions
@@ -297,7 +343,7 @@ export class DietComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       if (result && result !== false) {
         // Refresh diet list
-  
+
         this.filterDiets();
       }
     });
@@ -343,19 +389,19 @@ export class DietComponent implements OnInit, OnDestroy {
 
   // Diet Plans Methods
   loadDietPlans() {
-  this.dietservice.getWeeklyDietPlans(this.doctorCode)
-    .subscribe({
-      next:(res:any) => {
-        console.log('weekly diet plans res',res);
-        this.dietPlans = res.data || res;
-        this.filteredDietPlans = [...this.dietPlans];
-      },
-      error:(err:any)=>{
-        console.log('weekly diet plans AIP errer ',err)
-      }
-     
-    });
-}
+    this.dietservice.getWeeklyDietPlans(this.doctorCode)
+      .subscribe({
+        next: (res: any) => {
+          console.log('weekly diet plans res', res);
+          this.dietPlans = res.data || res;
+          this.filteredDietPlans = [...this.dietPlans];
+        },
+        error: (err: any) => {
+          console.log('weekly diet plans AIP errer ', err)
+        }
+
+      });
+  }
 
 
   getActivePlansCount(): number {
@@ -395,10 +441,10 @@ export class DietComponent implements OnInit, OnDestroy {
     this.filteredDietPlans = this.dietPlans.filter(plan => {
       const matchesType = !this.selectedPlanType || plan.type === this.selectedPlanType;
       const matchesStatus = !this.selectedPlanStatus || plan.status === this.selectedPlanStatus;
-      const matchesSearch = !this.planSearchQuery || 
+      const matchesSearch = !this.planSearchQuery ||
         plan.name.toLowerCase().includes(this.planSearchQuery.toLowerCase()) ||
         plan.description.toLowerCase().includes(this.planSearchQuery.toLowerCase());
-      
+
       return matchesType && matchesStatus && matchesSearch;
     });
     // keep preview valid
@@ -490,7 +536,7 @@ export class DietComponent implements OnInit, OnDestroy {
   getSelectedPlanStartDateShort(): string {
     const start = this.selectedPlanPreview?.startDate ? new Date(this.selectedPlanPreview.startDate) : new Date();
     return this.formatDateShort(start);
-    }
+  }
 
   getSelectedPlanEndDateShort(): string {
     const end = this.selectedPlanPreview?.endDate ? new Date(this.selectedPlanPreview.endDate) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -503,6 +549,10 @@ export class DietComponent implements OnInit, OnDestroy {
       name: item?.name || 'Diet',
       description: item?.description || '',
       dietType: 'Mediterranean',
+      imageUrl: item?.imageUrl || '',
+      videoUrl: item?.videoUrl || '',
+      documentUrl: item?.documentUrl || '',
+
       calories: item?.calories || 0,
       protein: 0,
       carbs: 0,

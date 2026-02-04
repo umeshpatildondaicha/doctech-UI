@@ -37,6 +37,7 @@ export class DietCreateComponent implements OnInit, OnDestroy {
   data = inject<DialogData>(DIALOG_DATA_TOKEN);
   private fb = inject(FormBuilder);
   private destroy$ = new Subject<void>();
+  difficulty :string = 'EASY';
 
   dietForm: FormGroup;
   mode: Mode = 'create';
@@ -154,29 +155,48 @@ export class DietCreateComponent implements OnInit, OnDestroy {
             tips: this.getTipsArray(),
             notes: formValue.notes || undefined
           };
-
-          const dietData: Partial<Diet> = {
+          const apiPayload = {
             name: formValue.name,
             description: formValue.description,
             dietType: formValue.dietType,
-            calories: formValue.calories,
-            protein: formValue.protein,
-            carbs: formValue.carbs,
-            fat: formValue.fat,
-            fiber: formValue.fiber,
-            imageUrl: formValue.imageUrl || undefined,
-            videoUrl: formValue.videoUrl || undefined,
-            documentUrl: formValue.documentUrl || undefined,
-            tags: tags.length > 0 ? tags : undefined,
-            ingredients: ingredients.length > 0 ? ingredients : undefined,
-            recipe: recipe,
-            createdByDoctorId: 'doc1', // TODO: Get from auth service
-            createdAt: new Date(),
-            isActive: true
+          
+            nutritionalInformation: {
+              caloriesKcal: formValue.calories,
+              protein: formValue.protein,
+              carbohydrates: formValue.carbs,
+              fat: formValue.fat,
+              fiber: formValue.fiber
+            },
+          
+            mediaLinks: [
+              {
+                imageUrl: formValue.imageUrl || null,
+                youtubeUrl: formValue.videoUrl || null,
+                documentUrl: formValue.documentUrl || null
+              }
+            ],
+          
+            ingredients: ingredients.map(i => ({
+              name: i.name,
+              quantity: i.quantity,
+              unit: i.unit,              // MUST be enum like CUP
+              category: i.category,      // GRAINS etc
+              notes: i.notes
+            })),
+          
+            recipe: {
+              preparationTimeMinutes: recipe.prepTime,
+              cookTimeMinutes: recipe.cookTime,
+              servings: recipe.servings,
+              difficulty: recipe.difficulty.toUpperCase(), // EASY
+              instructions: recipe.instructions.map(i => i.instruction),
+              cookingTips: recipe.tips,
+              recipeNotes: recipe.notes
+            }
           };
-
+          
           setTimeout(() => {
-            this.dialogRef.close(dietData);
+            this.dialogRef.close(apiPayload);
           }, 0);
         } else if (this.isViewMode) {
           setTimeout(() => {

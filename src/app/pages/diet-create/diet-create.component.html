@@ -142,13 +142,13 @@
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Diet Type</mat-label>
               <mat-select formControlName="dietType">
-                <mat-option value="mediterranean">Mediterranean</mat-option>
-                <mat-option value="keto">Keto</mat-option>
-                <mat-option value="vegan">Vegan</mat-option>
-                <mat-option value="vegetarian">Vegetarian</mat-option>
-                <mat-option value="paleo">Paleo</mat-option>
-                <mat-option value="low-carb">Low Carb</mat-option>
-                <mat-option value="high-protein">High Protein</mat-option>
+                <mat-option value="MEDITERRANEAN">Mediterranean</mat-option>
+                <mat-option value="KETO">Keto</mat-option>
+                <mat-option value="VEGAN">Vegan</mat-option>
+                <mat-option value="VEGETARIAN">Vegetarian</mat-option>
+                <mat-option value="PALEO">Paleo</mat-option>
+                <mat-option value="LOW_CARB">Low Carb</mat-option>
+                <mat-option value="HIGH_PROTEIN">High Protein</mat-option>
               </mat-select>
               @if (dietForm.get('dietType')?.hasError('required')) {
                 <mat-error>
@@ -337,20 +337,15 @@
                       <mat-form-field appearance="outline">
                         <mat-label>Unit *</mat-label>
                         <mat-select formControlName="unit">
-                          <mat-option value="cup">Cup</mat-option>
-                          <mat-option value="tbsp">Tablespoon</mat-option>
-                          <mat-option value="tsp">Teaspoon</mat-option>
-                          <mat-option value="g">Gram</mat-option>
-                          <mat-option value="kg">Kilogram</mat-option>
-                          <mat-option value="ml">Milliliter</mat-option>
-                          <mat-option value="l">Liter</mat-option>
-                          <mat-option value="piece">Piece</mat-option>
-                          <mat-option value="can">Can</mat-option>
-                          <mat-option value="medium">Medium</mat-option>
-                          <mat-option value="large">Large</mat-option>
-                          <mat-option value="small">Small</mat-option>
-                          <mat-option value="clove">Clove</mat-option>
-                          <mat-option value="bunch">Bunch</mat-option>
+                          <mat-option value="CUP">Cup</mat-option>
+                          <mat-option value="TBSP">Tablespoon</mat-option>
+                          <mat-option value="TSP">Teaspoon</mat-option>
+                          <mat-option value="GRAM">Gram</mat-option>
+                          <mat-option value="KG">Kilogram</mat-option>
+                          <mat-option value="ML">Milliliter</mat-option>
+                          <mat-option value="L">Liter</mat-option>
+                          <mat-option value="PIECE">Piece</mat-option>
+                          
                         </mat-select>
                         @if (ingredient.get('unit')?.hasError('required')) {
                           <mat-error>
@@ -363,16 +358,13 @@
                       <mat-form-field appearance="outline">
                         <mat-label>Category</mat-label>
                         <mat-select formControlName="category">
-                          <mat-option value="Grains">Grains</mat-option>
-                          <mat-option value="Protein">Protein</mat-option>
-                          <mat-option value="Vegetables">Vegetables</mat-option>
-                          <mat-option value="Fruits">Fruits</mat-option>
-                          <mat-option value="Legumes">Legumes</mat-option>
-                          <mat-option value="Oils">Oils</mat-option>
-                          <mat-option value="Condiments">Condiments</mat-option>
-                          <mat-option value="Herbs">Herbs</mat-option>
-                          <mat-option value="Dairy">Dairy</mat-option>
-                          <mat-option value="Nuts">Nuts</mat-option>
+                          <mat-option value="GRAINS">Grains</mat-option>
+                          <mat-option value="PROTEIN">Protein</mat-option>
+                          <mat-option value="VEGETABLES">Vegetables</mat-option>
+                          <mat-option value="FRUITS">Fruits</mat-option>
+                          <mat-option value="LEGUMES">Legumes</mat-option>
+                          <mat-option value="OILS">Oils</mat-option>
+                          
                         </mat-select>
                       </mat-form-field>
                     </div>
@@ -414,9 +406,10 @@
                   <mat-form-field appearance="outline">
                     <mat-label>Difficulty</mat-label>
                     <mat-select formControlName="difficulty">
-                      <mat-option value="Easy">Easy</mat-option>
-                      <mat-option value="Medium">Medium</mat-option>
-                      <mat-option value="Hard">Hard</mat-option>
+                      <mat-option value="EASY">Easy</mat-option>
+                      <mat-option value="MEDIUM">Medium</mat-option>
+                      <mat-option value="HARD">Hard</mat-option>
+                      
                     </mat-select>
                   </mat-form-field>
                 </div>

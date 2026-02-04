@@ -14,6 +14,7 @@ import { Mode } from '../../types/mode.type';
 import { AppointmentRescheduleComponent } from '../appointment-reschedule/appointment-reschedule.component';
 import { AppointmentViewComponent } from '../appointment-view/appointment-view.component';
 import { CoreEventService, DialogboxService, DialogFooterAction, PageComponent, BreadcrumbItem } from "@lk/core";
+import { AppointmentService } from '../../services/appointment.service';
 
 @Component({
     selector: 'app-appointment',
@@ -30,6 +31,7 @@ export class AppointmentComponent implements OnInit {
 
   // All appointments data
   allAppointments: Appointment[] = [];
+  isLoading =false;
   appointmentColumns: ColDef[] = [];
   appointmentGridOptions = {
     menuActions: [
@@ -78,7 +80,8 @@ export class AppointmentComponent implements OnInit {
     private dialogService: DialogboxService,
     private router: Router,
     private eventService: CoreEventService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private appointmentService :AppointmentService
   ) {
     this.eventService.setBreadcrumb({
       label: 'Appointments',
@@ -180,93 +183,22 @@ export class AppointmentComponent implements OnInit {
     ];
   }
 
-  loadAppointmentData() {
-    this.allAppointments = [
-      {
-        appointment_id: 1,
-        patient_id: 1,
-        appointment_date_time: '2024-01-15T09:00:00',
-        notes: 'Regular checkup appointment',
-        created_at: '2024-01-10T10:00:00',
-        updated_at: '2024-01-10T10:00:00',
-        doctor_id: 1,
-        slot_id: 1,
-        status: 'SCHEDULED',
-        patientName: 'John Doe',
-        doctorName: 'Dr. Chetan',
-        slotTime: '09:00 AM',
-        is_referred: false
+  loadAppointmentData():void {
+    this.isLoading = true;
+
+    this.appointmentService.getAppointments().subscribe({
+      next: (res) => {
+        console.log('My appointments response 👉', res);
+
+        // 🔴 response structure safe handling
+        this.allAppointments = res?.data || res || [];
+        this.isLoading = false;
       },
-      {
-        appointment_id: 2,
-        patient_id: 2,
-        appointment_date_time: '2024-01-15T10:00:00',
-        notes: 'Follow-up consultation',
-        created_at: '2024-01-11T11:00:00',
-        updated_at: '2024-01-11T11:00:00',
-        doctor_id: 2,
-        slot_id: 2,
-        status: 'COMPLETED',
-        patientName: 'Jane Smith',
-        doctorName: 'Dr. Sarah',
-        slotTime: '10:00 AM',
-        is_referred: true,
-        referred_by_doctor_id: 1,
-        referred_by_doctor_name: 'Dr. Chetan',
-        referral_notes: 'Patient requires specialized cardiology consultation'
-      },
-      {
-        appointment_id: 3,
-        patient_id: 3,
-        appointment_date_time: '2024-01-15T11:00:00',
-        notes: 'Emergency consultation',
-        created_at: '2024-01-12T09:00:00',
-        updated_at: '2024-01-12T09:00:00',
-        doctor_id: 1,
-        slot_id: 3,
-        status: 'PENDING',
-        patientName: 'Mike Johnson',
-        doctorName: 'Dr. Chetan',
-        slotTime: '11:00 AM',
-        is_referred: true,
-        referred_by_doctor_id: 3,
-        referred_by_doctor_name: 'Dr. Michael Chen',
-        referral_notes: 'Urgent referral for neurological assessment'
-      },
-      {
-        appointment_id: 4,
-        patient_id: 4,
-        appointment_date_time: '2024-01-16T14:00:00',
-        notes: 'Routine checkup',
-        created_at: '2024-01-13T10:00:00',
-        updated_at: '2024-01-13T10:00:00',
-        doctor_id: 1,
-        slot_id: 4,
-        status: 'SCHEDULED',
-        patientName: 'Emily Davis',
-        doctorName: 'Dr. Chetan',
-        slotTime: '02:00 PM',
-        is_referred: false
-      },
-      {
-        appointment_id: 5,
-        patient_id: 5,
-        appointment_date_time: '2024-01-17T16:00:00',
-        notes: 'Specialist consultation',
-        created_at: '2024-01-14T11:00:00',
-        updated_at: '2024-01-14T11:00:00',
-        doctor_id: 1,
-        slot_id: 5,
-        status: 'SCHEDULED',
-        patientName: 'Robert Brown',
-        doctorName: 'Dr. Chetan',
-        slotTime: '04:00 PM',
-        is_referred: true,
-        referred_by_doctor_id: 4,
-        referred_by_doctor_name: 'Dr. Lisa Garcia',
-        referral_notes: 'Patient needs dermatology evaluation for skin condition'
+      error: (err) => {
+        console.error('Error loading appointments ❌', err);
+        this.isLoading = false;
       }
-    ];
+    });
   }
 
   onAppointmentRowClick(event: any) {

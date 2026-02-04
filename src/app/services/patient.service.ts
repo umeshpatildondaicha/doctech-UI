@@ -19,4 +19,7 @@ export class PatientService {
   updatePatient(patientId:number,payload:any):Observable<any>{
     return this.httpService.sendPUTRequest(`${this.baseUrl}/patients/${patientId}`,payload);
   }
+  deletePatient(PatientId:number):Observable<any>{
+    return this.httpService.sendDELETERequest(`${this.baseUrl}/patients/${PatientId}`)
+  }
 }
