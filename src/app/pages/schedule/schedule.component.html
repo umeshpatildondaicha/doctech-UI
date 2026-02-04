@@ -62,6 +62,12 @@
           <span class="sched-count">{{ getScheduleListAppointments().length }} appointment(s)</span>
         </div>
         <div class="sched-list-body">
+          @if (scheduleApiError) {
+            <div class="sched-empty">
+              <p class="empty-title">Failed to load schedule</p>
+              <p class="empty-sub">{{ scheduleApiError }}</p>
+            </div>
+          } @else {
           <!-- Day overview: Total · Booked · Available · Break + Available slots (all in one place) -->
           <div class="appointments-day-overview">
             <div class="day-overview-stats">
@@ -105,6 +111,27 @@
               </div>
             </div>
           }
+
+          @if (isSlotBasedScheduling()) {
+            <div class="avail-cards-shell">
+              <div class="avail-cards-head">
+                <div class="avail-cards-title">Available slots</div>
+                <div class="avail-cards-sub">{{ scheduleSummary.available }} available</div>
+              </div>
+              @if (getAvailableSlotCards(12).length > 0) {
+                <div class="avail-cards">
+                  @for (c of getAvailableSlotCards(12); track c.slotId) {
+                    <button type="button" class="avail-slot-card" (click)="openQuickAddAt(c.start)">
+                      <div class="t">{{ c.startLabel }} – {{ c.endLabel }}</div>
+                      <div class="sub">Tap to add patient</div>
+                    </button>
+                  }
+                </div>
+              } @else {
+                <div class="avail-empty">No available slots</div>
+              }
+            </div>
+          }
           </div>
           @if (getScheduleListAppointments().length > 0) {
             @for (appointment of getScheduleListAppointments(); track appointment) {
@@ -143,9 +170,16 @@
           } @else {
             <div class="sched-empty">
               <div class="empty-ico" aria-hidden="true"><app-icon fontIcon="event_available" [size]="48"></app-icon></div>
-              <p class="empty-title">No appointments this day</p>
-              <p class="empty-sub">Select another date, search by patient name, or create a new appointment.</p>
+              <p class="empty-title">
+                @if (scheduleApiLoading) { Loading schedule... } @else { No booked appointments for this day }
+              </p>
+              <p class="empty-sub">
+                @if (!scheduleApiLoading) {
+                  {{ scheduleSummary.available }} slot(s) available. Select another date or create a new appointment.
+                }
+              </p>
             </div>
+          }
           }
         </div>
       </app-card>
@@ -511,7 +545,7 @@
               <app-card class="manage-card prio-card p1" [dense]="true" [divider]="true" title="Leave &amp; Absences" subtitle="Priority 1 (highest)">
                 <div appCardActions class="prio-actions">
                   <span class="count">{{ manageLeaves.length }} item(s)</span>
-                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  (btnClick)="addManageItem('p1')"></app-button>
+                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  [disabled]="true"></app-button>
                 </div>
                 <div class="manage-list">
                   @for (item of manageLeaves; track item; let i = $index) {
@@ -532,8 +566,8 @@
                         </div>
                       </div>
                       <div class="actions">
-                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'"></app-button>
-                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" (btnClick)="deleteManageItem('p1', i)"></app-button>
+                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'" [disabled]="true"></app-button>
+                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" [disabled]="true"></app-button>
                       </div>
                     </div>
                   }
@@ -543,7 +577,7 @@
               <app-card class="manage-card prio-card p2" [dense]="true" [divider]="true" title="Specific Day Overrides" subtitle="Priority 2 (date-specific)">
                 <div appCardActions class="prio-actions">
                   <span class="count">{{ manageSpecificDays.length }} item(s)</span>
-                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  (btnClick)="addManageItem('p2')"></app-button>
+                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  [disabled]="true"></app-button>
                 </div>
                 <div class="manage-list">
                   @for (item of manageSpecificDays; track item; let i = $index) {
@@ -564,8 +598,8 @@
                         </div>
                       </div>
                       <div class="actions">
-                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'"></app-button>
-                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" (btnClick)="deleteManageItem('p2', i)"></app-button>
+                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'" [disabled]="true"></app-button>
+                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" [disabled]="true"></app-button>
                       </div>
                     </div>
                   }
@@ -575,7 +609,7 @@
               <app-card class="manage-card prio-card p3" [dense]="true" [divider]="true" title="Weekly Routine" subtitle="Priority 3 (recurring)">
                 <div appCardActions class="prio-actions">
                   <span class="count">{{ manageWeeklyRoutines.length }} item(s)</span>
-                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  (btnClick)="addManageItem('p3')"></app-button>
+                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  [disabled]="true"></app-button>
                 </div>
                 <div class="manage-list">
                   @for (item of manageWeeklyRoutines; track item; let i = $index) {
@@ -606,8 +640,8 @@
                         </div>
                       </div>
                       <div class="actions">
-                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'"></app-button>
-                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" (btnClick)="deleteManageItem('p3', i)"></app-button>
+                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'" [disabled]="true"></app-button>
+                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" [disabled]="true"></app-button>
                       </div>
                     </div>
                   }
@@ -618,7 +652,7 @@
                 <div appCardActions class="prio-actions">
                   <span class="singleton">Singleton</span>
                   <span class="count">{{ manageBaseAvailability.length }} item(s)</span>
-                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  (btnClick)="addManageItem('p4')"></app-button>
+                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  [disabled]="true"></app-button>
                 </div>
                 <div class="manage-list">
                   @for (item of manageBaseAvailability; track item; let i = $index) {
@@ -641,8 +675,8 @@
                         </div>
                       </div>
                       <div class="actions">
-                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'"></app-button>
-                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" (btnClick)="deleteManageItem('p4', i)"></app-button>
+                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'" [disabled]="true"></app-button>
+                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" [disabled]="true"></app-button>
                       </div>
                     </div>
                   }

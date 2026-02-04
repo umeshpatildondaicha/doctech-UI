@@ -25,6 +25,12 @@ import { PatientSearchDialogComponent, PatientSearchResult } from '../patient-se
 import { Appointment } from '../../interfaces/appointment.interface';
 import { AppCardComponent } from '../../core/components/app-card/app-card.component';
 import { AppCardActionsDirective } from '../../core/components/app-card/app-card-actions.directive';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { TimingsService } from '../../services/timings.service';
+import { AuthService } from '../../services/auth.service';
+import type { DoctorTimingsResponse, TimingsForecastDay } from '../../interfaces/timings.interface';
+import { AppointmentService } from '../../services/appointment.service';
 
 type TimingPriorityTab = 'p4' | 'p3' | 'p2' | 'p1';
 
@@ -107,6 +113,14 @@ interface ScheduleStats {
   flexibleAppointmentsRemaining?: number;
 }
 
+interface AvailableSlotCard {
+  slotId: string;
+  start: string; // "HH:mm"
+  end: string;   // "HH:mm"
+  startLabel: string; // "h:mm AM/PM"
+  endLabel: string;
+}
+
 interface ScheduleView {
   id: string;
   name: string;
@@ -127,6 +141,39 @@ interface ScheduleSummaryStats {
   booked: number;
   available: number;
   break: number;
+}
+
+type DoctorScheduleApiMode = 'TIME_SLOT' | 'FLEXIBLE';
+
+interface DoctorScheduleApiOverview {
+  totalSlots: number;
+  bookedSlots: number;
+  availableSlots: number;
+  breaksCount: number;
+}
+
+interface DoctorScheduleApiSlot {
+  slotId: string;
+  startTime: string; // "HH:mm:ss"
+  endTime: string; // "HH:mm:ss"
+  slotStatus: 'AVAILABLE' | 'BOOKED' | 'BREAK' | 'BLOCKED' | string;
+  type: 'SLOT' | 'BREAK' | 'BLOCKED' | string;
+  breakReason: string | null;
+  appointmentPublicId: string | null;
+  patientName: string | null;
+  appointmentStatus: string | null;
+  reason: string | null;
+}
+
+interface DoctorScheduleApiResponse {
+  startDate: string;
+  endDate: string;
+  selectedDate: string;
+  mode: DoctorScheduleApiMode;
+  overview: DoctorScheduleApiOverview;
+  breaks: any[];
+  slots: DoctorScheduleApiSlot[];
+  patients: any[];
 }
 
 interface ScheduleAvailabilityInfo {
@@ -258,13 +305,11 @@ export class ScheduleComponent implements OnInit {
 
   // Timings (P4 standard / P3 weekly / P2 overrides / P1 leave)
   timingsDaily = {
-    start: '09:00',
-    end: '17:00',
-    slotDuration: 30
+    start: '',
+    end: '',
+    slotDuration: 0
   };
-  timingsBreaks: TimingBreak[] = [
-    { label: 'Lunch Break', start: '13:30', end: '14:00' }
-  ];
+  timingsBreaks: TimingBreak[] = [];
   // Weekly rules are meant to be optional (one schedule per weekday).
   // If a rule exists for a weekday, it overrides the daily timing for that weekday.
   timingsWeeklyRules: Record<Weekday, WeeklyRule | null> = {
@@ -273,49 +318,30 @@ export class ScheduleComponent implements OnInit {
     Wednesday: null,
     Thursday: null,
     Friday: null,
-    // Example scenarios requested:
-    // - Every Saturday: 4 hours, lunch + tea breaks
-    Saturday: {
-      start: '09:00',
-      end: '13:00',
-      breaks: [
-        { label: 'Lunch Break', start: '11:00', end: '11:30' },
-        { label: 'Tea Break', start: '12:15', end: '12:30' }
-      ]
-    },
-    // - Every Sunday: 2 hours, 1 hour break
-    Sunday: {
-      start: '10:00',
-      end: '12:00',
-      breaks: [{ label: 'Break', start: '11:00', end: '12:00' }]
-    }
+    Saturday: null,
+    Sunday: null
   };
   timingsOverrides: TimingOverride[] = [];
   timingsLeaveDates: string[] = [];
   expandedWeekday: Weekday | null = null;
-  overrideDraft: TimingOverride = { date: '', start: '14:00', end: '19:00', breaks: [] };
+  overrideDraft: TimingOverride = { date: '', start: '', end: '', breaks: [] };
   isEditingOverride = false;
   selectedWeeklyDay: Weekday = 'Monday';
   selectedOverrideDate: string | null = null;
   thisWeekScheduleCards: ThisWeekScheduleCard[] = [];
 
-  // Timings management (admin) mock data
-  manageLeaves: ManageLeaveItem[] = [
-    { label: 'Medical Conference', rangeLabel: 'Dec 15 – Dec 20, 2024', durationLabel: '6 Days' }
-  ];
-  manageSpecificDays: ManageSpecificDayItem[] = [
-    { label: 'Evening Gala (Limited)', dateLabel: 'Nov 30', rangeLabel: 'Dec 15 – Dec 20, 2024' }
-  ];
-  manageWeeklyRoutines: ManageWeeklyRoutineItem[] = [
-    { label: 'Main Consultation', timeLabel: '09:00 AM – 01:00 PM', days: ['Monday', 'Wednesday', 'Friday'], partiallyOverridden: true },
-    { label: 'Weekend Telehealth', timeLabel: '10:00 AM – 12:00 PM', days: ['Saturday'] }
-  ];
-  manageBaseAvailability: ManageBaseAvailabilityItem[] = [
-    { label: 'General Availability', timeLabel: '05:00 PM – 08:00 PM', note: 'Overridden by Higher Priority' }
-  ];
+  // Timings management (admin) - populated from API only
+  manageLeaves: ManageLeaveItem[] = [];
+  manageSpecificDays: ManageSpecificDayItem[] = [];
+  manageWeeklyRoutines: ManageWeeklyRoutineItem[] = [];
+  manageBaseAvailability: ManageBaseAvailabilityItem[] = [];
 
   timingsForecast: ForecastDay[] = [];
   filteredTimingsForecast: ForecastDay[] = [];
+  timingsApiLoading = false;
+  timingsApiError: string | null = null;
+  private timingsLoaded = false;
+  private timingsDoctorId: string = 'DR1';
 
   // View Management
   selectedDate: Date = new Date();
@@ -326,6 +352,11 @@ export class ScheduleComponent implements OnInit {
   scheduleSearch = '';
   scheduleSummary: ScheduleSummaryStats = { totalSlots: 0, booked: 0, available: 0, break: 0 };
   scheduleAvailability: ScheduleAvailabilityInfo = { mode: 'slots', availableTimes: [] };
+  private scheduleSlots: DoctorScheduleApiSlot[] = [];
+  private scheduleSlotByStart: Record<string, DoctorScheduleApiSlot> = {};
+  private scheduleSelectedDateIso: string | null = null;
+  private scheduleRangeStartIso: string | null = null;
+  private scheduleRangeEndIso: string | null = null;
 
   // Statistics
   scheduleStats: ScheduleStats = {
@@ -342,42 +373,36 @@ export class ScheduleComponent implements OnInit {
 
   // Doctor Information
   doctorInfo: DoctorInfo = {
-    doctorId: 1,
-    doctorName: 'Dr. Chetan',
-    specialization: 'Cardiology',
-    avatar: 'assets/avatars/doctor1.jpg',
-    totalAppointments: 8,
-    completedAppointments: 5,
-    availableSlots: 3,
+    doctorId: 0,
+    doctorName: '',
+    specialization: '',
+    avatar: '',
+    totalAppointments: 0,
+    completedAppointments: 0,
+    availableSlots: 0,
     workingHours: {
-      start: '09:00',
-      end: '17:00'
+      start: '',
+      end: ''
     },
     breakTime: {
-      start: '12:00',
-      end: '13:00'
+      start: '',
+      end: ''
     },
     schedulingType: 'slots',
-    slotDuration: 30,
-    maxAppointmentsPerSlot: 1
+    slotDuration: 0,
+    maxAppointmentsPerSlot: 0
   };
 
   // Doctor Schedule Configuration
   doctorSchedule: DoctorSchedule = {
     schedulingType: 'slots',
-    slotDuration: 30,
-    maxAppointmentsPerSlot: 1,
+    slotDuration: 0,
+    maxAppointmentsPerSlot: 0,
     workingHours: {
-      start: '09:00',
-      end: '17:00'
+      start: '',
+      end: ''
     },
-    breaks: [
-      {
-        reason: 'Lunch Break',
-        startTime: '12:00',
-        endTime: '13:00'
-      }
-    ]
+    breaks: []
   };
   
   // Time slots for timeline view
@@ -392,6 +417,8 @@ export class ScheduleComponent implements OnInit {
   isDarkMode = false;
   showSettings = false;
   isPatientQueuePaused = false;
+  scheduleApiLoading = false;
+  scheduleApiError: string | null = null;
   
   // Schedule Settings
   scheduleSettings = {
@@ -412,57 +439,17 @@ export class ScheduleComponent implements OnInit {
     { id: 'admin', name: 'Admin Time', description: 'Administrative work', duration: 60, color: '#FF9800', icon: 'settings' }
   ];
   
-  // Mock data
-  mockAppointments: Appointment[] = [
-    {
-      appointment_id: 1,
-      patient_id: 1,
-      appointment_date_time: '2024-01-15T09:00:00',
-      notes: 'Regular checkup appointment',
-      created_at: '2024-01-10T10:00:00',
-      updated_at: '2024-01-10T10:00:00',
-      doctor_id: 1,
-      slot_id: 1,
-      status: 'SCHEDULED',
-      patientName: 'John Doe',
-      doctorName: 'Dr. Chetan',
-      slotTime: '09:00 AM'
-    },
-    {
-      appointment_id: 2,
-      patient_id: 2,
-      appointment_date_time: '2024-01-15T10:00:00',
-      notes: 'Follow-up consultation',
-      created_at: '2024-01-11T11:00:00',
-      updated_at: '2024-01-11T11:00:00',
-      doctor_id: 2,
-      slot_id: 2,
-      status: 'COMPLETED',
-      patientName: 'Jane Smith',
-      doctorName: 'Dr. Sarah',
-      slotTime: '10:00 AM'
-    },
-    {
-      appointment_id: 3,
-      patient_id: 3,
-      appointment_date_time: '2024-01-15T11:00:00',
-      notes: 'Emergency consultation',
-      created_at: '2024-01-12T09:00:00',
-      updated_at: '2024-01-12T09:00:00',
-      doctor_id: 1,
-      slot_id: 3,
-      status: 'PENDING',
-      patientName: 'Mike Johnson',
-      doctorName: 'Dr. Chetan',
-      slotTime: '11:00 AM'
-    }
-  ];
+  // Schedule appointments (API)
+  mockAppointments: Appointment[] = [];
 
   constructor(
     private readonly dialogService: DialogboxService,
     private readonly fb: FormBuilder,
     private readonly eventService: CoreEventService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly timingsService: TimingsService,
+    private readonly authService: AuthService,
+    private readonly appointmentService: AppointmentService
   ) {
     this.eventService.setBreadcrumb({
       label: 'Schedule',
@@ -473,38 +460,23 @@ export class ScheduleComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Default to first mocked appointment date if within schedule window, else today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const windowEnd = new Date(today);
-    windowEnd.setDate(windowEnd.getDate() + this.scheduleWindowDays - 1);
-    const mockDate = this.mockAppointments[0]?.appointment_date_time ? new Date(this.mockAppointments[0].appointment_date_time) : null;
-    if (mockDate) {
-      mockDate.setHours(0, 0, 0, 0);
-      if (mockDate >= today && mockDate <= windowEnd) {
-        this.selectedDate = new Date(this.mockAppointments[0].appointment_date_time);
-      } else {
-        this.selectedDate = new Date();
-      }
-    } else {
-      this.selectedDate = new Date();
-    }
+    this.selectedDate = new Date();
 
     this.generateTimeSlots();
     this.loadDoctorSchedule();
     this.setupRealTimeUpdates();
-    this.seedTimingsDemoData();
-    this.recomputeTimingsForecast();
-    this.initTimingsSelections();
-    this.buildThisWeekScheduleCards();
+    this.loadTimingsFromApi({ fallbackToDemo: false });
+    this.loadScheduleFromApi(this.selectedDate);
 
-    this.rebuildScheduleWeekStrip();
     this.recomputeScheduleSummary();
     this.recomputeScheduleAvailability();
   }
 
   setSection(section: 'schedule' | 'timings'): void {
     this.activeSection = section;
+    if (section === 'timings' && !this.timingsLoaded && !this.timingsApiLoading) {
+      this.loadTimingsFromApi({ fallbackToDemo: false });
+    }
   }
 
   setTimingsMode(mode: TimingsMode): void {
@@ -524,6 +496,578 @@ export class ScheduleComponent implements OnInit {
 
     // Overrides: default to first override date (sorted), otherwise null
     this.selectedOverrideDate = this.timingsOverrides[0]?.date ?? null;
+  }
+
+  private resolveDoctorIdForTimings(): string {
+    return this.authService.getDoctorRegistrationNumber() || 'DR1';
+  }
+
+  private resolveDoctorRegistrationNumberForSchedule(): string {
+    return this.authService.getDoctorRegistrationNumber() || 'DR1';
+  }
+
+  private formatTimeFromIso(dateTime: string | undefined | null): string {
+    if (!dateTime) return '';
+    const d = new Date(dateTime);
+    if (Number.isNaN(d.getTime())) return '';
+    // Match formatTimeForDisplay("HH:mm") output (e.g. "9:00 AM")
+    return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+
+  private normalizeDoctorScheduleResponse(resp: any): Appointment[] {
+    const raw =
+      (Array.isArray(resp) ? resp : null) ||
+      (Array.isArray(resp?.data) ? resp.data : null) ||
+      (Array.isArray(resp?.appointments) ? resp.appointments : null) ||
+      [];
+
+    const nowIso = new Date().toISOString();
+
+    return raw.map((a: any, idx: number) => {
+      const dateOnly =
+        a?.date ||
+        a?.appointmentDate ||
+        a?.appointment_date ||
+        a?.appointment_day ||
+        a?.day ||
+        null;
+      const timeOnly =
+        a?.time ||
+        a?.appointmentTime ||
+        a?.appointment_time ||
+        a?.slotTime ||
+        null;
+      const combined =
+        dateOnly && timeOnly && /^\d{4}-\d{2}-\d{2}$/.test(String(dateOnly))
+          ? `${String(dateOnly)}T${String(timeOnly).slice(0, 5)}:00`
+          : null;
+
+      const appointmentDateTime =
+        combined ||
+        a?.appointment_date_time ||
+        a?.appointmentDateTime ||
+        a?.appointment_dateTime ||
+        a?.dateTime ||
+        a?.date_time ||
+        a?.appointment_date ||
+        '';
+
+      const statusRaw = (a?.status || a?.appointmentStatus || '').toString().toUpperCase();
+      const status: Appointment['status'] =
+        statusRaw === 'SCHEDULED' || statusRaw === 'CANCELED' || statusRaw === 'COMPLETED' || statusRaw === 'PENDING'
+          ? statusRaw
+          : 'SCHEDULED';
+
+      const patientName =
+        a?.patientName ||
+        a?.patient_name ||
+        a?.patient?.name ||
+        a?.patient?.fullName ||
+        a?.patientFullName ||
+        '';
+
+      const doctorName =
+        a?.doctorName ||
+        a?.doctor_name ||
+        a?.doctor?.name ||
+        a?.doctor?.fullName ||
+        a?.doctorFullName ||
+        '';
+
+      return {
+        appointment_id: Number(a?.appointment_id ?? a?.appointmentId ?? a?.id ?? idx + 1),
+        patient_id: Number(a?.patient_id ?? a?.patientId ?? a?.patient?.id ?? 0),
+        appointment_date_time: String(appointmentDateTime),
+        notes: String(a?.notes ?? a?.note ?? ''),
+        created_at: String(a?.created_at ?? a?.createdAt ?? nowIso),
+        updated_at: String(a?.updated_at ?? a?.updatedAt ?? nowIso),
+        doctor_id: Number(a?.doctor_id ?? a?.doctorId ?? a?.doctor?.id ?? 0),
+        slot_id: Number(a?.slot_id ?? a?.slotId ?? a?.slot?.id ?? 0),
+        status,
+        patientName: String(patientName),
+        doctorName: String(doctorName),
+        slotTime: this.formatTimeFromIso(appointmentDateTime) || (typeof timeOnly === 'string' ? timeOnly : '')
+      } as Appointment;
+    });
+  }
+
+  private toHHmm(time: string | null | undefined): string {
+    const t = (time || '').trim();
+    if (!t) return '';
+    // "09:00:00" -> "09:00"
+    if (/^\d{2}:\d{2}:\d{2}$/.test(t)) return t.slice(0, 5);
+    if (/^\d{2}:\d{2}$/.test(t)) return t;
+    return t.slice(0, 5);
+  }
+
+  private normalizeDoctorScheduleSlotsResponse(resp: any): DoctorScheduleApiResponse | null {
+    const data = resp?.data && resp?.slots == null ? resp.data : resp;
+    if (!data || !Array.isArray(data.slots) || !data.overview) return null;
+    return data as DoctorScheduleApiResponse;
+  }
+
+  private isBookedLikeSlot(slot: DoctorScheduleApiSlot): boolean {
+    const status = String(slot.slotStatus || '').toUpperCase();
+    const type = String(slot.type || '').toUpperCase();
+    if (type !== 'SLOT') return false;
+    if (status === 'AVAILABLE' || status === 'BREAK' || status === 'BLOCKED') return false;
+    // Treat any non-available SLOT with a patient/appointment as booked-like (PENDING, BOOKED, CONFIRMED, etc.)
+    return !!slot.patientName || !!slot.appointmentPublicId || !!slot.appointmentStatus;
+  }
+
+  getAvailableSlotCards(limit = 12): AvailableSlotCard[] {
+    const slots = (this.scheduleSlots || [])
+      .filter((s) => String(s.type).toUpperCase() === 'SLOT' && String(s.slotStatus).toUpperCase() === 'AVAILABLE')
+      .slice(0, Math.max(0, limit));
+
+    return slots
+      .map((s) => {
+        const start = this.toHHmm(s.startTime);
+        const end = this.toHHmm(s.endTime);
+        if (!start || !end) return null;
+        return {
+          slotId: s.slotId,
+          start,
+          end,
+          startLabel: this.formatTimeForDisplay(start),
+          endLabel: this.formatTimeForDisplay(end)
+        } as AvailableSlotCard;
+      })
+      .filter(Boolean) as AvailableSlotCard[];
+  }
+
+  private loadScheduleFromApi(date: Date): void {
+    const doctorRegNo = this.resolveDoctorRegistrationNumberForSchedule();
+    const dateKey = this.toIsoDateOnly(date);
+
+    this.scheduleApiLoading = true;
+    this.scheduleApiError = null;
+
+    this.appointmentService.getDoctorSchedule(doctorRegNo, dateKey).subscribe({
+      next: (resp) => {
+        const slotsResp = this.normalizeDoctorScheduleSlotsResponse(resp);
+        if (slotsResp) {
+          const todayIso = this.toIsoDateOnly(new Date());
+          let rangeStartIso = (slotsResp.startDate || todayIso).trim();
+          const rangeEndIso = (slotsResp.endDate || '').trim() || null;
+
+          // Don't show past dates in the strip: clamp start to today.
+          if (rangeStartIso && rangeStartIso < todayIso) rangeStartIso = todayIso;
+
+          this.scheduleRangeStartIso = rangeStartIso || null;
+          this.scheduleRangeEndIso = rangeEndIso;
+
+          // Align UI selected date with backend selectedDate (but never before displayed range start)
+          let selectedIso = (slotsResp.selectedDate || dateKey).trim();
+          if (this.scheduleRangeStartIso && selectedIso < this.scheduleRangeStartIso) {
+            selectedIso = this.scheduleRangeStartIso;
+          }
+          this.scheduleSelectedDateIso = selectedIso;
+          this.selectedDate = this.parseIsoDateOnly(selectedIso);
+
+          // Align "Next N days" window with backend range when present
+          if (this.scheduleRangeStartIso && this.scheduleRangeEndIso) {
+            const a = this.parseIsoDateOnly(this.scheduleRangeStartIso).getTime();
+            const b = this.parseIsoDateOnly(this.scheduleRangeEndIso).getTime();
+            const days = Math.floor((b - a) / (24 * 60 * 60 * 1000)) + 1;
+            if (Number.isFinite(days) && days > 0) this.scheduleWindowDays = days;
+          }
+
+          this.scheduleSlots = slotsResp.slots || [];
+          this.scheduleSlotByStart = {};
+          for (const s of this.scheduleSlots) {
+            const hhmm = this.toHHmm(s.startTime);
+            if (hhmm) this.scheduleSlotByStart[hhmm] = s;
+          }
+
+          // Drive timeline + suggestions from API slots directly
+          this.timeSlots = this.scheduleSlots
+            .map((s) => this.toHHmm(s.startTime))
+            .filter(Boolean);
+
+          // Summary from API overview
+          this.scheduleSummary = {
+            totalSlots: Number(slotsResp.overview.totalSlots || 0),
+            booked: Number(slotsResp.overview.bookedSlots || 0),
+            available: Number(slotsResp.overview.availableSlots || 0),
+            break: Number(slotsResp.overview.breaksCount || 0)
+          };
+
+          // Availability (slots mode)
+          const availableTimes = this.scheduleSlots
+            .filter((s) => String(s.slotStatus).toUpperCase() === 'AVAILABLE' && String(s.type).toUpperCase() === 'SLOT')
+            .map((s) => this.toHHmm(s.startTime))
+            .filter(Boolean);
+          this.scheduleAvailability = { mode: 'slots', availableTimes };
+
+          // Derive "Appointments" list from booked-like slots (PENDING/BOOKED/CONFIRMED/etc.)
+          const bookedSlots = this.scheduleSlots.filter((s) => this.isBookedLikeSlot(s));
+          this.mockAppointments = bookedSlots.map((s, idx) => {
+            const start = this.toHHmm(s.startTime);
+            const dateIso = this.scheduleSelectedDateIso || dateKey;
+            const statusRaw = (s.appointmentStatus || 'SCHEDULED').toString().toUpperCase();
+            const status: Appointment['status'] =
+              statusRaw === 'SCHEDULED' || statusRaw === 'CANCELED' || statusRaw === 'COMPLETED' || statusRaw === 'PENDING'
+                ? statusRaw
+                : 'SCHEDULED';
+            return {
+              appointment_id: idx + 1,
+              patient_id: 0,
+              appointment_date_time: `${dateIso}T${this.toHHmm(s.startTime)}:00`,
+              notes: (s.reason || s.breakReason || '') as string,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              doctor_id: 0,
+              slot_id: 0,
+              status,
+              patientName: s.patientName || '',
+              doctorName: doctorRegNo,
+              slotTime: start ? this.formatTimeForDisplay(start) : ''
+            };
+          });
+
+          // Build the day strip from API range
+          this.rebuildScheduleWeekStrip();
+        } else {
+          // Fallback: backend may return plain appointment arrays in other environments
+          this.scheduleSlots = [];
+          this.scheduleSlotByStart = {};
+          this.scheduleSelectedDateIso = null;
+          this.scheduleRangeStartIso = null;
+          this.scheduleRangeEndIso = null;
+          this.mockAppointments = this.normalizeDoctorScheduleResponse(resp);
+          this.rebuildScheduleWeekStrip();
+        }
+      },
+      error: (err) => {
+        this.mockAppointments = [];
+        this.scheduleSlots = [];
+        this.scheduleSlotByStart = {};
+        this.scheduleSelectedDateIso = null;
+        this.scheduleRangeStartIso = null;
+        this.scheduleRangeEndIso = null;
+        this.scheduleApiError = err?.error?.message || err?.message || 'Failed to load schedule.';
+      },
+      complete: () => {
+        this.scheduleApiLoading = false;
+        // Refresh derived UI from latest appointments
+        if (!this.scheduleSlots.length) {
+          this.recomputeScheduleSummary();
+          this.recomputeScheduleAvailability();
+        }
+        this.loadDoctorSchedule();
+      }
+    });
+  }
+
+  private toIsoDateOnly(d: Date): string {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  private parseIsoDateOnly(date: string): Date {
+    // Avoid timezone shifting by anchoring to local midnight.
+    return new Date(`${date}T00:00:00`);
+  }
+
+  private loadTimingsFromApi(opts: { fallbackToDemo: boolean }): void {
+    const doctorId = this.resolveDoctorIdForTimings();
+    this.timingsDoctorId = doctorId;
+
+    const todayKey = this.toIsoDateOnly(new Date());
+    const weekStartKey = this.toIsoDateOnly(this.getWeekStartMonday(new Date()));
+
+    this.timingsApiLoading = true;
+    this.timingsApiError = null;
+
+    forkJoin({
+      raw: this.timingsService.getDoctorTimings(doctorId).pipe(
+        catchError((err) => {
+          this.timingsApiError =
+            err?.error?.message || err?.message || 'Failed to load timings.';
+          return of(null as DoctorTimingsResponse | null);
+        })
+      ),
+      forecast: this.timingsService.getForecast(doctorId, todayKey, this.forecastDays).pipe(
+        catchError(() => of(null as TimingsForecastDay[] | null))
+      ),
+      week: this.timingsService.getWeek(doctorId, weekStartKey).pipe(
+        catchError(() => of(null as TimingsForecastDay[] | null))
+      )
+    }).subscribe(({ raw, forecast, week }) => {
+      this.timingsApiLoading = false;
+
+      if (!raw) {
+        // Do not show any demo data; keep timings empty on error/no-config.
+        this.timingsLoaded = false;
+        this.timingsForecast = [];
+        this.filteredTimingsForecast = [];
+        this.thisWeekScheduleCards = [];
+        return;
+      }
+
+      this.applyRawTimingsToUi(raw);
+
+      if (forecast) this.applyForecastToUi(forecast);
+      else {
+        this.timingsForecast = [];
+        this.filteredTimingsForecast = [];
+      }
+
+      if (week) this.applyWeekToUi(week);
+      else this.thisWeekScheduleCards = [];
+
+      this.initTimingsSelections();
+      this.timingsLoaded = true;
+    });
+  }
+
+  private applyRawTimingsToUi(raw: DoctorTimingsResponse): void {
+    this.scheduleWindowDays = raw.scheduleWindowDays ?? this.scheduleWindowDays;
+
+    // Base (P4)
+    const base = raw.base;
+    this.timingsDaily.start = base?.startTime || '';
+    this.timingsDaily.end = base?.endTime || '';
+    this.timingsDaily.slotDuration = typeof base?.slotDurationMinutes === 'number' ? base.slotDurationMinutes : 0;
+    this.timingsBreaks = (base?.breaks ?? []).map((b) => ({
+      label: (b.label || 'Break').toString(),
+      start: b.startTime,
+      end: b.endTime
+    }));
+
+    // Weekly (P3) -> per weekday record
+    const dayMap: Record<string, Weekday> = {
+      MONDAY: 'Monday',
+      TUESDAY: 'Tuesday',
+      WEDNESDAY: 'Wednesday',
+      THURSDAY: 'Thursday',
+      FRIDAY: 'Friday',
+      SATURDAY: 'Saturday',
+      SUNDAY: 'Sunday'
+    };
+    // reset
+    this.timingsWeeklyRules = {
+      Monday: null,
+      Tuesday: null,
+      Wednesday: null,
+      Thursday: null,
+      Friday: null,
+      Saturday: null,
+      Sunday: null
+    };
+    for (const rule of raw.weeklyRules ?? []) {
+      const weekdays = rule.weekdays ?? [];
+      for (const wd of weekdays) {
+        const day = dayMap[wd as string];
+        if (!day) continue;
+        if (!rule.startTime || !rule.endTime) continue;
+        this.timingsWeeklyRules[day] = {
+          start: rule.startTime,
+          end: rule.endTime,
+          breaks: (rule.breaks ?? []).map((b) => ({
+            label: (b.label || 'Break').toString(),
+            start: b.startTime,
+            end: b.endTime
+          }))
+        };
+      }
+    }
+
+    // Overrides (P2)
+    this.timingsOverrides = (raw.dateOverrides ?? [])
+      .filter((o) => !!o.date && !!o.startTime && !!o.endTime)
+      .map((o) => ({
+        date: o.date as string,
+        start: o.startTime as string,
+        end: o.endTime as string,
+        breaks: (o.breaks ?? []).map((b) => ({
+          label: (b.label || 'Break').toString(),
+          start: b.startTime,
+          end: b.endTime
+        }))
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    // Leaves (P1) -> expand to date list (for current view UI)
+    const dates: string[] = [];
+    const maxExpandDays = 400; // safety cap
+    for (const leave of raw.leaves ?? []) {
+      if (!leave.startDate || !leave.endDate) continue;
+      const start = this.parseIsoDateOnly(leave.startDate);
+      const end = this.parseIsoDateOnly(leave.endDate);
+      const cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+      let expanded = 0;
+      while (cursor <= end && expanded < maxExpandDays) {
+        dates.push(this.toIsoDateOnly(cursor));
+        cursor.setDate(cursor.getDate() + 1);
+        expanded++;
+      }
+    }
+    this.timingsLeaveDates = Array.from(new Set(dates)).sort((a, b) => a.localeCompare(b));
+
+    // Apply timings to schedule slot configuration (remove hardcoded schedule grid)
+    this.doctorSchedule = {
+      schedulingType: (base?.schedulingType as any) || 'slots',
+      slotDuration: this.timingsDaily.slotDuration || 0,
+      maxAppointmentsPerSlot: typeof base?.maxAppointmentsPerSlot === 'number' ? base.maxAppointmentsPerSlot : 0,
+      maxAppointmentsPerDay: typeof base?.maxAppointmentsPerDay === 'number' ? base.maxAppointmentsPerDay : undefined,
+      workingHours: {
+        start: this.timingsDaily.start || '',
+        end: this.timingsDaily.end || ''
+      },
+      breaks: this.timingsBreaks.map(b => ({
+        reason: b.label || 'Break',
+        startTime: b.start,
+        endTime: b.end
+      }))
+    };
+
+    this.doctorInfo = {
+      ...this.doctorInfo,
+      workingHours: { start: this.timingsDaily.start || '', end: this.timingsDaily.end || '' },
+      breakTime: {
+        start: this.timingsBreaks[0]?.start || '',
+        end: this.timingsBreaks[0]?.end || ''
+      },
+      schedulingType: (base?.schedulingType as any) || 'slots',
+      slotDuration: this.timingsDaily.slotDuration || 0,
+      maxAppointmentsPerSlot: typeof base?.maxAppointmentsPerSlot === 'number' ? base.maxAppointmentsPerSlot : 0,
+      maxAppointmentsPerDay: typeof base?.maxAppointmentsPerDay === 'number' ? base.maxAppointmentsPerDay : undefined
+    };
+
+    // regenerate slots grid now that timings loaded
+    this.generateTimeSlots();
+
+    // ---- Manage mode lists (API-driven; read-only for now) ----
+    const formatDateShort = (iso: string): string => {
+      const d = this.parseIsoDateOnly(iso);
+      return d.toLocaleString(undefined, { month: 'short', day: 'numeric' });
+    };
+    const formatDateLong = (iso: string): string => {
+      const d = this.parseIsoDateOnly(iso);
+      return d.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    };
+    const diffDaysInclusive = (startIso: string, endIso: string): number => {
+      const a = this.parseIsoDateOnly(startIso).getTime();
+      const b = this.parseIsoDateOnly(endIso).getTime();
+      const days = Math.floor((b - a) / (24 * 60 * 60 * 1000));
+      return Math.max(0, days) + 1;
+    };
+    const dayMapBack: Record<string, Weekday> = {
+      MONDAY: 'Monday',
+      TUESDAY: 'Tuesday',
+      WEDNESDAY: 'Wednesday',
+      THURSDAY: 'Thursday',
+      FRIDAY: 'Friday',
+      SATURDAY: 'Saturday',
+      SUNDAY: 'Sunday'
+    };
+
+    this.manageLeaves = (raw.leaves ?? [])
+      .filter((l) => !!l.startDate && !!l.endDate)
+      .map((l) => {
+        const startDate = l.startDate as string;
+        const endDate = l.endDate as string;
+        const days = diffDaysInclusive(startDate, endDate);
+        return {
+          label: (l.reason || 'Leave').toString(),
+          rangeLabel: `${formatDateLong(startDate)} – ${formatDateLong(endDate)}`,
+          durationLabel: days === 1 ? '1 Day' : `${days} Days`
+        } as ManageLeaveItem;
+      });
+
+    this.manageSpecificDays = (raw.dateOverrides ?? [])
+      .filter((o) => !!o.date)
+      .map((o) => {
+        const date = o.date as string;
+        return {
+          label: (o.notes || 'Override').toString(),
+          dateLabel: formatDateShort(date),
+          rangeLabel: formatDateLong(date)
+        } as ManageSpecificDayItem;
+      })
+      .sort((a, b) => a.rangeLabel.localeCompare(b.rangeLabel));
+
+    this.manageWeeklyRoutines = (raw.weeklyRules ?? [])
+      .filter((w) => !!w.startTime && !!w.endTime && (w.weekdays?.length ?? 0) > 0)
+      .map((w) => ({
+        label: (w.notes || 'Weekly Routine').toString(),
+        timeLabel: `${w.startTime} – ${w.endTime}`,
+        days: (w.weekdays ?? [])
+          .map((d) => dayMapBack[d as unknown as string])
+          .filter(Boolean) as Weekday[]
+      })) as ManageWeeklyRoutineItem[];
+
+    this.manageBaseAvailability = base
+      ? [
+          {
+            label: 'Base Availability',
+            timeLabel: `${base.startTime || '—'} – ${base.endTime || '—'}`,
+            note: base.notes || undefined
+          } as ManageBaseAvailabilityItem
+        ]
+      : [];
+  }
+
+  private mapPriorityTypeToTab(priorityType: TimingsForecastDay['priorityType']): TimingPriorityTab {
+    switch (priorityType) {
+      case 'leave':
+        return 'p1';
+      case 'specific_day':
+        return 'p2';
+      case 'weekly':
+        return 'p3';
+      case 'daily':
+      default:
+        return 'p4';
+    }
+  }
+
+  private mapPriorityTypeToLabel(priorityType: TimingsForecastDay['priorityType']): string {
+    switch (priorityType) {
+      case 'leave':
+        return 'P1 LEAVE';
+      case 'specific_day':
+        return 'P2 OVERRIDE';
+      case 'weekly':
+        return 'P3 WEEKLY';
+      case 'daily':
+      default:
+        return 'P4 STANDARD';
+    }
+  }
+
+  private applyForecastToUi(forecast: TimingsForecastDay[]): void {
+    this.timingsForecast = (forecast ?? []).map((f) => ({
+      date: this.parseIsoDateOnly(f.date),
+      priority: this.mapPriorityTypeToTab(f.priorityType),
+      label: this.mapPriorityTypeToLabel(f.priorityType)
+    }));
+    this.filteredTimingsForecast = this.timingsForecast.filter((d) => d.priority === this.timingsTab);
+  }
+
+  private applyWeekToUi(week: TimingsForecastDay[]): void {
+    const dayNames: Weekday[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    this.thisWeekScheduleCards = (week ?? []).slice(0, 7).map((d, idx) => {
+      const date = this.parseIsoDateOnly(d.date);
+      const weekday = dayNames[idx] ?? date.toLocaleString(undefined, { weekday: 'long' }) as Weekday;
+      const hasSchedule = !!d.hasSchedule;
+      return {
+        weekday,
+        date,
+        dateLabel: this.formatMonthDay(date),
+        hasSchedule,
+        start: d.startTime,
+        end: d.endTime,
+        patternLabel: this.mapPriorityTypeToLabel(d.priorityType),
+        durationMin: d.slotDurationMinutes ?? this.timingsDaily.slotDuration,
+        totalSlots: d.slotsSummary?.totalSlots ?? 0,
+        isToday: this.isSameDay(date, new Date())
+      } as ThisWeekScheduleCard;
+    });
   }
 
   private getWeekStartMonday(base: Date): Date {
@@ -786,23 +1330,6 @@ export class ScheduleComponent implements OnInit {
     this.recomputeTimingsForecast();
   }
 
-  private seedTimingsDemoData(): void {
-    // Demo-only: show some overrides/leaves in next 15 days
-    const today = new Date();
-    const toKey = (d: Date) => d.toISOString().slice(0, 10);
-    const addDays = (d: Date, days: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + days);
-
-    this.timingsOverrides = [
-      {
-        date: toKey(addDays(today, 1)),
-        start: '14:00',
-        end: '19:00',
-        breaks: [{ label: 'Tea Break', start: '16:30', end: '16:45' }]
-      }
-    ];
-    this.timingsLeaveDates = [toKey(addDays(today, 5)), toKey(addDays(today, 6))];
-  }
-
   recomputeTimingsForecast(): void {
     const today = new Date();
     const days: ForecastDay[] = [];
@@ -920,13 +1447,21 @@ export class ScheduleComponent implements OnInit {
   }
 
   private generateTimeSlots() {
-    // Generate 30-minute time slots from 8 AM to 6 PM
+    // Generate time slots from configured working hours (API-driven via timings).
     this.timeSlots = [];
-    for (let hour = 8; hour <= 18; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        this.timeSlots.push(time);
-      }
+    const start = this.doctorSchedule?.workingHours?.start || '';
+    const end = this.doctorSchedule?.workingHours?.end || '';
+    const step = this.doctorSchedule?.slotDuration || 0;
+    if (!start || !end || step <= 0) return;
+
+    const startMin = this.timeToMinutes(start);
+    const endMin = this.timeToMinutes(end);
+    if (!Number.isFinite(startMin) || !Number.isFinite(endMin) || endMin <= startMin) return;
+
+    for (let m = startMin; m < endMin; m += step) {
+      const hh = Math.floor(m / 60).toString().padStart(2, '0');
+      const mm = (m % 60).toString().padStart(2, '0');
+      this.timeSlots.push(`${hh}:${mm}`);
     }
   }
 
@@ -1061,8 +1596,8 @@ export class ScheduleComponent implements OnInit {
     
     // Check if time is within working hours
     const timeHour = parseInt(time.split(':')[0]);
-    const startHour = parseInt(this.doctorInfo.workingHours.start.split(':')[0]);
-    const endHour = parseInt(this.doctorInfo.workingHours.end.split(':')[0]);
+    const startHour = parseInt((this.doctorSchedule.workingHours.start || '0:0').split(':')[0]);
+    const endHour = parseInt((this.doctorSchedule.workingHours.end || '0:0').split(':')[0]);
     
     if (timeHour < startHour || timeHour >= endHour) {
       conflicts.push({
@@ -1098,19 +1633,15 @@ export class ScheduleComponent implements OnInit {
     const timeMinutes = parseInt(time.split(':')[1]);
     const timeTotalMinutes = timeHour * 60 + timeMinutes;
     
-    for (const apt of this.mockAppointments) {
-      const aptDate = new Date(apt.appointment_date_time);
-      if (apt.doctor_id === this.doctorInfo.doctorId && aptDate.toDateString() === this.selectedDate.toDateString()) {
-        const aptTime = this.parseTimeToMinutes(apt.slotTime || '');
-        const timeDiff = Math.abs(timeTotalMinutes - aptTime);
-        
-        if (timeDiff < bufferTime && timeDiff > 0) {
-          conflicts.push({
-            type: 'buffer',
-            message: `Too close to ${apt.patientName}'s appointment`,
-            severity: 'warning'
-          });
-        }
+    for (const apt of this.getDoctorAppointmentsForSelectedDate()) {
+      const aptTime = this.parseTimeToMinutes(apt.slotTime || '');
+      const timeDiff = Math.abs(timeTotalMinutes - aptTime);
+      if (timeDiff < bufferTime && timeDiff > 0) {
+        conflicts.push({
+          type: 'buffer',
+          message: `Too close to ${apt.patientName}'s appointment`,
+          severity: 'warning'
+        });
       }
     }
     
@@ -1147,23 +1678,17 @@ export class ScheduleComponent implements OnInit {
   }
 
   private setupRealTimeUpdates() {
-    // Simulate real-time updates
-    setInterval(() => {
-      this.updateScheduleStats();
-    }, 30000); // Update every 30 seconds
+    // Intentionally left blank (no mock realtime updates).
   }
 
   private updateScheduleStats() {
-    // Update statistics in real-time
-    this.scheduleStats = {
-      ...this.scheduleStats,
-      completedToday: Math.min(this.scheduleStats.completedToday + 1, this.scheduleStats.todayAppointments)
-    };
+    // No-op (stats should come from API data).
   }
 
   onDateChange(date: Date) {
     this.selectedDate = date;
-    this.loadDoctorSchedule(); // Reload data for new date
+    this.loadScheduleFromApi(date);
+    this.loadDoctorSchedule(); // Reload derived data for new date
     this.rebuildScheduleWeekStrip();
     this.recomputeScheduleSummary();
     this.recomputeScheduleAvailability();
@@ -1180,11 +1705,7 @@ export class ScheduleComponent implements OnInit {
 
   getScheduleListAppointments(): Appointment[] {
     const q = this.scheduleSearch.trim().toLowerCase();
-    const selectedKey = this.selectedDate.toDateString();
-
-    const list = this.mockAppointments.filter(a => {
-      const aptDate = new Date(a.appointment_date_time);
-      if (aptDate.toDateString() !== selectedKey) return false;
+    const list = (this.mockAppointments || []).filter(a => {
       if (!q) return true;
       return (a.patientName ?? '').toLowerCase().includes(q);
     });
@@ -1213,15 +1734,27 @@ export class ScheduleComponent implements OnInit {
     if (next) this.startQuickAddFlow(next);
   }
 
-  /** Builds the schedule strip as today + next (scheduleWindowDays - 1) days — the window the doctor has set for scheduling. Patient and doctor can view/book within this window. */
+  /** Builds the schedule strip from schedule API range when available (fallback: today + next N days). */
   private rebuildScheduleWeekStrip(): void {
-    const calendarToday = new Date();
-    calendarToday.setHours(0, 0, 0, 0);
+    const fallbackStart = new Date();
+    fallbackStart.setHours(0, 0, 0, 0);
+
+    const rangeStart = this.scheduleRangeStartIso ? this.parseIsoDateOnly(this.scheduleRangeStartIso) : fallbackStart;
+    const rangeEnd = this.scheduleRangeEndIso ? this.parseIsoDateOnly(this.scheduleRangeEndIso) : null;
+
+    let daysToShow = this.scheduleWindowDays;
+    if (rangeEnd) {
+      const a = rangeStart.getTime();
+      const b = rangeEnd.getTime();
+      const diff = Math.floor((b - a) / (24 * 60 * 60 * 1000)) + 1;
+      if (Number.isFinite(diff) && diff > 0) daysToShow = diff;
+    }
+
     const selectedKey = this.selectedDate.toDateString();
     const strip: ScheduleWeekDay[] = [];
 
-    for (let i = 0; i < this.scheduleWindowDays; i++) {
-      const d = new Date(calendarToday.getFullYear(), calendarToday.getMonth(), calendarToday.getDate() + i);
+    for (let i = 0; i < daysToShow; i++) {
+      const d = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), rangeStart.getDate() + i);
       const weekdayShort = d.toLocaleString(undefined, { weekday: 'short' });
       const monthShort = d.toLocaleString(undefined, { month: 'short' });
       strip.push({
@@ -1236,6 +1769,9 @@ export class ScheduleComponent implements OnInit {
   }
 
   private recomputeScheduleSummary(): void {
+    // When schedule API provides overview, trust it.
+    if (this.scheduleSlots.length) return;
+
     const slots = this.timeSlots;
     let totalSlots = 0;
     let booked = 0;
@@ -1262,6 +1798,9 @@ export class ScheduleComponent implements OnInit {
   }
 
   private recomputeScheduleAvailability(): void {
+    // When schedule API provides availability list, trust it.
+    if (this.scheduleSlots.length) return;
+
     if (this.isSlotBasedScheduling()) {
       const times = this.timeSlots.filter(t => {
         const s = this.getTimeSlotForDoctor(t);
@@ -1289,12 +1828,9 @@ export class ScheduleComponent implements OnInit {
   }
 
   private getDoctorAppointmentsForSelectedDate(): Appointment[] {
-    const selectedKey = this.selectedDate.toDateString();
-    return this.mockAppointments.filter(a => {
-      if (a.doctor_id !== this.doctorInfo.doctorId) return false;
-      const d = new Date(a.appointment_date_time);
-      return d.toDateString() === selectedKey;
-    });
+    // API already returns doctor-specific schedule; and we call it with ?date=YYYY-MM-DD.
+    // Keep it simple: use current loaded list.
+    return this.mockAppointments || [];
   }
 
   // Navigation
@@ -1628,6 +2164,40 @@ export class ScheduleComponent implements OnInit {
 
   // Helper methods for template
   getTimeSlotForDoctor(time: string): TimeSlot {
+    const apiSlot = this.scheduleSlotByStart[time];
+    if (apiSlot) {
+      const isBreak = String(apiSlot.type).toUpperCase() === 'BREAK' || String(apiSlot.slotStatus).toUpperCase() === 'BREAK';
+      const isAvailable = String(apiSlot.slotStatus).toUpperCase() === 'AVAILABLE' && !isBreak;
+      const isBooked = this.isBookedLikeSlot(apiSlot);
+      return {
+        time,
+        appointments: isBooked && apiSlot.patientName
+          ? ([
+              {
+                appointment_id: 1,
+                patient_id: 0,
+                appointment_date_time: `${this.scheduleSelectedDateIso || this.toIsoDateOnly(this.selectedDate)}T${time}:00`,
+                notes: (apiSlot.reason || '') as string,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                doctor_id: 0,
+                slot_id: 0,
+                status: ((apiSlot.appointmentStatus || 'SCHEDULED') as any),
+                patientName: apiSlot.patientName,
+                doctorName: this.resolveDoctorRegistrationNumberForSchedule(),
+                slotTime: this.formatTimeForDisplay(time)
+              } as Appointment
+            ] as Appointment[])
+          : [],
+        isAvailable,
+        isBreak,
+        isConflict: false,
+        slotType: 'slots',
+        maxCapacity: 1,
+        currentCapacity: isBooked ? 1 : 0
+      };
+    }
+
     const timeSlots = this.generateTimeSlotsForDoctor();
     return timeSlots.find(slot => slot.time === time) || {
       time,

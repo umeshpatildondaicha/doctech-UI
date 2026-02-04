@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from '@lk/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AppointmentService {
-  private baseUrl ='https://doctech.solutions/api';
+  private readonly baseUrl = `${environment.apiUrl}/api`;
 
   constructor(private httpService :HttpService){}
 
@@ -44,4 +45,17 @@ export class AppointmentService {
       `${this.baseUrl}/appointments/doctor/${doctorCode}/demographics/age-groups`
     );
   }
+
+  /**
+   * Doctor schedule (optionally filtered by date)
+   * GET /api/appointments/doctor/{doctorRegNo}/schedule?date=YYYY-MM-DD
+   */
+  getDoctorSchedule(doctorRegNo: string, date?: string): Observable<any> {
+    const safeDoctor = encodeURIComponent((doctorRegNo || '').trim());
+    const safeDate = (date || '').trim();
+    const qs = safeDate ? `?date=${encodeURIComponent(safeDate)}` : '';
+    return this.httpService.sendGETRequest(`${this.baseUrl}/appointments/doctor/${safeDoctor}/schedule${qs}`);
+  }
+  
+
 }

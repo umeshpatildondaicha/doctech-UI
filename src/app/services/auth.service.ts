@@ -802,4 +802,58 @@ export class AuthService {
     const token = this.getStoredToken();
     return token ? { 'Authorization': `Bearer ${token}` } : {};
   }
+
+  /**
+   * Resolve the logged-in doctor's registration number (e.g. "DR1", "DOC-12345").
+   * Backend timings APIs expect registration number in the path param.
+   */
+  public getDoctorRegistrationNumber(): string | null {
+    const fromUser = (u: any): string | null => {
+      if (!u) return null;
+      return (
+        u.registrationNumber ||
+        u.registration_number ||
+        u.registrationNo ||
+        u.regNo ||
+        u.doctorRegistrationNumber ||
+        u.doctorRegNo ||
+        u.publicDoctorCode ||
+        u.doctorCode ||
+        null
+      );
+    };
+
+    // Prefer current in-memory user, then stored user (handles refresh/reload)
+    const current = this.getCurrentUser() as any;
+    const stored = this.getStoredUser() as any;
+    const regFromUser = fromUser(current) || fromUser(stored);
+    if (regFromUser) return String(regFromUser).trim() || null;
+
+    // Fallback: inspect JWT payload if it contains registrationNumber
+    const token = this.getStoredToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const regFromToken =
+          payload.registrationNumber ||
+          payload.registration_number ||
+          payload.registrationNo ||
+          payload.regNo ||
+          payload.doctorRegistrationNumber ||
+          payload.doctorRegNo ||
+          payload.publicDoctorCode ||
+          payload.doctorCode ||
+          null;
+        if (regFromToken) return String(regFromToken).trim() || null;
+      } catch {
+        // ignore parsing failures
+      }
+    }
+
+    // If your backend uses user.id as registration number for doctors, allow it as last resort.
+    const idCandidate = (current?.id || stored?.id || '').toString().trim();
+    if (idCandidate && /^[A-Za-z]{1,6}[-]?\d{1,10}$/.test(idCandidate)) return idCandidate;
+
+    return null;
+  }
 } 

@@ -194,6 +194,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   loadDashboardData() {
+    const doctorRegNo = this.authService.getDoctorRegistrationNumber() || 'DR1';
+
     // Load room availability
     this.roomsService.getRooms().subscribe((rooms: any[]) => {
       const availableRooms = rooms.filter((r: any) => r.status === 'Available').length;
@@ -204,8 +206,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     });
 
     // Appointment requests from API (GET .../requests)
-    const doctorCode = this.authService.getCurrentUser()?.id ?? 'DR2';
-    this.appointmentService.getAppointmentRequests('DR1').subscribe({
+    this.appointmentService.getAppointmentRequests(doctorRegNo).subscribe({
       next: (res: any) => {
         const list: AppointmentRequestApi[] = Array.isArray(res) ? res : res?.data ?? res?.content ?? [];
         this.appointmentRequests = list.map((item: AppointmentRequestApi) => this.mapRequestApiToRow(item));
@@ -218,9 +219,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     });
 
     // Appointment Status chart data (GET .../status-counts)
-    const statusDoctorCode = this.authService.getCurrentUser()?.id ?? 'DR1';
     const { from, to } = this.getDefaultStatusCountDateRange();
-    this.appointmentService.getAppointmentStatusCounts('DR1', from, to).subscribe({
+    this.appointmentService.getAppointmentStatusCounts(doctorRegNo, from, to).subscribe({
       next: (res: any) => {
         const data = this.mapStatusCountsToChartData(res);
         if (this.appointmentStatusChartOptions.series?.[0]) {
@@ -236,8 +236,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     });
 
     // Patient Demographics (age-groups) chart data
-    const demographicsDoctorCode = this.authService.getCurrentUser()?.id ?? 'DR1';
-    this.appointmentService.getAgeGroupDemographics('DR1').subscribe({
+    this.appointmentService.getAgeGroupDemographics(doctorRegNo).subscribe({
       next: (res: any) => {
         const data = this.mapAgeGroupDemographicsToChartData(res);
         if (this.patientDemographicsChartOptions.series?.[0]) {
@@ -531,8 +530,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     if (!request) return;
     const appointmentPublicId = request.appointmentPublicId ?? request.id;
     if (!appointmentPublicId || typeof appointmentPublicId !== 'string') return;
-    const doctorCode = this.authService.getCurrentUser()?.id ?? 'DR2';
-    this.appointmentService.approveAppointmentRequest("DR1", appointmentPublicId).subscribe({
+    const doctorRegNo = this.authService.getDoctorRegistrationNumber() || 'DR1';
+    this.appointmentService.approveAppointmentRequest(doctorRegNo, appointmentPublicId).subscribe({
       next: () => {
         this.appointmentRequests = this.appointmentRequests.filter(r => r.appointmentPublicId !== appointmentPublicId);
         this.updateRequestRowData();

@@ -533,6 +533,81 @@ $transition: var(--transition-fast);
   color: $neutral;
 }
 
+// Slot-based scheduling: available slots as cards
+.avail-cards-shell {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px dashed $border-subtle;
+}
+
+.avail-cards-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.avail-cards-title {
+  font-weight: var(--font-weight-bold);
+  color: $text-primary;
+  font-size: var(--font-size-md);
+}
+
+.avail-cards-sub {
+  font-weight: var(--font-weight-semibold);
+  color: $text-secondary;
+  font-size: var(--font-size-sm);
+}
+
+.avail-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.avail-slot-card {
+  border: 1px solid $border-subtle;
+  background: $page-bg;
+  border-radius: $radius-card;
+  padding: var(--spacing-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: $transition;
+
+  &:hover {
+    box-shadow: $shadow-hover;
+    border-color: $border-hover;
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 2px;
+  }
+
+  .t {
+    font-weight: var(--font-weight-bold);
+    color: $text-primary;
+    font-size: var(--font-size-sm);
+    line-height: 1.2;
+  }
+
+  .sub {
+    margin-top: 2px;
+    font-weight: var(--font-weight-medium);
+    color: $text-secondary;
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 1024px) {
+  .avail-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 768px) {
+  .avail-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 .apt-row {
   width: 100%;
   border: 1px solid $border-subtle;
