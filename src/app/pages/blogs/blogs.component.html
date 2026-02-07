@@ -1,0 +1,420 @@
+<app-page>
+  <div class="blogs" page-body>
+    <div class="blogs-shell">
+      <!-- LEFT: Publications list -->
+      <aside class="panel panel--left" aria-label="My publications">
+        <div class="panel-head">
+          <input class="input head-search" placeholder="Search posts..." [(ngModel)]="listSearch" />
+          <app-button
+            class="new-btn"
+            appearance="icon"
+            [fontIcon]="'add'"
+            title="New post"
+            (btnClick)="createNewPost()">
+          </app-button>
+        </div>
+
+        <div class="panel-tabs" role="tablist" aria-label="Post filters">
+          <button class="tab" [class.active]="listFilter === 'ALL'" (click)="listFilter='ALL'">All</button>
+          <button class="tab" [class.active]="listFilter === 'PUBLISHED'" (click)="listFilter='PUBLISHED'">Published</button>
+          <button class="tab" [class.active]="listFilter === 'DRAFTS'" (click)="listFilter='DRAFTS'">Drafts</button>
+          <button class="tab" [class.active]="listFilter === 'SCHEDULED'" (click)="listFilter='SCHEDULED'">Scheduled</button>
+        </div>
+
+        <div class="list">
+          @if (filteredPosts.length === 0) {
+            <div class="empty">
+              <div class="empty-icon">
+                <app-icon [fontIcon]="'description'" [size]="26"></app-icon>
+              </div>
+              <h3>No posts found</h3>
+              <p class="muted">Try a different filter or create a new post.</p>
+              <app-button text="Create your first post" (btnClick)="createNewPost()"></app-button>
+            </div>
+          } @else {
+            @for (p of filteredPosts; track p.id) {
+              <button type="button" class="post-card" [class.active]="p.id === selectedPostId" (click)="selectPost(p)">
+                <div class="post-thumb" aria-hidden="true">
+                  @if (p.coverImageUrl) {
+                    <img class="post-thumb-img" [src]="p.coverImageUrl" alt="">
+                  } @else {
+                    <div class="post-thumb-ph">
+                      <app-icon [fontIcon]="'image'" [size]="18"></app-icon>
+                    </div>
+                  }
+                </div>
+
+                <div class="post-body">
+                  <div class="post-top">
+                    <div class="pill">{{ p.category }}</div>
+                    <span class="status"
+                      [class.status--draft]="p.status === 'DRAFT'"
+                      [class.status--published]="p.status === 'PUBLISHED'"
+                      [class.status--scheduled]="p.status === 'SCHEDULED'">
+                      {{ p.status === 'DRAFT' ? 'Draft' : (p.status === 'PUBLISHED' ? 'Published' : 'Scheduled') }}
+                    </span>
+                  </div>
+                  <div class="post-title">{{ p.title }}</div>
+                  <div class="post-meta">
+                    <span class="meta-item">
+                      <app-icon [fontIcon]="'visibility'" [size]="16"></app-icon>
+                      {{ p.views | number }}
+                    </span>
+                    <span class="meta-item">
+                      <app-icon [fontIcon]="'favorite'" [size]="16"></app-icon>
+                      {{ p.likes | number }}
+                    </span>
+                    <span class="meta-right">{{ formatTimeAgo(p.updatedAt) }}</span>
+                  </div>
+                </div>
+              </button>
+            }
+          }
+        </div>
+
+        <div class="panel-foot">
+          <div class="mini-stats" aria-label="Weekly performance">
+            <span class="mini-stat"><span class="k">Views</span><span class="v">4.8k</span></span>
+            <span class="dot-sep">•</span>
+            <span class="mini-stat"><span class="k">Likes</span><span class="v">312</span></span>
+            <span class="dot-sep">•</span>
+            <span class="mini-stat"><span class="k">Reach</span><span class="v">+12.4%</span></span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- CENTER: Editor -->
+      <section class="panel panel--center" aria-label="Blog editor">
+        <div class="topbar">
+          <div class="crumbs">
+            <span class="crumb-muted">Drafts</span>
+            <span class="crumb-sep">/</span>
+            <span class="crumb-strong">{{ (selectedPost?.title || 'New Article') }}</span>
+          </div>
+
+          <div class="topbar-actions">
+            <div class="segmented" role="tablist" aria-label="Editor mode">
+              <button class="seg" [class.active]="editorMode==='edit'" (click)="setEditorMode('edit')">Edit</button>
+              <button class="seg" [class.active]="editorMode==='preview'" (click)="setEditorMode('preview')">Preview</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="editor">
+          @if (!selectedPost) {
+            <div class="empty center-empty">
+              <h3>Select a post</h3>
+              <p class="muted">Choose a post from the left panel to start editing.</p>
+            </div>
+          } @else {
+            @if (editorMode === 'edit') {
+              <!-- Stepper + Save/Publish on one line -->
+              <div class="editor-top-row">
+                <div class="editor-stepper">
+                  <div class="stepper-head">
+                    <button type="button" class="stepper-step" [class.active]="editStep === 1" (click)="setEditStep(1)" aria-current="step">
+                      <span class="stepper-num">1</span>
+                      <span class="stepper-label">Media & options</span>
+                    </button>
+                    <span class="stepper-connector" aria-hidden="true"></span>
+                    <button type="button" class="stepper-step" [class.active]="editStep === 2" (click)="setEditStep(2)">
+                      <span class="stepper-num">2</span>
+                      <span class="stepper-label">Content</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="editor-footer">
+                  <app-button text="Save draft" appearance="flat" (btnClick)="saveDraft()"></app-button>
+                  <app-button text="Publish" color="primary" appearance="raised" (btnClick)="publish()"></app-button>
+                </div>
+              </div>
+
+              @if (editStep === 1) {
+                <div class="step-panel step-panel--1">
+                  <div class="media-options-card">
+                    <div class="media-section">
+                      <input class="cover-input" type="file" accept="image/*" (change)="onCoverSelected($event)" #coverFile />
+                      <button type="button" class="media-cover-zone" (click)="coverFile.click()">
+                        @if (selectedPost.coverImageUrl) {
+                          <div class="cover-preview">
+                            <img class="cover-preview-img" [src]="selectedPost.coverImageUrl" alt="Cover">
+                            <div class="cover-preview-overlay">
+                              <app-icon [fontIcon]="'edit'" [size]="16"></app-icon>
+                              <span>Change cover</span>
+                            </div>
+                          </div>
+                        } @else {
+                          <div class="cover-empty-zone">
+                            <div class="cover-empty-icon">
+                              <app-icon [fontIcon]="'add_a_photo'" [size]="18"></app-icon>
+                            </div>
+                            <span class="cover-empty-label">Add cover image</span>
+                            <span class="cover-empty-hint">Click or drag a photo</span>
+                          </div>
+                        }
+                      </button>
+
+                      <div class="media-docs-zone">
+                        <input #docInputTop class="cover-input" type="file" multiple accept=".pdf,.doc,.docx,application/pdf" (change)="onDocSelected($event)" />
+                        <button type="button" class="docs-drop-trigger" (click)="docInputTop.click()">
+                          <app-icon [fontIcon]="'attach_file'" [size]="18"></app-icon>
+                          <span>Attach documents</span>
+                          <span class="docs-drop-hint">PDF, DOC, DOCX</span>
+                        </button>
+                        @if (selectedPost.documents.length > 0) {
+                          <ul class="docs-list" aria-label="Attached documents">
+                            @for (d of selectedPost.documents; track d.id) {
+                              <li class="docs-list-item">
+                                <span class="docs-list-icon" aria-hidden="true">
+                                  <app-icon [fontIcon]="getDocIcon(d.type)" [size]="14"></app-icon>
+                                </span>
+                                <span class="docs-list-name">{{ d.title }}</span>
+                                <button type="button" class="docs-list-remove" (click)="removeDoc(d.id); $event.stopPropagation()" aria-label="Remove {{ d.title }}">×</button>
+                              </li>
+                            }
+                          </ul>
+                        }
+                      </div>
+                    </div>
+
+                    <input class="title-input title-input--step1" [(ngModel)]="selectedPost.title" placeholder="Enter post title here..." />
+
+                    <div class="options-section">
+                      <div class="more-grid">
+                        <div class="field">
+                          <div class="label">Status</div>
+                          <select class="select" [(ngModel)]="selectedPost.status">
+                            <option value="DRAFT">Draft</option>
+                            <option value="PUBLISHED">Published</option>
+                            <option value="SCHEDULED">Scheduled</option>
+                          </select>
+                        </div>
+
+                        <div class="field">
+                          <div class="label">Category</div>
+                          <select class="select" [(ngModel)]="selectedPost.category">
+                            @for (c of categories; track c) {
+                              <option [value]="c">{{ c }}</option>
+                            }
+                          </select>
+                        </div>
+
+                        <div class="field">
+                          <div class="label">Visibility</div>
+                          <select class="select" [(ngModel)]="selectedPost.visibility">
+                            <option value="PUBLIC">Public</option>
+                            <option value="PRIVATE">Private</option>
+                          </select>
+                        </div>
+
+                        @if (selectedPost.status === 'SCHEDULED') {
+                          <div class="field">
+                            <div class="label">Schedule</div>
+                            <input class="input" type="datetime-local" [(ngModel)]="selectedPost.scheduledFor" />
+                          </div>
+                        }
+                      </div>
+
+                      <div class="field">
+                        <div class="label">Tags</div>
+                        <div class="chips">
+                          @for (t of selectedPost.tags; track t) {
+                            <span class="chip">
+                              {{ t }}
+                              <button type="button" class="chip-x" (click)="removeTag(t)">×</button>
+                            </span>
+                          }
+                        </div>
+                        <div class="tag-row">
+                          <input class="input" placeholder="Add tag (press Enter)..." [(ngModel)]="tagInput" (keydown.enter)="$event.preventDefault(); addTagFromInput()" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="step-actions">
+                      <app-button text="Next: Content" color="primary" appearance="flat" (btnClick)="setEditStep(2)"></app-button>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              @if (editStep === 2) {
+                <div class="step-panel step-panel--2">
+                  <div class="format-toolbar">
+                    <button type="button" class="format-btn" title="Bold" (mousedown)="$event.preventDefault(); formatBold()" aria-label="Bold">
+                      <app-icon [fontIcon]="'format_bold'" [size]="18"></app-icon>
+                    </button>
+                    <button type="button" class="format-btn" title="Italic" (mousedown)="$event.preventDefault(); formatItalic()" aria-label="Italic">
+                      <app-icon [fontIcon]="'format_italic'" [size]="18"></app-icon>
+                    </button>
+                    <span class="format-sep" aria-hidden="true"></span>
+                    <button type="button" class="format-btn" title="Bullet list" (mousedown)="$event.preventDefault(); formatBulletList()" aria-label="Bullet list">
+                      <app-icon [fontIcon]="'format_list_bulleted'" [size]="18"></app-icon>
+                    </button>
+                    <button type="button" class="format-btn" title="Numbered list" (mousedown)="$event.preventDefault(); formatNumberedList()" aria-label="Numbered list">
+                      <app-icon [fontIcon]="'format_list_numbered'" [size]="18"></app-icon>
+                    </button>
+                  </div>
+                  <div
+                    #contentInput
+                    class="content-input content-input-editable"
+                    contenteditable="true"
+                    role="textbox"
+                    aria-multiline="true"
+                    (input)="onContentInput()"
+                    data-placeholder="Start typing your professional medical blog post here..."></div>
+                  <div class="step-actions">
+                    <app-button text="Back" appearance="flat" (btnClick)="setEditStep(1)"></app-button>
+                  </div>
+                </div>
+              }
+            } @else {
+              @if (isMobile) {
+                <!-- Mobile-style article preview (like your reference screenshot) -->
+                <div class="m-article">
+                  <div class="m-appbar">
+                    <button type="button" class="m-icon" (click)="setEditorMode('edit')" aria-label="Back">
+                      <app-icon [fontIcon]="'arrow_back'" [size]="20"></app-icon>
+                    </button>
+                    <div class="m-title">Article Details</div>
+                    <button type="button" class="m-icon" aria-label="Share">
+                      <app-icon [fontIcon]="'share'" [size]="20"></app-icon>
+                    </button>
+                  </div>
+
+                  <div class="m-body">
+                    <div class="m-sheet">
+                    <div class="m-author-card">
+                      <div class="m-avatar"></div>
+                      <div class="m-author-meta">
+                        <div class="m-author-name">{{ selectedPost.authorName }}</div>
+                        <div class="m-author-sub">{{ selectedPost.category }}</div>
+                        <div class="m-author-date">{{ formatDateShort(selectedPost.updatedAt) }}</div>
+                      </div>
+                      <div class="m-pill">{{ selectedPost.readTimeMin }} min read</div>
+                    </div>
+
+                    <div class="m-cover">
+                      @if (selectedPost.coverImageUrl) {
+                        <img class="m-cover-img" [src]="selectedPost.coverImageUrl" alt="Cover">
+                      }
+                    </div>
+
+                    <h1 class="m-h1">{{ selectedPost.title }}</h1>
+
+                    <div class="m-content" [class.m-content--collapsed]="!isContentExpanded && (selectedPost.content || '').length > 320">
+                      <div [innerHTML]="getSafeContent()"></div>
+                      @if ((selectedPost.content || '').length > 320) {
+                        <button type="button" class="m-more" (click)="toggleContentExpanded()">
+                          {{ isContentExpanded ? 'Show Less' : 'Show More' }}
+                        </button>
+                      }
+                    </div>
+
+                    @if (selectedPost.documents.length > 0) {
+                      <div class="m-related">
+                        <div class="m-related-title">Related Documents</div>
+                        @for (d of selectedPost.documents; track d.id) {
+                          <a class="m-doc" [href]="d.url" target="_blank" rel="noreferrer">
+                            <div class="m-doc-left">
+                              <div class="m-doc-ic">
+                                <app-icon [fontIcon]="getDocIcon(d.type)" [size]="18"></app-icon>
+                              </div>
+                              <div>
+                                <div class="m-doc-name">{{ d.title }}</div>
+                                <div class="m-doc-sub">Tap to view</div>
+                              </div>
+                            </div>
+                            <app-icon [fontIcon]="'chevron_right'" [size]="20"></app-icon>
+                          </a>
+                        }
+                      </div>
+                    }
+
+                    @if (selectedPost.tags.length > 0) {
+                      <div class="m-tags">
+                        <div class="m-related-title">Tags</div>
+                        <div class="chips">
+                          @for (t of selectedPost.tags; track t) {
+                            <span class="chip">{{ t }}</span>
+                          }
+                        </div>
+                      </div>
+                    }
+                    </div> <!-- /m-sheet -->
+                  </div>
+
+                  <div class="m-actions">
+                    <button type="button" class="m-act">
+                      <app-icon [fontIcon]="'favorite_border'" [size]="20"></app-icon>
+                      <span>{{ selectedPost.likes }}</span>
+                    </button>
+                    <button type="button" class="m-act">
+                      <app-icon [fontIcon]="'chat_bubble_outline'" [size]="20"></app-icon>
+                    </button>
+                    <button type="button" class="m-act">
+                      <app-icon [fontIcon]="'share'" [size]="20"></app-icon>
+                      <span>Share</span>
+                    </button>
+                    <button type="button" class="m-act">
+                      <app-icon [fontIcon]="'bookmark_border'" [size]="20"></app-icon>
+                      <span>Save</span>
+                    </button>
+                  </div>
+                </div>
+              } @else {
+                <!-- Desktop preview -->
+                <div class="preview">
+                  @if (selectedPost.coverImageUrl) {
+                    <img class="preview-cover" [src]="selectedPost.coverImageUrl" alt="Cover">
+                  }
+
+                  <div class="preview-top">
+                    <span class="pill">{{ selectedPost.category }}</span>
+                    <span class="preview-date">{{ formatDateShort(selectedPost.updatedAt) }}</span>
+                  </div>
+
+                  <h1 class="preview-title">{{ selectedPost.title }}</h1>
+                  <div class="author-row">
+                    <div class="dot"></div>
+                    <span class="author">{{ selectedPost.authorName }}</span>
+                    <span class="sep">|</span>
+                    <span class="muted">{{ selectedPost.readTimeMin }} min read</span>
+                  </div>
+                  <div class="preview-body" [innerHTML]="getSafeContent()"></div>
+
+                  @if (selectedPost.documents.length > 0) {
+                    <div class="preview-docs">
+                      <div class="label">Related documents</div>
+                      <div class="docs">
+                        @for (d of selectedPost.documents; track d.id) {
+                          <a class="doc-row" [href]="d.url" target="_blank" rel="noreferrer">
+                            <app-icon [fontIcon]="getDocIcon(d.type)" [size]="18"></app-icon>
+                            <span class="doc-name">{{ d.title }}</span>
+                            <app-icon [fontIcon]="'open_in_new'" [size]="16"></app-icon>
+                          </a>
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  @if (selectedPost.tags.length > 0) {
+                    <div class="preview-tags">
+                      <div class="label">Tags</div>
+                      <div class="chips">
+                        @for (t of selectedPost.tags; track t) {
+                          <span class="chip">{{ t }}</span>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            }
+          }
+        </div>
+      </section>
+    </div>
+  </div>
+</app-page>
+

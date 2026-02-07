@@ -11,6 +11,7 @@ import { PatientFormComponent } from './components/patient-form/patient-form.com
 import { ExerciseComponent } from './pages/exercise copy/exercise.component';
 import { DietComponent } from './pages/diet copy/diet.component';
 import { ChatComponent } from './pages/chat/chat.component';
+import { BlogsComponent } from './pages/blogs/blogs.component';
 import { ProfileComponent } from "@lk/template";
 import { SettingsComponent } from "@lk/template";
 import { LoginComponent } from './pages/login/login.component';
@@ -55,6 +56,7 @@ export const routes: Routes = [
   { path: 'patient/:id', component: PatientProfileComponent, canActivate: [AuthGuard] },
   { path: 'patient-profile', component: PatientProfileComponent, canActivate: [AuthGuard] },
   { path: 'chat', component: ChatComponent, canActivate: [AuthGuard] },
+  { path: 'blogs', component: BlogsComponent, canActivate: [AuthGuard] },
   { path: 'exercises', component: ExerciseComponent, canActivate: [AuthGuard] },
   { path: 'diet', component: DietComponent, canActivate: [AuthGuard] },
   { path: 'diet/plans', component: DietComponent, canActivate: [AuthGuard], data: { breadcrumb: 'Diet Plans', breadcrumbIcon: 'calendar_today' } },

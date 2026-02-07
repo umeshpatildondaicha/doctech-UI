@@ -5,7 +5,8 @@ import { ChatService } from '../../services/chat.service';
 import { ChatSession, ChatMessage, ChatFilter } from '../../interfaces/chat.interface';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
-import { AppButtonComponent } from '@lk/core';
+import { AppButtonComponent, DialogboxService, DialogFooterAction } from '@lk/core';
+import { PatientSearchDialogComponent, type PatientSearchResult } from '../patient-search-dialog/patient-search-dialog.component';
 
 @Component({
     selector: 'app-chat',
@@ -33,14 +34,67 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   };
 
   // UI state
-  showPatientList = false; // Start with patient list hidden
+  showPatientList = false;
   isLoading = false;
   isMobile = window.innerWidth < 768;
   isMainSidebarCollapsed = false;
+  // Default to active/current appointments view
+  activeChatTab: 'ALL' | 'CURRENT' = 'CURRENT';
 
   private subscriptions = new Subscription();
 
-  constructor(private chatService: ChatService, private router: Router) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly router: Router,
+    private readonly dialogService: DialogboxService
+  ) {}
+
+  openPatientPicker(): void {
+    const footerActions: DialogFooterAction[] = [
+      { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
+      { id: 'select', text: 'Select Patient', color: 'primary', appearance: 'raised', fontIcon: 'person_add' }
+    ];
+
+    const ref = this.dialogService.openDialog(PatientSearchDialogComponent, {
+      title: 'Select Patient',
+      data: {},
+      width: '70%',
+      footerActions
+    });
+
+    ref.afterClosed().subscribe((result) => {
+      const patient = result?.patient as PatientSearchResult | null | undefined;
+      if (!patient) return;
+
+      const patientId = this.patientIdToNumber(patient.id);
+      const patientName = patient.fullName || `${patient.firstName ?? ''} ${patient.lastName ?? ''}`.trim() || 'Patient';
+      const patientAvatar = patient.profileImageUrl || 'assets/avatars/default-avatar.jpg';
+
+      const existing = this.chatSessions.find(s => s.patientId === patientId);
+      if (existing) {
+        this.selectChatSession(existing);
+        return;
+      }
+
+      const newSession: ChatSession = {
+        id: Date.now().toString(),
+        patientId,
+        patientName,
+        patientAvatar,
+        doctorId: 1,
+        doctorName: 'Dr. Sarah Johnson',
+        doctorAvatar: 'assets/avatars/default-avatar.jpg',
+        unreadCount: 0,
+        isActive: true,
+        lastActivity: new Date(),
+        appointmentStatus: 'PENDING',
+      };
+
+      // Add on top and open it
+      this.chatSessions = [newSession, ...this.chatSessions];
+      this.selectChatSession(newSession);
+    });
+  }
 
   ngOnInit(): void {
     this.loadChatSessions();
@@ -63,8 +117,27 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   private setupResponsiveBehavior(): void {
-    // Patient list starts closed for both mobile and desktop
-    this.showPatientList = false;
+    // On mobile, show chat list first when no conversation is selected
+    this.showPatientList = this.isMobile;
+  }
+
+  private patientIdToNumber(id: string): number {
+    const digits = (id || '').replace(/\D+/g, '');
+    const n = Number.parseInt(digits || '0', 10);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  get filteredChatSessions(): ChatSession[] {
+    let list = this.chatSessions;
+    if (this.activeChatTab === 'CURRENT') {
+      // Treat scheduled/pending as “current/active” appointments
+      list = list.filter(s => s.appointmentStatus === 'SCHEDULED' || s.appointmentStatus === 'PENDING');
+    }
+    return list;
+  }
+
+  setActiveTab(tab: 'ALL' | 'CURRENT'): void {
+    this.activeChatTab = tab;
   }
 
   loadChatSessions(): void {

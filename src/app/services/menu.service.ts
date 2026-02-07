@@ -46,6 +46,13 @@ export class MenuService {
       userTypes: ['doctor']
     },
     { 
+      label: 'Blogs', 
+      icon: 'rss_feed', 
+      route: '/blogs', 
+      section: 'main',
+      userTypes: ['doctor']
+    },
+    { 
       label: 'Exercises', 
       icon: 'fitness_center', 
       route: '/exercises', 
