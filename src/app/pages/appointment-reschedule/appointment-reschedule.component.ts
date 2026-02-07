@@ -1,14 +1,19 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, AfterViewInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Appointment } from '../../interfaces/appointment.interface';
 import { AppInputComponent } from "@lk/core";
 import { AppButtonComponent } from "@lk/core";
 import { IconComponent } from "@lk/core";
 
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CalendarComponent, ImageComponent, DIALOG_DATA_TOKEN } from "@lk/core";
 import { filter } from 'rxjs';
+
+import { AppointmentService } from '../../services/appointment.service';
+import { AuthService } from '../../services/auth.service';
 
 interface TimeSlot {
   id: number;
@@ -29,10 +34,11 @@ interface TimeSlot {
     FormsModule,
     ReactiveFormsModule,
     MatFormFieldModule,
+    MatProgressSpinnerModule,
     CalendarComponent
 ]
 })
-export class AppointmentRescheduleComponent implements OnInit {
+export class AppointmentRescheduleComponent implements OnInit, AfterViewInit {
   rescheduleForm: FormGroup;
   submitButtonText: string = 'Reschedule Appointment';
   appointment: Appointment | undefined;
@@ -41,11 +47,23 @@ export class AppointmentRescheduleComponent implements OnInit {
   selectedTimeSlot: TimeSlot | null = null;
   availableTimeSlots: TimeSlot[] = [];
   hasConflict: boolean = false;
-  
+  isLoadingSlots = false;
+  isSubmitting = false;
+  availableDates = new Set<string>();
+  noSlotsDates = new Set<string>();
   calendarEvents: any[] = [];
+  currentCalendarMonth = new Date().getMonth();
+  currentCalendarYear = new Date().getFullYear();
+  /** Cache of slots by date (YYYY-MM-DD) - populated on date click */
+  private slotsByDate = new Map<string, TimeSlot[]>();
+
+  @ViewChild('calendarWrapper', { read: ElementRef }) calendarWrapper?: ElementRef<HTMLElement>;
 
   dialogRef = inject(MatDialogRef<AppointmentRescheduleComponent>);
   data = inject<{ appointment?: Appointment }>(DIALOG_DATA_TOKEN);
+  private readonly appointmentService = inject(AppointmentService);
+  private readonly authService = inject(AuthService);
+  private readonly snackBar = inject(MatSnackBar);
 
   constructor(
     private fb: FormBuilder
@@ -58,81 +76,232 @@ export class AppointmentRescheduleComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.loadCalendarEvents();
-    
-    // Listen for dialog close events to handle footer actions
+    (this.data as Record<string, unknown>)['componentInstance'] = this;
+    const today = new Date();
+    this.selectedDate = today;
+    this.loadTimeSlotsForDate(today);
+
     this.dialogRef.beforeClosed().pipe(
       filter(result => result?.action === 'submit' || result?.action === 'cancel')
     ).subscribe((result) => {
-      if (result?.action === 'cancel') {
-        // Cancel action - dialog will close normally
-        return;
-      }
-      
-      if (result?.action === 'submit') {
-        // Handle submit action from footer
-        if (this.canSubmit()) {
-          // Use a small delay to ensure form validation completes
-          setTimeout(() => {
-            const submitResult = {
-              originalAppointment: this.appointment,
-              newDateTime: this.rescheduleForm.get('newDateTime')?.value,
-              rescheduleReason: this.rescheduleForm.get('rescheduleReason')?.value,
-              hasConflict: this.hasConflict
-            };
-            // Close with form data - this will override the action-only close
-            this.dialogRef.close(submitResult);
-          }, 10);
-        }
-        // If invalid, dialog closes with action='submit' and validation errors are shown
+      if (result?.action === 'cancel') return;
+      if (result?.action === 'submit' && this.canSubmit()) {
+        this.performReschedule();
       }
     });
   }
 
-  loadCalendarEvents() {
-    // Mock calendar events - in real app, this would come from a service
-    this.calendarEvents = [
-      {
-        date: new Date(2024, 0, 15),
-        title: 'Appointment',
-        color: '#667eea'
+  /** Called by footer when action id is 'apply' - prevents default close, runs async reschedule */
+  apply(): void {
+    if (this.canSubmit()) this.performReschedule();
+  }
+
+  private performReschedule(): void {
+    const appointmentPublicId =
+      (this.appointment as Appointment & { appointmentPublicId?: string })?.appointmentPublicId ??
+      (this.appointment?.appointment_id ? String(this.appointment.appointment_id) : '');
+    if (!appointmentPublicId) {
+      this.snackBar.open('Appointment ID is missing. Cannot reschedule.', 'Close', { duration: 4000 });
+      return;
+    }
+    const payload = this.buildReschedulePayload();
+    if (!payload) return;
+
+    this.isSubmitting = true;
+    this.appointmentService.rescheduleAppointment(appointmentPublicId, payload).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.dialogRef.close({
+          originalAppointment: this.appointment,
+          newDateTime: this.rescheduleForm.get('newDateTime')?.value,
+          rescheduleReason: this.rescheduleForm.get('rescheduleReason')?.value,
+          hasConflict: this.hasConflict
+        });
       },
-      {
-        date: new Date(2024, 0, 16),
-        title: 'Appointment',
-        color: '#667eea'
+      error: (err) => {
+        this.isSubmitting = false;
+        const msg = err?.error?.message ?? err?.message ?? 'Failed to reschedule appointment.';
+        this.snackBar.open(msg, 'Close', { duration: 4000 });
       }
-    ];
+    });
+  }
+
+  private buildReschedulePayload(): { newDate: string; newStartTime: string; newEndTime: string } | null {
+    if (!this.selectedDate || !this.selectedTimeSlot) return null;
+    const newDate = this.formatDateForApi(this.selectedDate);
+    const { startTime, endTime } = this.parseSlotTimeTo24h(this.selectedTimeSlot.time, 30);
+    return { newDate, newStartTime: startTime, newEndTime: endTime };
+  }
+
+  private parseSlotTimeTo24h(timeStr: string, slotMinutes: number): { startTime: string; endTime: string } {
+    const [time, period] = (timeStr || '09:00').trim().split(/\s+/);
+    const parts = (time || '09:00').split(':');
+    const hours = Number(parts[0]) || 9;
+    const minutes = Number(parts[1]) || 0;
+    let h24 = hours;
+    if (period === 'PM' && hours !== 12) h24 += 12;
+    else if (period === 'AM' && hours === 12) h24 = 0;
+    const startDate = new Date(2000, 0, 1, h24, minutes, 0);
+    const endDate = new Date(startDate.getTime() + slotMinutes * 60 * 1000);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return {
+      startTime: `${pad(h24)}:${pad(minutes)}:00`,
+      endTime: `${pad(endDate.getHours())}:${pad(endDate.getMinutes())}:00`
+    };
   }
 
   onDateSelected(date: Date) {
+    const dateStr = this.formatDateForApi(date);
+    if (this.noSlotsDates.has(dateStr)) {
+      this.snackBar.open('No slots available for this date.', 'Close', { duration: 3000 });
+      return;
+    }
     this.selectedDate = date;
     this.selectedTimeSlot = null;
-    this.loadTimeSlotsForDate(date);
+    const cached = this.slotsByDate.get(dateStr);
+    if (cached) {
+      this.availableTimeSlots = cached;
+    } else {
+      this.loadTimeSlotsForDate(date);
+    }
+  }
+
+  onMonthChanged(event: { year: number; month: number }) {
+    this.currentCalendarMonth = event.month;
+    this.currentCalendarYear = event.year;
+    this.applyDisabledDates();
   }
 
   onEventClicked(event: any) {
     console.log('Calendar event clicked:', event);
   }
 
-  loadTimeSlotsForDate(date: Date) {
-    // Mock time slots - in real app, this would come from a service
-    const baseSlots: TimeSlot[] = [
-      { id: 1, time: '09:00 AM', available: true, hasConflict: false },
-      { id: 2, time: '10:00 AM', available: true, hasConflict: false },
-      { id: 3, time: '11:00 AM', available: true, hasConflict: false },
-      { id: 4, time: '02:00 PM', available: true, hasConflict: false },
-      { id: 5, time: '03:00 PM', available: true, hasConflict: false },
-      { id: 6, time: '04:00 PM', available: true, hasConflict: false }
-    ];
+  ngAfterViewInit() {
+    setTimeout(() => this.applyDisabledDates(), 0);
+  }
 
-    // Simulate conflicts for demonstration
-    if (date.getDate() === 15) {
-      baseSlots[1].hasConflict = true;
-      baseSlots[3].hasConflict = true;
+  /** Add disabled styling to calendar date cells that have no slots */
+  private applyDisabledDates(): void {
+    const wrapper = this.calendarWrapper?.nativeElement;
+    if (!wrapper || this.noSlotsDates.size === 0) return;
+
+    const cells = wrapper.querySelectorAll<HTMLElement>('.calendar-day');
+    const dates = this.buildCalendarDateGrid();
+
+    cells.forEach((cell, i) => {
+      const date = dates[i];
+      if (!date) return;
+      const dateStr = this.formatDateForApi(date);
+      const isDisabled = this.noSlotsDates.has(dateStr);
+      cell.classList.toggle('date-disabled', isDisabled);
+    });
+  }
+
+  /** Build the same date grid as @lk/core CalendarComponent for DOM mapping */
+  private buildCalendarDateGrid(): Date[] {
+    const firstDay = new Date(this.currentCalendarYear, this.currentCalendarMonth, 1);
+    const lastDay = new Date(this.currentCalendarYear, this.currentCalendarMonth + 1, 0);
+    const dayOfWeek = firstDay.getDay();
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - dayOfWeek);
+    const weeks = Math.ceil((lastDay.getDate() + dayOfWeek) / 7);
+    const dates: Date[] = [];
+    for (let week = 0; week < weeks; week++) {
+      for (let day = 0; day < 7; day++) {
+        const d = new Date(startDate);
+        d.setDate(startDate.getDate() + week * 7 + day);
+        dates.push(d);
+      }
     }
+    return dates;
+  }
 
-    this.availableTimeSlots = baseSlots;
+  loadTimeSlotsForDate(date: Date) {
+    const doctorRegNo =
+      (this.appointment as Appointment & { doctorRegistrationNumber?: string })?.doctorRegistrationNumber ??
+      this.authService.getDoctorRegistrationNumber() ??
+      'DR1';
+    const dateStr = this.formatDateForApi(date);
+
+    this.isLoadingSlots = true;
+    this.availableTimeSlots = [];
+
+    this.appointmentService.getAppointmentSlotsForDate(doctorRegNo, dateStr, 30).subscribe({
+      next: (res) => {
+        const slots = this.mapApiSlotsToTimeSlots(res);
+        this.slotsByDate.set(dateStr, slots);
+        this.availableTimeSlots = slots;
+        this.isLoadingSlots = false;
+        const hasAvailable = slots.some((s) => s.available);
+        if (hasAvailable && slots.length > 0) {
+          this.availableDates.add(dateStr);
+          this.noSlotsDates.delete(dateStr);
+        } else {
+          this.noSlotsDates.add(dateStr);
+          this.availableDates.delete(dateStr);
+        }
+        this.buildCalendarEvents();
+        this.applyDisabledDates();
+      },
+      error: () => {
+        this.availableTimeSlots = [];
+        this.isLoadingSlots = false;
+        this.noSlotsDates.add(dateStr);
+        this.availableDates.delete(dateStr);
+        this.buildCalendarEvents();
+        this.applyDisabledDates();
+      }
+    });
+  }
+
+  private buildCalendarEvents() {
+    this.calendarEvents = Array.from(this.availableDates).map((dateStr, i) => {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return {
+        id: `slot-${i}`,
+        title: 'Available',
+        start: new Date(y, m - 1, d),
+        type: 'available' as const
+      };
+    });
+  }
+
+  private formatDateForApi(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  /** Map API response to TimeSlot[]. Handles various response shapes. */
+  private mapApiSlotsToTimeSlots(res: any): TimeSlot[] {
+    const raw = Array.isArray(res) ? res : res?.slots ?? res?.data ?? res?.content ?? [];
+    if (!Array.isArray(raw) || raw.length === 0) return [];
+
+    return raw.map((s: any, idx: number) => {
+      const timeStr = this.extractTimeString(s);
+      const available = s?.available ?? s?.isAvailable ?? s?.free ?? true;
+      const hasConflict = s?.hasConflict ?? s?.conflict ?? s?.booked ?? !available;
+      return {
+        id: s?.id ?? idx + 1,
+        time: timeStr,
+        available: !!available,
+        hasConflict: !!hasConflict
+      };
+    });
+  }
+
+  private extractTimeString(s: any): string {
+    const val = s?.startTime ?? s?.time ?? s?.s ?? s?.start;
+    if (!val) return '09:00 AM';
+    if (typeof val === 'string') {
+      if (val.includes('T')) {
+        const d = new Date(val);
+        return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      }
+      return val;
+    }
+    return '09:00 AM';
   }
 
   selectTimeSlot(slot: TimeSlot) {

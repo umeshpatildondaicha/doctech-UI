@@ -64,6 +64,28 @@ export class AppointmentService {
     const qs = safeDate ? `?date=${encodeURIComponent(safeDate)}` : '';
     return this.httpService.sendGETRequest(`${this.baseUrl}/appointments/doctor/${safeDoctor}/schedule${qs}`);
   }
-  
 
+  /**
+   * Get available appointment slots for a doctor on a given date.
+   * GET /api/doctor/appointment-timings/doctor/{doctorRegNo}/slots/date/{YYYY-MM-DD}?slotMinutes=30
+   */
+  getAppointmentSlotsForDate(doctorRegNo: string, dateStr: string, slotMinutes = 30): Observable<any> {
+    const safeDoctor = encodeURIComponent((doctorRegNo || '').trim());
+    const safeDate = encodeURIComponent((dateStr || '').trim());
+    const url = `${this.baseUrl}/doctor/appointment-timings/doctor/${safeDoctor}/slots/date/${safeDate}?slotMinutes=${slotMinutes}`;
+    return this.httpService.sendGETRequest(url);
+  }
+
+  /**
+   * Reschedule an appointment.
+   * PUT /api/appointments/{appointmentPublicId}/reschedule
+   * Body: { newDate, newStartTime, newEndTime }
+   */
+  rescheduleAppointment(appointmentPublicId: string, payload: { newDate: string; newStartTime: string; newEndTime: string }): Observable<any> {
+    const safeId = encodeURIComponent((appointmentPublicId || '').trim());
+    return this.httpService.sendPUTRequest(
+      `${this.baseUrl}/appointments/${safeId}/reschedule`,
+      JSON.stringify(payload)
+    );
+  }
 }

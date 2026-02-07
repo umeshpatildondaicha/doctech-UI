@@ -1,8 +1,31 @@
 .appointment-reschedule-dialog {
+  position: relative;
   width: 100%;
   display: flex;
   flex-direction: column;
 
+  .reschedule-loader-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.85);
+    z-index: 10;
+    border-radius: 8px;
+
+    .loader-text {
+      font-size: 14px;
+      color: var(--text-secondary-color, #6b7280);
+    }
+  }
+
+  .dialog-content.loading {
+    pointer-events: none;
+    opacity: 0.6;
+  }
 
   .dialog-content {
 
@@ -129,9 +152,31 @@
             .calendar-container {
               width: 100%;
             }
+
+            /* Disable calendar date buttons that have no available slots */
+            ::ng-deep .calendar-day.date-disabled {
+              pointer-events: none;
+              cursor: not-allowed;
+              opacity: 0.45;
+
+              .day-number {
+                color: var(--text-disabled-color, #9ca3af) !important;
+              }
+
+              &:hover {
+                background: transparent !important;
+              }
+            }
           }
 
           .time-slots-container {
+            .slots-loading {
+              padding: 24px;
+              text-align: center;
+              color: var(--text-secondary-color, #6b7280);
+              font-size: 14px;
+            }
+
             .time-slots-grid {
               display: grid;
               grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

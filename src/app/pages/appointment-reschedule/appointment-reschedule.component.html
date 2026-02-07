@@ -1,6 +1,12 @@
 <div class="appointment-reschedule-dialog">
+  @if (isSubmitting) {
+    <div class="reschedule-loader-overlay">
+      <mat-spinner diameter="48"></mat-spinner>
+      <span class="loader-text">Rescheduling appointment...</span>
+    </div>
+  }
   <!-- Dialog Content -->
-  <div class="dialog-content">
+  <div class="dialog-content" [class.loading]="isSubmitting">
     <!-- Current Appointment Info -->
     <div class="current-appointment-card">
       <div class="card-header">
@@ -43,13 +49,14 @@
           <div class="form-section-header">
             <h4 class="form-section-title">1. Select Date</h4>
           </div>
-          <div class="calendar-wrapper">
+          <div class="calendar-wrapper" #calendarWrapper>
             <app-calendar
               class="calendar-container"
               [showNavigation]="true"
               [showToday]="true"
               [events]="calendarEvents"
               (dateSelected)="onDateSelected($event)"
+              (monthChanged)="onMonthChanged($event)"
               (eventClicked)="onEventClicked($event)">
             </app-calendar>
           </div>
@@ -63,9 +70,13 @@
               <span class="selected-date">{{ formatDate(selectedDate) }}</span>
             </div>
             <div class="time-slots-container">
-              @if (availableTimeSlots.length > 0) {
+              @if (isLoadingSlots) {
+                <div class="slots-loading">
+                  <span>Loading available slots...</span>
+                </div>
+              } @else if (availableTimeSlots.length > 0) {
                 <div class="time-slots-grid">
-                  @for (slot of availableTimeSlots; track slot) {
+                  @for (slot of availableTimeSlots; track slot.id) {
                     <div
                       class="time-slot"
                       [class.selected]="selectedTimeSlot === slot"

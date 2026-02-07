@@ -47,7 +47,7 @@ export class AppPatientQueueContentComponent {
   onRescheduleClick(patient: NextUpPatient) {
     const footerActions: DialogFooterAction[] = [
       { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
-      { id: 'submit', text: 'Reschedule Appointment', color: 'primary', appearance: 'raised' },
+      { id: 'apply', text: 'Reschedule Appointment', color: 'primary', appearance: 'raised' },
     ];
 
     const dialogRef = this.dialogService.openDialog(AppointmentRescheduleComponent, {

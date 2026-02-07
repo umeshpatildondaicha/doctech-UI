@@ -2,12 +2,14 @@ import { Component, OnInit, AfterViewInit, PLATFORM_ID, Inject } from '@angular/
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { AppButtonComponent, DividerComponent, GridComponent, IconComponent, ImageComponent, PageBodyDirective, PageComponent, StatusCellRendererComponent } from '@lk/core';
+import { AppButtonComponent, DividerComponent, GridComponent, IconComponent, ImageComponent, PageBodyDirective, PageComponent, StatusCellRendererComponent, DialogboxService, DialogFooterAction } from '@lk/core';
 import { ColDef } from 'ag-grid-community';
 import * as Highcharts from 'highcharts';
 import { HighchartsChartModule } from 'highcharts-angular';
 
 import { DashboardDetailsComponent } from '../dashboard-details/dashboard-details.component';
+import { AppointmentRescheduleComponent } from '../appointment-reschedule/appointment-reschedule.component';
+import { Appointment } from '../../interfaces/appointment.interface';
 import { RoomsService } from '../../services/rooms.service';
 import { AppointmentService } from '../../services/appointment.service';
 import { AuthService } from '../../services/auth.service';
@@ -103,6 +105,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   constructor(
     private readonly dialog: MatDialog,
+    private readonly dialogService: DialogboxService,
     private readonly router: Router,
     private readonly roomsService: RoomsService,
     private readonly appointmentService: AppointmentService,
@@ -550,7 +553,58 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   rescheduleAppointmentRequest(request: AppointmentRequest) {
     const appointmentPublicId = request.appointmentPublicId ?? request.id;
-    this.router.navigate(['/appointment'], { queryParams: { reschedule: appointmentPublicId } });
+    const appointmentDateTime = this.parseRequestedDateTime(request.requestedDate, request.requestedTime);
+    const appointment: Appointment & { appointmentPublicId?: string } = {
+      appointment_id: 0,
+      patient_id: 0,
+      patientName: request.patientName,
+      appointment_date_time: appointmentDateTime.toISOString(),
+      notes: request.reason,
+      status: 'PENDING',
+      doctor_id: 0,
+      doctorRegistrationNumber: this.authService.getDoctorRegistrationNumber() ?? undefined,
+      slot_id: 1,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      appointmentPublicId
+    };
+    console.log("doctorRegistrationNumber : ", this.authService.getDoctorRegistrationNumber());
+
+    const footerActions: DialogFooterAction[] = [
+      { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
+      { id: 'apply', text: 'Reschedule Appointment', color: 'primary', appearance: 'raised' }
+    ];
+
+    const dialogRef = this.dialogService.openDialog(AppointmentRescheduleComponent, {
+      title: 'Reschedule Appointment',
+      width: '70%',
+      height: '90%',
+      data: { appointment },
+      footerActions
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result && (result.newDateTime || (!result?.action && result !== null))) {
+        this.loadDashboardData();
+      }
+    });
+  }
+
+  private parseRequestedDateTime(dateStr: string, timeStr: string): Date {
+    const date = dateStr ? new Date(dateStr) : new Date();
+    const time = (timeStr ?? '09:00').trim().toUpperCase();
+    const re = /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/;
+    const match = re.exec(time);
+    let hours = 9, minutes = 0;
+    if (match) {
+      hours = Number.parseInt(match[1], 10);
+      minutes = Number.parseInt(match[2] ?? '0', 10);
+      if (match[3] === 'PM' && hours !== 12) hours += 12;
+      else if (match[3] === 'AM' && hours === 12) hours = 0;
+      else if (!match[3] && hours >= 24) hours = hours % 24;
+    }
+    date.setHours(hours, minutes, 0, 0);
+    return date;
   }
 
   getStatusClass(status: string): string {

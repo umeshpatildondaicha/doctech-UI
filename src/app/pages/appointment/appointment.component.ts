@@ -286,10 +286,15 @@ export class AppointmentComponent implements OnInit {
   }
 
   openRescheduleDialog(appointment: Appointment) {
+    const footerActions: DialogFooterAction[] = [
+      { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
+      { id: 'apply', text: 'Reschedule Appointment', color: 'primary', appearance: 'raised' }
+    ];
     const dialogRef = this.dialogService.openDialog(AppointmentRescheduleComponent, {
       title: 'Reschedule Appointment',
       data: { appointment },
-      width: '50%'
+      width: '50%',
+      footerActions
     });
 
     dialogRef.afterClosed().subscribe((result) => {

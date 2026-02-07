@@ -19,4 +19,5 @@ export interface Appointment {
   patientName?: string;
   doctorName?: string;
   slotTime?: string;
+  doctorRegistrationNumber?: string;
 } 
