@@ -19,6 +19,8 @@ export interface ChatSession {
   patientId: number;
   patientName: string;
   patientAvatar?: string;
+  /** Patient publicId (UUID) – used for API calls */
+  patientPublicId?: string;
   doctorId: number;
   doctorName: string;
   doctorAvatar?: string;
@@ -29,6 +31,8 @@ export interface ChatSession {
   appointmentId?: number;
   appointmentDate?: Date;
   appointmentStatus?: 'SCHEDULED' | 'COMPLETED' | 'CANCELED' | 'PENDING';
+  /** Appointment publicId (UUID) – required for chat API and WebSocket INIT */
+  appointmentPublicId?: string;
 }
 
 export interface ChatFilter {

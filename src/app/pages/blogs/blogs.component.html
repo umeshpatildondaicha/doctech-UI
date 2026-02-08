@@ -34,16 +34,6 @@
           } @else {
             @for (p of filteredPosts; track p.id) {
               <button type="button" class="post-card" [class.active]="p.id === selectedPostId" (click)="selectPost(p)">
-                <div class="post-thumb" aria-hidden="true">
-                  @if (p.coverImageUrl) {
-                    <img class="post-thumb-img" [src]="p.coverImageUrl" alt="">
-                  } @else {
-                    <div class="post-thumb-ph">
-                      <app-icon [fontIcon]="'image'" [size]="18"></app-icon>
-                    </div>
-                  }
-                </div>
-
                 <div class="post-body">
                   <div class="post-top">
                     <div class="pill">{{ p.category }}</div>
@@ -131,108 +121,116 @@
 
               @if (editStep === 1) {
                 <div class="step-panel step-panel--1">
-                  <div class="media-options-card">
-                    <div class="media-section">
-                      <input class="cover-input" type="file" accept="image/*" (change)="onCoverSelected($event)" #coverFile />
-                      <button type="button" class="media-cover-zone" (click)="coverFile.click()">
-                        @if (selectedPost.coverImageUrl) {
-                          <div class="cover-preview">
-                            <img class="cover-preview-img" [src]="selectedPost.coverImageUrl" alt="Cover">
-                            <div class="cover-preview-overlay">
-                              <app-icon [fontIcon]="'edit'" [size]="16"></app-icon>
-                              <span>Change cover</span>
-                            </div>
-                          </div>
-                        } @else {
-                          <div class="cover-empty-zone">
-                            <div class="cover-empty-icon">
-                              <app-icon [fontIcon]="'add_a_photo'" [size]="18"></app-icon>
-                            </div>
-                            <span class="cover-empty-label">Add cover image</span>
-                            <span class="cover-empty-hint">Click or drag a photo</span>
-                          </div>
-                        }
-                      </button>
+                  <div class="step1-card">
+                    <input
+                      class="step1-title"
+                      [(ngModel)]="selectedPost.title"
+                      placeholder="Article title"
+                      type="text"
+                      aria-label="Article title" />
 
-                      <div class="media-docs-zone">
+                    <div class="step1-row step1-row--cover-settings">
+                      <div class="step1-cover-cell">
+                        <span class="step1-mini-label">Cover</span>
+                        <input class="cover-input" type="file" accept="image/*" (change)="onCoverSelected($event)" #coverFile />
+                        <button type="button" class="step1-cover" (click)="coverFile.click()">
+                          @if (selectedPost.coverImageUrl) {
+                            <div class="step1-cover-preview">
+                              <img class="step1-cover-img" [src]="selectedPost.coverImageUrl" alt="Cover">
+                              <div class="step1-cover-overlay">
+                                <app-icon [fontIcon]="'photo_camera'" [size]="18"></app-icon>
+                                <span>Change</span>
+                              </div>
+                            </div>
+                          } @else {
+                            <div class="step1-cover-empty">
+                              <app-icon [fontIcon]="'add_a_photo'" [size]="22"></app-icon>
+                              <span>Add image</span>
+                            </div>
+                          }
+                        </button>
+                      </div>
+                      <div class="step1-settings-cell">
+                        <span class="step1-mini-label">Publish</span>
+                        <div class="step1-settings-grid">
+                          <div class="step1-field">
+                            <label class="step1-label" for="step1-status">Status</label>
+                            <select id="step1-status" class="step1-select" [(ngModel)]="selectedPost.status">
+                              <option value="DRAFT">Draft</option>
+                              <option value="PUBLISHED">Published</option>
+                              <option value="SCHEDULED">Scheduled</option>
+                            </select>
+                          </div>
+                          <div class="step1-field">
+                            <label class="step1-label" for="step1-category">Category</label>
+                            <select id="step1-category" class="step1-select" [(ngModel)]="selectedPost.category">
+                              @for (c of categories; track c) {
+                                <option [value]="c">{{ c }}</option>
+                              }
+                            </select>
+                          </div>
+                          <div class="step1-field">
+                            <label class="step1-label" for="step1-visibility">Visibility</label>
+                            <select id="step1-visibility" class="step1-select" [(ngModel)]="selectedPost.visibility">
+                              <option value="PUBLIC">Public</option>
+                              <option value="PRIVATE">Private</option>
+                            </select>
+                          </div>
+                          @if (selectedPost.status === 'SCHEDULED') {
+                            <div class="step1-field step1-field--full">
+                              <label class="step1-label" for="step1-schedule">Schedule</label>
+                              <input id="step1-schedule" class="step1-input" type="datetime-local" [(ngModel)]="selectedPost.scheduledFor" />
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="step1-row step1-row--attach-tags">
+                      <div class="step1-attach-cell">
+                        <span class="step1-mini-label">Attachments</span>
                         <input #docInputTop class="cover-input" type="file" multiple accept=".pdf,.doc,.docx,application/pdf" (change)="onDocSelected($event)" />
-                        <button type="button" class="docs-drop-trigger" (click)="docInputTop.click()">
-                          <app-icon [fontIcon]="'attach_file'" [size]="18"></app-icon>
-                          <span>Attach documents</span>
-                          <span class="docs-drop-hint">PDF, DOC, DOCX</span>
+                        <button type="button" class="step1-docs-trigger" (click)="docInputTop.click()">
+                          <app-icon [fontIcon]="'attach_file'" [size]="16"></app-icon>
+                          <span>Add files</span>
                         </button>
                         @if (selectedPost.documents.length > 0) {
-                          <ul class="docs-list" aria-label="Attached documents">
+                          <ul class="step1-docs-list" aria-label="Attached documents">
                             @for (d of selectedPost.documents; track d.id) {
-                              <li class="docs-list-item">
-                                <span class="docs-list-icon" aria-hidden="true">
+                              <li class="step1-doc-item">
+                                <span class="step1-doc-icon">
                                   <app-icon [fontIcon]="getDocIcon(d.type)" [size]="14"></app-icon>
                                 </span>
-                                <span class="docs-list-name">{{ d.title }}</span>
-                                <button type="button" class="docs-list-remove" (click)="removeDoc(d.id); $event.stopPropagation()" aria-label="Remove {{ d.title }}">×</button>
+                                <span class="step1-doc-name">{{ d.title }}</span>
+                                <button type="button" class="step1-doc-remove" (click)="removeDoc(d.id); $event.stopPropagation()" aria-label="Remove {{ d.title }}">×</button>
                               </li>
                             }
                           </ul>
                         }
                       </div>
-                    </div>
-
-                    <input class="title-input title-input--step1" [(ngModel)]="selectedPost.title" placeholder="Enter post title here..." />
-
-                    <div class="options-section">
-                      <div class="more-grid">
-                        <div class="field">
-                          <div class="label">Status</div>
-                          <select class="select" [(ngModel)]="selectedPost.status">
-                            <option value="DRAFT">Draft</option>
-                            <option value="PUBLISHED">Published</option>
-                            <option value="SCHEDULED">Scheduled</option>
-                          </select>
-                        </div>
-
-                        <div class="field">
-                          <div class="label">Category</div>
-                          <select class="select" [(ngModel)]="selectedPost.category">
-                            @for (c of categories; track c) {
-                              <option [value]="c">{{ c }}</option>
+                      <div class="step1-tags-cell">
+                        <span class="step1-mini-label">Tags</span>
+                        <div class="step1-tags-inline">
+                          <div class="step1-tags-chips">
+                            @for (t of selectedPost.tags; track t) {
+                              <span class="step1-chip">
+                                {{ t }}
+                                <button type="button" class="step1-chip-remove" (click)="removeTag(t)" aria-label="Remove tag {{ t }}">×</button>
+                              </span>
                             }
-                          </select>
-                        </div>
-
-                        <div class="field">
-                          <div class="label">Visibility</div>
-                          <select class="select" [(ngModel)]="selectedPost.visibility">
-                            <option value="PUBLIC">Public</option>
-                            <option value="PRIVATE">Private</option>
-                          </select>
-                        </div>
-
-                        @if (selectedPost.status === 'SCHEDULED') {
-                          <div class="field">
-                            <div class="label">Schedule</div>
-                            <input class="input" type="datetime-local" [(ngModel)]="selectedPost.scheduledFor" />
                           </div>
-                        }
-                      </div>
-
-                      <div class="field">
-                        <div class="label">Tags</div>
-                        <div class="chips">
-                          @for (t of selectedPost.tags; track t) {
-                            <span class="chip">
-                              {{ t }}
-                              <button type="button" class="chip-x" (click)="removeTag(t)">×</button>
-                            </span>
-                          }
-                        </div>
-                        <div class="tag-row">
-                          <input class="input" placeholder="Add tag (press Enter)..." [(ngModel)]="tagInput" (keydown.enter)="$event.preventDefault(); addTagFromInput()" />
+                          <input
+                            class="step1-input step1-tag-input"
+                            placeholder="Add tag, Enter"
+                            [(ngModel)]="tagInput"
+                            (keydown.enter)="$event.preventDefault(); addTagFromInput()"
+                            aria-label="Add tag" />
                         </div>
                       </div>
                     </div>
 
-                    <div class="step-actions">
-                      <app-button text="Next: Content" color="primary" appearance="flat" (btnClick)="setEditStep(2)"></app-button>
+                    <div class="step1-actions">
+                      <app-button text="Next: Write content" color="primary" appearance="raised" (btnClick)="setEditStep(2)"></app-button>
                     </div>
                   </div>
                 </div>

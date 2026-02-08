@@ -6,6 +6,7 @@ import { ChatSession, ChatMessage, ChatFilter } from '../../interfaces/chat.inte
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { AppButtonComponent, DialogboxService, DialogFooterAction } from '@lk/core';
+import { AuthService } from '../../services/auth.service';
 import { PatientSearchDialogComponent, type PatientSearchResult } from '../patient-search-dialog/patient-search-dialog.component';
 
 @Component({
@@ -38,15 +39,18 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   isLoading = false;
   isMobile = window.innerWidth < 768;
   isMainSidebarCollapsed = false;
-  // Default to active/current appointments view
-  activeChatTab: 'ALL' | 'CURRENT' = 'CURRENT';
+  /** WebSocket connected and INIT sent (messages will be saved to backend). */
+  isWsConnected = false;
+  // Default to ALL so connected patients (no appointmentStatus yet) are visible
+  activeChatTab: 'ALL' | 'CURRENT' = 'ALL';
 
   private subscriptions = new Subscription();
 
   constructor(
     private readonly chatService: ChatService,
     private readonly router: Router,
-    private readonly dialogService: DialogboxService
+    private readonly dialogService: DialogboxService,
+    private readonly authService: AuthService
   ) {}
 
   openPatientPicker(): void {
@@ -70,19 +74,21 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       const patientName = patient.fullName || `${patient.firstName ?? ''} ${patient.lastName ?? ''}`.trim() || 'Patient';
       const patientAvatar = patient.profileImageUrl || 'assets/avatars/default-avatar.jpg';
 
-      const existing = this.chatSessions.find(s => s.patientId === patientId);
+      const existing = this.chatSessions.find(s => s.patientPublicId === patient.id || s.patientId === patientId);
       if (existing) {
         this.selectChatSession(existing);
         return;
       }
 
+      const doctorName = this.getDoctorName();
       const newSession: ChatSession = {
-        id: Date.now().toString(),
+        id: patient.id,
         patientId,
         patientName,
         patientAvatar,
+        patientPublicId: patient.id,
         doctorId: 1,
-        doctorName: 'Dr. Sarah Johnson',
+        doctorName,
         doctorAvatar: 'assets/avatars/default-avatar.jpg',
         unreadCount: 0,
         isActive: true,
@@ -101,11 +107,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.setupResponsiveBehavior();
     this.checkMainSidebarState();
     this.setupSidebarObserver();
-    
-    // Listen for window resize to detect sidebar changes
-    window.addEventListener('resize', () => {
-      this.checkMainSidebarState();
-    });
+    this.subscriptions.add(
+      this.chatService.getMessages().subscribe(msgs => (this.messages = msgs))
+    );
+    this.subscriptions.add(
+      this.chatService.getIsConnected().subscribe((connected: boolean) => (this.isWsConnected = connected))
+    );
+    window.addEventListener('resize', () => this.checkMainSidebarState());
   }
 
   ngAfterViewChecked(): void {
@@ -113,6 +121,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   ngOnDestroy(): void {
+    this.chatService.disconnectChat();
     this.subscriptions.unsubscribe();
   }
 
@@ -131,7 +140,11 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     let list = this.chatSessions;
     if (this.activeChatTab === 'CURRENT') {
       // Treat scheduled/pending as “current/active” appointments
-      list = list.filter(s => s.appointmentStatus === 'SCHEDULED' || s.appointmentStatus === 'PENDING');
+      list = list.filter(s =>
+        !s.appointmentStatus ||
+        s.appointmentStatus === 'SCHEDULED' ||
+        s.appointmentStatus === 'PENDING'
+      );
     }
     return list;
   }
@@ -142,42 +155,57 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   loadChatSessions(): void {
     this.isLoading = true;
+    // Backend /patients/doctor/{code}/connected expects public doctor code (e.g. DR1)
+    const doctorCode = this.authService.getDoctorPublicCode() ?? this.authService.getDoctorRegistrationNumber() ?? 'DR1';
     this.subscriptions.add(
-      this.chatService.getChatSessions(this.filter).subscribe(sessions => {
-        this.chatSessions = sessions;
-        this.isLoading = false;
+      this.chatService.loadConnectedPatientsAsSessions(doctorCode).subscribe({
+        next: (sessions) => {
+          this.chatSessions = sessions;
+          this.isLoading = false;
+        },
+        error: () => {
+          this.chatSessions = [];
+          this.isLoading = false;
+        }
       })
     );
   }
 
   selectChatSession(session: ChatSession): void {
     this.currentSession = session;
-    this.loadMessages(session.id);
-    
-    // Always close patient list after selection
     this.showPatientList = false;
-  }
-
-  loadMessages(sessionId: string): void {
     this.subscriptions.add(
-      this.chatService.getMessages(sessionId).subscribe(messages => {
-        this.messages = messages;
-        this.markMessagesAsRead(sessionId, messages.map(m => m.id));
+      this.chatService.openChatForPatient(session).subscribe({
+        next: ({ session: updated, messages }) => {
+          this.currentSession = updated;
+          this.messages = messages;
+          this.markMessagesAsRead(session.id, messages.map(m => m.id));
+        },
+        error: () => {
+          this.messages = [];
+        }
       })
     );
+  }
+
+  private getDoctorName(): string {
+    const u = this.authService.getCurrentUser() as { firstName?: string; lastName?: string; name?: string } | null;
+    if (!u) return 'Doctor';
+    if (u.firstName || u.lastName) return `Dr. ${(u.firstName || '').trim()} ${(u.lastName || '').trim()}`.trim();
+    return (u as any).name || 'Doctor';
   }
 
   sendMessage(): void {
     if (!this.newMessage.trim() && this.selectedFiles.length === 0) return;
     if (!this.currentSession) return;
 
-    // Send text message
+    const doctorName = this.getDoctorName();
     if (this.newMessage.trim()) {
       this.subscriptions.add(
         this.chatService.sendMessage(this.currentSession.id, {
-          senderId: 1, // Doctor ID
+          senderId: 1,
           senderType: 'DOCTOR',
-          senderName: 'Dr. Sarah Johnson',
+          senderName: doctorName,
           content: this.newMessage.trim(),
           messageType: 'TEXT'
         }).subscribe(() => {
@@ -186,15 +214,14 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       );
     }
 
-    // Send files
     this.selectedFiles.forEach(file => {
       this.subscriptions.add(
         this.chatService.uploadFile(
           this.currentSession!.id,
           file,
-          1, // Doctor ID
+          1,
           'DOCTOR',
-          'Dr. Sarah Johnson'
+          doctorName
         ).subscribe()
       );
     });

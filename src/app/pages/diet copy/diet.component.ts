@@ -199,6 +199,43 @@ export class DietComponent implements OnInit, OnDestroy {
     this.filterDiets();
   }
 
+  getDietGroupTabs(): { label: string; value: string; count: number }[] {
+    const counts: Record<string, number> = { '': this.dietList.length };
+    this.mealTypes.filter(mt => mt.value).forEach(mt => {
+      counts[mt.value] = this.dietList.filter(d =>
+        (d.tags || []).some((t: string) => t.toLowerCase() === mt.value.toLowerCase())
+      ).length;
+    });
+    return this.mealTypes.map(mt => ({
+      label: mt.label,
+      value: mt.value,
+      count: counts[mt.value] ?? 0
+    }));
+  }
+
+  selectMealTypeTab(value: string): void {
+    this.selectedMealType = value;
+    this.filterDiets();
+  }
+
+  getPlanGroupTabs(): { label: string; value: string; count: number }[] {
+    const types = [
+      { label: 'All', value: '' },
+      { label: 'Weekly', value: 'weekly' },
+      { label: 'Monthly', value: 'monthly' },
+      { label: 'Custom', value: 'custom' }
+    ];
+    return types.map(t => ({
+      ...t,
+      count: t.value ? this.dietPlans.filter(p => p.type === t.value).length : this.dietPlans.length
+    }));
+  }
+
+  selectPlanTypeTab(value: string): void {
+    this.selectedPlanType = value;
+    this.filterDietPlans();
+  }
+
   filterDiets() {
     this.filteredDiets = this.dietList.filter(diet => {
       const matchesSearch = !this.searchQuery ||

@@ -87,9 +87,14 @@
             <h2 class="conversation-name">{{ currentSession.patientName }}</h2>
             <p class="conversation-subtitle">
               @if (currentSession.appointmentDate) {
-                Appointment {{ currentSession.appointmentDate | date:'MMM d, y' }} · 
+                Appointment {{ currentSession.appointmentDate | date:'MMM d, y' }} ·
               }
               {{ currentSession.appointmentStatus || 'Active' }}
+              @if (!currentSession.appointmentPublicId) {
+                <span class="conversation-warn"> · No appointment (chat not saved)</span>
+              } @else if (!isWsConnected) {
+                <span class="conversation-warn"> · Connecting…</span>
+              }
             </p>
           </div>
         </div>
@@ -147,7 +152,7 @@
             class="message-input"
             rows="1"></textarea>
         </div>
-        <button type="button" class="input-action-btn send-btn" [disabled]="!newMessage.trim() && selectedFiles.length === 0" (click)="sendMessage()" title="Send">
+        <button type="button" class="input-action-btn send-btn" [disabled]="(!newMessage.trim() && selectedFiles.length === 0) || !isWsConnected" (click)="sendMessage()" title="{{ isWsConnected ? 'Send' : 'Connect to send' }}">
           <span class="material-icons">send</span>
         </button>
         <input #fileInput type="file" multiple (change)="onFileSelected($event)" style="display: none" accept="image/*,.pdf,.doc,.docx,.txt">

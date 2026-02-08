@@ -804,6 +804,65 @@ export class AuthService {
   }
 
   /**
+   * Resolve the logged-in doctor's public UUID (for WebSocket chat INIT as userPublicId).
+   * Backend login sets userId = doctor.getPublicId().toString(), so user.id is the UUID for doctors.
+   */
+  public getDoctorPublicId(): string | null {
+    const current = this.getCurrentUser() as { publicId?: string; id?: string } | null;
+    const stored = this.getStoredUser() as { publicId?: string; id?: string } | null;
+    const uuidLike = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+    const from = (u: typeof current) => {
+      if (!u) return null;
+      const id = (u.publicId ?? u.id ?? '').toString().trim();
+      return uuidLike(id) ? id : null;
+    };
+    const fromUser = from(current) ?? from(stored);
+    if (fromUser) return fromUser;
+    const token = this.getStoredToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const doctorId = payload.doctorId ?? payload.doctor_id ?? null;
+        if (doctorId && uuidLike(String(doctorId))) return String(doctorId).trim();
+      } catch { /* ignore */ }
+    }
+    return null;
+  }
+
+  /**
+   * Resolve the logged-in doctor's public doctor code (e.g. "DR1", "DR2").
+   * Use this for appointment/patient APIs: GET /api/appointments/doctor/{code}/patient/...
+   * and GET /api/patients/doctor/{code}/connected — backend looks up by publicDoctorCode.
+   */
+  public getDoctorPublicCode(): string | null {
+    const fromUser = (u: any): string | null => {
+      if (!u) return null;
+      return (
+        u.publicDoctorCode ||
+        u.public_doctor_code ||
+        u.doctorCode ||
+        u.doctor_code ||
+        u.registrationNumber ||
+        u.registration_number ||
+        null
+      );
+    };
+    const current = this.getCurrentUser() as any;
+    const stored = this.getStoredUser() as any;
+    const code = fromUser(current) || fromUser(stored);
+    if (code) return String(code).trim() || null;
+    const token = this.getStoredToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const fromToken = payload.publicDoctorCode ?? payload.public_doctor_code ?? payload.doctorCode ?? payload.registrationNumber ?? null;
+        if (fromToken) return String(fromToken).trim() || null;
+      } catch { /* ignore */ }
+    }
+    return null;
+  }
+
+  /**
    * Resolve the logged-in doctor's registration number (e.g. "DR1", "DOC-12345").
    * Backend timings APIs expect registration number in the path param.
    */

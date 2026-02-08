@@ -766,6 +766,43 @@ export class ExerciseComponent implements OnInit, OnDestroy {
     this.viewMode = this.viewMode === 'cards' ? 'table' : 'cards';
   }
 
+  getExerciseGroupTabs(): { label: string; value: string; count: number }[] {
+    const base = [{ label: 'All', value: 'all', count: this.exercises.length }];
+    const byCat = this.categories.filter(c => c.value !== 'all').map(c => ({
+      label: c.label,
+      value: c.value,
+      count: this.exercises.filter(e => e.category === c.value).length
+    }));
+    return [...base, ...byCat];
+  }
+
+  selectExerciseCategoryTab(value: string): void {
+    this.selectedCategory = value;
+  }
+
+  onExerciseSearchInput(): void {
+    // Trigger filter recalc on next tick
+    this.exercises = [...this.exercises];
+  }
+
+  getExerciseGroupsGroupTabs(): { label: string; value: string; count: number }[] {
+    const base = [{ label: 'All', value: '', count: this.exerciseGroups.length }];
+    const byCat = this.groupCategories.map(c => ({
+      label: c.label,
+      value: c.value,
+      count: this.exerciseGroups.filter(g => g.category === c.value).length
+    }));
+    return [...base, ...byCat];
+  }
+
+  selectGroupCategoryTab(value: string): void {
+    this.selectedGroupCategory = value;
+  }
+
+  onGroupSearchInput(): void {
+    this.exerciseGroups = [...this.exerciseGroups];
+  }
+
   onCategoryChange(event: any) {
     this.selectedCategory = event.value;
   }

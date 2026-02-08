@@ -357,6 +357,10 @@ $shadow-bubble: 0 1px 0.5px rgba(0, 0, 0, 0.13);
   line-height: 1.3;
 }
 
+.conversation-warn {
+  color: var(--warn-color, #b45309);
+}
+
 .conversation-actions {
   display: flex;
   gap: 0.25rem;

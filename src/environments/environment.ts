@@ -31,6 +31,10 @@ export const environment = {
       base: '/api/appointments',
       schedule: '/api/appointments/schedule'
     },
+    chat: {
+      base: '/api/chat',
+      ws: 'wss://doctech.solutions/ws/chat'
+    },
     billing: {
       base: '/api/billing',
       invoices: '/api/billing/invoices',
