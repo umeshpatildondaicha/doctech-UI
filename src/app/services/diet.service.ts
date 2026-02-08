@@ -2,14 +2,15 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { HttpService } from "@lk/core";
 import { Observable } from "rxjs";
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class DietService {
 
-  private baseUrl = 'https://doctech.solutions/api/doctors';
+  private readonly baseUrl = `${environment.apiUrl}/api/doctors`;
 
   constructor(private http: HttpClient,
-    private httpService :HttpService
+    private httpService: HttpService
   ) {}
   getWeeklyDietPlans(doctorCode:string){
     return this.http.get<any>(
@@ -23,12 +24,17 @@ export class DietService {
     );
   }
   // CREATE
-  createDietPlan(doctorCode:string ,payload:any):Observable<any>{
-    return this.httpService.sendPOSTRequest(`${this.baseUrl}/${doctorCode}/diet-plans`,payload)
+  createDietPlan(payload:any):Observable<any>{
+    return this.httpService.sendPOSTRequest(`${this.baseUrl}/diet-plans`,payload)
   }
-  updateDiet(dietId: number, payload: any) {
+  /**
+   * Update a diet plan.
+   * PUT /api/doctors/{doctorCode}/diet-plans/updateDietPlan/{id}
+   */
+  updateDietPlan(doctorCode: string, id: number, payload: any): Observable<any> {
+    const safeDoctor = encodeURIComponent((doctorCode || '').trim());
     return this.httpService.sendPUTRequest(
-      `${this.baseUrl}/diet-plans/${dietId}`,
+      `${this.baseUrl}/${safeDoctor}/diet-plans/updateDietPlan/${id}`,
       payload
     );
   }
@@ -54,15 +60,6 @@ getDietPlansCount(registrationNumber: string): Observable<any> {
   getDietPlans(doctorCode: string) {
     return this.http.get<any>(
       `${this.baseUrl}/${doctorCode}/diet-plans`
-    );
-  }
-
-
-  // UPDATE
-  updateDietPlan(doctorCode: string, id: number, payload: any) {
-    return this.http.put(
-      `${this.baseUrl}/${doctorCode}/diet-plans/updateDietPlan/${id}`,
-      payload
     );
   }
 
