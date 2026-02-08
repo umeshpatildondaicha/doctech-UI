@@ -23,8 +23,8 @@ export class DietService {
     );
   }
   // CREATE
-  createDietPlan(payload:any):Observable<any>{
-    return this.httpService.sendPOSTRequest(`${this.baseUrl}/diet-plans`,payload)
+  createDietPlan(doctorCode:string ,payload:any):Observable<any>{
+    return this.httpService.sendPOSTRequest(`${this.baseUrl}/${doctorCode}/diet-plans`,payload)
   }
   updateDiet(dietId: number, payload: any) {
     return this.httpService.sendPUTRequest(
@@ -32,6 +32,23 @@ export class DietService {
       payload
     );
   }
+  getDietPlanById(doctorCode: string, dietId: number): Observable<any> {
+    const url = `${this.baseUrl}/${doctorCode}/diet-plans/${dietId}`;
+    return this.http.get<any>(url);
+  }
+  getWeeklyDietPlansCount(registrationNumber: string): Observable<any> {
+    return this.httpService.sendGETRequest(
+      `${this.baseUrl}/${registrationNumber}/weekly-diet-plans/count`
+    );
+  }
+  // ✅ GET TOTAL DIET COUNT
+
+getDietPlansCount(registrationNumber: string): Observable<any> {
+  return this.httpService.sendGETRequest(
+    `${this.baseUrl}/${registrationNumber}/diet-plans/count`
+  );
+}
+
 
   // LIST
   getDietPlans(doctorCode: string) {

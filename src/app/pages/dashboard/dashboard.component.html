@@ -20,7 +20,7 @@
           <app-icon [fontIcon]="'event'" [size]="20"></app-icon>
         </div>
         <div class="stat-content">
-          <span class="stat-label">Appointments</span>
+          <span class="stat-label">Appointments List</span>
           <span class="stat-value">{{ stats.bookAppointment }}</span>
         </div>
       </button>
@@ -54,7 +54,7 @@
           <div class="card-head">
             <div>
               <h2 class="card-title">Appointment Requests</h2>
-              <span class="card-meta">{{ appointmentRequests.length }} pending</span>
+              <span class="card-meta">{{ pendingRequestCount }} Appointment pending</span>
             </div>
           </div>
           <app-divider></app-divider>

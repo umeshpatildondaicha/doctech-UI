@@ -13,7 +13,7 @@
             </div>
             <div class="mini-text">
               <div class="mini-label">Total Diets</div>
-              <div class="mini-value">{{ dietList.length }}</div>
+              <div class="mini-value">{{totalDietCount}}</div>
             </div>
           </div>
 
@@ -86,12 +86,19 @@
           <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Diet'" (btnClick)="onCreateDiet()"></app-button>
         </div>
 
+
         <!-- Diet Cards Grid -->
         <div class="cards-grid">
           @for (diet of filteredDiets; track diet) {
-          <app-diet-card [diet]="diet" [showActions]="true" [clickable]="true" (cardClick)="onViewDiet($event)"
-            (viewClick)="onViewDiet($event)" (editClick)="onEditDiet($event)" (deleteClick)="onDeleteDiet($event)"
-            (videoClick)="onVideoClick($event)" (pdfClick)="onPdfClick($event)"></app-diet-card>
+          <app-diet-card [diet]="diet"
+           [showActions]="true"
+            [clickable]="true" 
+            (cardClick)="onViewDiet($event)"
+            (viewClick)="onViewDiet($event)"
+             (editClick)="onEditDiet($event)" 
+             (deleteClick)="onDeleteDiet(diet)"
+            (videoClick)="onVideoClick($event)"
+             (pdfClick)="onPdfClick($event)"></app-diet-card>
           }
         </div>
 
@@ -136,7 +143,7 @@
             </div>
             <div class="mini-text">
               <div class="mini-label">Active Plans</div>
-              <div class="mini-value">{{ getActivePlansCount() }}</div>
+              <div class="mini-value">{{ weeklyDietCount }}</div>
             </div>
           </div>
 
@@ -146,7 +153,7 @@
             </div>
             <div class="mini-text">
               <div class="mini-label">Weekly Plans</div>
-              <div class="mini-value">{{ getWeeklyPlansCount() }}</div>
+              <div class="mini-value">{{ weeklyDietCount }}</div>
             </div>
           </div>
 

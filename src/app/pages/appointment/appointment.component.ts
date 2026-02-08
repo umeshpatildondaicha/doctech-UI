@@ -31,6 +31,7 @@ export class AppointmentComponent implements OnInit {
   allAppointments: Appointment[] = [];
   isLoading = false;
   appointmentColumns: ColDef[] = [];
+  
   appointmentGridOptions = {
     menuActions: [
       {

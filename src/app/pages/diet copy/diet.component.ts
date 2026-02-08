@@ -82,6 +82,7 @@ export class DietComponent implements OnInit, OnDestroy {
   @Output() deleteClick = new EventEmitter<Diet>();
   @Output() videoClick = new EventEmitter<string>();
   @Output() pdfClick = new EventEmitter<string>();
+  private editingDietId!: number;
 
 
   // Diets Tab
@@ -95,6 +96,8 @@ export class DietComponent implements OnInit, OnDestroy {
 
   // Diet Plans Tab
   doctorCode = 'DR1';
+  totalDietCount = 0;
+  weeklyDietCount =0;
   dietPlans: any[] = [];
   filteredDietPlans: any[] = [];
   selectedPlanType: string = '';
@@ -103,7 +106,7 @@ export class DietComponent implements OnInit, OnDestroy {
   // Weekly preview state
   selectedPlanPreview: any | null = null;
   selectedPlanDayIndex: number = new Date().getDay();
-
+  mode: 'create' | 'edit' = 'create';
   // Computed properties for stats
   get avgCalories(): number {
     if (!this.dietList.length) return 0;
@@ -158,12 +161,44 @@ export class DietComponent implements OnInit, OnDestroy {
     if (currentUrl.includes('/diet/plans')) {
       this.selectedTabIndex = 1; // Diet Plans tab index (second tab)
     }
+    this.loadWeeklyPlansCount();
+    this.loadDietCounts();
+    this.GetWeeklyDietCount();
   }
 
   ngOnDestroy() {
     this.eventService.clearBreadcrumb();
   }
-
+  loadDietCounts() {
+    const doctorCode = this.doctorCode;
+  
+    this.dietservice.getDietPlansCount(doctorCode).subscribe({
+      next: (res: any) => {
+        this.totalDietCount = res?.count ?? res ?? 0;
+      },
+      error: () => this.totalDietCount = 0
+    });
+  }
+  GetWeeklyDietCount() {
+    const doctorCode = this.doctorCode;
+  
+    this.dietservice.getWeeklyDietPlansCount(doctorCode).subscribe({
+      next: (res: any) => {
+        console.log('Weekly Diet plans count api =>', res);
+  
+        // 🔥 ONLY number assign कर
+        if (typeof res === 'number') {
+          this.weeklyDietCount = res;
+        } else if (typeof res?.count === 'number') {
+          this.weeklyDietCount = res.count;
+        } else {
+          this.weeklyDietCount = 0;
+        }
+      },
+      error: () => this.weeklyDietCount = 0
+    });
+  }
+  
   onTabChange(index: number) {
     this.selectedTabIndex = index;
 
@@ -218,20 +253,20 @@ export class DietComponent implements OnInit, OnDestroy {
     this.dietservice.getDietPlans(this.doctorCode)
       .subscribe({
         next: (res) => {
-  
+
           const rawList = res.data || res;
-  
+
           this.dietList = rawList.map((diet: any) => ({
             ...diet,
-  
-            // 🔥 FLATTEN nutrition for UI
+
+            //  FLATTEN nutrition for UI
             calories: diet.nutritionalInformation?.caloriesKcal ?? 0,
             protein: diet.nutritionalInformation?.protein ?? 0,
             carbs: diet.nutritionalInformation?.carbohydrates ?? 0,
             fat: diet.nutritionalInformation?.fat ?? 0,
             fiber: diet.nutritionalInformation?.fiber ?? 0
           }));
-  
+
           this.filteredDiets = [...this.dietList];
         },
         error: (err) => {
@@ -239,7 +274,7 @@ export class DietComponent implements OnInit, OnDestroy {
         }
       });
   }
-  
+
 
 
 
@@ -283,77 +318,131 @@ export class DietComponent implements OnInit, OnDestroy {
         fontIcon: 'save'
       }
     ];
-  
+
+
+    // 🔥 Edit mode मध्ये ID + full object lock कर
+    const editingDietId = mode === 'edit' ? diet?.id : null;
+    const editingDiet = mode === 'edit' ? { ...diet } : null;
+
     const dialogRef = this.dialogService.openDialog(DietCreateComponent, {
       title: mode === 'edit' ? 'Edit Diet' : 'Create Diet',
+      data: { mode, diet: editingDiet },
+      width: '90%',
+      height: '90%',
+      footerActions
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Dialog result', result);
+      if (!result || result === false || result?.action === 'cancel') {
+        return;
+      }
+
+      const payload = result?.data || result;
+
+      // ADD THIS BLOCK ONLY FOR CREATE
+      if (mode === 'create') {
+
+        // REMOVE ALL IDs
+        delete payload.id;
+
+        payload.nutritionalInformation && delete payload.nutritionalInformation.id;
+
+        payload.mediaLinks?.forEach((m: any) => delete m.id);
+        payload.ingredients?.forEach((i: any) => delete i.id);
+
+        if (payload.recipe) {
+          delete payload.recipe.id;
+        }
+
+        // NOW CALL CREATE API
+        this.dietservice.createDietPlan(this.doctorCode, payload).subscribe({
+          next: () => {
+            console.log(' Diet created successfully');
+            this.filterDiets();
+          },
+          error: err => console.error(' Diet create failed', err)
+        });
+      }
+
+      // EDIT PART unchanged
+    });
+
+  }
+
+
+  private editingDiet!: any;
+  onEditDiet(diet: any) {
+
+    const mode: 'create' | 'edit' = 'create';
+    this.editingDietId = diet.id;
+
+
+    this.editingDiet = { ...diet };
+
+    const footerActions: DialogFooterAction[] = [
+      { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
+      {
+        id: 'save',
+        text: 'Save Changes',
+        color: 'primary',
+        appearance: 'raised',
+        fontIcon: 'save'
+      }
+    ];
+
+    const dialogRef = this.dialogService.openDialog(DietCreateComponent, {
+      title: 'Create Diet',
       data: { mode, diet },
       width: '90%',
       height: '90%',
       footerActions
     });
-  
+
+
+
     dialogRef.afterClosed().subscribe(result => {
-  
-      // ❌ cancel / invalid
       if (!result || result === false || result?.action === 'cancel') {
         return;
       }
-  
-      // ✅ CREATE
-      if (mode === 'create') {
-        this.dietservice.createDietPlan(result).subscribe({
+
+      const updatePayload = {
+        ...this.editingDiet,
+        ...result
+      };
+
+      console.log('FINAL UPDATE PAYLOAD =>', updatePayload);
+      console.log('UPDATE ID =>', this.editingDietId);
+
+      this.dietservice
+        .updateDietPlan(this.doctorCode, this.editingDietId, updatePayload)
+        .subscribe({
           next: () => {
-            console.log('✅ Diet created successfully');
-            this.filterDiets();
+            console.log('Diet updated');
+            this.filterDiets();   // UI refresh
           },
-          error: (err) => console.error('❌ Diet create failed', err)
+          error: err => {
+            console.error('Update failed', err);
+          }
         });
-      }
-  
-      // ✏️ EDIT
-      if (mode === 'edit') {
-        const dietId = diet?.id || diet?.dietId; // backend field confirm कर
-  
-        this.dietservice.updateDiet(dietId, result).subscribe({
-          next: () => {
-            console.log('✅ Diet updated successfully');
-            this.filterDiets();
-          },
-          error: (err) => console.error('❌ Diet update failed', err)
-        });
-      }
-    });
-  }
-  
-
-  onEditDiet(diet: Diet) {
-    const footerActions: DialogFooterAction[] = [
-      { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
-      { id: 'save', text: 'Save Changes', color: 'primary', appearance: 'raised', fontIcon: 'save', disabled: false }
-    ];
-
-    const dialogRef = this.dialogService.openDialog(DietCreateComponent, {
-      title: 'Edit Diet',
-
-      width: '90%',
-      height: '90%',
-      footerActions: footerActions
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && result !== false) {
-        // Refresh diet list
-
-        this.filterDiets();
-      }
     });
   }
 
-  onViewDiet(diet: Diet) {
-    // Navigate to the diet view page
-    console.log('Navigating to diet view:', diet.dietId);
-    this.router.navigate(['/diet/view', diet.dietId]);
+
+
+
+  onViewDiet(diet: any) {
+    const dietId = diet.id || diet.dietId; // correct field
+
+    if (!dietId) {
+      console.error('Diet ID missing', diet);
+      return;
+    }
+
+    console.log('Navigating to diet view:', dietId);
+    this.router.navigate(['/diet/view', dietId]);
   }
+
 
   onVideoClick(videoUrl: string) {
     // Open video in new tab
@@ -365,11 +454,33 @@ export class DietComponent implements OnInit, OnDestroy {
     window.open(pdfUrl, '_blank');
   }
 
-  onDeleteDiet(diet: Diet) {
-    console.log('Delete diet:', diet);
-    // Implement delete diet functionality with confirmation dialog
-  }
+  onDeleteDiet(diet: any) {
+    console.log('FULL DIET OBJECT =>', JSON.stringify(diet));
 
+    const dietId1 = diet?.id;
+
+    console.log(' DIET ID =>', dietId1);
+    console.log('Delete clicked diet:', diet);
+
+    const dietId = diet?.id;
+
+    if (dietId === null || dietId === undefined) {
+      console.error('Diet ID missing', diet);
+      return;
+    }
+
+    this.dietservice
+      .deleteDietPlan(this.doctorCode, Number(dietId))
+      .subscribe({
+        next: () => {
+          console.log(' Diet deleted');
+          this.filterDiets();
+        },
+        error: err => {
+          console.error(' Delete failed', err);
+        }
+      });
+  }
   onDietRowClick(event: any) {
     console.log('Diet row clicked:', event);
   }
@@ -403,13 +514,25 @@ export class DietComponent implements OnInit, OnDestroy {
       });
   }
 
-
+  weeklyPlansCount = 0;
   getActivePlansCount(): number {
     return this.dietPlans.filter(plan => plan.status === 'active').length;
   }
 
-  getWeeklyPlansCount(): number {
-    return this.dietPlans.filter(plan => plan.type === 'weekly').length;
+  // getWeeklyPlansCount(): number {
+  //   return this.dietPlans.filter(plan => plan.type === 'weekly').length;
+  // }
+  loadWeeklyPlansCount() {
+    this.dietservice.getWeeklyDietPlansCount(this.doctorCode).subscribe({
+      next: (count: number) => {
+        this.weeklyPlansCount = count;
+        console.log("success");
+      },
+      error: err => {
+        console.error('Weekly plans count failed', err);
+        this.weeklyPlansCount = 0;
+      }
+    });
   }
 
   getAvgAdherence(): number {
@@ -466,10 +589,15 @@ export class DietComponent implements OnInit, OnDestroy {
 
   onEditPlan(plan: any) {
     // Reuse create page UI for editing
-    this.router.navigate(['/diet-plan-edit', plan.planId], { state: { plan } });
+    if (!plan?.planId) {
+      console.error('Plan Id Missing');
+      return;
+    }
+    this.router.navigate(['/diet/edit', plan.planId],);
   }
 
   onDeletePlan(plan: any) {
+
     console.log('Delete plan:', plan);
     // Implement plan deletion with confirmation
   }

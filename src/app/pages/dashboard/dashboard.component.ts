@@ -84,10 +84,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   // Stats
   stats: DashboardStats = {
-    roomAvailability: 50,
+    roomAvailability: 0,
     totalRooms: 100,
-    bookAppointment: 291,
-    totalPatients: 871,
+    bookAppointment: 0,
+    totalPatients: 0,
     overallVisitors: 1210
   };
 
@@ -96,7 +96,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   requestColumns: ColDef[] = [];
   requestGridOptions: any = {};
   requestRowData: AppointmentRequest[] = [];
-
+  doctorCode ="DR1";
+  pendingRequestCount =0;
+ allAppointmentCount =0;
   // Chart Options
   patientVisitChartOptions: Highcharts.Options = {};
   revenueChartOptions: Highcharts.Options = {};
@@ -120,7 +122,49 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     if (this.isBrowser) {
       this.initializeCharts();
     }
+    this.loadAllAppointmentsCount();
+    this.loadPendingRequestsCount();
   }
+  loadAllAppointmentsCount() {
+    const doctorCode =
+      this.authService.getDoctorRegistrationNumber() || 'DR1';
+  
+    this.appointmentService.getAllAppointmentsCount(doctorCode).subscribe({
+      next: (res: any) => {
+        console.log('All Appointments Count API =>', res);
+  
+        // usually response: { count: number }
+        this.allAppointmentCount = res?.count ?? 0;
+  
+        // जर stats वापरत असशील तर
+        this.stats.bookAppointment = this.allAppointmentCount;
+      },
+      error: (err) => {
+        console.error('All appointments count failed', err);
+        this.allAppointmentCount = 0;
+        this.stats.bookAppointment = 0;
+      }
+    });
+  }
+  loadPendingRequestsCount() {
+    const doctorCode =
+      this.authService.getDoctorRegistrationNumber() || 'DR1';
+  
+    this.appointmentService.getPendingRequestsCount(doctorCode).subscribe({
+      next: (res: any) => {
+        console.log('Pending Requests Count API =>', res);
+  
+        // API response usually: { count: number }
+        this.pendingRequestCount = res?.count ?? 0;
+      },
+      error: (err) => {
+        console.error('Pending requests count failed', err);
+        this.pendingRequestCount = 0;
+      }
+    });
+  }
+  
+  
 
   ngAfterViewInit() {
     if (this.isBrowser && !this.patientVisitChartOptions.chart) {
