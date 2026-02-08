@@ -31,6 +31,18 @@ export class AppointmentService {
     );
   }
 
+  /**
+   * Get doctor's patient queue.
+   * GET /api/appointments/doctor/{doctorCode}/queue
+   */
+  getDoctorQueue(doctorCode: string): Observable<any> {
+    const safeDoctor = encodeURIComponent((doctorCode || '').trim());
+    console.log('[AppointmentService] Getting doctor queue for doctor:', safeDoctor);
+    return this.httpService.sendGETRequest(
+      `${this.baseUrl}/appointments/doctor/${safeDoctor}/queue`
+    );
+  }
+
   approveAppointmentRequest(doctorCode: string, requestId: string): Observable<any> {
     return this.httpService.sendPUTRequest(
       `${this.baseUrl}/appointments/doctor/${doctorCode}/requests/${requestId}/approve`,

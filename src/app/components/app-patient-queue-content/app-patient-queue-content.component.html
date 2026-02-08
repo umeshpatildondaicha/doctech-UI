@@ -18,7 +18,7 @@
         </div>
         <div class="patient-main">
           <span class="patient-name">{{ patient.name }}</span>
-          <span class="patient-id">ID: {{ patient.id }}</span>
+          <span class="patient-id">ID: #{{ patient.id | slice:0:8 }}</span>
         </div>
       </div>
       <div class="patient-details">
