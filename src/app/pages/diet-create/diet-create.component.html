@@ -448,6 +448,16 @@
                 </mat-form-field>
               </div>
             </div>
+            <!-- In-form save button ensures updateDietPlan/createDietPlan is triggered -->
+            <div class="form-actions">
+              <app-button
+                [fontIcon]="'save'"
+                [text]="mode === 'edit' ? 'Save Changes' : 'Create Diet'"
+                color="primary"
+                appearance="raised"
+                (btnClick)="onSubmit()">
+              </app-button>
+            </div>
           </form>
         </div>
       }

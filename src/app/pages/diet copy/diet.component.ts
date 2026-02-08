@@ -31,6 +31,7 @@ import { MealTimeDialogComponent } from '../meal-time-dialog/meal-time-dialog.co
 import { DietCardComponent } from '../../components/diet-card/diet-card.component';
 import { DietPlanCardComponent } from '../../components/diet-plan-card/diet-plan-card.component';
 import { DietService } from '../../services/diet.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-diet',
@@ -94,7 +95,7 @@ export class DietComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['image', 'name', 'type', 'calories', 'protein', 'actions'];
 
   // Diet Plans Tab
-  doctorCode = 'DR1';
+  doctorCode = '';
   dietPlans: any[] = [];
   filteredDietPlans: any[] = [];
   selectedPlanType: string = '';
@@ -128,7 +129,8 @@ export class DietComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private dialogService: DialogboxService,
     private dietservice: DietService,
-    private eventService: CoreEventService
+    private eventService: CoreEventService,
+    private authService: AuthService
   ) { }
 
   private updateBreadcrumb() {
@@ -145,6 +147,7 @@ export class DietComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.doctorCode = this.authService.getDoctorRegistrationNumber() || 'DR1';
     this.updateBreadcrumb();
     this.initializeDietData();
     this.loadDietPlans();
@@ -293,33 +296,41 @@ export class DietComponent implements OnInit, OnDestroy {
     });
   
     dialogRef.afterClosed().subscribe(result => {
-  
       // ❌ cancel / invalid
       if (!result || result === false || result?.action === 'cancel') {
         return;
       }
-  
+      // Extract payload (component may close with { action: 'save', payload } or raw payload)
+      const payload = result?.payload ?? result;
+      if (!payload || typeof payload !== 'object' || !payload.name) {
+        return;
+      }
+
       // ✅ CREATE
       if (mode === 'create') {
-        this.dietservice.createDietPlan(result).subscribe({
+        this.dietservice.createDietPlan(this.doctorCode, payload).subscribe({
           next: () => {
-            console.log('✅ Diet created successfully');
-            this.filterDiets();
+            console.log('✅ Diet plan created successfully');
+            this.loadDietsFromApi();
           },
-          error: (err) => console.error('❌ Diet create failed', err)
+          error: (err) => console.error('❌ Diet plan create failed', err)
         });
+        return;
       }
-  
+
       // ✏️ EDIT
       if (mode === 'edit') {
-        const dietId = diet?.id || diet?.dietId; // backend field confirm कर
-  
-        this.dietservice.updateDiet(dietId, result).subscribe({
+        const dietId = diet?.id ?? diet?.dietId;
+        if (!dietId) {
+          console.error('❌ Diet plan id missing for update');
+          return;
+        }
+        this.dietservice.updateDietPlan(this.doctorCode, Number(dietId), payload).subscribe({
           next: () => {
-            console.log('✅ Diet updated successfully');
-            this.filterDiets();
+            console.log('✅ Diet plan updated successfully');
+            this.loadDietsFromApi();
           },
-          error: (err) => console.error('❌ Diet update failed', err)
+          error: (err) => console.error('❌ Diet plan update failed', err)
         });
       }
     });
@@ -327,26 +338,7 @@ export class DietComponent implements OnInit, OnDestroy {
   
 
   onEditDiet(diet: Diet) {
-    const footerActions: DialogFooterAction[] = [
-      { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
-      { id: 'save', text: 'Save Changes', color: 'primary', appearance: 'raised', fontIcon: 'save', disabled: false }
-    ];
-
-    const dialogRef = this.dialogService.openDialog(DietCreateComponent, {
-      title: 'Edit Diet',
-
-      width: '90%',
-      height: '90%',
-      footerActions: footerActions
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && result !== false) {
-        // Refresh diet list
-
-        this.filterDiets();
-      }
-    });
+    this.onCreateDiet('edit', diet);
   }
 
   onViewDiet(diet: Diet) {

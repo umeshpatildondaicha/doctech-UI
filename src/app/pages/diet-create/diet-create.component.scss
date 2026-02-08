@@ -451,6 +451,13 @@
   }
 }
 
+.form-actions {
+  padding-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
 // Section Title with Add Button
 .section-title {
   display: flex;

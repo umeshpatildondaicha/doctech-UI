@@ -8,12 +8,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef } from '@angular/material/dialog';
 import { AppButtonComponent, DIALOG_DATA_TOKEN } from '@lk/core';
-import { Diet, Ingredient, Recipe } from '../../interfaces/diet.interface';
 import { Mode } from '../../types/mode.type';
 import { Subject, takeUntil, filter } from 'rxjs';
 
 export interface DialogData {
-  diet?: Diet;
+  diet?: any;  // API diet object (id, nutritionalInformation, mediaLinks, ingredients, recipe)
   mode: Mode;
 }
 
@@ -80,19 +79,52 @@ export class DietCreateComponent implements OnInit, OnDestroy {
 
     // If editing or viewing existing diet, populate form
     if (this.data?.diet) {
+      const d = this.data.diet;
+      const nutr = d.nutritionalInformation;
+      const firstMedia = Array.isArray(d.mediaLinks) && d.mediaLinks[0] ? d.mediaLinks[0] : {};
       this.dietForm.patchValue({
-        name: this.data.diet.name,
-        description: this.data.diet.description,
-        dietType: this.data.diet.dietType,
-        calories: this.data.diet.calories,
-        protein: this.data.diet.protein,
-        carbs: this.data.diet.carbs,
-        fat: this.data.diet.fat,
-        fiber: this.data.diet.fiber,
-        imageUrl: this.data.diet.imageUrl || '',
-        videoUrl: this.data.diet.videoUrl || '',
-        documentUrl: this.data.diet.documentUrl || '',
-        tags: this.data.diet.tags ? this.data.diet.tags.join(', ') : ''
+        name: d.name || '',
+        description: d.description || '',
+        dietType: d.dietType || '',
+        calories: d.calories ?? nutr?.caloriesKcal ?? '',
+        protein: d.protein ?? nutr?.protein ?? '',
+        carbs: d.carbs ?? nutr?.carbohydrates ?? '',
+        fat: d.fat ?? nutr?.fat ?? '',
+        fiber: d.fiber ?? nutr?.fiber ?? '',
+        imageUrl: d.imageUrl || '',
+        videoUrl: firstMedia.youtubeUrl || d.videoUrl || '',
+        documentUrl: firstMedia.documentUrl || d.documentUrl || '',
+        tags: d.tags ? (Array.isArray(d.tags) ? d.tags.join(', ') : d.tags) : ''
+      });
+
+      // Load ingredients
+      const ingList = d.ingredients || [];
+      this.ingredientsArray.clear();
+      ingList.forEach((ing: any) => {
+        this.ingredientsArray.push(this.fb.group({
+          id: [ing.id ?? null],
+          name: [ing.name || ''],
+          quantity: [ing.quantity ?? ''],
+          unit: [this.mapUnitToFormFormat(ing.unit)],
+          category: [ing.category || ''],
+          notes: [ing.notes || '']
+        }));
+      });
+
+      // Load recipe
+      const rec = d.recipe || {};
+      this.dietForm.patchValue({
+        prepTime: rec.preparationTimeMinutes ?? rec.prepTime ?? '',
+        cookTime: rec.cookTimeMinutes ?? rec.cookTime ?? '',
+        servings: rec.servings ?? '',
+        difficulty: rec.difficulty ? this.mapDifficultyToForm(rec.difficulty) : 'Easy',
+        instructions: Array.isArray(rec.instructions)
+          ? rec.instructions.join('\n')
+          : (rec.instructions || ''),
+        tips: Array.isArray(rec.cookingTips)
+          ? rec.cookingTips.join('\n')
+          : (rec.tips || rec.cookingTips || ''),
+        notes: rec.recipeNotes ?? rec.notes ?? ''
       });
 
       // Disable form in view mode
@@ -123,90 +155,15 @@ export class DietCreateComponent implements OnInit, OnDestroy {
       }
       
       if (result?.action === 'save') {
-        if (this.dietForm.valid && !this.isViewMode) {
-          const formValue = this.dietForm.value;
-          
-          // Convert tags string to array
-          const tags = formValue.tags ? 
-            formValue.tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0) : 
-            [];
-
-          // Convert ingredients form array to Ingredient objects
-          const ingredients: Ingredient[] = formValue.ingredients.map((ingredient: any, index: number) => ({
-            ingredientId: `ingredient_${index + 1}`,
-            name: ingredient.name,
-            quantity: ingredient.quantity,
-            unit: ingredient.unit,
-            category: ingredient.category || undefined,
-            notes: ingredient.notes || undefined
-          }));
-
-          // Create recipe object
-          const recipe: Recipe = {
-            recipeId: `recipe_${Date.now()}`,
-            prepTime: formValue.prepTime || 0,
-            cookTime: formValue.cookTime || 0,
-            servings: formValue.servings || 1,
-            difficulty: formValue.difficulty || 'Easy',
-            instructions: this.getInstructionsArray().map((instruction, index) => ({
-              stepNumber: index + 1,
-              instruction: instruction.trim()
-            })),
-            tips: this.getTipsArray(),
-            notes: formValue.notes || undefined
-          };
-          const apiPayload = {
-            name: formValue.name,
-            description: formValue.description,
-            dietType: formValue.dietType,
-          
-            nutritionalInformation: {
-              caloriesKcal: formValue.calories,
-              protein: formValue.protein,
-              carbohydrates: formValue.carbs,
-              fat: formValue.fat,
-              fiber: formValue.fiber
-            },
-          
-            mediaLinks: [
-              {
-                imageUrl: formValue.imageUrl || null,
-                youtubeUrl: formValue.videoUrl || null,
-                documentUrl: formValue.documentUrl || null
-              }
-            ],
-          
-            ingredients: ingredients.map(i => ({
-              name: i.name,
-              quantity: i.quantity,
-              unit: i.unit,              // MUST be enum like CUP
-              category: i.category,      // GRAINS etc
-              notes: i.notes
-            })),
-          
-            recipe: {
-              preparationTimeMinutes: recipe.prepTime,
-              cookTimeMinutes: recipe.cookTime,
-              servings: recipe.servings,
-              difficulty: recipe.difficulty.toUpperCase(), // EASY
-              instructions: recipe.instructions.map(i => i.instruction),
-              cookingTips: recipe.tips,
-              recipeNotes: recipe.notes
-            }
-          };
-          
-          setTimeout(() => {
-            this.dialogRef.close(apiPayload);
-          }, 0);
-        } else if (this.isViewMode) {
-          setTimeout(() => {
-            this.dialogRef.close();
-          }, 0);
+        if (this.isViewMode) {
+          setTimeout(() => this.dialogRef.close(), 0);
+          return;
+        }
+        if (this.dietForm.valid) {
+          this.handleSaveAndClose();
         } else {
-          // Prevent close if form is invalid
-          setTimeout(() => {
-            this.dialogRef.close(false);
-          }, 0);
+          this.dietForm.markAllAsTouched();
+          setTimeout(() => this.dialogRef.close(false), 0);
         }
       }
     });
@@ -264,9 +221,78 @@ export class DietCreateComponent implements OnInit, OnDestroy {
     this.dialogRef.close({ action: 'delete', diet: this.data?.diet });
   }
 
+  /** Called when form is submitted (e.g. in-form Save button) - ensures updateDietPlan is triggered */
   onSubmit() {
-    // This method is kept for backward compatibility but form submission is handled in ngOnInit via beforeClosed()
-    // The footer action will trigger the beforeClosed() subscription
+    if (this.isViewMode) return;
+    if (!this.dietForm.valid) {
+      this.dietForm.markAllAsTouched();
+      return;
+    }
+    this.handleSaveAndClose();
+  }
+
+  private handleSaveAndClose() {
+    if (!this.dietForm.valid || this.isViewMode) return;
+    const formValue = this.dietForm.value;
+    const d = this.data?.diet;
+    const isEdit = this.mode === 'edit' && d;
+
+    const nutritionalInformation: any = {
+      caloriesKcal: Number(formValue.calories) || 0,
+      protein: Number(formValue.protein) || 0,
+      carbohydrates: Number(formValue.carbs) || 0,
+      fat: Number(formValue.fat) || 0,
+      fiber: Number(formValue.fiber) || 0
+    };
+    if (isEdit && d?.nutritionalInformation?.id != null) nutritionalInformation.id = d.nutritionalInformation.id;
+
+    const youtubeUrl = formValue.videoUrl?.trim() || null;
+    const documentUrl = formValue.documentUrl?.trim() || null;
+    const mediaLinks: any[] = [];
+    if (youtubeUrl || documentUrl) {
+      const link: any = { youtubeUrl, documentUrl };
+      const firstMedia = Array.isArray(d?.mediaLinks) && d.mediaLinks[0];
+      if (isEdit && firstMedia?.id != null) link.id = firstMedia.id;
+      mediaLinks.push(link);
+    }
+
+    const ingredients = formValue.ingredients.map((ing: any) => {
+      const item: any = {
+        name: ing.name,
+        quantity: Number(ing.quantity) || 0,
+        unit: this.mapUnitToApiFormat(ing.unit),
+        category: ing.category ? (ing.category + '').toUpperCase() : undefined,
+        notes: ing.notes || undefined
+      };
+      if (isEdit && ing.id != null) item.id = ing.id;
+      return item;
+    });
+
+    const instructions = this.getInstructionsArray();
+    const cookingTips = this.getTipsArray();
+    const recipe: any = {
+      preparationTimeMinutes: Number(formValue.prepTime) || 0,
+      cookTimeMinutes: Number(formValue.cookTime) || 0,
+      servings: Number(formValue.servings) || 1,
+      difficulty: (formValue.difficulty || 'EASY').toString().toUpperCase(),
+      instructions: instructions.map(i => i.trim()).filter(Boolean),
+      cookingTips: cookingTips.filter(Boolean),
+      recipeNotes: formValue.notes || undefined
+    };
+    if (isEdit && d?.recipe?.id != null) recipe.id = d.recipe.id;
+
+    const apiPayload: any = {
+      name: formValue.name,
+      description: formValue.description,
+      dietType: formValue.dietType,
+      nutritionalInformation,
+      mediaLinks,
+      ingredients,
+      recipe
+    };
+    if (isEdit && d?.id != null) apiPayload.id = d.id;
+
+    this.dialogRef.close({ action: 'save', payload: apiPayload });
   }
 
   onCancel() {
@@ -320,6 +346,7 @@ export class DietCreateComponent implements OnInit, OnDestroy {
 
   addIngredient(): void {
     const ingredientGroup = this.fb.group({
+      id: [null],
       name: ['', Validators.required],
       quantity: ['', [Validators.required, Validators.min(0)]],
       unit: ['', Validators.required],
@@ -342,5 +369,45 @@ export class DietCreateComponent implements OnInit, OnDestroy {
   getTipsArray(): string[] {
     const tipsValue = this.dietForm.get('tips')?.value;
     return tipsValue ? tipsValue.split('\n').filter((tip: string) => tip.trim()) : [];
+  }
+
+  /** Maps form unit values (e.g. KG, ML) to API enum format (e.g. KILOGRAM, MILLILITER) */
+  private mapUnitToApiFormat(unit: string | undefined): string {
+    const u = (unit || '').trim().toUpperCase();
+    const map: Record<string, string> = {
+      KG: 'KILOGRAM',
+      G: 'GRAM',
+      GRAM: 'GRAM',
+      ML: 'MILLILITER',
+      L: 'LITER',
+      TBSP: 'TABLESPOON',
+      TSP: 'TEASPOON',
+      CUP: 'CUP',
+      PIECE: 'PIECE'
+    };
+    return map[u] || u || 'GRAM';
+  }
+
+  /** Maps API unit (e.g. KILOGRAM) to form dropdown value (e.g. KG) */
+  private mapUnitToFormFormat(unit: string | undefined): string {
+    const u = (unit || '').trim().toUpperCase();
+    const map: Record<string, string> = {
+      KILOGRAM: 'KG',
+      GRAM: 'GRAM',
+      MILLILITER: 'ML',
+      LITER: 'L',
+      TABLESPOON: 'TBSP',
+      TEASPOON: 'TSP',
+      CUP: 'CUP',
+      PIECE: 'PIECE'
+    };
+    return map[u] || u || 'GRAM';
+  }
+
+  /** Maps API difficulty (e.g. MEDIUM) to form value (e.g. Medium) */
+  private mapDifficultyToForm(diff: string): string {
+    const d = (diff || '').trim().toUpperCase();
+    const map: Record<string, string> = { EASY: 'Easy', MEDIUM: 'Medium', HARD: 'Hard' };
+    return map[d] || (d.charAt(0) + d.slice(1).toLowerCase()) || 'Easy';
   }
 }
