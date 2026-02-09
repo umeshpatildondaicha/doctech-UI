@@ -1,0 +1,64 @@
+<div class="entity-toolbar">
+
+
+  <!-- <div class="center">
+    <div class="search-container">
+      <div class="search-bar">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input 
+          class="search-input" 
+          type="text" 
+          [(ngModel)]="searchQuery" 
+          (input)="onSearchInput(searchQuery)" 
+          placeholder="Search" 
+        />
+      </div> -->
+      <!-- <div class="search-segments">
+        <button 
+          *ngFor="let segment of searchSegments" 
+          class="segment-btn" 
+          [class.active]="segment.active"
+          (click)="selectSegment(segment)"
+        >
+          {{ segment.name }} <span class="segment-count">({{ segment.count }})</span>
+        </button>
+      </div> -->
+    <!-- </div>
+  </div> -->
+  <div class="left">
+    <div class="search-container">
+      <div class="search-bar">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input 
+          class="search-input" 
+          type="text" 
+          [(ngModel)]="searchQuery" 
+          (input)="onSearchInput(searchQuery)" 
+          placeholder="Search" 
+        />
+      </div>
+    </div>
+    <div class="title-block">
+      <div class="title">{{ title }}</div>
+      <div *ngIf="subtitle" class="subtitle">{{ subtitle }}</div>
+    </div>
+    <div *ngIf="showCounts" class="counts">
+      <span *ngIf="currentCount !== undefined">{{ currentCount }}</span>
+      <span *ngIf="totalCount !== undefined">/</span>
+      <span *ngIf="totalCount !== undefined">{{ totalCount }}</span>
+    </div>
+  </div>
+
+  <div class="right">
+    <button *ngIf="showNew" type="button" class="btn new" (click)="emitNew()">
+      <mat-icon class="new-icon">add</mat-icon>
+      {{ newLabel }}
+    </button>
+    <button *ngIf="showRefresh" type="button" class="icon-btn refresh-btn" title="Refresh" (click)="emitRefresh()">
+      <mat-icon>refresh</mat-icon>
+    </button>
+    <button *ngIf="showFilter" type="button" class="icon-btn filter-btn" title="Filter" (click)="emitFilter()">
+      <mat-icon>filter_list</mat-icon>
+    </button>
+  </div>
+</div>

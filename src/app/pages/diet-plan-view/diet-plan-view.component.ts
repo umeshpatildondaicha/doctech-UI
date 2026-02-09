@@ -7,6 +7,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
+import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
 
 @Component({
     selector: 'app-diet-plan-view',
@@ -18,6 +19,7 @@ import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.comp
         MatChipsModule,
         MatProgressBarModule,
         BreadcrumbComponent
+        ,EntityToolbarComponent
     ],
     templateUrl: './diet-plan-view.component.html',
     styleUrl: './diet-plan-view.component.scss'
@@ -58,6 +60,24 @@ export class DietPlanViewComponent implements OnInit {
   ngOnInit() {
     this.planId = this.route.snapshot.params['id'];
     this.loadDietPlan();
+  }
+
+  onCreateDietPlan() {
+    console.log('Create diet plan clicked');
+    // this.router.navigate(['/diet-plan-create']);
+  }
+
+  loadDietPlans() {
+    console.log('Reload diet plans request');
+    this.loadDietPlan();
+  }
+
+  openPlanFilters() {
+    console.log('Open plan filters');
+  }
+
+  onPlanToolbarSearch(q: string) {
+    console.log('Plan toolbar search:', q);
   }
 
   get isActive(): boolean {

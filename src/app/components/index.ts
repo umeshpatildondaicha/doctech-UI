@@ -13,6 +13,7 @@ export { ExerciseListComponent, type ExerciseListConfig } from './exercise-list/
 export { ExerciseCardComponent } from './exercise-card/exercise-card.component';
 export { DietCardComponent } from './diet-card/diet-card.component';
 export { DietPlanCardComponent, type DietPlan } from './diet-plan-card/diet-plan-card.component';
+export { EntityToolbarComponent } from './entity-toolbar/entity-toolbar.component';
 export {
   ListingCardComponent,
   type ListingCardAction,
