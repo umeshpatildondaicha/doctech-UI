@@ -100,6 +100,20 @@ export class AppointmentService {
   }
 
   /**
+   * Get appointments for a specific patient with this doctor.
+   * Use to pick an appointmentPublicId for chat when doctor selects a patient.
+   * GET /api/appointments/doctor/{doctorCode}/patient/{patientPublicId}
+   * or GET /api/appointments/doctor/{doctorCode}/patient/{patientPublicId}/details
+   */
+  getPatientAppointments(doctorCode: string, patientPublicId: string): Observable<any> {
+    const safeDoctor = encodeURIComponent((doctorCode || '').trim());
+    const safePatient = encodeURIComponent((patientPublicId || '').trim());
+    return this.httpService.sendGETRequest(
+      `${this.baseUrl}/appointments/doctor/${safeDoctor}/patient/${safePatient}`
+    );
+  }
+
+  /**
    * Reschedule an appointment.
    * PUT /api/appointments/{appointmentPublicId}/reschedule
    * Body: { newDate, newStartTime, newEndTime }

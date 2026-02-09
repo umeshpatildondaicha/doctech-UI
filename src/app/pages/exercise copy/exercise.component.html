@@ -37,37 +37,25 @@
           </div>
         </div>
 
-        <!-- Filters Row (screenshot-style) -->
-        <div class="filters-row">
-          <mat-form-field appearance="outline" class="search-field">
-            <mat-icon matPrefix>search</mat-icon>
-            <input matInput [(ngModel)]="searchQuery" placeholder="Search Exercise" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="select-field">
-            <mat-select [(ngModel)]="selectedCategory" (selectionChange)="onCategoryChange($event)">
-              <mat-option value="all">All Categories</mat-option>
-              @for (category of categories; track category) {
-              <mat-option [value]="category.value">{{ category.label }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="select-field">
-            <mat-select [(ngModel)]="selectedDifficulty" (selectionChange)="onDifficultyChange($event)">
-              <mat-option value="all">Any Level</mat-option>
-              @for (difficulty of difficulties; track difficulty) {
-              <mat-option [value]="difficulty.value">{{ difficulty.label }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-
-          <app-button class="clear-link" [fontIcon]="'clear_all'" [text] ="'Clear Filter'"
-            (btnClick)="clearFilters()"></app-button>
-          <!-- <button class="clear-link" type="button" (click)="clearFilters()">Clear Filters</button> -->
-
-          <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Exercise'" [color]="'primary'"
-            (btnClick)="onAddExercise()"></app-button>
+        <!-- Filter Bar: Search + Group Tabs + Actions -->
+        <div class="filter-bar">
+          <div class="filter-bar-search">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input type="text" [(ngModel)]="searchQuery" (input)="onExerciseSearchInput()" placeholder="Search" class="search-input" />
+          </div>
+          <div class="filter-bar-tabs">
+            @for (tab of getExerciseGroupTabs(); track tab.value) {
+            <button type="button" class="filter-tab" [class.active]="selectedCategory === tab.value" (click)="selectExerciseCategoryTab(tab.value)">
+              {{ tab.label }} ({{ tab.count }})
+            </button>
+            }
+          </div>
+          <div class="filter-bar-actions">
+            <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Exercise'" [color]="'primary'" (btnClick)="onAddExercise()"></app-button>
+            <button type="button" class="icon-btn" title="Upload" aria-label="Upload" (click)="onImport()"><mat-icon>upload</mat-icon></button>
+            <button type="button" class="icon-btn" title="Refresh" aria-label="Refresh" (click)="onExport()"><mat-icon>refresh</mat-icon></button>
+            <button type="button" class="icon-btn" title="Filter" aria-label="Filter"><mat-icon>filter_list</mat-icon></button>
+          </div>
         </div>
 
         <!-- Exercise Cards Grid -->
@@ -146,24 +134,26 @@
           </mat-card>
         </div>
 
-        <!-- Groups Filters (same bar style) -->
-        <div class="filters-row">
-          <mat-form-field appearance="outline" class="search-field">
-            <mat-icon matPrefix>search</mat-icon>
-            <input matInput [(ngModel)]="groupSearchQuery" placeholder="Search group exercise" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="select-field">
-            <mat-select [(ngModel)]="selectedGroupCategory" (selectionChange)="onGroupCategoryChange()">
-              <mat-option value="">All Categories</mat-option>
-              @for (category of groupCategories; track category) {
-              <mat-option [value]="category.value">
-                {{ category.label }}
-              </mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-
+        <!-- Groups Filter Bar: Search + Group Tabs + Actions -->
+        <div class="filter-bar">
+          <div class="filter-bar-search">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input type="text" [(ngModel)]="groupSearchQuery" (input)="onGroupSearchInput()" placeholder="Search" class="search-input" />
+          </div>
+          <div class="filter-bar-tabs">
+            @for (tab of getExerciseGroupsGroupTabs(); track tab.value) {
+            <button type="button" class="filter-tab" [class.active]="selectedGroupCategory === tab.value" (click)="selectGroupCategoryTab(tab.value)">
+              {{ tab.label }} ({{ tab.count }})
+            </button>
+            }
+          </div>
+          <div class="filter-bar-actions">
+            <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Group'" [color]="'primary'" (btnClick)="onAddExerciseGroup()"></app-button>
+            <button type="button" class="icon-btn" title="Upload" aria-label="Upload" (click)="onImportGroups()"><mat-icon>upload</mat-icon></button>
+            <button type="button" class="icon-btn" title="Refresh" aria-label="Refresh" (click)="onExportGroups()"><mat-icon>refresh</mat-icon></button>
+            <button type="button" class="icon-btn" title="Filter" aria-label="Filter"><mat-icon>filter_list</mat-icon></button>
+          </div>
+          <div class="legacy-filters-hidden" style="display:none">
           <mat-form-field appearance="outline" class="select-field">
             <mat-select [(ngModel)]="selectedGroupDifficulty" (selectionChange)="onGroupDifficultyChange()">
               <mat-option value="">Any Level</mat-option>
@@ -180,6 +170,7 @@
           <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Group'" [color]="'primary'"
             (btnClick)="onAddExerciseGroup()">
           </app-button>
+          </div>
 
         </div>
 

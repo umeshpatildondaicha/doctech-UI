@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map, catchError, tap, switchMap } from 'rxjs/operators';
 import { ChatMessage, ChatSession, ChatFilter, ChatNotification } from '../interfaces/chat.interface';
-import { Patient } from '../interfaces/patient.interface';
-import { Appointment } from '../interfaces/appointment.interface';
+import { PatientService, DoctorConnectedPatientDTO } from './patient.service';
+import { AppointmentService } from './appointment.service';
+import { ChatApiService } from './chat-api.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,229 +16,270 @@ export class ChatService {
   private messages = new BehaviorSubject<ChatMessage[]>([]);
   private notifications = new BehaviorSubject<ChatNotification[]>([]);
 
-  constructor() {
-    this.initializeMockData();
+  constructor(
+    private readonly patientService: PatientService,
+    private readonly appointmentService: AppointmentService,
+    private readonly chatApi: ChatApiService,
+    private readonly auth: AuthService
+  ) {
+    this.chatApi.messages$.subscribe((msg) => {
+      const current = this.messages.value;
+      if (!current.some((m) => m.id === msg.id)) {
+        this.messages.next([...current, msg]);
+      }
+    });
   }
 
-  private initializeMockData(): void {
-    // Mock chat sessions
-    const mockSessions: ChatSession[] = [
-      {
-        id: '1',
-        patientId: 1,
-        patientName: 'John Smith',
-        patientAvatar: 'assets/avatars/default-avatar.jpg',
-        doctorId: 1,
-        doctorName: 'Dr. Sarah Johnson',
-        doctorAvatar: 'assets/avatars/default-avatar.jpg',
-        unreadCount: 2,
-        isActive: true,
-        lastActivity: new Date(),
-        appointmentId: 1,
-        appointmentDate: new Date('2024-02-15'),
-        appointmentStatus: 'SCHEDULED',
-        lastMessage: {
-          id: '1',
-          senderId: 1,
-          senderType: 'PATIENT',
-          senderName: 'John Smith',
-          content: 'I have some questions about my medication',
-          messageType: 'TEXT',
-          timestamp: new Date(),
-          isRead: false,
-          isDelivered: true
-        }
-      },
-      {
-        id: '2',
-        patientId: 2,
-        patientName: 'Emily Davis',
-        patientAvatar: 'assets/avatars/default-avatar.jpg',
-        doctorId: 1,
-        doctorName: 'Dr. Sarah Johnson',
-        doctorAvatar: 'assets/avatars/default-avatar.jpg',
-        unreadCount: 0,
-        isActive: true,
-        lastActivity: new Date(Date.now() - 86400000), // 1 day ago
-        appointmentId: 2,
-        appointmentDate: new Date('2024-02-10'),
-        appointmentStatus: 'COMPLETED',
-        lastMessage: {
-          id: '2',
-          senderId: 1,
-          senderType: 'DOCTOR',
-          senderName: 'Dr. Sarah Johnson',
-          content: 'Your test results look good',
-          messageType: 'TEXT',
-          timestamp: new Date(Date.now() - 86400000),
-          isRead: true,
-          isDelivered: true
-        }
-      },
-      {
-        id: '3',
-        patientId: 3,
-        patientName: 'Michael Brown',
-        patientAvatar: 'assets/avatars/default-avatar.jpg',
-        doctorId: 1,
-        doctorName: 'Dr. Sarah Johnson',
-        doctorAvatar: 'assets/avatars/default-avatar.jpg',
-        unreadCount: 1,
-        isActive: true,
-        lastActivity: new Date(Date.now() - 3600000), // 1 hour ago
-        appointmentId: 3,
-        appointmentDate: new Date('2024-02-20'),
-        appointmentStatus: 'SCHEDULED',
-        lastMessage: {
-          id: '3',
-          senderId: 3,
-          senderType: 'PATIENT',
-          senderName: 'Michael Brown',
-          content: 'Can I reschedule my appointment?',
-          messageType: 'TEXT',
-          timestamp: new Date(Date.now() - 3600000),
-          isRead: false,
-          isDelivered: true
-        }
-      }
-    ];
+  /**
+   * Load chat sessions from connected patients.
+   * GET /api/patients/doctor/{doctorCode}/connected
+   */
+  loadConnectedPatientsAsSessions(doctorCode: string): Observable<ChatSession[]> {
+    return this.patientService.getConnectedPatients(doctorCode).pipe(
+      map((resp) => {
+        // Handle wrapped responses: { content: [...] } or { data: [...] } or raw array
+        const r = resp as DoctorConnectedPatientDTO[] | { content?: DoctorConnectedPatientDTO[]; data?: DoctorConnectedPatientDTO[]; patients?: DoctorConnectedPatientDTO[] };
+        const arr = Array.isArray(r) ? r : r?.content ?? r?.data ?? r?.patients ?? [];
+        return this.mapPatientsToSessions(arr);
+      }),
+      tap((sessions) => this.chatSessions.next(sessions)),
+      catchError(() => {
+        this.chatSessions.next([]);
+        return of([]);
+      })
+    );
+  }
 
-    this.chatSessions.next(mockSessions);
+  private mapPatientsToSessions(patients: DoctorConnectedPatientDTO[]): ChatSession[] {
+    const doctorName = this.getDoctorName();
+    return patients.map((p, idx) => ({
+      id: p.publicId,
+      patientId: idx + 1,
+      patientName: `${(p.firstName || '').trim()} ${(p.lastName || '').trim()}`.trim() || 'Patient',
+      patientPublicId: p.publicId,
+      doctorId: 1,
+      doctorName,
+      unreadCount: 0,
+      isActive: true,
+      lastActivity: new Date(),
+      appointmentStatus: undefined as ChatSession['appointmentStatus']
+    }));
+  }
+
+  private getDoctorName(): string {
+    const u = this.auth.getCurrentUser() as { firstName?: string; lastName?: string; name?: string } | null;
+    if (!u) return 'Doctor';
+    if (u.firstName || u.lastName) return `Dr. ${(u.firstName || '').trim()} ${(u.lastName || '').trim()}`.trim();
+    return (u as any).name || 'Doctor';
+  }
+
+  /**
+   * When doctor selects a patient: resolve appointment and open chat.
+   * Fetches appointments, picks one (latest), loads history, connects WebSocket.
+   */
+  openChatForPatient(session: ChatSession): Observable<{ session: ChatSession; messages: ChatMessage[] }> {
+    // Backend appointment API expects public doctor code (e.g. DR1), not registration number (e.g. DOC002)
+    const doctorCode = this.auth.getDoctorPublicCode() ?? this.auth.getDoctorRegistrationNumber();
+    const patientPublicId = session.patientPublicId ?? session.id;
+    if (!doctorCode || !patientPublicId) {
+      return of({ session, messages: [] });
+    }
+
+    const ensureAppointment = (): Observable<ChatSession> => {
+      if (session.appointmentPublicId) return of(session);
+      return this.appointmentService.getPatientAppointments(doctorCode, patientPublicId).pipe(
+        map((resp) => {
+          const list = Array.isArray(resp)
+            ? resp
+            : resp?.appointments ?? resp?.content ?? resp?.data ?? [];
+          const apt = list.length > 0 ? this.pickAppointment(list) : null;
+          if (apt) {
+            const aptId = apt.publicId ?? apt.appointmentPublicId ?? apt.id;
+            const aptDate = apt.appointmentDate ?? apt.date ?? apt.scheduledDate;
+            const aptStatus = apt.status ?? apt.appointmentStatus;
+            return {
+              ...session,
+              appointmentPublicId: aptId,
+              appointmentDate: aptDate ? new Date(aptDate) : undefined,
+              appointmentStatus: aptStatus as ChatSession['appointmentStatus']
+            };
+          }
+          return session;
+        }),
+        catchError(() => of(session))
+      );
+    };
+
+    return ensureAppointment().pipe(
+      tap((s) => {
+        this.currentChatSession.next(s);
+        this.updateSessionInList(s);
+      }),
+      switchMap((s) => {
+        // Always attempt WebSocket when opening chat (use appointment id or fallback to patient/session id)
+        this.connectWebSocket(s);
+        if (!s.appointmentPublicId) return of({ session: s, messages: [] });
+        return this.chatApi.getAppointmentMessages(s.appointmentPublicId).pipe(
+          map((msgs) => this.normalizeMessages(msgs)),
+          tap((msgs) => this.messages.next(msgs)),
+          map((messages) => ({ session: s, messages })),
+          catchError(() => of({ session: s, messages: [] }))
+        );
+      })
+    );
+  }
+
+  private pickAppointment(list: any[]): any {
+    const sorted = [...list].sort((a, b) => {
+      const da = a.appointmentDate ?? a.date ?? a.scheduledDate ?? 0;
+      const db = b.appointmentDate ?? b.date ?? b.scheduledDate ?? 0;
+      return new Date(db).getTime() - new Date(da).getTime();
+    });
+    return sorted[0];
+  }
+
+  private updateSessionInList(session: ChatSession): void {
+    const list = this.chatSessions.value;
+    const idx = list.findIndex((x) => x.id === session.id || x.patientPublicId === session.patientPublicId);
+    if (idx !== -1) {
+      const next = [...list];
+      next[idx] = { ...next[idx], ...session };
+      this.chatSessions.next(next);
+    }
+  }
+
+  private connectWebSocket(session: ChatSession): void {
+    // Backend requires a real appointment UUID for INIT; it will reject "Appointment not found" otherwise.
+    if (!session.appointmentPublicId) {
+      if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+        console.warn('[Chat] WebSocket skipped: no appointment for this patient — select a patient with an appointment to chat');
+      }
+      return;
+    }
+    const user = this.auth.getCurrentUser() as { publicId?: string; id?: string | number } | null;
+    const userPublicId =
+      (user?.publicId ?? user?.id ?? this.auth.getDoctorRegistrationNumber() ?? '').toString().trim();
+    if (!userPublicId) {
+      if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+        console.warn('[Chat] WebSocket skipped: missing userPublicId');
+      }
+      return;
+    }
+    this.chatApi.connectWebSocket({
+      appointmentPublicId: session.appointmentPublicId,
+      userPublicId,
+      senderType: 'DOCTOR'
+    });
+  }
+
+  private normalizeMessages(raw: any[]): ChatMessage[] {
+    return (raw ?? []).map((m) => ({
+      id: String(m.id ?? m.messageId ?? Date.now()),
+      senderId: m.senderId ?? 0,
+      senderType: (m.senderType ?? 'PATIENT') as 'DOCTOR' | 'PATIENT',
+      senderName: m.senderName ?? (m.senderType === 'DOCTOR' ? this.getDoctorName() : 'Patient'),
+      content: m.content ?? '',
+      messageType: (m.messageType ?? 'TEXT') as 'TEXT' | 'IMAGE' | 'DOCUMENT' | 'FILE',
+      timestamp: m.timestamp ? new Date(m.timestamp) : new Date(),
+      isRead: !!m.isRead,
+      isDelivered: !!m.isDelivered,
+      ...(m.fileUrl && { fileUrl: m.fileUrl }),
+      ...(m.fileName && { fileName: m.fileName }),
+      ...(m.fileSize && { fileSize: m.fileSize })
+    }));
+  }
+
+  disconnectChat(): void {
+    this.chatApi.disconnect();
+  }
+
+  /** Observable of WebSocket connection state (true when connected and INIT sent). */
+  getIsConnected(): Observable<boolean> {
+    return this.chatApi.isConnected$;
   }
 
   getChatSessions(filter: ChatFilter): Observable<ChatSession[]> {
     let sessions = this.chatSessions.value;
-
-    // Filter by appointment status
-    if (filter.appointmentStatus !== 'ALL') {
-      sessions = sessions.filter(session => session.appointmentStatus === filter.appointmentStatus);
+    if (filter.appointmentStatus && filter.appointmentStatus !== 'ALL') {
+      sessions = sessions.filter((s) => s.appointmentStatus === filter.appointmentStatus);
     }
-
-    // Filter by search term
     if (filter.searchTerm) {
-      sessions = sessions.filter(session => 
-        session.patientName.toLowerCase().includes(filter.searchTerm.toLowerCase())
+      sessions = sessions.filter((s) =>
+        s.patientName.toLowerCase().includes(filter.searchTerm.toLowerCase())
       );
     }
-
-    // Sort sessions
-    sessions.sort((a, b) => {
-      let comparison = 0;
-      
+    sessions = [...sessions].sort((a, b) => {
+      let cmp = 0;
       switch (filter.sortBy) {
         case 'NAME':
-          comparison = a.patientName.localeCompare(b.patientName);
+          cmp = a.patientName.localeCompare(b.patientName);
           break;
         case 'LAST_ACTIVITY':
-          comparison = a.lastActivity.getTime() - b.lastActivity.getTime();
+          cmp = a.lastActivity.getTime() - b.lastActivity.getTime();
           break;
         case 'UNREAD_COUNT':
-          comparison = b.unreadCount - a.unreadCount;
+          cmp = b.unreadCount - a.unreadCount;
           break;
         case 'APPOINTMENT_DATE':
-          if (a.appointmentDate && b.appointmentDate) {
-            comparison = a.appointmentDate.getTime() - b.appointmentDate.getTime();
-          }
+          if (a.appointmentDate && b.appointmentDate) cmp = a.appointmentDate.getTime() - b.appointmentDate.getTime();
           break;
       }
-
-      return filter.sortOrder === 'ASC' ? comparison : -comparison;
+      return filter.sortOrder === 'ASC' ? cmp : -cmp;
     });
-
     return of(sessions);
   }
 
   getChatSession(id: string): Observable<ChatSession | null> {
-    const session = this.chatSessions.value.find(s => s.id === id);
-    this.currentChatSession.next(session || null);
-    return of(session || null);
+    const session = this.chatSessions.value.find((s) => s.id === id || s.patientPublicId === id);
+    this.currentChatSession.next(session ?? null);
+    return of(session ?? null);
   }
 
-  getMessages(sessionId: string): Observable<ChatMessage[]> {
-    // Mock messages for the session
-    const mockMessages: ChatMessage[] = [
-      {
-        id: '1',
-        senderId: 1,
-        senderType: 'PATIENT',
-        senderName: 'John Smith',
-        content: 'Hello Doctor, I have some questions about my medication',
-        messageType: 'TEXT',
-        timestamp: new Date(Date.now() - 3600000),
-        isRead: true,
-        isDelivered: true
-      },
-      {
-        id: '2',
-        senderId: 1,
-        senderType: 'DOCTOR',
-        senderName: 'Dr. Sarah Johnson',
-        content: 'Hello John! Of course, I\'m here to help. What would you like to know?',
-        messageType: 'TEXT',
-        timestamp: new Date(Date.now() - 3500000),
-        isRead: true,
-        isDelivered: true
-      },
-      {
-        id: '3',
-        senderId: 1,
-        senderType: 'PATIENT',
-        senderName: 'John Smith',
-        content: 'I\'ve been experiencing some side effects. Should I be concerned?',
-        messageType: 'TEXT',
-        timestamp: new Date(Date.now() - 3400000),
-        isRead: true,
-        isDelivered: true
-      },
-      {
-        id: '4',
-        senderId: 1,
-        senderType: 'DOCTOR',
-        senderName: 'Dr. Sarah Johnson',
-        content: 'Can you describe the side effects you\'re experiencing? Also, please send me a photo if there are any visible symptoms.',
-        messageType: 'TEXT',
-        timestamp: new Date(Date.now() - 3300000),
-        isRead: false,
-        isDelivered: true
-      }
-    ];
-
-    this.messages.next(mockMessages);
-    return of(mockMessages);
+  getMessages(): Observable<ChatMessage[]> {
+    return this.messages.asObservable();
   }
 
   sendMessage(sessionId: string, message: Omit<ChatMessage, 'id' | 'timestamp' | 'isRead' | 'isDelivered'>): Observable<ChatMessage> {
-    const newMessage: ChatMessage = {
+    const sent = this.chatApi.sendTextMessage(message.content);
+    if (sent) {
+      const optimistic: ChatMessage = {
+        ...message,
+        id: `opt-${Date.now()}`,
+        timestamp: new Date(),
+        isRead: false,
+        isDelivered: false
+      };
+      const current = this.messages.value;
+      this.messages.next([...current, optimistic]);
+      const sessions = this.chatSessions.value;
+      const idx = sessions.findIndex((s) => s.id === sessionId);
+      if (idx !== -1) {
+        const next = [...sessions];
+        next[idx] = { ...next[idx], lastMessage: optimistic, lastActivity: new Date() };
+        this.chatSessions.next(next);
+      }
+      return of(optimistic);
+    }
+    // Fallback: optimistically add (no real send without WebSocket)
+    const fallback: ChatMessage = {
       ...message,
       id: Date.now().toString(),
       timestamp: new Date(),
       isRead: false,
       isDelivered: false
     };
-
-    const currentMessages = this.messages.value;
-    currentMessages.push(newMessage);
-    this.messages.next([...currentMessages]);
-
-    // Update last message in chat session
-    const sessions = this.chatSessions.value;
-    const sessionIndex = sessions.findIndex(s => s.id === sessionId);
-    if (sessionIndex !== -1) {
-      sessions[sessionIndex].lastMessage = newMessage;
-      sessions[sessionIndex].lastActivity = new Date();
-      this.chatSessions.next([...sessions]);
-    }
-
-    // Simulate delivery and read status
-    setTimeout(() => {
-      newMessage.isDelivered = true;
-      this.messages.next([...currentMessages]);
-    }, 1000);
-
-    return of(newMessage);
+    const current = this.messages.value;
+    this.messages.next([...current, fallback]);
+    return of(fallback);
   }
 
-  uploadFile(sessionId: string, file: File, senderId: number, senderType: 'DOCTOR' | 'PATIENT', senderName: string): Observable<ChatMessage> {
+  uploadFile(
+    sessionId: string,
+    file: File,
+    senderId: number,
+    senderType: 'DOCTOR' | 'PATIENT',
+    senderName: string
+  ): Observable<ChatMessage> {
     const fileMessage: ChatMessage = {
       id: Date.now().toString(),
       senderId,
@@ -250,20 +294,15 @@ export class ChatService {
       isRead: false,
       isDelivered: false
     };
-
-    const currentMessages = this.messages.value;
-    currentMessages.push(fileMessage);
-    this.messages.next([...currentMessages]);
-
-    // Update last message in chat session
+    const current = this.messages.value;
+    this.messages.next([...current, fileMessage]);
     const sessions = this.chatSessions.value;
-    const sessionIndex = sessions.findIndex(s => s.id === sessionId);
-    if (sessionIndex !== -1) {
-      sessions[sessionIndex].lastMessage = fileMessage;
-      sessions[sessionIndex].lastActivity = new Date();
-      this.chatSessions.next([...sessions]);
+    const idx = sessions.findIndex((s) => s.id === sessionId);
+    if (idx !== -1) {
+      const next = [...sessions];
+      next[idx] = { ...next[idx], lastMessage: fileMessage, lastActivity: new Date() };
+      this.chatSessions.next(next);
     }
-
     return of(fileMessage);
   }
 
@@ -274,23 +313,19 @@ export class ChatService {
   }
 
   markAsRead(sessionId: string, messageIds: string[]): Observable<void> {
-    const currentMessages = this.messages.value;
-    messageIds.forEach(id => {
-      const message = currentMessages.find(m => m.id === id);
-      if (message) {
-        message.isRead = true;
-      }
+    const current = this.messages.value;
+    messageIds.forEach((id) => {
+      const m = current.find((x) => x.id === id);
+      if (m) m.isRead = true;
     });
-    this.messages.next([...currentMessages]);
-
-    // Update unread count in chat session
+    this.messages.next([...current]);
     const sessions = this.chatSessions.value;
-    const sessionIndex = sessions.findIndex(s => s.id === sessionId);
-    if (sessionIndex !== -1) {
-      sessions[sessionIndex].unreadCount = 0;
-      this.chatSessions.next([...sessions]);
+    const idx = sessions.findIndex((s) => s.id === sessionId);
+    if (idx !== -1) {
+      const next = [...sessions];
+      next[idx] = { ...next[idx], unreadCount: 0 };
+      this.chatSessions.next(next);
     }
-
     return of(void 0);
   }
 
@@ -299,18 +334,17 @@ export class ChatService {
   }
 
   markNotificationAsRead(notificationId: string): Observable<void> {
-    const currentNotifications = this.notifications.value;
-    const notification = currentNotifications.find(n => n.id === notificationId);
-    if (notification) {
-      notification.isRead = true;
-      this.notifications.next([...currentNotifications]);
+    const list = this.notifications.value;
+    const n = list.find((x) => x.id === notificationId);
+    if (n) {
+      n.isRead = true;
+      this.notifications.next([...list]);
     }
     return of(void 0);
   }
 
   getUnreadMessageCount(): Observable<number> {
-    const sessions = this.chatSessions.value;
-    const totalUnread = sessions.reduce((sum, session) => sum + session.unreadCount, 0);
-    return of(totalUnread);
+    const total = this.chatSessions.value.reduce((s, x) => s + x.unreadCount, 0);
+    return of(total);
   }
 }

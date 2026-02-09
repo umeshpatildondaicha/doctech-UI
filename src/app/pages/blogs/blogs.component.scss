@@ -373,7 +373,6 @@ $shadow: var(--card-shadow, 0 2px 10px rgba(0, 0, 0, 0.06));
 // ---------------- Center editor ----------------
 .topbar {
   min-height: 3em;
-  border-bottom: $border;
   padding: var(--spacing-md, 0.75rem) var(--spacing-xl, 1rem);
   border-bottom: 1px solid $border;
   background: $surface-2;
@@ -572,6 +571,400 @@ $shadow: var(--card-shadow, 0 2px 10px rgba(0, 0, 0, 0.06));
   box-shadow: 0 0 0 3px $primary-100;
 }
 
+// Step 1 — Compact professional layout (single card, less space)
+.step-panel--1 {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  max-width: 720px;
+}
+
+.step1-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem 1.25rem;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.step1-title {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: var(--primary-font-family);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: $text;
+  padding: 0.25rem 0;
+  outline: none;
+
+  &::placeholder {
+    color: $muted;
+  }
+}
+
+.step1-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.step1-row--cover-settings {
+  gap: 1.25rem;
+}
+
+.step1-row--attach-tags {
+  align-items: stretch;
+}
+
+.step1-mini-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $muted;
+  margin-bottom: 0.35rem;
+}
+
+.cover-input {
+  display: none;
+}
+
+.step1-cover-cell {
+  flex-shrink: 0;
+  width: 120px;
+}
+
+.step1-cover {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  outline: none;
+  text-align: left;
+  transition: box-shadow 0.2s ease;
+}
+
+.step1-cover:focus-visible {
+  box-shadow: 0 0 0 2px $primary;
+}
+
+.step1-cover-preview {
+  position: relative;
+  aspect-ratio: 1;
+  min-height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.step1-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.step1-cover-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.step1-cover:hover .step1-cover-overlay {
+  opacity: 1;
+}
+
+.step1-cover-empty {
+  aspect-ratio: 1;
+  min-height: 100px;
+  border: 2px dashed $border;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.5rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  color: $muted;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.step1-cover:hover .step1-cover-empty {
+  border-color: $primary;
+  background: $primary-100;
+  color: $primary;
+}
+
+.step1-settings-cell {
+  flex: 1;
+  min-width: 0;
+}
+
+.step1-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+.step1-field--full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .step1-row--cover-settings {
+    flex-direction: column;
+  }
+
+  .step1-cover-cell {
+    width: 100%;
+  }
+
+  .step1-cover-preview,
+  .step1-cover-empty {
+    min-height: 80px;
+    aspect-ratio: 16 / 6;
+  }
+
+  .step1-settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .step1-row--attach-tags {
+    flex-direction: column;
+  }
+}
+
+.step1-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.step1-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: $muted;
+}
+
+.step1-select,
+.step1-input {
+  width: 100%;
+  border: 1px solid $border;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  background: $surface-2;
+  color: $text;
+  font-family: var(--primary-font-family);
+  font-size: 0.8125rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.step1-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  padding-right: 1.5rem;
+}
+
+.step1-select:focus,
+.step1-input:focus {
+  border-color: $primary;
+  box-shadow: 0 0 0 2px $primary-100;
+}
+
+.step1-attach-cell,
+.step1-tags-cell {
+  flex: 1;
+  min-width: 0;
+}
+
+.step1-docs-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px dashed $border;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.02);
+  color: $muted;
+  font-family: var(--primary-font-family);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.step1-docs-trigger:hover {
+  border-color: $primary;
+  background: $primary-100;
+  color: $primary;
+}
+
+.step1-docs-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 88px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.step1-doc-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid $border;
+  border-radius: 6px;
+  background: $surface-2;
+  font-size: 0.75rem;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.step1-doc-item:hover {
+  border-color: $primary;
+  background: $primary-100;
+}
+
+.step1-doc-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  background: $primary-100;
+  color: $primary;
+  font-size: 0.7rem;
+}
+
+.step1-doc-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  color: $text;
+}
+
+.step1-doc-remove {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: $muted;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.step1-doc-remove:hover {
+  color: $text;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.step1-tags-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.step1-tags-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.step1-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.45rem;
+  border-radius: 999px;
+  background: $primary-100;
+  border: 1px solid $primary-200;
+  color: $text;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.step1-chip:hover {
+  border-color: $primary;
+}
+
+.step1-chip-remove {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: $muted;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 0.05rem;
+  border-radius: 2px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.step1-chip-remove:hover {
+  color: $text;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.step1-tag-input {
+  flex: 1;
+  min-width: 120px;
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+}
+
+.step1-actions {
+  padding-top: 0.35rem;
+  border-top: 1px solid $border;
+  flex-shrink: 0;
+}
+
 .step-actions {
   margin-top: var(--spacing-md, 0.75rem);
   padding-top: var(--spacing-md, 0.75rem);
@@ -647,10 +1040,6 @@ $shadow: var(--card-shadow, 0 2px 10px rgba(0, 0, 0, 0.06));
 
 .cover {
   margin-bottom: 1rem;
-}
-
-.cover-input {
-  display: none;
 }
 
 .cover-drop {

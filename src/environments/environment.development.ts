@@ -31,6 +31,11 @@ export const environment = {
       base: '/api/appointments',
       schedule: '/api/appointments/schedule'
     },
+    chat: {
+      base: '/api/chat',
+      // Backend ChatConnectHandler is registered at /ws/chat (WebSocketConfig)
+      ws: 'wss://doctech.solutions/ws/chat'
+    },
     billing: {
       base: '/api/billing',
       invoices: '/api/billing/invoices',

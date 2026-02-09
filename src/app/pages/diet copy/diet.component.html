@@ -48,42 +48,25 @@
           </div>
         </div>
 
-        <!-- Filters Row (screenshot-style) -->
-        <div class="filters-row">
-          <mat-form-field appearance="outline" class="search-field">
-            <mat-icon matPrefix>search</mat-icon>
-            <input matInput [(ngModel)]="searchQuery" (input)="onSearchChange($event)" placeholder="Search Diet" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="select-field">
-            <mat-select [(ngModel)]="selectedDietType" (selectionChange)="onDietTypeChange($event)"
-              placeholder="Diet Type">
-              <mat-option value="">Diet Type</mat-option>
-              <mat-option value="mediterranean">Mediterranean</mat-option>
-              <mat-option value="keto">Keto</mat-option>
-              <mat-option value="vegan">Vegan</mat-option>
-              <mat-option value="vegetarian">Vegetarian</mat-option>
-              <mat-option value="paleo">Paleo</mat-option>
-              <mat-option value="cardiac">Cardiac</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="select-field">
-            <mat-select [(ngModel)]="selectedMealType" (selectionChange)="filterDiets()" placeholder="Meal Type">
-              @for (mt of mealTypes; track mt) {
-              <mat-option [value]="mt.value">{{ mt.label }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <app-button class="clear-link" [fontIcon]="'clear_all'" [text]="'Clear All'" title="Clear Filters"
-            (btnClick)="clearFilters()"></app-button>
-          <!-- <button class="clear-link" type="button" (click)="clearFilters()">Clear Filters</button> -->
-
-          <!-- <button mat-raised-button color="primary" class="add-btn" (click)="onCreateDiet()">
-            <mat-icon>add</mat-icon>
-            Add Diet
-          </button> -->
-          <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Diet'" (btnClick)="onCreateDiet()"></app-button>
+        <!-- Filter Bar: Search + Group Tabs + Actions -->
+        <div class="filter-bar">
+          <div class="filter-bar-search">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input type="text" [(ngModel)]="searchQuery" (input)="onSearchChange($event)" placeholder="Search" class="search-input" />
+          </div>
+          <div class="filter-bar-tabs">
+            @for (tab of getDietGroupTabs(); track tab.value) {
+            <button type="button" class="filter-tab" [class.active]="selectedMealType === tab.value" (click)="selectMealTypeTab(tab.value)">
+              {{ tab.label }} ({{ tab.count }})
+            </button>
+            }
+          </div>
+          <div class="filter-bar-actions">
+            <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Diet'" (btnClick)="onCreateDiet()"></app-button>
+            <button type="button" class="icon-btn" title="Upload" aria-label="Upload"><mat-icon>upload</mat-icon></button>
+            <button type="button" class="icon-btn" title="Refresh" aria-label="Refresh" (click)="loadDietsFromApi()"><mat-icon>refresh</mat-icon></button>
+            <button type="button" class="icon-btn" title="Filter" aria-label="Filter"><mat-icon>filter_list</mat-icon></button>
+          </div>
         </div>
 
 
@@ -168,45 +151,25 @@
           </div>
         </div>
 
-        <!-- Diet Plans Filters (same bar style) -->
-        <div class="filters-row">
-          <mat-form-field class="search-field">
-            <mat-icon matPrefix>search</mat-icon>
-            <input matInput [(ngModel)]="planSearchQuery" (input)="onPlanSearchChange($event)"
-              placeholder="Search Diet plans" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="select-field">
-            <mat-select [(ngModel)]="selectedPlanType" (selectionChange)="onPlanTypeChange($event)">
-              <mat-option value="">Plan Type</mat-option>
-              <mat-option value="weekly">Weekly</mat-option>
-              <mat-option value="monthly">Monthly</mat-option>
-              <mat-option value="custom">Custom</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="select-field">
-            <mat-select [(ngModel)]="selectedPlanStatus" (selectionChange)="onPlanStatusChange($event)">
-              <mat-option value="">Plan Status</mat-option>
-              <mat-option value="active">Active</mat-option>
-              <mat-option value="inactive">Inactive</mat-option>
-              <mat-option value="draft">Draft</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <app-button class="clear-link" [fontIcon]="'clear_all'" title="Clear Filters" [text]="'Clear Filters'"
-            (btnClick)="clearPlanFilters()"></app-button>
-          <!-- <button class="clear-link" type="button" (click)="clearPlanFilters()">Clear Filters</button> -->
-
-          <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Plan'" title="Create Weekly Plan"
-            (btnClick)="onCreateDietPlan()"></app-button>
-          <!-- <button mat-raised-button color="primary" class="add-btn" (click)="onCreateDietPlan()">
-              <mat-icon>add</mat-icon>
-              Create Weekly Plan
-            </button>
+        <!-- Diet Plans Filter Bar: Search + Group Tabs + Actions -->
+        <div class="filter-bar">
+          <div class="filter-bar-search">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input type="text" [(ngModel)]="planSearchQuery" (input)="onPlanSearchChange($event)" placeholder="Search" class="search-input" />
           </div>
-          
-           Diet Plans Content -->
+          <div class="filter-bar-tabs">
+            @for (tab of getPlanGroupTabs(); track tab.value) {
+            <button type="button" class="filter-tab" [class.active]="selectedPlanType === tab.value" (click)="selectPlanTypeTab(tab.value)">
+              {{ tab.label }} ({{ tab.count }})
+            </button>
+            }
+          </div>
+          <div class="filter-bar-actions">
+            <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Plan'" title="Create Weekly Plan" (btnClick)="onCreateDietPlan()"></app-button>
+            <button type="button" class="icon-btn" title="Upload" aria-label="Upload"><mat-icon>upload</mat-icon></button>
+            <button type="button" class="icon-btn" title="Refresh" aria-label="Refresh" (click)="loadDietPlans()"><mat-icon>refresh</mat-icon></button>
+            <button type="button" class="icon-btn" title="Filter" aria-label="Filter"><mat-icon>filter_list</mat-icon></button>
+          </div>
         </div>
         <div class="diet-plans-content">
           @if (filteredDietPlans.length > 0) {
