@@ -156,7 +156,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   loadChatSessions(): void {
     this.isLoading = true;
     // Backend /patients/doctor/{code}/connected expects public doctor code (e.g. DR1)
-    const doctorCode = this.authService.getDoctorPublicCode() ?? this.authService.getDoctorRegistrationNumber() ?? 'DR1';
+    // Use "me" so backend resolves the authenticated doctor (avoids "Access denied" when token has doctorPublicId but not publicDoctorCode)
+    const doctorCode = 'me';
     this.subscriptions.add(
       this.chatService.loadConnectedPatientsAsSessions(doctorCode).subscribe({
         next: (sessions) => {

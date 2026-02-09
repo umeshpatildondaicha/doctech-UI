@@ -4,11 +4,12 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'https://doctech.solutions', // Use www subdomain to avoid redirects
+  // TEMP: Point to local backend for chat/WebSocket testing. Revert to https://doctech.solutions when done.
+  apiUrl: 'http://localhost:8080',
   appName: 'Shree Clinic Management System',
   version: '1.0.0',
   buildNumber: '2024.1.0',
-  
+
   // API Endpoints
   endpoints: {
     auth: {
@@ -33,8 +34,8 @@ export const environment = {
     },
     chat: {
       base: '/api/chat',
-      // Backend ChatConnectHandler is registered at /ws/chat (WebSocketConfig)
-      ws: 'wss://doctech.solutions/ws/chat'
+      // Backend ChatConnectHandler is at /ws/chat. TEMP: local WebSocket for testing.
+      ws: 'ws://localhost:8080/ws/chat'
     },
     billing: {
       base: '/api/billing',
