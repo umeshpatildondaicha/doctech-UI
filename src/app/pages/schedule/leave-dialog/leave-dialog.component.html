@@ -1,0 +1,32 @@
+<div class="leave-dialog">
+
+    <h2 class="title">Add Leave</h2>
+  
+    <form [formGroup]="leaveForm">
+  
+      <div class="field">
+        <label>Leave Date</label>
+        <input type="date" formControlName="specificDate" />
+      </div>
+  
+      <div class="field">
+        <label>Notes</label>
+        <textarea
+          formControlName="notes"
+          placeholder="Optional note">
+        </textarea>
+      </div>
+  
+      <div class="actions">
+        <button type="button" class="btn cancel" (click)="close()">
+          Cancel
+        </button>
+        <button type="button" class="btn save" (click)="saveLeave()">
+          Save
+        </button>
+      </div>
+  
+    </form>
+  
+  </div>
+  

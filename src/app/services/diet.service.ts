@@ -23,9 +23,16 @@ export class DietService {
       `${this.baseUrl}/${doctorCode}/diet-plan-groups/getAllDietPlanGroups`
     );
   }
-  // CREATE
-  createDietPlan(payload:any):Observable<any>{
-    return this.httpService.sendPOSTRequest(`${this.baseUrl}/diet-plans`,payload)
+  /**
+   * Create a diet plan.
+   * POST /api/doctors/{doctorCode}/diet-plans/create
+   */
+  createDietPlan(doctorCode: string, payload: any): Observable<any> {
+    const safeDoctor = encodeURIComponent((doctorCode || '').trim());
+    return this.httpService.sendPOSTRequest(
+      `${this.baseUrl}/${safeDoctor}/diet-plans/create`,
+      payload
+    );
   }
   /**
    * Update a diet plan.
@@ -38,23 +45,6 @@ export class DietService {
       payload
     );
   }
-  getDietPlanById(doctorCode: string, dietId: number): Observable<any> {
-    const url = `${this.baseUrl}/${doctorCode}/diet-plans/${dietId}`;
-    return this.http.get<any>(url);
-  }
-  getWeeklyDietPlansCount(registrationNumber: string): Observable<any> {
-    return this.httpService.sendGETRequest(
-      `${this.baseUrl}/${registrationNumber}/weekly-diet-plans/count`
-    );
-  }
-  // ✅ GET TOTAL DIET COUNT
-
-getDietPlansCount(registrationNumber: string): Observable<any> {
-  return this.httpService.sendGETRequest(
-    `${this.baseUrl}/${registrationNumber}/diet-plans/count`
-  );
-}
-
 
   // LIST
   getDietPlans(doctorCode: string) {
@@ -67,6 +57,24 @@ getDietPlansCount(registrationNumber: string): Observable<any> {
   deleteDietPlan(doctorCode: string, id: number) {
     return this.http.delete(
       `${this.baseUrl}/${doctorCode}/diet-plans/deleteDietPlan/${id}`
+    );
+  }
+  //Diet Plans Count
+  getDietPlansCount(registrationNumber: string): Observable<number> {
+    return this.httpService.sendGETRequest(
+      `${this.baseUrl}/${registrationNumber}/diet-plans/count`
+    );
+  }
+
+  //  Weekly Diet Plans Count
+  getWeeklyDietPlansCount(registrationNumber: string): Observable<number> {
+    return this.httpService.sendGETRequest(
+      `${this.baseUrl}/${registrationNumber}/weekly-diet-plans/count`
+    );
+  }
+  getDietPlanGroupsCount(registrationNumber: string): Observable<number> {
+    return this.httpService.sendGETRequest(
+      `${this.baseUrl}/${registrationNumber}/diet-plan-groups/count`
     );
   }
 

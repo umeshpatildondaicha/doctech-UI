@@ -47,4 +47,9 @@ export class PatientService {
   deletePatient(PatientId: number): Observable<any> {
     return this.httpService.sendDELETERequest(`${this.baseUrl}/patients/${PatientId}`);
   }
+  getConnectedPatientsCount(doctorCode: string): Observable<number> {
+    return this.httpService.sendGETRequest(
+      `${this.baseUrl}/patients/doctor/${doctorCode}/connected/count`
+    );
+  }
 }

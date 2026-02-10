@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit, PLATFORM_ID, Inject } from '@angular/
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { AppButtonComponent, DividerComponent, GridComponent, IconComponent, ImageComponent, PageBodyDirective, PageComponent, StatusCellRendererComponent, DialogboxService, DialogFooterAction } from '@lk/core';
+import { AppButtonComponent, DividerComponent, GridComponent, IconComponent, ImageComponent, PageBodyDirective, PageComponent, StatusCellRendererComponent, DialogboxService, DialogFooterAction ,ExtendedGridOptions} from '@lk/core';
 import { ColDef } from 'ag-grid-community';
 import * as Highcharts from 'highcharts';
 import { HighchartsChartModule } from 'highcharts-angular';
@@ -13,6 +13,7 @@ import { Appointment } from '../../interfaces/appointment.interface';
 import { RoomsService } from '../../services/rooms.service';
 import { AppointmentService } from '../../services/appointment.service';
 import { AuthService } from '../../services/auth.service';
+import { PatientService } from '../../services/patient.service';
 
 interface DashboardStats {
   roomAvailability: number;
@@ -56,6 +57,7 @@ interface AppointmentRequest {
     selector: 'app-dashboard',
     imports: [
         CommonModule,
+        
         DashboardDetailsComponent,
         HighchartsChartModule,
         AppButtonComponent,
@@ -64,7 +66,9 @@ interface AppointmentRequest {
         IconComponent,
         PageComponent,
         PageBodyDirective,
-        ImageComponent
+        ImageComponent,
+        
+       
     ],
     templateUrl: './dashboard.component.html',
     styleUrl: './dashboard.component.scss'
@@ -84,7 +88,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   // Stats
   stats: DashboardStats = {
-    roomAvailability: 0,
+    roomAvailability: 2,
     totalRooms: 100,
     bookAppointment: 0,
     totalPatients: 0,
@@ -94,7 +98,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   // Appointment Requests
   appointmentRequests: AppointmentRequest[] = [];
   requestColumns: ColDef[] = [];
-  requestGridOptions: any = {};
+ 
   requestRowData: AppointmentRequest[] = [];
   doctorCode ="DR1";
   pendingRequestCount =0;
@@ -104,11 +108,24 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   revenueChartOptions: Highcharts.Options = {};
   patientDemographicsChartOptions: Highcharts.Options = {};
   appointmentStatusChartOptions: Highcharts.Options = {};
+  requestGridOptions: ExtendedGridOptions = {
+  rowHeight: 44,
+  headerHeight: 36,
+  pagination: false,
+  suppressCellFocus: true,
+  menuActions: [
+    { title: 'Approve', icon: 'check_circle', click: (p: any) => this.approveAppointmentRequest(p?.data ?? p) },
+    { title: 'Reschedule', icon: 'event_available', click: (p: any) => this.rescheduleAppointmentRequest(p?.data ?? p) },
+    { title: 'Reject', icon: 'cancel', click: (p: any) => this.rejectAppointmentRequest(p?.data ?? p) }
+  ]
+};
+
 
   constructor(
     private readonly dialog: MatDialog,
     private readonly dialogService: DialogboxService,
     private readonly router: Router,
+    private patientService :PatientService,
     private readonly roomsService: RoomsService,
     private readonly appointmentService: AppointmentService,
     private readonly authService: AuthService,
@@ -124,6 +141,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }
     this.loadAllAppointmentsCount();
     this.loadPendingRequestsCount();
+    const doctorCode =
+    this.authService.getDoctorRegistrationNumber() || 'DR1';
+    this.loadConnectedPatientsCount(doctorCode);
   }
   loadAllAppointmentsCount() {
     const doctorCode =
@@ -136,7 +156,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         // usually response: { count: number }
         this.allAppointmentCount = res?.count ?? 0;
   
-        // जर stats वापरत असशील तर
+      
         this.stats.bookAppointment = this.allAppointmentCount;
       },
       error: (err) => {
@@ -163,7 +183,17 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       }
     });
   }
-  
+  loadConnectedPatientsCount(doctorCode: string) {
+    this.patientService.getConnectedPatientsCount(doctorCode).subscribe({
+      next: (res:any) => {
+        console.log('Connected Patients Count =>', res);
+       this.stats.totalPatients = res.count;
+      },
+      error: (err) => {
+        console.error('Connected Patients Count Error', err);
+      }
+    });
+  }
   
 
   ngAfterViewInit() {
@@ -244,13 +274,17 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     const doctorRegNo = this.authService.getDoctorRegistrationNumber() || 'DR1';
 
     // Load room availability
-    this.roomsService.getRooms().subscribe((rooms: any[]) => {
-      const availableRooms = rooms.filter((r: any) => r.status === 'Available').length;
+    this.roomsService.getRooms().subscribe((res: any) => {
+      const rooms = res?.content ?? [];
+    
+      const availableRooms = rooms.filter(
+        (r: any) => r.status === 'Available'
+      ).length;
+    
       this.stats.roomAvailability = availableRooms;
       this.stats.totalRooms = rooms.length;
-
-      // You can put any other logic that depends on rooms here, if needed
     });
+    
 
     // Appointment requests from API (GET .../requests)
     this.appointmentService.getAppointmentRequests(doctorRegNo).subscribe({
@@ -328,19 +362,19 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       }
     ];
 
-    this.requestGridOptions = {
-      rowHeight: 44,
-      headerHeight: 36,
-      // NOTE: @lk/core GridComponent currently defaults pagination=true internally.
-      // We set this to false for intent, and hide any remaining pagination UI via scoped CSS on this page.
-      pagination: false,
-      suppressCellFocus: true,
-      menuActions: [
-        { title: 'Approve', icon: 'check_circle', click: (param: any) => this.approveAppointmentRequest(param?.data ?? param) },
-        { title: 'Reschedule', icon: 'event_available', click: (param: any) => this.rescheduleAppointmentRequest(param?.data ?? param) },
-        { title: 'Reject', icon: 'cancel', click: (param: any) => this.rejectAppointmentRequest(param?.data ?? param) }
-      ]
-    };
+    // this.requestGridOptions = {
+    //   rowHeight: 44,
+    //   headerHeight: 36,
+    //   // NOTE: @lk/core GridComponent currently defaults pagination=true internally.
+    //   // We set this to false for intent, and hide any remaining pagination UI via scoped CSS on this page.
+    //   pagination: false,
+    //   suppressCellFocus: true,
+    //   menuActions: [
+    //     { title: 'Approve', icon: 'check_circle', click: (param: any) => this.approveAppointmentRequest(param?.data ?? param) },
+    //     { title: 'Reschedule', icon: 'event_available', click: (param: any) => this.rescheduleAppointmentRequest(param?.data ?? param) },
+    //     { title: 'Reject', icon: 'cancel', click: (param: any) => this.rejectAppointmentRequest(param?.data ?? param) }
+    //   ]
+    // };
 
     // Initialize filtered rowData once.
     this.updateRequestRowData();

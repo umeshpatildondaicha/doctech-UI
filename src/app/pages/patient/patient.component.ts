@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { GridComponent } from "@lk/core";
 import { Patient } from '../../interfaces/patient.interface';
 import { ColDef, GridOptions } from 'ag-grid-community';
-import { IconComponent } from "@lk/core";
+import { IconComponent ,ExtendedGridOptions} from "@lk/core";
 import { PatientCreateComponent } from '../patient-create/patient-create.component';
 import { StatusCellRendererComponent } from "@lk/core";
 import { CoreEventService, DialogboxService, DialogFooterAction } from "@lk/core";
@@ -40,7 +40,7 @@ export class PatientComponent  implements OnInit{
     { field: 'updatedDate', headerName: 'Updated Date', width: 120, sortable: true, filter: true }
   ];
 
-  gridOptions: any = {};
+  
   patientData: Patient[]=[];
   loading=false;
   selectedPatientId!: number; 
@@ -51,7 +51,7 @@ export class PatientComponent  implements OnInit{
       private patientService: PatientService
     
     ) {
-    this.initializeGridOptions();
+    // this.initializeGridOptions();
     this.eventService.setBreadcrumb({
       label: 'Patients',
       icon: 'groups'
@@ -59,6 +59,7 @@ export class PatientComponent  implements OnInit{
   }
   ngOnInit(): void {
     this.loadPatients();
+    this.initializeGridOptions();
     
   }
 
@@ -81,10 +82,10 @@ export class PatientComponent  implements OnInit{
     });
   }
   
-  
+  appointmentGridOptions!: ExtendedGridOptions;
 
   initializeGridOptions() {
-    this.gridOptions = {
+    this.appointmentGridOptions  ={
       menuActions: [
         {
           "title":"View",

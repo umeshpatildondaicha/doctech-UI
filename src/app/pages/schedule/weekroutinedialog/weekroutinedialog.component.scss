@@ -1,0 +1,84 @@
+.dialog {
+    background: #ffffff;
+    padding: 24px;
+    width: 420px;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    font-family: Arial, sans-serif;
+  }
+  
+  .dialog h2 {
+    margin: 0 0 20px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  /* ---------- Form ---------- */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  /* ---------- Fields ---------- */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .field label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .field input,
+  .field select,
+  .field textarea {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.2s ease;
+  }
+  
+  .field textarea {
+    resize: vertical;
+    min-height: 70px;
+  }
+  
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: #2563eb;
+  }
+  
+  /* ---------- Row (Start / End time) ---------- */
+  .row {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .row .field {
+    flex: 1;
+  }
+  
+  /* ---------- Actions ---------- */
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .actions button:last-child {
+    background: #2563eb;
+    color: #ffffff;
+  }
+  
+  .actions button:last-child:hover {
+    background: #1d4ed8;
+  }

@@ -134,4 +134,60 @@ export interface LeaveUpsertRequest {
   isFullDay?: boolean; // default true
   reason?: string;
 }
+export interface AppointmentTiming {
+  id?: number;                 // edit/delete साठी (optional)
+  specificDate: string;        // YYYY-MM-DD
+  isLeave: boolean;            // true
+  isRecurring: boolean;        // false
+  notes?: string;              // optional
+}
+export interface AppointmentTimings {
+  id?: number;
+
+  // Specific Day
+  specificDate1?: string;
+
+  // Time / Capacity
+  startTime?: string;
+  endTime?: string;
+  maxAppointmentsPerSlot?: number;
+
+  // Flags
+  isAvailable?: boolean;
+  isRecurring: boolean;
+  isLeave: boolean;
+
+  // Optional
+  notes?: string;
+}
+
+export interface AppointmentTimingDaily {
+  id: number;
+
+  day?: string;                
+  specificDates?: string;       
+
+  startTime: string;
+  endTime: string;
+
+  isAvailable: boolean;
+  maxAppointmentsPerSlot: number;
+
+  notes?: string;
+
+  isRecurring: boolean;         // ❌ false
+  isLeave: boolean;             // ❌ false
+}
+export interface WeeklyRoutineTiming {
+  day: 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY';
+  startTime: string;
+  endTime: string;
+  maxAppointmentsPerSlot?: number;
+  notes?: string;
+  isAvailable: boolean;
+  isRecurring: true;
+  isLeave: false;
+}
+
+
 

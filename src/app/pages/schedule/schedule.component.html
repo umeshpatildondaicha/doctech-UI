@@ -545,7 +545,7 @@
               <app-card class="manage-card prio-card p1" [dense]="true" [divider]="true" title="Leave &amp; Absences" subtitle="Priority 1 (highest)">
                 <div appCardActions class="prio-actions">
                   <span class="count">{{ manageLeaves.length }} item(s)</span>
-                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  [disabled]="true"></app-button>
+                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'" (click)="onAddLeave()" [disabled]="false"  [color]="'primary'"></app-button>
                 </div>
                 <div class="manage-list">
                   @for (item of manageLeaves; track item; let i = $index) {
@@ -577,7 +577,7 @@
               <app-card class="manage-card prio-card p2" [dense]="true" [divider]="true" title="Specific Day Overrides" subtitle="Priority 2 (date-specific)">
                 <div appCardActions class="prio-actions">
                   <span class="count">{{ manageSpecificDays.length }} item(s)</span>
-                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  [disabled]="true"></app-button>
+                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  [disabled]="false" [color]=" 'primary'" (click)="onAddSpecificDay()"></app-button>
                 </div>
                 <div class="manage-list">
                   @for (item of manageSpecificDays; track item; let i = $index) {
@@ -599,7 +599,7 @@
                       </div>
                       <div class="actions">
                         <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'" [disabled]="true"></app-button>
-                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" [disabled]="true"></app-button>
+                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" [disabled]="false" ></app-button>
                       </div>
                     </div>
                   }
@@ -609,7 +609,7 @@
               <app-card class="manage-card prio-card p3" [dense]="true" [divider]="true" title="Weekly Routine" subtitle="Priority 3 (recurring)">
                 <div appCardActions class="prio-actions">
                   <span class="count">{{ manageWeeklyRoutines.length }} item(s)</span>
-                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  [disabled]="true"></app-button>
+                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'" (click)="onAddWeeklyRoutine()"></app-button>
                 </div>
                 <div class="manage-list">
                   @for (item of manageWeeklyRoutines; track item; let i = $index) {
@@ -641,7 +641,7 @@
                       </div>
                       <div class="actions">
                         <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'" [disabled]="true"></app-button>
-                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" [disabled]="true"></app-button>
+                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" [disabled]="false"></app-button>
                       </div>
                     </div>
                   }
@@ -652,7 +652,7 @@
                 <div appCardActions class="prio-actions">
                   <span class="singleton">Singleton</span>
                   <span class="count">{{ manageBaseAvailability.length }} item(s)</span>
-                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'"  [disabled]="true"></app-button>
+                  <app-button type="button" class="add-btn" [fontIcon]="'add'" [text]="'Add'" [disabled]="manageBaseAvailability.length > 0" [color]="'primary'" (click)="openDailyBaseDialog()"></app-button>
                 </div>
                 <div class="manage-list">
                   @for (item of manageBaseAvailability; track item; let i = $index) {
@@ -675,8 +675,8 @@
                         </div>
                       </div>
                       <div class="actions">
-                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'" [disabled]="true"></app-button>
-                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" [disabled]="true"></app-button>
+                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'" [disabled]="false"  (click)="openDailyBaseDialog(item)"></app-button>
+                        <app-button  type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" [disabled]="false" (click)="onDeleteTiming(item)"></app-button>
                       </div>
                     </div>
                   }

@@ -1,0 +1,75 @@
+/* Dialog container */
+.dialog {
+    background: #ffffff;
+    padding: 16px 18px;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+  
+  /* Title */
+  .dialog h2 {
+    margin: 0 0 14px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  /* Form fields */
+  .field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+  }
+  
+  .field label {
+    font-size: 13px;
+    margin-bottom: 4px;
+    color: #555;
+  }
+  
+  .field input,
+  .field textarea {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #cfcfcf;
+    border-radius: 4px;
+    outline: none;
+  }
+  
+  .field textarea {
+    resize: none;
+    min-height: 70px;
+  }
+  
+  /* Row for time inputs */
+  .row {
+    display: flex;
+    gap: 12px;
+  }
+  
+  /* Actions */
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  
+  /* Buttons */
+  .btn {
+    padding: 6px 14px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .btn.cancel {
+    background: #e0e0e0;
+    color: #333;
+  }
+  
+  .btn.save {
+    background: #1976d2;
+    color: #ffffff;
+  }
+  

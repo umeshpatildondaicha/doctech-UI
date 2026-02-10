@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Inject, OnInit } from '@angular/core';
+import { CommonModule, NgIf } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
@@ -17,7 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
 import { AppButtonComponent, AppInputComponent, DividerComponent, IconComponent, CalendarComponent, CoreEventService, DialogboxService, DialogFooterAction, PageComponent, PageBodyDirective, ToggleButtonComponent, type ToggleButtonOption } from '@lk/core';
 import { AppointmentCreateComponent } from '../appointment-create/appointment-create.component';
 import { AppointmentViewComponent } from '../appointment-view/appointment-view.component';
@@ -29,8 +29,14 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { TimingsService } from '../../services/timings.service';
 import { AuthService } from '../../services/auth.service';
-import type { DoctorTimingsResponse, TimingsForecastDay } from '../../interfaces/timings.interface';
+import type { AppointmentTiming, DoctorTimingsResponse, TimingsForecastDay } from '../../interfaces/timings.interface';
 import { AppointmentService } from '../../services/appointment.service';
+import { TimingManageService } from '../../services/timing-manage.service';
+import { Dialog, DIALOG_DATA } from '@angular/cdk/dialog';
+import { LeaveDialogComponent } from './leave-dialog/leave-dialog.component';
+import { SpecificdaydialogComponent } from './specificdaydialog/specificdaydialog.component';
+import { DailyBaseDialogComponent } from './daily-base-dialog/daily-base-dialog.component';
+import { WeekroutinedialogComponent } from './weekroutinedialog/weekroutinedialog.component';
 
 type TimingPriorityTab = 'p4' | 'p3' | 'p2' | 'p1';
 
@@ -96,9 +102,12 @@ interface ManageWeeklyRoutineItem {
 }
 
 interface ManageBaseAvailabilityItem {
+  id:number;
   label: string;
   timeLabel: string;
   note?: string;
+  raw :any
+  
 }
 
 interface ScheduleStats {
@@ -283,7 +292,8 @@ interface DoctorSchedule {
         PageBodyDirective,
         AppCardComponent,
         AppCardActionsDirective,
-        ToggleButtonComponent
+        ToggleButtonComponent,
+        NgIf
     ],
     templateUrl: './schedule.component.html',
     styleUrls: ['./schedule.component.scss']
@@ -296,6 +306,19 @@ export class ScheduleComponent implements OnInit {
   scheduleWindowDays = 15;
   readonly weekdays: Weekday[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   timingsMode: TimingsMode = 'view';
+  leaveFrom! :FormGroup;
+  doctorCode = 'DR1';
+  manageLeavesDay: any[] = [];
+  // ✅ P4 – Daily Base Availability (singleton)
+dailyBaseAvailability: {
+  id: string;        // UUID
+  startTime: string;
+  endTime: string;
+  notes?: string;
+} | null = null;
+
+  manageWeeklyRoutine:any[]=[];
+  
 
   /** Options for View/Manage toggle (lk-core ToggleButtonComponent) */
   readonly timingsModeOptions: ToggleButtonOption[] = [
@@ -445,11 +468,14 @@ export class ScheduleComponent implements OnInit {
   constructor(
     private readonly dialogService: DialogboxService,
     private readonly fb: FormBuilder,
+    private dialog :Dialog,
     private readonly eventService: CoreEventService,
     private readonly router: Router,
     private readonly timingsService: TimingsService,
     private readonly authService: AuthService,
-    private readonly appointmentService: AppointmentService
+    private readonly appointmentService: AppointmentService,
+    private timingManageService :TimingManageService,
+  
   ) {
     this.eventService.setBreadcrumb({
       label: 'Schedule',
@@ -458,6 +484,16 @@ export class ScheduleComponent implements OnInit {
     
     this.initFilterForm();
   }
+ createLeaveFrom(){
+   this.leaveFrom = this.fb.group({
+    specificDate:[null,Validators.required],
+    notes:['']
+   })
+ }
+
+
+
+
 
   ngOnInit() {
     this.selectedDate = new Date();
@@ -470,7 +506,249 @@ export class ScheduleComponent implements OnInit {
 
     this.recomputeScheduleSummary();
     this.recomputeScheduleAvailability();
+    this.loadLeaves();
+    this.loadSpecificDays();
+    this.loadBaseAvailability();
+    this.loadWeeklyRoutine();
+  
   }
+  loadLeaves() {
+    this.timingManageService
+      .getAllTimings(this.doctorCode)
+      .subscribe({
+        next: (res: any[]) => {
+          // Leave entries filter 
+          this.manageLeaves = res.filter(
+            t => t.isLeave === true
+          );
+        },
+        error: err => {
+          console.error('Load leaves failed', err);
+        }
+      });
+  }
+  openLeavePopup() {
+    const dialogRef = this.dialog.open(LeaveDialogComponent, {
+      width: '420px',
+      hasBackdrop: true,
+      disableClose: true,
+      backdropClass: 'custom-backdrop'
+    });
+  
+    dialogRef.closed.subscribe(result => {
+      if (result === true) {
+        this.loadLeaves();
+      }
+    });
+  }
+  
+  onAddLeave() {
+    
+      const dialogRef = this.dialog.open(LeaveDialogComponent, {
+        width: '450px'
+      });
+    
+      dialogRef.closed.subscribe((result) => {
+        if (result === true) {
+         
+          this.loadLeaves(); // GET APIcall
+        }
+      });
+    
+    
+  }
+ 
+  formatDate(date: string): string {
+    return new Date(date).toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
+  onAddSpecificDay() {
+    const ref = this.dialog.open(SpecificdaydialogComponent, {
+      width: '520px',
+      data: { doctorCode: this.doctorCode }
+    });
+  
+    ref.closed.subscribe(result => {
+      if (result === true) {
+        this.loadSpecificDays();
+      }
+    });
+  }
+  loadSpecificDays() {
+    if (!this.doctorCode) {
+      console.warn('DoctorCode missing - skipping loadSpecificDays');
+      return;
+    }
+    this.timingManageService.getAllTimings(this.doctorCode).subscribe({
+      next: (res: any[]) => {
+        console.log("Total",res);
+        
+        this.manageSpecificDays = res
+          .filter(x =>
+            x.specificDate &&
+            x.isLeave === false &&
+            x.isRecurring === false
+          )
+          .map(x => ({
+            label: x.notes || 'Specific Day',
+            dateLabel: this.formatDate(x.specificDate),
+            rangeLabel: x.startTime && x.endTime
+              ? `${x.startTime} - ${x.endTime}`
+              : 'Capacity mode (no slots)',
+            raw: x
+          }));
+      },
+      error: () => this.manageSpecificDays = []
+    });
+  }
+  // loadDailyBase() {
+  //   this.timingManageService.getAllTimings(this.doctorCode).subscribe(res => {
+  //     this.manageBaseAvailability = res
+  //       .filter((x:any) =>
+  //         !x.day &&
+  //         !x.specificDate &&
+  //         x.isRecurring === false &&
+  //         x.isLeave === false
+  //       )
+  //       .map((x:any) => ({
+  //         label: 'Base Availability',
+  //         timeLabel: `${x.startTime} – ${x.endTime}`,
+  //         note: x.notes,
+  //         raw: x   // 🔴 THIS IS MUST
+  //       }));
+  //   });
+  // }
+  onEditBaseAvailability(item: any) {
+    this.dialog.open(DailyBaseDialogComponent, {
+      width: '520px',
+      data: {
+        doctorCode: this.doctorCode,
+        existing: item.raw   // 👈 RAW backend object
+      }
+    });
+  }
+  
+  
+  openDailyBaseDialog(existing ? :any) {
+    const ref = this.dialog.open(DailyBaseDialogComponent, {
+      width: '480px',
+      data: { doctorCode: this.doctorCode ,existing
+
+      }
+    });
+  
+   
+    ref.closed.subscribe(result => {
+      if (result===true) {
+        this.loadBaseAvailability();
+      }
+    });
+  }
+  loadBaseAvailability() {
+    this.timingManageService.getAllTimings(this.doctorCode).subscribe(res => {
+  
+      console.log('RAW API DATA 👉', res);
+  
+      this.manageBaseAvailability = res
+        .filter((x: any) =>
+          !x.day &&
+          !x.specificDate &&
+          x.isRecurring === false &&
+          x.isLeave === false &&
+          x.startTime &&
+          x.endTime
+        )
+        .map((x: any) => ({
+          id: x.recordId ?? x.id,   // ✅ NUMERIC ID (e.g. 2)
+          label: 'Base Availability',
+          timeLabel: `${x.startTime} – ${x.endTime}`,
+          note: x.notes,
+          raw: x
+        }));
+    });
+  }
+  
+  loadWeeklyRoutine() {
+    this.timingManageService.getAllTimings(this.doctorCode).subscribe({
+     
+      next: (res: any[]) => {
+        console.log('API response',res);
+        this.manageWeeklyRoutine = res
+          .filter(x => x.day && x.isRecurring === true && x.isLeave === false)
+          .map((x:any) => ({
+            label: x.notes || 'Weekly Routine',
+            dayLabel: x.day.substring(0,3),
+            timeLabel: `${x.startTime} - ${x.endTime}`,
+            raw: x
+          }));
+      },
+      error: () => this.manageWeeklyRoutine = []
+    });
+  }
+  
+  onAddWeeklyRoutine() {
+    const ref = this.dialog.open(WeekroutinedialogComponent, {
+      width: '520px',
+      data: { doctorCode: this.doctorCode }
+    });
+  
+    ref.closed.subscribe(result => {
+      if (result === true) {
+        // Result is type `true`, so can't access result.startTime etc.
+        this.loadBaseAvailability();
+        this.loadWeeklyRoutine();
+      }
+    });
+  }
+  
+  onDeleteTiming(item: ManageBaseAvailabilityItem) {
+    console.log('DELETE CLICK ID 👉', item.id, typeof item.id);
+  
+    if (item.id === undefined || item.id === null || isNaN(item.id)) {
+      console.error('❌ ID INVALID / NaN', item);
+      return;
+    }
+  
+    this.timingManageService
+      .deleteTiming(this.doctorCode, item.id)
+      .subscribe({
+        next: () => {
+          console.log('✅ Deleted successfully');
+          this.loadBaseAvailability(); // refresh list
+        },
+        error: err => {
+          console.error('❌ Delete failed', err);
+        }
+      });
+  }
+  
+  // onDeleteDailyBase() {
+  //   if (!this.dailyBaseAvailability) {
+  //     console.warn('No daily base to delete');
+  //     return;
+  //   }
+  
+  //   const baseId = this.dailyBaseAvailability.id; // UUID string
+  //   console.log('Deleting Daily Base UUID 👉', baseId);
+  
+  //   this.timingManageService
+  //     .deleteDailyBase(this.doctorCode, baseId)
+  //     .subscribe({
+  //       next: () => {
+  //         console.log('✅ Daily Base deleted');
+  //         this.dailyBaseAvailability = null;
+  //         this.loadTimingsFromApi({ fallbackToDemo: false });
+  //       },
+  //       error: err => console.error('❌ Daily Base delete failed', err)
+  //     });
+  // }
+  
+  
+
+  
 
   setSection(section: 'schedule' | 'timings'): void {
     this.activeSection = section;
@@ -837,7 +1115,16 @@ export class ScheduleComponent implements OnInit {
       start: b.startTime,
       end: b.endTime
     }));
-
+    this.dailyBaseAvailability = base
+    ? {
+        id: base.id,               // UUID string
+        startTime: base.startTime ?? '',
+        endTime: base.endTime ?? '',
+        notes: base.notes ?? ''
+      }
+    : null;
+  
+  console.log('STATE dailyBaseAvailability 👉', this.dailyBaseAvailability);
     // Weekly (P3) -> per weekday record
     const dayMap: Record<string, Weekday> = {
       MONDAY: 'Monday',
@@ -1001,17 +1288,18 @@ export class ScheduleComponent implements OnInit {
           .filter(Boolean) as Weekday[]
       })) as ManageWeeklyRoutineItem[];
 
-    this.manageBaseAvailability = base
-      ? [
-          {
-            label: 'Base Availability',
-            timeLabel: `${base.startTime || '—'} – ${base.endTime || '—'}`,
-            note: base.notes || undefined
-          } as ManageBaseAvailabilityItem
-        ]
-      : [];
+      this.manageBaseAvailability = base
+        ? [
+            {
+              id: Number(base.id), // 👈 Fix: ensure id is a number
+              label: 'Base Availability',
+              timeLabel: `${base.startTime} – ${base.endTime}`,
+              note: base.notes,
+              raw: base// 👈 MUST
+            } as ManageBaseAvailabilityItem
+          ]
+        : [];
   }
-
   private mapPriorityTypeToTab(priorityType: TimingsForecastDay['priorityType']): TimingPriorityTab {
     switch (priorityType) {
       case 'leave':
@@ -1222,12 +1510,31 @@ export class ScheduleComponent implements OnInit {
 
   // ---- Manage UI actions (mock) ----
   addManageItem(scope: 'p1' | 'p2' | 'p3' | 'p4'): void {
-    // Hook this to dialogs / backend later
-    if (scope === 'p1') this.manageLeaves = [...this.manageLeaves, { label: 'New Leave', rangeLabel: 'Dec 22 – Dec 22, 2024', durationLabel: '1 Day' }];
-    if (scope === 'p2') this.manageSpecificDays = [...this.manageSpecificDays, { label: 'New Override', dateLabel: 'Dec 26', rangeLabel: 'Dec 26, 2024' }];
-    if (scope === 'p3') this.manageWeeklyRoutines = [...this.manageWeeklyRoutines, { label: 'New Weekly Routine', timeLabel: '09:00 AM – 10:00 AM', days: ['Tuesday'] }];
-    if (scope === 'p4') this.manageBaseAvailability = [...this.manageBaseAvailability, { label: 'New Base Availability', timeLabel: '10:00 AM – 11:00 AM' }];
+
+    if (scope === 'p1') {
+      this.openLeavePopup();
+    }
+  
+    if (scope === 'p2') {
+      this.onAddSpecificDay();
+    }
+  
+    if (scope === 'p3') {
+      this.onAddWeeklyRoutine();
+    }
+  
+    if (scope === 'p4') {
+      this.openDailyBaseDialog(); // 👈 फक्त dialog उघड
+    }
   }
+  
+  // addManageItem(scope: 'p1' | 'p2' | 'p3' | 'p4'): void {
+  //   // Hook this to dialogs / backend later
+  //   if (scope === 'p1') this.manageLeaves = [...this.manageLeaves, { label: 'New Leave', rangeLabel: 'Dec 22 – Dec 22, 2024', durationLabel: '1 Day' }];
+  //   if (scope === 'p2') this.manageSpecificDays = [...this.manageSpecificDays, { label: 'New Override', dateLabel: 'Dec 26', rangeLabel: 'Dec 26, 2024' }];
+  //   if (scope === 'p3') this.manageWeeklyRoutines = [...this.manageWeeklyRoutines, { label: 'New Weekly Routine', timeLabel: '09:00 AM – 10:00 AM', days: ['Tuesday'] }];
+  //   if (scope === 'p4') this.manageBaseAvailability = [...this.manageBaseAvailability, { label: 'New Base Availability', timeLabel: '10:00 AM – 11:00 AM' ,raw : 'x'}];
+  // }
 
   deleteManageItem(scope: 'p1' | 'p2' | 'p3' | 'p4', index: number): void {
     if (scope === 'p1') this.manageLeaves = this.manageLeaves.filter((_, i) => i !== index);

@@ -1,0 +1,28 @@
+.dialog {
+    padding: 20px;
+    width: 420px;
+    background-color: rgb(252, 245, 237);
+  }
+  
+  .row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+  }
+  
+  label {
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  
+  input, textarea {
+    padding: 6px;
+    font-size: 14px;
+  }
+  
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  

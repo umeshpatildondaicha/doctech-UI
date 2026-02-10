@@ -1,0 +1,61 @@
+
+<div class="dialog">
+    <h2>Weekly Routine</h2>
+  
+    <form [formGroup]="form">
+  
+      <div class="field">
+        <label>Day</label>
+        <select formControlName="day">
+          <option value="">Select day</option>
+          <option *ngFor="let d of days" [value]="d">{{ d }}</option>
+        </select>
+      </div>
+  
+      <div class="row">
+        <div class="field">
+          <label>Start Time</label>
+          <input type="time" formControlName="startTime">
+        </div>
+  
+        <div class="field">
+          <label>End Time</label>
+          <input type="time" formControlName="endTime">
+        </div>
+      </div>
+  
+      <div class="field">
+        <label>Max Appointments / Slot</label>
+        <input type="number" formControlName="maxAppointmentsPerSlot">
+      </div>
+  
+      <div class="field">
+        <label>Notes</label>
+        <textarea formControlName="notes"></textarea>
+      </div>
+  
+      <div class="actions">
+        <div class="actions">
+            <app-button
+              type="button"
+              text="Cancel"
+              appearance="flat"
+              color="secondary"
+              (click)="close()">
+            </app-button>
+          
+            <app-button
+              type="button"
+              text="Save"
+              appearance="raised"
+              color="primary"
+              (click)="save()">
+            </app-button>
+          </div>
+          
+       
+      </div>
+  
+    </form>
+  </div>
+  

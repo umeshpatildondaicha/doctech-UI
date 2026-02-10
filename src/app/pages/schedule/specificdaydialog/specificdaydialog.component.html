@@ -1,0 +1,40 @@
+
+<div class="dialog">
+    <h2>Add Specific Day Override</h2>
+  
+    <form [formGroup]="form">
+  
+      <div class="field">
+        <label>Date *</label>
+        <input type="date" formControlName="specificDate">
+      </div>
+  
+      <div class="row">
+        <div class="field">
+          <label>Start Time</label>
+          <input type="time" formControlName="startTime">
+        </div>
+        <div class="field">
+          <label>End Time</label>
+          <input type="time" formControlName="endTime">
+        </div>
+      </div>
+  
+      <div class="field">
+        <label>Max Appointments</label>
+        <input type="number" formControlName="maxAppointmentsPerSlot">
+      </div>
+  
+      <div class="field">
+        <label>Notes</label>
+        <textarea formControlName="notes"></textarea>
+      </div>
+  
+      <div class="actions">
+        <button type="button" class="btn cancel" (click)="close()">Cancel</button>
+        <button type="button" class="btn save" (click)="save()">Save</button>
+      </div>
+  
+    </form>
+  </div>
+  

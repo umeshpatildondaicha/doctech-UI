@@ -1,0 +1,47 @@
+<div class="dialog">
+    <h2>Daily Base Availability</h2>
+  
+    <form [formGroup]="form">
+      <div class="row">
+        <label>Start Time</label>
+        <input type="time" formControlName="startTime">
+      </div>
+  
+      <div class="row">
+        <label>End Time</label>
+        <input type="time" formControlName="endTime">
+      </div>
+  
+      <div class="row">
+        <label>Max Appointments / Slot</label>
+        <input type="number" formControlName="maxAppointmentsPerSlot">
+      </div>
+  
+      <div class="row">
+        <label>Notes</label>
+        <textarea formControlName="notes"></textarea>
+      </div>
+  
+      <div class="actions">
+        <div class="actions">
+            <app-button
+              type="button"
+              text="Cancel"
+              appearance="flat"
+              color="secondary"
+              (click)="close()">
+            </app-button>
+          
+            <app-button
+              type="button"
+              text="Save"
+              appearance="raised"
+              color="primary"
+              (click)="save()">
+            </app-button>
+          </div>
+          
+      </div>
+    </form>
+  </div>
+  

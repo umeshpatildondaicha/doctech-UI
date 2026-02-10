@@ -26,7 +26,7 @@ import { HighchartsChartModule } from 'highcharts-angular';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 
 // Custom Components
-import { IconComponent, AppButtonComponent, AppInputComponent, AppSelectboxComponent, GridComponent } from '@lk/core';
+import { IconComponent, AppButtonComponent, AppInputComponent, AppSelectboxComponent, GridComponent, ExtendedGridOptions } from '@lk/core';
 import { ExerciseListComponent } from '../../../components/exercise-list/exercise-list.component';
 import { ExerciseCardComponent } from '../../../components/exercise-card/exercise-card.component';
 import { DietPlanCardComponent } from '../../../components/diet-plan-card/diet-plan-card.component';
@@ -656,7 +656,7 @@ export class PatientProfileComponent implements OnInit {
 
   // Medications grid
   medicationsColumns: any[] = [];
-  medicationsGridOptions: any = {};
+  medicationsGridOptions: ExtendedGridOptions = {}
 
   // Medication templates
   medicationTemplates: {
