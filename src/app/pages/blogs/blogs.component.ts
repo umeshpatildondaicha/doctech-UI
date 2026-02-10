@@ -1,38 +1,10 @@
-import { Component, ViewChild, ElementRef, inject } from '@angular/core';
+import { AfterViewInit, Component, ViewChild, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AppButtonComponent, DividerComponent, IconComponent, PageBodyDirective, PageComponent } from '@lk/core';
-
-type BlogStatus = 'DRAFT' | 'PUBLISHED' | 'SCHEDULED';
-type BlogVisibility = 'PUBLIC' | 'PRIVATE';
-
-type BlogDocType = 'PDF' | 'DOC' | 'DOCX' | 'FILE';
-
-interface BlogDocument {
-  id: string;
-  title: string;
-  type: BlogDocType;
-  url: string;
-}
-
-interface BlogPost {
-  id: string;
-  title: string;
-  content: string;
-  category: string;
-  tags: string[];
-  status: BlogStatus;
-  visibility: BlogVisibility;
-  scheduledFor?: string; // datetime-local value
-  coverImageUrl?: string;
-  documents: BlogDocument[];
-  views: number;
-  likes: number;
-  updatedAt: Date;
-  authorName: string;
-  readTimeMin: number;
-}
+import { BLOGS_MOCK_POSTS, BLOG_CATEGORIES, BlogDocType, BlogDocument, BlogPost } from './blogs.data';
 
 @Component({
   selector: 'app-blogs',
@@ -41,68 +13,44 @@ interface BlogPost {
   templateUrl: './blogs.component.html',
   styleUrl: './blogs.component.scss'
 })
-export class BlogsComponent {
+export class BlogsComponent implements AfterViewInit {
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   // Left panel
   listFilter: 'ALL' | 'PUBLISHED' | 'DRAFTS' | 'SCHEDULED' = 'ALL';
   listSearch = '';
 
-  // Center panel
-  editorMode: 'edit' | 'preview' = 'edit';
-  editStep: 1 | 2 = 1; // 1 = Media & options, 2 = Content
   isMobile = window.innerWidth < 768;
   isContentExpanded = false;
 
   // Data (mock for now; wire to API later)
-  posts: BlogPost[] = [
-    {
-      id: 'b1',
-      title: 'Managing Type 2 Diabetes Through Modern Nutrition',
-      content:
-        'Type 2 diabetes is a chronic condition that affects the way your body metabolizes sugar (glucose)...\n\nIn this post we’ll discuss meal timing, fiber, protein, and practical swaps that work in real life.',
-      category: 'Health & Wellness',
-      tags: ['Diabetes', 'Diet'],
-      status: 'PUBLISHED',
-      visibility: 'PUBLIC',
-      coverImageUrl: 'assets/avatars/default-avatar.jpg',
-      documents: [
-        {
-          id: 'd1',
-          title: 'Health Check-up Guidelines',
-          type: 'PDF',
-          url: 'assets/avatars/default-avatar.jpg'
-        }
-      ],
-      views: 1200,
-      likes: 84,
-      updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      authorName: 'Dr. Sarah Smith',
-      readTimeMin: 5
-    },
-    {
-      id: 'b2',
-      title: 'Dietary Management for Hypertension',
-      content:
-        'Blood pressure responds to lifestyle changes faster than most people expect.\n\nWe’ll cover DASH basics, sodium awareness, and how to build a heart-friendly plate.',
-      category: 'Patient Care',
-      tags: ['Heart Health', 'Blood Pressure'],
-      status: 'DRAFT',
-      visibility: 'PRIVATE',
-      coverImageUrl: 'assets/avatars/default-avatar.jpg',
-      documents: [],
-      views: 856,
-      likes: 42,
-      updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-      authorName: 'Dr. Sarah Smith',
-      readTimeMin: 4
-    }
-  ];
+  posts: BlogPost[] = [...BLOGS_MOCK_POSTS];
 
   selectedPostId: string | null = this.posts[0]?.id ?? null;
   tagInput = '';
 
-  categories = ['Cardiology', 'Patient Care', 'Health & Wellness', 'Nutrition', 'Lifestyle'];
+  categories = [...BLOG_CATEGORIES];
+
+  ngOnInit(): void {
+    const qp = this.route.snapshot.queryParamMap;
+    const openId = qp.get('id');
+    const createNew = qp.get('new') === '1' || qp.get('new') === 'true';
+
+    if (createNew) {
+      this.createNewPost();
+      // clear query param so refresh doesn't keep creating posts
+      void this.router.navigate([], { queryParams: { new: null, id: null }, queryParamsHandling: 'merge' });
+      return;
+    }
+
+    if (openId && this.posts.some(p => p.id === openId)) {
+      this.selectedPostId = openId;
+      // clear id param so refresh doesn't keep forcing selection
+      void this.router.navigate([], { queryParams: { id: null }, queryParamsHandling: 'merge' });
+    }
+  }
 
   get selectedPost(): BlogPost | null {
     return this.posts.find(p => p.id === this.selectedPostId) ?? null;
@@ -129,7 +77,6 @@ export class BlogsComponent {
   }
 
   createNewPost(): void {
-    this.editStep = 1;
     const now = new Date();
     const newPost: BlogPost = {
       id: `b_${Date.now()}`,
@@ -149,25 +96,23 @@ export class BlogsComponent {
     };
     this.posts = [newPost, ...this.posts];
     this.selectedPostId = newPost.id;
-    this.editorMode = 'edit';
     this.isContentExpanded = false;
+    setTimeout(() => this.loadContentIntoEditor(), 0);
   }
 
   selectPost(post: BlogPost): void {
     this.selectedPostId = post.id;
-    this.editorMode = 'edit';
-    this.editStep = 1;
     this.isContentExpanded = false;
-  }
-
-  setEditStep(step: 1 | 2): void {
-    this.editStep = step;
-    if (step === 2) setTimeout(() => this.loadContentIntoEditor(), 0);
+    setTimeout(() => this.loadContentIntoEditor(), 0);
   }
 
   @ViewChild('contentInput') contentInputRef?: ElementRef<HTMLDivElement>;
 
-  /** Load post content into contenteditable when entering step 2 */
+  ngAfterViewInit(): void {
+    setTimeout(() => this.loadContentIntoEditor(), 0);
+  }
+
+  /** Load post content into contenteditable */
   loadContentIntoEditor(): void {
     const el = this.contentInputRef?.nativeElement;
     const p = this.selectedPost;
@@ -244,7 +189,7 @@ export class BlogsComponent {
     };
     this.posts = [copy, ...this.posts];
     this.selectedPostId = copy.id;
-    this.editorMode = 'edit';
+    setTimeout(() => this.loadContentIntoEditor(), 0);
   }
 
   deleteSelectedPost(): void {
@@ -252,11 +197,7 @@ export class BlogsComponent {
     if (!p) return;
     this.posts = this.posts.filter(x => x.id !== p.id);
     this.selectedPostId = this.posts[0]?.id ?? null;
-    this.editorMode = 'edit';
-  }
-
-  setEditorMode(mode: 'edit' | 'preview'): void {
-    this.editorMode = mode;
+    setTimeout(() => this.loadContentIntoEditor(), 0);
   }
 
   toggleContentExpanded(): void {

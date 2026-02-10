@@ -11,10 +11,10 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class ChatService {
-  private chatSessions = new BehaviorSubject<ChatSession[]>([]);
-  private currentChatSession = new BehaviorSubject<ChatSession | null>(null);
-  private messages = new BehaviorSubject<ChatMessage[]>([]);
-  private notifications = new BehaviorSubject<ChatNotification[]>([]);
+  private readonly chatSessions = new BehaviorSubject<ChatSession[]>([]);
+  private readonly currentChatSession = new BehaviorSubject<ChatSession | null>(null);
+  private readonly messages = new BehaviorSubject<ChatMessage[]>([]);
+  private readonly notifications = new BehaviorSubject<ChatNotification[]>([]);
 
   constructor(
     private readonly patientService: PatientService,
@@ -22,10 +22,42 @@ export class ChatService {
     private readonly chatApi: ChatApiService,
     private readonly auth: AuthService
   ) {
-    this.chatApi.messages$.subscribe((msg) => {
+    this.chatApi.messages$.subscribe((incoming) => {
+      // Ensure senderName is human-friendly (patient's real name instead of literal "Patient")
+      const active = this.currentChatSession.value;
+      const msg: ChatMessage = {
+        ...incoming,
+        senderName:
+          incoming.senderType === 'DOCTOR'
+            ? this.getDoctorName()
+            : (active?.patientName ?? incoming.senderName ?? 'Patient')
+      };
+
       const current = this.messages.value;
+
+      // Replace optimistic message when server echo arrives (avoid duplicate)
+      const optimisticIdx = current.findIndex(
+        (m) =>
+          typeof m.id === 'string' &&
+          m.id.startsWith('opt-') &&
+          m.content === msg.content &&
+          m.senderType === msg.senderType
+      );
+      if (optimisticIdx !== -1) {
+        const next = [...current];
+        next[optimisticIdx] = msg;
+        this.messages.next(next);
+        return;
+      }
       if (!current.some((m) => m.id === msg.id)) {
         this.messages.next([...current, msg]);
+      }
+
+      // Keep the chat-list preview/ticks in sync for the active session
+      if (active) {
+        const nextSession: ChatSession = { ...active, lastMessage: msg, lastActivity: msg.timestamp ?? new Date() };
+        this.currentChatSession.next(nextSession);
+        this.updateSessionInList(nextSession);
       }
     });
   }
@@ -78,8 +110,8 @@ export class ChatService {
    * Fetches appointments, picks one (latest), loads history, connects WebSocket.
    */
   openChatForPatient(session: ChatSession): Observable<{ session: ChatSession; messages: ChatMessage[] }> {
-    // Backend appointment API expects public doctor code (e.g. DR1), not registration number (e.g. DOC002)
-    const doctorCode = this.auth.getDoctorPublicCode() ?? this.auth.getDoctorRegistrationNumber();
+    // Use "me" when backend supports it (GET /api/appointments/doctor/me/patient/...), else public doctor code
+    const doctorCode = this.auth.getDoctorPublicCode() ?? this.auth.getDoctorRegistrationNumber() ?? 'me';
     const patientPublicId = session.patientPublicId ?? session.id;
     if (!doctorCode || !patientPublicId) {
       return of({ session, messages: [] });
@@ -116,12 +148,23 @@ export class ChatService {
         this.updateSessionInList(s);
       }),
       switchMap((s) => {
-        // Always attempt WebSocket when opening chat (use appointment id or fallback to patient/session id)
+        // Always attempt WebSocket when opening chat (use appointment id for sending)
         this.connectWebSocket(s);
-        if (!s.appointmentPublicId) return of({ session: s, messages: [] });
-        return this.chatApi.getAppointmentMessages(s.appointmentPublicId).pipe(
-          map((msgs) => this.normalizeMessages(msgs)),
-          tap((msgs) => this.messages.next(msgs)),
+        // Load unified conversation (all messages for this doctor–patient) so doctor messages do not disappear
+        const doctorCode = this.auth.getDoctorPublicCode() ?? this.auth.getDoctorRegistrationNumber() ?? 'me';
+        const patientPublicId = (s.patientPublicId ?? s.id ?? '').toString().trim();
+        if (!patientPublicId) return of({ session: s, messages: [] });
+        return this.chatApi.getConversationMessages(doctorCode, patientPublicId).pipe(
+          map((msgs) => this.normalizeMessages(msgs, s)),
+          tap((msgs) => {
+            this.messages.next(msgs);
+            const last = msgs.at(-1);
+            if (last) {
+              const nextSession: ChatSession = { ...s, lastMessage: last, lastActivity: last.timestamp ?? new Date() };
+              this.currentChatSession.next(nextSession);
+              this.updateSessionInList(nextSession);
+            }
+          }),
           map((messages) => ({ session: s, messages })),
           catchError(() => of({ session: s, messages: [] }))
         );
@@ -129,8 +172,14 @@ export class ChatService {
     );
   }
 
+  /** Pick the appointment with the most recent chat (so doctor sees patient messages in the same thread). */
   private pickAppointment(list: any[]): any {
     const sorted = [...list].sort((a, b) => {
+      const lastA = a.lastMessageAt ?? a.last_message_at;
+      const lastB = b.lastMessageAt ?? b.last_message_at;
+      if (lastA && lastB) return new Date(lastB).getTime() - new Date(lastA).getTime();
+      if (lastA) return -1;
+      if (lastB) return 1;
       const da = a.appointmentDate ?? a.date ?? a.scheduledDate ?? 0;
       const db = b.appointmentDate ?? b.date ?? b.scheduledDate ?? 0;
       return new Date(db).getTime() - new Date(da).getTime();
@@ -172,21 +221,28 @@ export class ChatService {
     });
   }
 
-  private normalizeMessages(raw: any[]): ChatMessage[] {
-    return (raw ?? []).map((m) => ({
-      id: String(m.id ?? m.messageId ?? Date.now()),
-      senderId: m.senderId ?? 0,
-      senderType: (m.senderType ?? 'PATIENT') as 'DOCTOR' | 'PATIENT',
-      senderName: m.senderName ?? (m.senderType === 'DOCTOR' ? this.getDoctorName() : 'Patient'),
-      content: m.content ?? '',
-      messageType: (m.messageType ?? 'TEXT') as 'TEXT' | 'IMAGE' | 'DOCUMENT' | 'FILE',
-      timestamp: m.timestamp ? new Date(m.timestamp) : new Date(),
-      isRead: !!m.isRead,
-      isDelivered: !!m.isDelivered,
-      ...(m.fileUrl && { fileUrl: m.fileUrl }),
-      ...(m.fileName && { fileName: m.fileName }),
-      ...(m.fileSize && { fileSize: m.fileSize })
-    }));
+  private normalizeMessages(raw: any[], session?: ChatSession): ChatMessage[] {
+    const patientName = session?.patientName ?? 'Patient';
+    const doctorName = this.getDoctorName();
+    return (raw ?? []).map((m) => {
+      const senderType = (m.senderType ?? 'PATIENT') as 'DOCTOR' | 'PATIENT';
+      const tsRaw = m.createdAt ?? m.timestamp ?? m.created_at ?? null;
+      const ts = tsRaw ? new Date(tsRaw) : new Date();
+      return {
+        id: String(m.id ?? m.messageId ?? Date.now()),
+        senderId: m.senderId ?? 0,
+        senderType,
+        senderName: m.senderName ?? (senderType === 'DOCTOR' ? doctorName : patientName),
+        content: m.content ?? '',
+        messageType: (m.messageType ?? 'TEXT') as 'TEXT' | 'IMAGE' | 'DOCUMENT' | 'FILE',
+        timestamp: ts,
+        isRead: !!m.isRead,
+        isDelivered: !!m.isDelivered,
+        ...(m.fileUrl && { fileUrl: m.fileUrl }),
+        ...(m.fileName && { fileName: m.fileName }),
+        ...(m.fileSize && { fileSize: m.fileSize })
+      } as ChatMessage;
+    });
   }
 
   disconnectChat(): void {

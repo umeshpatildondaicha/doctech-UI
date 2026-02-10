@@ -32,6 +32,7 @@ import { DietCardComponent } from '../../components/diet-card/diet-card.componen
 import { DietPlanCardComponent } from '../../components/diet-plan-card/diet-plan-card.component';
 import { DietService } from '../../services/diet.service';
 import { AuthService } from '../../services/auth.service';
+import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
 
 @Component({
   selector: 'app-diet',
@@ -54,7 +55,8 @@ import { AuthService } from '../../services/auth.service';
     DietSelectionDialogComponent,
     MealTimeDialogComponent,
     DietCardComponent,
-    DietPlanCardComponent
+    DietPlanCardComponent,
+    EntityToolbarComponent
   ],
   templateUrl: './diet.component.html',
   styleUrl: './diet.component.scss'
@@ -194,7 +196,8 @@ export class DietComponent implements OnInit, OnDestroy {
     this.eventService.setBreadcrumb(this.breadcrumb);
   }
 
-  onSearchChange(event: any) {
+  onSearchChange(query: string) {
+    this.searchQuery = query;
     this.filterDiets();
   }
 
@@ -207,6 +210,11 @@ export class DietComponent implements OnInit, OnDestroy {
     this.selectedDietType = '';
     this.selectedMealType = '';
     this.filterDiets();
+  }
+
+  openDietFilters() {
+    console.log('Open diet filters (toolbar)');
+    // Open filter dialog or side panel if needed
   }
 
   getDietGroupTabs(): { label: string; value: string; count: number }[] {
@@ -500,7 +508,8 @@ export class DietComponent implements OnInit, OnDestroy {
     this.filterDietPlans();
   }
 
-  onPlanSearchChange(event: any) {
+  onPlanSearchChange(query: string) {
+    this.planSearchQuery = query;
     this.filterDietPlans();
   }
 
@@ -532,6 +541,11 @@ export class DietComponent implements OnInit, OnDestroy {
 
   onCreateDietPlan() {
     this.router.navigate(['/diet-plan-create']);
+  }
+
+  openDietPlanFilters() {
+    console.log('Open diet plan filters (toolbar)');
+    // Open filter dialog or side panel if needed
   }
 
   onViewPlan(plan: any) {

@@ -8,6 +8,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Diet } from '../../interfaces/diet.interface';
 import { SafePipe, AppButtonComponent } from '@lk/core';
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.component';
+import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
 
 @Component({
     selector: 'app-diet-view',
@@ -17,6 +18,7 @@ import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb.comp
     MatProgressSpinnerModule,
     SafePipe,
     BreadcrumbComponent,
+    EntityToolbarComponent,
     AppButtonComponent
 ],
     templateUrl: './diet-view.component.html',
@@ -284,4 +286,25 @@ export class DietViewComponent implements OnInit {
     };
     return iconMap[category || ''] || 'restaurant';
   }
+
+  onCreateDiet() {
+    console.log('Create diet clicked from toolbar');
+    // navigate to diet create page if route exists
+    // this.router.navigate(['/diet/create']);
+  }
+
+  loadDiet() {
+    console.log('Toolbar refresh requested');
+    // re-load current diet if available
+    if (this.diet) this.loadDietData(this.diet.dietId);
+  }
+
+  openFilter() {
+    console.log('Open filter (toolbar)');
+  }
+
+  onToolbarSearch(query: string) {
+    console.log('Toolbar search:', query);
+  }
+
 }

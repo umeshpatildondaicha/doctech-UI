@@ -48,26 +48,18 @@
           </div>
         </div>
 
-        <!-- Filter Bar: Search + Group Tabs + Actions -->
-        <div class="filter-bar">
-          <div class="filter-bar-search">
-            <mat-icon class="search-icon">search</mat-icon>
-            <input type="text" [(ngModel)]="searchQuery" (input)="onSearchChange($event)" placeholder="Search" class="search-input" />
-          </div>
-          <div class="filter-bar-tabs">
-            @for (tab of getDietGroupTabs(); track tab.value) {
-            <button type="button" class="filter-tab" [class.active]="selectedMealType === tab.value" (click)="selectMealTypeTab(tab.value)">
-              {{ tab.label }} ({{ tab.count }})
-            </button>
-            }
-          </div>
-          <div class="filter-bar-actions">
-            <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Diet'" (btnClick)="onCreateDiet()"></app-button>
-            <button type="button" class="icon-btn" title="Upload" aria-label="Upload"><mat-icon>upload</mat-icon></button>
-            <button type="button" class="icon-btn" title="Refresh" aria-label="Refresh" (click)="loadDietsFromApi()"><mat-icon>refresh</mat-icon></button>
-            <button type="button" class="icon-btn" title="Filter" aria-label="Filter"><mat-icon>filter_list</mat-icon></button>
-          </div>
-        </div>
+        <!-- Entity Toolbar: Search + Counts + Actions -->
+        <app-entity-toolbar
+          title="Diets"
+          [showCounts]="true"
+          [currentCount]="filteredDiets.length"
+          [totalCount]="dietList.length"
+          [newLabel]="'New Diet'"
+          (newClick)="onCreateDiet()"
+          (refreshClick)="loadDietsFromApi()"
+          (filterClick)="openDietFilters()"
+          (search)="onSearchChange($event)">
+        </app-entity-toolbar>
 
 
         <!-- Diet Cards Grid -->
@@ -151,26 +143,18 @@
           </div>
         </div>
 
-        <!-- Diet Plans Filter Bar: Search + Group Tabs + Actions -->
-        <div class="filter-bar">
-          <div class="filter-bar-search">
-            <mat-icon class="search-icon">search</mat-icon>
-            <input type="text" [(ngModel)]="planSearchQuery" (input)="onPlanSearchChange($event)" placeholder="Search" class="search-input" />
-          </div>
-          <div class="filter-bar-tabs">
-            @for (tab of getPlanGroupTabs(); track tab.value) {
-            <button type="button" class="filter-tab" [class.active]="selectedPlanType === tab.value" (click)="selectPlanTypeTab(tab.value)">
-              {{ tab.label }} ({{ tab.count }})
-            </button>
-            }
-          </div>
-          <div class="filter-bar-actions">
-            <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Plan'" title="Create Weekly Plan" (btnClick)="onCreateDietPlan()"></app-button>
-            <button type="button" class="icon-btn" title="Upload" aria-label="Upload"><mat-icon>upload</mat-icon></button>
-            <button type="button" class="icon-btn" title="Refresh" aria-label="Refresh" (click)="loadDietPlans()"><mat-icon>refresh</mat-icon></button>
-            <button type="button" class="icon-btn" title="Filter" aria-label="Filter"><mat-icon>filter_list</mat-icon></button>
-          </div>
-        </div>
+        <!-- Diet Plans Entity Toolbar: Search + Counts + Actions -->
+        <app-entity-toolbar
+          title="Diet Plans"
+          [showCounts]="true"
+          [currentCount]="filteredDietPlans.length"
+          [totalCount]="dietPlans.length"
+          [newLabel]="'New Plan'"
+          (newClick)="onCreateDietPlan()"
+          (refreshClick)="loadDietPlans()"
+          (filterClick)="openDietPlanFilters()"
+          (search)="onPlanSearchChange($event)">
+        </app-entity-toolbar>
         <div class="diet-plans-content">
           @if (filteredDietPlans.length > 0) {
           <div class="plans-grid">

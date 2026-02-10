@@ -1,6 +1,18 @@
 <div class="diet-plan-view">
   @if (dietPlan) {
     <div class="page-shell">
+      <app-entity-toolbar
+        title="Diet Plans"
+        [showCounts]="true"
+        [currentCount]="dietPlan?.dietsCount"
+        [totalCount]="dietPlan?.dietsCount"
+        [newLabel]="'New Plan'"
+        (newClick)="onCreateDietPlan()"
+        (refreshClick)="loadDietPlans()"
+        (filterClick)="openPlanFilters()"
+        (search)="onPlanToolbarSearch($event)">
+      </app-entity-toolbar>
+
       <div class="page-header">
         <div class="title-block">
           <div class="title-row">

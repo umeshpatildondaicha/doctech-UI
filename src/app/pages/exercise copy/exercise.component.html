@@ -37,26 +37,18 @@
           </div>
         </div>
 
-        <!-- Filter Bar: Search + Group Tabs + Actions -->
-        <div class="filter-bar">
-          <div class="filter-bar-search">
-            <mat-icon class="search-icon">search</mat-icon>
-            <input type="text" [(ngModel)]="searchQuery" (input)="onExerciseSearchInput()" placeholder="Search" class="search-input" />
-          </div>
-          <div class="filter-bar-tabs">
-            @for (tab of getExerciseGroupTabs(); track tab.value) {
-            <button type="button" class="filter-tab" [class.active]="selectedCategory === tab.value" (click)="selectExerciseCategoryTab(tab.value)">
-              {{ tab.label }} ({{ tab.count }})
-            </button>
-            }
-          </div>
-          <div class="filter-bar-actions">
-            <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Exercise'" [color]="'primary'" (btnClick)="onAddExercise()"></app-button>
-            <button type="button" class="icon-btn" title="Upload" aria-label="Upload" (click)="onImport()"><mat-icon>upload</mat-icon></button>
-            <button type="button" class="icon-btn" title="Refresh" aria-label="Refresh" (click)="onExport()"><mat-icon>refresh</mat-icon></button>
-            <button type="button" class="icon-btn" title="Filter" aria-label="Filter"><mat-icon>filter_list</mat-icon></button>
-          </div>
-        </div>
+        <!-- Entity Toolbar: Search + Counts + Actions -->
+        <app-entity-toolbar
+          title="Exercises"
+          [showCounts]="true"
+          [currentCount]="getFilteredExercises().length"
+          [totalCount]="exercises.length"
+          [newLabel]="'New Exercise'"
+          (newClick)="onAddExercise()"
+          (refreshClick)="refreshExercises()"
+          (filterClick)="openExerciseFilters()"
+          (search)="onExerciseSearchInput($event)">
+        </app-entity-toolbar>
 
         <!-- Exercise Cards Grid -->
         @if (getFilteredExercises().length > 0) {
@@ -134,26 +126,21 @@
           </mat-card>
         </div>
 
-        <!-- Groups Filter Bar: Search + Group Tabs + Actions -->
-        <div class="filter-bar">
-          <div class="filter-bar-search">
-            <mat-icon class="search-icon">search</mat-icon>
-            <input type="text" [(ngModel)]="groupSearchQuery" (input)="onGroupSearchInput()" placeholder="Search" class="search-input" />
-          </div>
-          <div class="filter-bar-tabs">
-            @for (tab of getExerciseGroupsGroupTabs(); track tab.value) {
-            <button type="button" class="filter-tab" [class.active]="selectedGroupCategory === tab.value" (click)="selectGroupCategoryTab(tab.value)">
-              {{ tab.label }} ({{ tab.count }})
-            </button>
-            }
-          </div>
-          <div class="filter-bar-actions">
-            <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Group'" [color]="'primary'" (btnClick)="onAddExerciseGroup()"></app-button>
-            <button type="button" class="icon-btn" title="Upload" aria-label="Upload" (click)="onImportGroups()"><mat-icon>upload</mat-icon></button>
-            <button type="button" class="icon-btn" title="Refresh" aria-label="Refresh" (click)="onExportGroups()"><mat-icon>refresh</mat-icon></button>
-            <button type="button" class="icon-btn" title="Filter" aria-label="Filter"><mat-icon>filter_list</mat-icon></button>
-          </div>
-          <div class="legacy-filters-hidden" style="display:none">
+        <!-- Entity Toolbar for Groups: Search + Counts + Actions -->
+        <app-entity-toolbar
+          title="Exercise Groups"
+          [showCounts]="true"
+          [currentCount]="getFilteredGroups().length"
+          [totalCount]="exerciseGroups.length"
+          [newLabel]="'New Group'"
+          (newClick)="onAddExerciseGroup()"
+          (refreshClick)="refreshGroups()"
+          (filterClick)="openGroupFilters()"
+          (search)="onGroupSearchInput($event)">
+        </app-entity-toolbar>
+
+        <!-- Groups Filter Bar (Legacy - hidden) -->
+        <div class="legacy-filters-hidden" style="display:none">
           <mat-form-field appearance="outline" class="select-field">
             <mat-select [(ngModel)]="selectedGroupDifficulty" (selectionChange)="onGroupDifficultyChange()">
               <mat-option value="">Any Level</mat-option>
@@ -170,8 +157,6 @@
           <app-button class="add-btn" [fontIcon]="'add'" [text]="'Add Group'" [color]="'primary'"
             (btnClick)="onAddExerciseGroup()">
           </app-button>
-          </div>
-
         </div>
 
         <!-- Groups Cards -->

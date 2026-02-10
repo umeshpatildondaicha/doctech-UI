@@ -4,6 +4,18 @@
     [showHome]="true">
   </app-breadcrumb>
 
+  <app-entity-toolbar
+    title="Diet"
+    [showCounts]="true"
+    [currentCount]="1"
+    [totalCount]="1"
+    [newLabel]="'New Diet'"
+    (newClick)="onCreateDiet()"
+    (refreshClick)="loadDiet()"
+    (filterClick)="openFilter()"
+    (search)="onToolbarSearch($event)">
+  </app-entity-toolbar>
+
 
 
   <!-- Main Content -->

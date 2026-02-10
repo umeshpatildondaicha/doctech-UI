@@ -8,7 +8,7 @@ export const environment = {
   appName: 'Shree Clinic Management System',
   version: '1.0.0',
   buildNumber: '2024.1.0',
-  
+
   // API Endpoints
   endpoints: {
     auth: {
@@ -33,7 +33,7 @@ export const environment = {
     },
     chat: {
       base: '/api/chat',
-      // Backend ChatConnectHandler is registered at /ws/chat (WebSocketConfig)
+      // Backend ChatConnectHandler is at /ws/chat.
       ws: 'wss://doctech.solutions/ws/chat'
     },
     billing: {

@@ -19,6 +19,7 @@ import { ExerciseCreateComponent } from '../exercise-create/exercise-create.comp
 import { ExerciseSetCreateComponent } from '../exercise-set-create/exercise-set-create.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ExerciseCardComponent } from '../../components/exercise-card/exercise-card.component';
+import { EntityToolbarComponent } from '../../components';
 import { ExerciseService } from '../../services/exercise.service';
 
 @Component({
@@ -42,7 +43,8 @@ import { ExerciseService } from '../../services/exercise.service';
     FormsModule,
     ReactiveFormsModule,
     ExerciseCardComponent,
-    AppInputComponent
+    AppInputComponent,
+    EntityToolbarComponent
 ],
     templateUrl: './exercise.component.html',
     styleUrl: './exercise.component.scss'
@@ -806,7 +808,8 @@ export class ExerciseComponent implements OnInit, OnDestroy {
     this.selectedCategory = value;
   }
 
-  onExerciseSearchInput(): void {
+  onExerciseSearchInput(query: string): void {
+    this.searchQuery = query;
     // Trigger filter recalc on next tick
     this.exercises = [...this.exercises];
   }
@@ -825,7 +828,8 @@ export class ExerciseComponent implements OnInit, OnDestroy {
     this.selectedGroupCategory = value;
   }
 
-  onGroupSearchInput(): void {
+  onGroupSearchInput(query: string): void {
+    this.groupSearchQuery = query;
     this.exerciseGroups = [...this.exerciseGroups];
   }
 
@@ -841,5 +845,23 @@ export class ExerciseComponent implements OnInit, OnDestroy {
     this.searchQuery = '';
     this.selectedCategory = 'all';
     this.selectedDifficulty = 'all';
+  }
+
+  refreshExercises(): void {
+    console.log('Refresh exercises (toolbar)');
+    this.exercises = [...this.exercises];
+  }
+
+  openExerciseFilters(): void {
+    console.log('Open exercise filters (toolbar)');
+  }
+
+  refreshGroups(): void {
+    console.log('Refresh exercise groups (toolbar)');
+    this.exerciseGroups = [...this.exerciseGroups];
+  }
+
+  openGroupFilters(): void {
+    console.log('Open exercise group filters (toolbar)');
   }
 }

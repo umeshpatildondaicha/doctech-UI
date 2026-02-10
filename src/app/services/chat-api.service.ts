@@ -54,6 +54,17 @@ export class ChatApiService {
   }
 
   /**
+   * Load unified conversation (all messages for doctor–patient across appointments).
+   * GET /api/chat/doctor/{doctorCode}/patient/{patientPublicId}/messages
+   * Use this so doctor messages do not disappear when switching chat.
+   */
+  getConversationMessages(doctorCode: string, patientPublicId: string): Observable<ChatMessage[]> {
+    const safeDoctor = encodeURIComponent((doctorCode || '').trim());
+    const safePatient = encodeURIComponent((patientPublicId || '').trim());
+    return this.httpService.sendGETRequest(`${this.baseUrl}/chat/doctor/${safeDoctor}/patient/${safePatient}/messages`);
+  }
+
+  /**
    * Connect WebSocket and send INIT with appointmentId (appointment's public UUID), userPublicId, senderType.
    * Backend expects: type "INIT", appointmentId, userPublicId, senderType ("DOCTOR" | "PATIENT").
    * appointmentId must be a real appointment UUID from the DB or backend responds "Appointment not found".
