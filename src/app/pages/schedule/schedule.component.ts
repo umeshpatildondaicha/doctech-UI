@@ -321,6 +321,8 @@ dailyBaseAvailability: {
 } | null = null;
 
   manageWeeklyRoutine:any[]=[];
+  selectedTiming: any = null;
+
   
 
   /** Options for View/Manage toggle (lk-core ToggleButtonComponent) */
@@ -616,6 +618,19 @@ dailyBaseAvailability: {
       }
     });
   }
+  openEditLeave(item: any) {
+    const dialogRef = this.dialog.open(LeaveDialogComponent, {
+      width: '400px',
+      data: item   // 🔥 edit data pass
+    });
+  
+    dialogRef.closed.subscribe(result => {
+      if (result) {
+        this.loadLeaves();
+      }
+    });
+  }
+  
   
   onAddLeave() {
     
@@ -778,6 +793,8 @@ dailyBaseAvailability: {
       }
     });
   }
+  
+  
   
   onDeleteTiming(item: ManageBaseAvailabilityItem) {
     console.log('DELETE CLICK ID 👉', item.id, typeof item.id);

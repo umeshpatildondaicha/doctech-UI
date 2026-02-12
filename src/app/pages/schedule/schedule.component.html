@@ -473,6 +473,59 @@
                 </div>
               </div>
             </div>
+          }
+        </div>
+        <!-- This Week Schedule (view-only) -->
+        @if (timingsMode === 'view') {
+          <div class="week-schedule-card">
+            <div class="week-head">
+              <h3>This Week Schedule</h3>
+              <app-button type="button" class="week-add-btn" [text]="'+ Add New Schedule'"  [disabled]="true"></app-button>
+            </div>
+            <div class="week-row" aria-label="This week schedule">
+              @for (d of thisWeekScheduleCards; track d) {
+                <div class="week-day" [class.empty]="!d.hasSchedule">
+                  <div class="day-top">
+                    <div class="day-top-left">
+                      <div class="day-title">{{ d.weekday }}</div>
+                      <div class="day-sub" [class.is-today]="d.isToday">{{ d.dateLabel }}</div>
+                    </div>
+                    @if (d.hasSchedule) {
+                      <span class="day-pill">Fixed</span>
+                    }
+                  </div>
+                  <div class="day-divider"></div>
+                  @if (d.hasSchedule) {
+                    <div class="day-body">
+                      <div class="info-row">
+                        <app-icon fontIcon="schedule" [size]="22"></app-icon>
+                        <span class="info-text strong">{{ d.start }} - {{ d.end }}</span>
+                      </div>
+                      <div class="info-row">
+                        <app-icon fontIcon="calendar_month" [size]="22"></app-icon>
+                        <span class="info-text muted">{{ d.patternLabel }}</span>
+                      </div>
+                      <div class="day-table">
+                        <div class="tr">
+                          <div class="k">Duration</div>
+                          <div class="v">{{ d.durationMin }} min</div>
+                        </div>
+                        <div class="tr">
+                          <div class="k">Slot</div>
+                          <div class="v">{{ d.totalSlots }} Total</div>
+                        </div>
+                      </div>
+                    </div>
+                    <app-button type="button" class="day-footer-btn" [text]="'Edit Details'"  [disabled]="true"></app-button>
+                  } @else {
+                    <div class="day-empty-body">
+                      <div class="plus-circle"><span class="plus">+</span></div>
+                      <div class="empty-text">Add Availability</div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
           </div>
           } @else {
             <div class="timings-manage">

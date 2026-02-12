@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ColDef } from 'ag-grid-community';
 import { Appointment } from '../../interfaces/appointment.interface';
-import { GridComponent } from "@lk/core";
+import { ExtendedGridOptions, GridComponent } from "@lk/core";
 import { AppButtonComponent } from "@lk/core";
 import { IconComponent } from "@lk/core";
 import { CalendarComponent } from "@lk/core";
@@ -15,12 +15,13 @@ import { AppointmentViewComponent } from '../appointment-view/appointment-view.c
 import { CoreEventService, DialogboxService, DialogFooterAction, PageComponent, BreadcrumbItem, UserType } from "@lk/core";
 import { AppointmentService } from '../../services/appointment.service';
 import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
-    selector: 'app-appointment',
-    imports: [GridComponent, AppButtonComponent, IconComponent, CalendarComponent, PageComponent],
-    templateUrl: './appointment.component.html',
-    styleUrl: './appointment.component.scss'
+  selector: 'app-appointment',
+  imports: [GridComponent, AppButtonComponent, IconComponent, CalendarComponent, PageComponent],
+  templateUrl: './appointment.component.html',
+  styleUrl: './appointment.component.scss'
 })
 export class AppointmentComponent implements OnInit {
   breadcrumb: BreadcrumbItem[] = [
@@ -28,11 +29,12 @@ export class AppointmentComponent implements OnInit {
     { label: 'Appointments', route: '/appointment', icon: 'event', isActive: true }
   ];
   // All appointments data
-  allAppointments: Appointment[] = [];
+  //apiConfig :any = null;
   isLoading = false;
+
   appointmentColumns: ColDef[] = [];
-  
-  appointmentGridOptions = {
+  appointmentGridOptions: ExtendedGridOptions = {
+    paginationMode : 'infinite',
     menuActions: [
       {
         title: 'View',
@@ -64,12 +66,39 @@ export class AppointmentComponent implements OnInit {
       label: 'Appointments',
       icon: 'event'
     });
+
   }
+ 
 
   ngOnInit() {
     this.getQueryParams();
     this.initializeAppointmentGrid();
-    this.loadAppointmentData();
+ 
+   
+  }
+   apiConfig: any = {
+    dataConfig: {
+      url: environment.apiUrl,
+      rest: '/api/appointments/doctor/DR1/appointments', // New format - API endpoint path
+      params: "",
+      context: "",
+      fiqlKey: "", // Key name for FIQL filter parameter
+      lLimitKey: 'llimit',
+      uLimitKey: 'ulimit',
+      requestType: 'GET',
+      type: 'GET', // Alternative format
+      queryParamsUrl: 'llimit=$llimit&ulimit=$ulimit',
+      suppressNullValues: true,
+      suppressDefaultFiqlOnApply: false,
+      dataKey: "content", // Key to extract data from response
+      dataType: 'array'
+    },
+    countConfig: {
+      rest: '/api/appointments/doctor/DR1/appointments/count',
+      type: 'GET',
+      queryParamsUrl: '',
+      suppressNullValues: true
+    }
   }
 
   getQueryParams() {
@@ -86,108 +115,99 @@ export class AppointmentComponent implements OnInit {
 
 
   // All appointments methods
-  initializeAppointmentGrid() {
-    this.appointmentColumns = [
-      {
-        headerName: 'Status',
-        field: 'status',
-        width: 120,
+  initializeAppointmentGrid() { this.appointmentColumns = [
+    { 
+      headerName: 'Status',
+       field: 'status', 
+       width: 120,
         sortable: true,
-        filter: true,
-        cellRenderer: ChipCellRendererComponent
-      },
-      {
-        headerName: 'Patient Name',
-        field: 'patientName',
-        width: 150,
-        sortable: true,
-        filter: true
-      },
-      {
-        headerName: 'Doctor Name',
-        field: 'doctorName',
-        width: 150,
-        sortable: true,
-        filter: true
-      },
-      {
-        headerName: 'Appointment Date',
-        field: 'appointment_date_time',
-        width: 150,
-        sortable: true,
-        filter: true,
-        valueFormatter: (params: any) => {
-          return new Date(params.value).toLocaleDateString();
-        }
-      },
-      {
-        headerName: 'Slot Time',
-        field: 'slotTime',
-        width: 120,
-        sortable: true,
-        filter: true
-      },
-      {
-        headerName: 'Referred By',
-        field: 'referred_by_doctor_name',
-        width: 150,
-        sortable: true,
-        filter: true,
-        cellRenderer: (params: any) => {
-          if (params.data.is_referred && params.data.referred_by_doctor_name) {
-            return `<span style="background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
-              <i class="material-icons" style="font-size: 14px; vertical-align: middle; margin-right: 4px;">person_add</i>
-              ${params.data.referred_by_doctor_name}
-            </span>`;
-          }
-          return '<span style="color: #6b7280; font-style: italic;">Direct appointment</span>';
-        }
-      },
-      {
-        headerName: 'Notes',
-        field: 'notes',
-        width: 200,
-        sortable: true,
-        filter: true
-      }
-    ];
+         filter: true, 
+         cellRenderer: ChipCellRendererComponent
+         }, 
+         {
+           headerName: 'Patient Name', 
+           field: 'patientName', 
+           width: 150, 
+           sortable: true, 
+           filter: true
+           },
+            { 
+            headerName: 'Doctor Name',
+             field: 'doctorName',
+             width: 150, 
+            sortable: true, 
+            filter: true 
+            },
+          {
+             headerName: 'Reason',
+            field: 'reason', 
+             width: 150, 
+            sortable: true,
+             filter: true, 
+             valueFormatter: (params: any) => {
+             return new Date(params.value).toLocaleDateString();
+           } 
+          },
+          {
+           headerName: 'Start Time',
+           field: 'startTime', 
+           width: 120, 
+           sortable: true, 
+            filter: true 
+           },
+            {
+             headerName:'date',
+              field: 'date', 
+              width: 150, 
+             sortable: true, 
+            filter: true,
+            
+          },
+           
+          {
+            headerName: 'Notes', 
+             field: 'notes',
+              width: 200,
+              sortable: true, 
+          filter: true 
+        } 
+      ];
   }
+  //  loadAppointmentData(): void {
+  //   this.isLoading = true;
 
-  loadAppointmentData(): void {
-    this.isLoading = true;
+  //   const userType = this.authService.getUserType();
+  //   const user = this.authService.getCurrentUser() as { role?: string } | null;
+  //   const isDoctor =
+  //     this.authService.isUserType(UserType.DOCTOR) ||
+  //     userType === 'DOCTOR' ||
+  //     user?.role === 'DOCTOR';
+  //   const doctorCode = this.authService.getDoctorRegistrationNumber() || 'DR1';
 
-    const userType = this.authService.getUserType();
-    const user = this.authService.getCurrentUser() as { role?: string } | null;
-    const isDoctor =
-      this.authService.isUserType(UserType.DOCTOR) ||
-      userType === 'DOCTOR' ||
-      user?.role === 'DOCTOR';
-    const doctorCode = this.authService.getDoctorRegistrationNumber() || 'DR1';
-
-    if (isDoctor) {
-      this.appointmentService.getDoctorAppointments(doctorCode).subscribe({
-        next: (res) => {
-          this.allAppointments = res?.data ?? res ?? [];
-          this.isLoading = false;
-        },
-        error: (err) => {
-          console.error('Error loading doctor appointments', err);
-          this.isLoading = false;
-        }
-      });
-    } else {
-      this.appointmentService.getAppointments().subscribe({
-        next: (res) => {
-          this.allAppointments = res?.data ?? res ?? [];
-          this.isLoading = false;
-        },
-        error: (err) => {
-          console.error('Error loading appointments', err);
-          this.isLoading = false;
-        }
-      });
-    }
-  }
+  //   if (isDoctor) {
+  //     this.appointmentService.getDoctorAppointments(doctorCode).subscribe({
+  //       next: (res) => {
+  //         this.apiConfig = res?.data ?? res ?? [];
+  //         this.isLoading = false;
+  //       },
+  //       error: (err) => {
+  //         console.error('Error loading doctor appointments', err);
+  //         this.isLoading = false;
+  //       }
+  //     });
+  //   } else {
+  //     this.appointmentService.getAppointments().subscribe({
+  //       next: (res) => {
+  //         this.apiConfig = res?.data ?? res ?? [];
+  //         this.isLoading = false;
+  //       },
+  //       error: (err) => {
+  //         console.error('Error loading appointments', err);
+  //         this.isLoading = false;
+  //       }
+  //     });
+  //   }
+  // }
 
   onAppointmentRowClick(event: any) {
     console.log('Appointment row clicked:', event.data);
@@ -196,9 +216,9 @@ export class AppointmentComponent implements OnInit {
   openDialog(mode: Mode, data?: Appointment) {
     const isViewMode = mode === 'view';
     const submitButtonText = mode === 'create' ? 'Create Appointment' : mode === 'edit' ? 'Update Appointment' : 'Close';
-    
+
     const footerActions: DialogFooterAction[] = [];
-    
+
     if (!isViewMode) {
       footerActions.push({
         id: 'cancel',
@@ -207,7 +227,7 @@ export class AppointmentComponent implements OnInit {
         appearance: 'flat'
       });
     }
-    
+
     footerActions.push({
       id: 'submit',
       text: submitButtonText,
@@ -226,7 +246,7 @@ export class AppointmentComponent implements OnInit {
       // If result has form data (not just action), it means form was submitted successfully
       if (result && (result.patient_id || result.appointment_date_time || (!result.action && result !== null))) {
         // Handle appointment creation/update
-        this.loadAppointmentData();
+
       }
       // If result is just { action: 'submit' } without form data, form validation failed
       // The component will show validation errors
@@ -280,35 +300,30 @@ export class AppointmentComponent implements OnInit {
         // Handle cancel appointment - show confirmation
         if (confirm('Are you sure you want to cancel this appointment?')) {
           // Handle cancellation logic
-          this.loadAppointmentData();
+
         }
       }
     });
   }
 
   openRescheduleDialog(appointment: Appointment) {
-    const footerActions: DialogFooterAction[] = [
-      { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
-      { id: 'apply', text: 'Reschedule Appointment', color: 'primary', appearance: 'raised' }
-    ];
     const dialogRef = this.dialogService.openDialog(AppointmentRescheduleComponent, {
       title: 'Reschedule Appointment',
       data: { appointment },
-      width: '50%',
-      footerActions
+      width: '50%'
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         // Handle rescheduling
-        this.loadAppointmentData();
+
       }
     });
   }
 
   deleteAppointment(appointment: Appointment) {
     if (confirm(`Are you sure you want to delete appointment for ${appointment.patientName}?`)) {
-      this.allAppointments = this.allAppointments.filter(item => item.appointment_id !== appointment.appointment_id);
+      this.apiConfig = this.apiConfig.filter((item: Appointment) => item.appointment_id !== appointment.appointment_id);
     }
   }
 
