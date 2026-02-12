@@ -8,6 +8,7 @@ import { PatientCreateComponent } from '../patient-create/patient-create.compone
 import { StatusCellRendererComponent } from "@lk/core";
 import { CoreEventService, DialogboxService, DialogFooterAction } from "@lk/core";
 import { PatientService } from '../../services/patient.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
     selector: 'app-patient',
@@ -41,8 +42,9 @@ export class PatientComponent  implements OnInit{
   ];
 
   
-  patientData: Patient[]=[];
+  
   loading=false;
+ 
   selectedPatientId!: number; 
 
   constructor(private dialogService: DialogboxService,
@@ -58,34 +60,59 @@ export class PatientComponent  implements OnInit{
     });
   }
   ngOnInit(): void {
-    this.loadPatients();
-    this.initializeGridOptions();
+    this.initializeGridOptions()
+    
     
   }
 
-  loadPatients(): void {
-    this.loading = true;
-  
-    this.patientService.getPatients().subscribe({
-      next: (res: any) => {
-        console.log('Patients API response 👉', res);
-  
-        // 🔥 THIS IS THE FIX
-        this.patientData = res.content || [];
-  
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Failed to load patients ❌', err);
-        this.loading = false;
-      }
-    });
+apiConfig:any = {
+    dataConfig: {
+      url: environment.apiUrl,
+      rest: '/api/patients', // New format - API endpoint path
+      params: "",
+      context: "",
+      fiqlKey: "", // Key name for FIQL filter parameter
+      lLimitKey: 'llimit',
+      uLimitKey: 'ulimit',
+      requestType: 'GET',
+      type: 'GET', // Alternative format
+      queryParamsUrl: 'llimit=$llimit&ulimit=$ulimit',
+      suppressNullValues: true,
+      suppressDefaultFiqlOnApply: false,
+      dataKey: "content", // Key to extract data from response
+      dataType: 'array'
+    },
+    countConfig: {
+      rest: '/api/patients/doctor/DR1/connected/count',
+      type: 'GET',
+      queryParamsUrl: '',
+      suppressNullValues: true
+    }
   }
+  // loadPatients(): void {
+  //   this.loading = true;
+  
+  //   this.patientService.getPatients().subscribe({
+  //     next: (res: any) => {
+  //       console.log('Patients API response 👉', res);
+  
+  //       // 🔥 THIS IS THE FIX
+  //       this.patientData = res.content || [];
+  
+  //       this.loading = false;
+  //     },
+  //     error: (err) => {
+  //       console.error('Failed to load patients ❌', err);
+  //       this.loading = false;
+  //     }
+  //   });
+  // }
   
   appointmentGridOptions!: ExtendedGridOptions;
 
   initializeGridOptions() {
     this.appointmentGridOptions  ={
+      paginationMode: 'infinite',
       menuActions: [
         {
           "title":"View",
@@ -127,7 +154,7 @@ export class PatientComponent  implements OnInit{
     this.patientService.deletePatient(param?.data?.patientId).subscribe({
       next:()=>{
         console.log('patient Deleted Successfully');
-        this.loadPatients();
+       
       },
       error:(err)=>{
         console.error('Failed to delete patient', err);
@@ -213,7 +240,7 @@ export class PatientComponent  implements OnInit{
         this.patientService.createPatient(createPayload).subscribe({
           next: () => {
             console.log('✅ Patient created successfully');
-            this.loadPatients();
+          
           },
           error: (err) => {
             console.error(' Create patient failed', err);
@@ -246,7 +273,7 @@ export class PatientComponent  implements OnInit{
         this.patientService.updatePatient(patientId as number, updatePayload).subscribe({
           next: () => {
             console.log('Patient updated successfully');
-            this.loadPatients(); // refresh list
+            // refresh list
           },
           error: (err) => {
             console.error(' Update patient failed', err);

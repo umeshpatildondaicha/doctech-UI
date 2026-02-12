@@ -25,6 +25,13 @@ export class TimingManageService {
       payload as any
     );
   }
+  updateTiming(doctorCode: string, payload: any) {
+    return this.httpService.sendPOSTRequest(
+      `${this.baseUrl}/doctor/appointment-timings/${doctorCode}`,
+      payload
+    );
+  }
+  
   // getAllTimining(doctorCode:string):Observable<any[]>{
   //   return this.httpService.sendGETRequest(`${this.baseUrl}/doctor/appoinment-timings/${doctorCode}`) ;
 
@@ -64,11 +71,7 @@ export class TimingManageService {
       `${this.baseUrl}/doctor/appointment-timings/${doctorCode}/${timingId}`
     );
   }
-  deleteDailyBase(doctorCode: string, timingId :number) {
-    return this.httpService.sendDELETERequest(
-      `${this.baseUrl}/doctor/appointment-timings/${doctorCode}/${timingId}`
-    );
-  }
+
   
 }
 

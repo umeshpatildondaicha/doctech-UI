@@ -2,7 +2,7 @@
   <div page-body class="appointment-container">
     <div class="tab-content">
       <app-grid
-        [rowData]="allAppointments"
+        [apiConfig]="apiConfig"
         [columnDefs]="appointmentColumns"
         [gridOptions]="appointmentGridOptions"
         [height]="'500px'"

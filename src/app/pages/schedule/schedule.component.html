@@ -566,7 +566,7 @@
                         </div>
                       </div>
                       <div class="actions">
-                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'" [disabled]="true"></app-button>
+                        <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'" [disabled]="false" (click)="openEditLeave(item)"></app-button>
                         <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" [disabled]="true"></app-button>
                       </div>
                     </div>
@@ -641,9 +641,9 @@
                       </div>
                       <div class="actions">
                         <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'" [disabled]="true"></app-button>
-                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" [disabled]="false"></app-button>
+                        <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" [disabled]="false" ></app-button>
                       </div>
-                    </div>
+                    </div> 
                   }
                 </div>
               </app-card>
