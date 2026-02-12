@@ -1,0 +1,419 @@
+<div>
+  @if (setupType() === 'leave' && showLeaveScreen()) {
+    <!-- Leave-only screen -->
+    @if (apiError(); as err) {
+      <div class="avail-alert avail-alert--error"><mat-icon>error</mat-icon><span>{{ err }}</span></div>
+    }
+    <form [formGroup]="step3" class="avail-step">
+      <div class="leave-screen">
+        <h3 class="avail-h">Mark Leave</h3>
+        <p class="avail-p">Block calendar dates for vacation or personal time off.</p>
+
+        <div class="leave-section">
+          <h4 class="leave-section-title">SELECT DATES</h4>
+          <div class="leave-calendar-wrap">
+            <mat-calendar
+              [startAt]="leaveCalendarStart()"
+              [selected]="step3.value.leaveStart ?? null"
+              (selectedChange)="onLeaveDateSelected($event)"
+              [dateClass]="leaveDateClass"
+            ></mat-calendar>
+          </div>
+          <p class="leave-summary">{{ leaveSelectionSummary() }}</p>
+        </div>
+
+        @if (step3.errors?.['leaveDateRange']) {
+          <div class="avail-alert avail-alert--error"><mat-icon>error</mat-icon><span>End date must be on or after start date.</span></div>
+        }
+
+        <div class="avail-alert avail-alert--warn leave-override-warn">
+          <mat-icon>warning</mat-icon>
+          <div>
+            <div class="warn-title">Schedule Override</div>
+            <div class="warn-desc">Marking these days as "Leave" will automatically block all available appointment slots for this period. This takes priority over your Weekly Pattern.</div>
+          </div>
+        </div>
+
+        <div class="leave-section">
+          <h4 class="leave-section-title">REASON FOR LEAVE (Optional)</h4>
+          <mat-form-field appearance="outline" class="full">
+            <textarea matInput formControlName="leaveReason" rows="3" placeholder="e.g. Personal time, Medical, Conference..."></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
+  } @else if (setupType() === 'leave') {
+    <!-- Leave type-selection (no stepper) -->
+    @if (apiError(); as err) {
+      <div class="avail-alert avail-alert--error"><mat-icon>error</mat-icon><span>{{ err }}</span></div>
+    }
+    <form [formGroup]="step1" class="avail-step">
+      <ng-container *ngTemplateOutlet="typeCards"></ng-container>
+    </form>
+  } @else {
+  <!-- Non-leave stepper flow -->
+  <div class="avail-progress" aria-hidden="true" [style.gridTemplateColumns]="'repeat(' + totalSteps() + ', 1fr)'">
+    @for (i of progressSteps(); track i) {
+      <span class="seg" [class.on]="(stepper?.selectedIndex ?? 0) >= i"></span>
+    }
+  </div>
+
+  @if (apiError(); as err) {
+    <div class="avail-alert avail-alert--error"><mat-icon>error</mat-icon><span>{{ err }}</span></div>
+  }
+
+  <mat-horizontal-stepper #stepper [linear]="true" class="avail-stepper">
+    <!-- Step 1: Type selection -->
+    <mat-step [stepControl]="step1">
+      <form [formGroup]="step1" class="avail-step">
+        <ng-container *ngTemplateOutlet="typeCards"></ng-container>
+      </form>
+    </mat-step>
+
+    <!-- Step 2: Scheduling type -->
+    <mat-step [stepControl]="step2">
+      <form [formGroup]="step2" class="avail-step">
+        <h3 class="avail-h">How do you take appointments?</h3>
+        <p class="avail-p">Pick the scheduling logic that matches your clinic workflow.</p>
+
+        <div class="avail-two">
+          <button type="button" class="avail-choice" [class.sel]="schedulingType() === 'slots'" (click)="selectSchedulingType('slots')">
+            @if (schedulingType() === 'slots') { <span class="choice-check"><mat-icon>check_circle</mat-icon></span> }
+            <div class="choice-head">
+              <mat-icon class="choice-ico">schedule</mat-icon>
+              <div>
+                <div class="choice-title">Fixed Time Slots</div>
+                <div class="choice-desc">Patients book exact times (e.g. 10:00–10:30). Best for predictable schedules.</div>
+              </div>
+            </div>
+            <span class="choice-cta">{{ schedulingType() === 'slots' ? 'Selected' : 'Select Fixed Time' }}</span>
+          </button>
+
+          <button type="button" class="avail-choice" [class.sel]="schedulingType() === 'flexible'" (click)="selectSchedulingType('flexible')">
+            @if (schedulingType() === 'flexible') { <span class="choice-check"><mat-icon>check_circle</mat-icon></span> }
+            <div class="choice-head">
+              <mat-icon class="choice-ico">queue</mat-icon>
+              <div>
+                <div class="choice-title">Flexible Queue</div>
+                <div class="choice-desc">Patients come within a window; you see them in order. Best for walk-ins/variable durations.</div>
+              </div>
+            </div>
+            <span class="choice-cta">{{ schedulingType() === 'flexible' ? 'Selected' : 'Select Flexible Queue' }}</span>
+          </button>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- Step 3: Working hours -->
+    <mat-step [stepControl]="step3">
+      <form [formGroup]="step3" class="avail-step">
+        <h3 class="avail-h">Set your working hours</h3>
+        <p class="avail-p">Define your daily schedule and add breaks. We'll estimate capacity automatically.</p>
+
+        @if (setupType() === 'weekly') {
+          <div class="weekdays">
+            @for (d of weekdays; track d) {
+              <button type="button" class="day" [class.on]="(step3.value.weekdays ?? []).includes(d)" (click)="toggleWeekday(d)">
+                {{ d.slice(0, 3).toUpperCase() }}
+              </button>
+            }
+          </div>
+        }
+
+        @if (setupType() === 'override') {
+          <mat-form-field appearance="outline" class="datepick">
+            <mat-label>Select date</mat-label>
+            <input matInput [matDatepicker]="overridePicker" formControlName="date" />
+            <mat-datepicker-toggle matSuffix [for]="overridePicker"></mat-datepicker-toggle>
+            <mat-datepicker #overridePicker></mat-datepicker>
+          </mat-form-field>
+        }
+
+        <div class="avail-grid">
+          <div class="avail-panel">
+            <div class="timeline">
+              <div class="timeline-head">
+                <div class="timeline-title">Daily timeline</div>
+                <div class="timeline-legend">
+                  <span class="dot w"></span> Working
+                  <span class="dot b"></span> Break
+                  <span class="dot i"></span> Inactive
+                </div>
+              </div>
+              <div class="timeline-bar" [style.background]="timelineGradient()"></div>
+            </div>
+
+            <div class="field-row">
+              <mat-form-field appearance="outline" class="f">
+                <mat-label>Start time</mat-label>
+                <input matInput type="time" formControlName="startTime" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="f">
+                <mat-label>End time</mat-label>
+                <input matInput type="time" formControlName="endTime" />
+              </mat-form-field>
+            </div>
+
+            <div class="break-head">
+              <div class="break-title">Manage breaks</div>
+              <button mat-stroked-button type="button" (click)="addBreak()">+ Add another break</button>
+            </div>
+
+            <div class="break-list">
+              @for (b of breaksArray.controls; track $index) {
+                <div class="break-row" [formGroup]="$any(b)">
+                  <div class="break-ico"><mat-icon>free_breakfast</mat-icon></div>
+                  <div class="break-main">
+                    <div class="break-name"><input class="break-label" formControlName="label" /></div>
+                    <div class="break-meta">
+                      <input type="time" class="break-time" formControlName="startTime" />
+                      <span>–</span>
+                      <input type="time" class="break-time" formControlName="endTime" />
+                    </div>
+                  </div>
+                  <button type="button" class="break-x" (click)="removeBreak($index)" aria-label="Remove break"><mat-icon>close</mat-icon></button>
+                </div>
+              }
+            </div>
+          </div>
+
+          <aside class="avail-side" aria-label="Capacity overview">
+            <div class="side-card">
+              <div class="side-top">
+                <div class="side-k">Estimated appointments</div>
+                <div class="side-v">@if (overview().estimatedAppointments === null) { — } @else { {{ overview().estimatedAppointments }} }</div>
+                <div class="side-sub">
+                  @if (schedulingType() === 'slots') { Slots/day: {{ overview().slotsPerDay ?? 0 }} } @else { Queue-based (varies by visit type) }
+                </div>
+              </div>
+              <div class="side-row"><span>Total shift</span><span>{{ overview().shiftMinutes }} min</span></div>
+              <div class="side-row"><span>Total breaks</span><span>{{ overview().breakMinutes }} min</span></div>
+              <div class="side-row net"><span>Net working</span><span>{{ overview().netMinutes }} min</span></div>
+            </div>
+            <div class="side-note">
+              <mat-icon>info</mat-icon>
+              <span>Capacity is calculated from net working minutes and your selected scheduling logic.</span>
+            </div>
+          </aside>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- Step 4: Advanced settings -->
+    <mat-step [stepControl]="step4">
+      <form [formGroup]="step4" class="avail-step">
+        <h3 class="avail-h">Advanced settings (optional)</h3>
+        <p class="avail-p">Fine-tune buffer time and slot settings. You can adjust these later.</p>
+
+        <div class="adv">
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Buffer time between patients</mat-label>
+            <mat-select formControlName="bufferMinutes">
+              @for (m of bufferOptions; track m) {
+                <mat-option [value]="m">{{ m }} mins</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <div class="adv-block">
+            <div class="adv-title">Emergency priority</div>
+            <mat-slide-toggle formControlName="emergencyPriority">Enable emergency slot priority</mat-slide-toggle>
+          </div>
+
+          @if (schedulingType() === 'slots') {
+            <div class="adv-row">
+              <mat-form-field appearance="outline" class="f">
+                <mat-label>Slot duration</mat-label>
+                <input matInput type="number" min="5" formControlName="slotDurationMinutes" />
+                <span matTextSuffix>min</span>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="f">
+                <mat-label>Max patients / slot</mat-label>
+                <input matInput type="number" min="1" formControlName="maxAppointmentsPerSlot" />
+              </mat-form-field>
+            </div>
+          }
+
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Notes (optional)</mat-label>
+            <input matInput formControlName="notes" placeholder="Any notes to remember for this rule…" />
+          </mat-form-field>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- Step 5: Review (matches screenshot layout) -->
+    <mat-step [stepControl]="step5">
+      <form [formGroup]="step5" class="avail-step">
+        <div class="rs">
+          <!-- Apply Timing For -->
+          <div class="rs-top">
+            <div class="rs-field">
+              <div class="rs-label">Apply Timing For</div>
+              <div class="rs-value-box">{{ getSetupTypeLabel() }}</div>
+            </div>
+            @if (setupType() === 'override') {
+              <div class="rs-field">
+                <div class="rs-label">Select Date</div>
+                <div class="rs-value-box">{{ getAppliesToLabel() }}</div>
+              </div>
+            }
+            @if (setupType() === 'weekly') {
+              <div class="rs-field">
+                <div class="rs-label">Selected Days</div>
+                <div class="rs-value-box">{{ getAppliesToLabel() }}</div>
+              </div>
+            }
+          </div>
+
+          @if (setupType() === 'override') {
+            <div class="rs-info"><mat-icon>info</mat-icon><span>You can add only one availability slot for a single day.</span></div>
+          }
+
+          <!-- Working Hours -->
+          <div class="rs-section">
+            <div class="rs-section-head">
+              <h4 class="rs-section-title">Working Hours</h4>
+              <span class="rs-hours-badge">{{ getHoursLabel() }}</span>
+            </div>
+            <div class="timeline-bar rs-timeline" [style.background]="timelineGradient()"></div>
+            <div class="rs-row-2">
+              <div class="rs-field">
+                <div class="rs-label">START TIME</div>
+                <div class="rs-value-box">{{ step3.value.startTime }}</div>
+              </div>
+              <div class="rs-field">
+                <div class="rs-label">END TIME</div>
+                <div class="rs-value-box">{{ step3.value.endTime }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scheduling Logic -->
+          <div class="rs-section">
+            <h4 class="rs-section-title">Scheduling Logic</h4>
+            <div class="rs-logic-row">
+              <div class="rs-logic-card" [class.active]="schedulingType() === 'slots'">
+                <div class="rs-logic-left">
+                  <mat-icon>schedule</mat-icon>
+                  <div>
+                    <div class="rs-logic-title">Fixed Time Slots</div>
+                    <div class="rs-logic-desc">Predefined duration (e.g. 30 mins). Patients book specific times.</div>
+                  </div>
+                </div>
+                @if (schedulingType() === 'slots') { <span class="rs-logic-check"><mat-icon>check_circle</mat-icon></span> }
+                @if (schedulingType() !== 'slots') { <span class="rs-logic-radio"></span> }
+              </div>
+              <div class="rs-logic-card" [class.active]="schedulingType() === 'flexible'">
+                <div class="rs-logic-left">
+                  <mat-icon>queue</mat-icon>
+                  <div>
+                    <div class="rs-logic-title">Flexible Queue (Token)</div>
+                    <div class="rs-logic-desc">First come, first served. Max patients per session limits only.</div>
+                  </div>
+                </div>
+                @if (schedulingType() === 'flexible') { <span class="rs-logic-check"><mat-icon>check_circle</mat-icon></span> }
+                @if (schedulingType() !== 'flexible') { <span class="rs-logic-radio"></span> }
+              </div>
+            </div>
+          </div>
+
+          <!-- Slot settings + Estimated Capacity -->
+          <div class="rs-section">
+            <div class="rs-metrics">
+              @if (schedulingType() === 'slots') {
+                <div class="rs-field">
+                  <div class="rs-label">SLOT DURATION</div>
+                  <div class="rs-value-box rs-value-unit">{{ step4.value.slotDurationMinutes }}<span>min</span></div>
+                </div>
+                <div class="rs-field">
+                  <div class="rs-label">MAX PATIENTS / SLOT</div>
+                  <div class="rs-value-box rs-value-unit">{{ step4.value.maxAppointmentsPerSlot }}<span>min</span></div>
+                </div>
+              }
+              <div class="rs-capacity">
+                <mat-icon>trending_up</mat-icon>
+                <div>
+                  <div class="rs-cap-label">ESTIMATED CAPACITY</div>
+                  <div class="rs-cap-value">{{ overview().estimatedAppointments ?? '—' }} Appointments</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Breaks -->
+          <div class="rs-section">
+            <div class="rs-section-head">
+              <h4 class="rs-section-title">Break</h4>
+            </div>
+            @if ((breaksArray.value?.length ?? 0) === 0) {
+              <div class="rs-empty">No breaks configured</div>
+            } @else {
+              <div class="rs-break-list">
+                @for (b of breaksArray.value; track b?.startTime + b?.endTime) {
+                  <div class="rs-break">
+                    <mat-icon class="rs-break-ico">free_breakfast</mat-icon>
+                    <span class="rs-break-label">{{ b?.label || 'Break' }}</span>
+                    <span class="rs-break-time">{{ b?.startTime }} – {{ b?.endTime }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          @if (step4.value.notes) {
+            <div class="rs-section">
+              <h4 class="rs-section-title">Notes</h4>
+              <div class="rs-notes">{{ step4.value.notes }}</div>
+            </div>
+          }
+        </div>
+      </form>
+    </mat-step>
+  </mat-horizontal-stepper>
+  }
+</div>
+
+<!-- Shared template: type-selection cards -->
+<ng-template #typeCards>
+  <h3 class="avail-h">What would you like to set up?</h3>
+  <p class="avail-p">Choose an option below to begin defining your availability pattern.</p>
+
+  <div class="avail-card-grid">
+    <button type="button" class="avail-card" [class.sel]="setupType() === 'base'" (click)="setSetupType('base')">
+      @if (setupType() === 'base') { <span class="card-selected-badge">Selected</span> }
+      <div class="ico"><mat-icon>today</mat-icon></div>
+      <div class="t">Daily Routine</div>
+      <div class="d">Set consistent hours for each day of the week.</div>
+      <span class="prio p4">P4</span>
+      @if (setupType() === 'base') { <span class="check"><mat-icon>check_circle</mat-icon></span> }
+    </button>
+
+    <button type="button" class="avail-card" [class.sel]="setupType() === 'weekly'" (click)="setSetupType('weekly')">
+      @if (setupType() === 'weekly') { <span class="card-selected-badge">Selected</span> }
+      <div class="ico"><mat-icon>calendar_view_week</mat-icon></div>
+      <div class="t">Weekly Schedule</div>
+      <div class="d">Customize your availability for a recurring weekly pattern.</div>
+      <span class="prio p3">P3</span>
+      @if (setupType() === 'weekly') { <span class="check"><mat-icon>check_circle</mat-icon></span> }
+    </button>
+
+    <button type="button" class="avail-card" [class.sel]="setupType() === 'override'" (click)="setSetupType('override')">
+      @if (setupType() === 'override') { <span class="card-selected-badge">Selected</span> }
+      <div class="ico"><mat-icon>event</mat-icon></div>
+      <div class="t">One Special Day</div>
+      <div class="d">Add specific availability for a single, unique date.</div>
+      <span class="prio p2">P2</span>
+      @if (setupType() === 'override') { <span class="check"><mat-icon>check_circle</mat-icon></span> }
+    </button>
+
+    <button type="button" class="avail-card" [class.sel]="setupType() === 'leave'" (click)="setSetupType('leave')">
+      @if (setupType() === 'leave') { <span class="card-selected-badge">Selected</span> }
+      <div class="ico"><mat-icon>event_busy</mat-icon></div>
+      <div class="t">Mark Leave</div>
+      <div class="d">Schedule time off for vacation or personal reasons.</div>
+      <span class="prio p1">P1</span>
+      @if (setupType() === 'leave') { <span class="check"><mat-icon>check_circle</mat-icon></span> }
+    </button>
+  </div>
+</ng-template>

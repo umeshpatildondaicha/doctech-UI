@@ -54,11 +54,11 @@ export class AppPatientQueueContentComponent implements OnInit {
   ngOnInit(): void {
     const doctorCode = this.authService.getDoctorRegistrationNumber() ?? 'DR1';
     this.appointmentService.getDoctorQueue(doctorCode).subscribe({
-      next: (data) => {
+      next: (data: unknown) => {
         const items = this.normalizeQueueResponse(data);
         this.applyQueueData(items);
       },
-      error: (err) => {
+      error: (err: unknown) => {
         console.error('[AppPatientQueueContent] Doctor queue API error:', err);
       },
     });

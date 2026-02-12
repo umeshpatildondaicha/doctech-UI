@@ -1,7 +1,7 @@
 export type BlogStatus = 'DRAFT' | 'PUBLISHED' | 'SCHEDULED';
 export type BlogVisibility = 'PUBLIC' | 'PRIVATE';
 
-export type BlogDocType = 'PDF' | 'DOC' | 'DOCX' | 'FILE';
+export type BlogDocType = 'PDF' | 'DOC' | 'DOCX' | 'IMAGE' | 'FILE';
 
 export interface BlogDocument {
   id: string;

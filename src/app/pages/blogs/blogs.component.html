@@ -128,10 +128,11 @@
           </div>
           <div class="topbar-actions">
             @if (selectedPost) {
-              <app-button text="Save draft" appearance="flat" (btnClick)="saveDraft()"></app-button>
-              <app-button text="Publish" color="primary" appearance="raised" (btnClick)="publish()"></app-button>
+              @if (isNewPost) {
+                <app-button text="Cancel" appearance="flat" (btnClick)="cancelNewPost()"></app-button>
+              }
+              <app-button text="Save" color="primary" appearance="raised" [disabled]="isCreating" (btnClick)="save()"></app-button>
             }
-            <app-button appearance="icon" [fontIcon]="'add'" title="New post" (btnClick)="createNewPost()"></app-button>
           </div>
         </div>
 
@@ -186,35 +187,59 @@
                   }
                   <div class="editor-meta-field editor-meta-field--cover">
                     <span class="editor-label" id="edit-cover-label">Cover</span>
-                    <input class="editor-file-input" type="file" accept="image/*" (change)="onCoverSelected($event)" #coverFile aria-labelledby="edit-cover-label" />
-                    <button type="button" class="editor-action-btn" (click)="coverFile.click()" aria-labelledby="edit-cover-label">
+                    <input
+                      class="editor-file-input"
+                      type="file"
+                      accept="image/*"
+                      (change)="onCoverSelected($event)"
+                      #coverFile
+                      aria-labelledby="edit-cover-label" />
+                    <div
+                      class="editor-meta-clickable"
+                      role="button"
+                      tabindex="0"
+                      aria-labelledby="edit-cover-label"
+                      (click)="coverFile.click()">
                       @if (selectedPost.coverImageUrl) {
-                        <app-icon [fontIcon]="'image'" [size]="16"></app-icon>
-                        <span>Change</span>
+                        <span class="editor-attach-pill">Image added</span>
                       } @else {
-                        <app-icon [fontIcon]="'add_a_photo'" [size]="16"></app-icon>
-                        <span>Add cover</span>
+                        <span class="editor-attach-pill editor-attach-pill--empty">No image added</span>
                       }
-                    </button>
+                    </div>
                   </div>
                   <div class="editor-meta-field editor-meta-field--attach">
                     <span class="editor-label" id="edit-attach-label">Attachments</span>
-                    <input #docInput class="editor-file-input" type="file" multiple accept=".pdf,.doc,.docx,application/pdf" (change)="onDocSelected($event)" aria-labelledby="edit-attach-label" />
-                    <button type="button" class="editor-action-btn" (click)="docInput.click()" aria-labelledby="edit-attach-label">
-                      <app-icon [fontIcon]="'attach_file'" [size]="16"></app-icon>
-                      <span>Add files</span>
-                    </button>
-                    @if (selectedPost.documents.length > 0) {
-                      <ul class="editor-docs">
-                        @for (d of selectedPost.documents; track d.id) {
-                          <li class="editor-doc">
-                            <app-icon [fontIcon]="getDocIcon(d.type)" [size]="14"></app-icon>
-                            <span class="editor-doc-name">{{ d.title }}</span>
-                            <button type="button" class="editor-doc-remove" (click)="removeDoc(d.id); $event.stopPropagation()" aria-label="Remove attachment">×</button>
-                          </li>
-                        }
-                      </ul>
-                    }
+                    <input
+                      #docInput
+                      class="editor-file-input"
+                      type="file"
+                      multiple
+                      accept=".pdf,.doc,.docx,application/pdf,image/*"
+                      (change)="onDocSelected($event)"
+                      aria-labelledby="edit-attach-label" />
+                    <div
+                      class="editor-meta-clickable"
+                      role="button"
+                      tabindex="0"
+                      aria-labelledby="edit-attach-label"
+                      (click)="docInput.click()">
+                      @if (selectedPost.documents.length === 0) {
+                        <span class="editor-attach-pill editor-attach-pill--empty">No attachments</span>
+                      } @else {
+                        <div class="editor-attach-summary">
+                          @if (imageAttachmentCount > 0) {
+                            <span class="editor-attach-pill">
+                              {{ imageAttachmentCount }} image{{ imageAttachmentCount > 1 ? 's' : '' }} added
+                            </span>
+                          }
+                          @if (fileAttachmentCount > 0) {
+                            <span class="editor-attach-pill">
+                              {{ fileAttachmentCount }} file{{ fileAttachmentCount > 1 ? 's' : '' }} added
+                            </span>
+                          }
+                        </div>
+                      }
+                    </div>
                   </div>
                 </div>
                 <div class="editor-tags">

@@ -493,6 +493,18 @@ html{
     }
   }
 }
+
+/* Availability Setup wizard: size to content, no fixed height */
+.availability-setup-dialog-panel {
+  .mat-mdc-dialog-container {
+    height: fit-content !important;
+    max-height: 90vh;
+  }
+  .mat-mdc-dialog-surface {
+    height: fit-content !important;
+  }
+}
+
 .custom-dialog-container{
   .mat-mdc-dialog-container {
     padding: 20px;
@@ -558,4 +570,52 @@ html{
   margin: 0 !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
+}
+
+/* =============================================================================
+   Mobile UI — beautiful, touch-friendly experience
+   ============================================================================= */
+:root {
+  --mobile-tap-min: 44px;
+  --mobile-radius: 16px;
+  --mobile-radius-sm: 12px;
+  --mobile-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --mobile-shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+}
+
+/* Smooth scroll and overscroll on mobile */
+@media (max-width: 768px) {
+  html {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  body {
+    padding-left: var(--safe-area-inset-left);
+    padding-right: var(--safe-area-inset-right);
+    padding-bottom: var(--safe-area-inset-bottom);
+  }
+}
+
+/* Touch-friendly tap targets (use on interactive elements) */
+@media (pointer: coarse) {
+  .touch-target,
+  button.mat-mdc-icon-button,
+  .icon-btn,
+  .topbar .icon-btn {
+    min-width: var(--mobile-tap-min) !important;
+    min-height: var(--mobile-tap-min) !important;
+  }
+}
+
+/* Mobile card styling — softer, rounded */
+@media (max-width: 768px) {
+  .main-content .mat-mdc-card,
+  .main-content [class*="card"]:not(.breadcrumb-list) {
+    border-radius: var(--mobile-radius) !important;
+    box-shadow: var(--mobile-shadow) !important;
+  }
 }

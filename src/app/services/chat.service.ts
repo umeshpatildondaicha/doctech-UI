@@ -120,10 +120,11 @@ export class ChatService {
     const ensureAppointment = (): Observable<ChatSession> => {
       if (session.appointmentPublicId) return of(session);
       return this.appointmentService.getPatientAppointments(doctorCode, patientPublicId).pipe(
-        map((resp) => {
-          const list = Array.isArray(resp)
-            ? resp
-            : resp?.appointments ?? resp?.content ?? resp?.data ?? [];
+        map((resp: unknown) => {
+          const r = resp as { appointments?: unknown[]; content?: unknown[]; data?: unknown[] } | unknown[];
+          const list = Array.isArray(r)
+            ? r
+            : r?.appointments ?? r?.content ?? r?.data ?? [];
           const apt = list.length > 0 ? this.pickAppointment(list) : null;
           if (apt) {
             const aptId = apt.publicId ?? apt.appointmentPublicId ?? apt.id;

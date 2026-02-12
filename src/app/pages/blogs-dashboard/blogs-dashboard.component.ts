@@ -1,11 +1,13 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AppButtonComponent, DividerComponent, IconComponent, PageBodyDirective, PageComponent } from '@lk/core';
 import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
 
-import { BLOGS_MOCK_POSTS, BlogPost, BlogStatus } from '../blogs/blogs.data';
+import { BlogPost, BlogStatus } from '../blogs/blogs.data';
+import { BlogService } from '../../services/blog.service';
+import { AuthService } from '../../services/auth.service';
 
 type StatusFilter = 'ALL' | BlogStatus;
 type SortBy = 'UPDATED' | 'VIEWS' | 'LIKES' | 'TITLE';
@@ -17,16 +19,29 @@ type SortBy = 'UPDATED' | 'VIEWS' | 'LIKES' | 'TITLE';
   templateUrl: './blogs-dashboard.component.html',
   styleUrl: './blogs-dashboard.component.scss'
 })
-export class BlogsDashboardComponent {
+export class BlogsDashboardComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly blogService = inject(BlogService);
+  private readonly authService = inject(AuthService);
 
-  // TEMP: mock data until wired to API
-  readonly posts = signal<BlogPost[]>([...BLOGS_MOCK_POSTS]);
+  readonly posts = signal<BlogPost[]>([]);
 
   readonly search = signal('');
   readonly statusFilter = signal<StatusFilter>('ALL');
   readonly sortBy = signal<SortBy>('UPDATED');
   readonly showFilterPanel = signal(false);
+
+  ngOnInit(): void {
+    this.loadPosts();
+  }
+
+  private loadPosts(): void {
+    const reg = this.authService.getDoctorRegistrationNumber() ?? 'me';
+    this.blogService.listBlogs(reg).subscribe({
+      next: (rows) => this.posts.set(rows ?? []),
+      error: () => this.posts.set([]),
+    });
+  }
 
   readonly stats = computed(() => {
     const posts = this.posts();
@@ -89,7 +104,7 @@ export class BlogsDashboardComponent {
     this.statusFilter.set('ALL');
     this.sortBy.set('UPDATED');
     this.showFilterPanel.set(false);
-    // TODO: reload posts when API is wired
+    this.loadPosts();
   }
 
   createPost(): void {
@@ -116,8 +131,8 @@ export class BlogsDashboardComponent {
 
   excerpt(content: string): string {
     const text = (content || '')
-      .replace(/<[^>]*>/g, ' ')
-      .replace(/\s+/g, ' ')
+      .replaceAll(/<[^>]*>/g, ' ')
+      .replaceAll(/\s+/g, ' ')
       .trim();
     if (!text) return 'No content yet. Open the editor to start writing.';
     return text.length > 140 ? `${text.slice(0, 140)}…` : text;

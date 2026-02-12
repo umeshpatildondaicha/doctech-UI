@@ -30,29 +30,6 @@ export class AppointmentService {
       `${this.baseUrl}/appointments/doctor/${doctorCode}/requests`
     );
   }
-  getAllAppointmentsCount(doctorCode: string) {
-    return this.httpService.sendGETRequest(
-      `${this.baseUrl}/appointments/doctor/${doctorCode}/appointments/count`
-    );
-  }
-  getPendingRequestsCount(doctorCode: string) {
-    return this.httpService.sendGETRequest(
-      `${this.baseUrl}/appointments/doctor/${doctorCode}/requests/count`
-    );
-  }
-  
-  
-  /**
-   * Get doctor's patient queue.
-   * GET /api/appointments/doctor/{doctorCode}/queue
-   */
-  getDoctorQueue(doctorCode: string): Observable<any> {
-    const safeDoctor = encodeURIComponent((doctorCode || '').trim());
-    console.log('[AppointmentService] Getting doctor queue for doctor:', safeDoctor);
-    return this.httpService.sendGETRequest(
-      `${this.baseUrl}/appointments/doctor/${safeDoctor}/queue`
-    );
-  }
 
   approveAppointmentRequest(doctorCode: string, requestId: string): Observable<any> {
     return this.httpService.sendPUTRequest(
@@ -88,41 +65,64 @@ export class AppointmentService {
     return this.httpService.sendGETRequest(`${this.baseUrl}/appointments/doctor/${safeDoctor}/schedule${qs}`);
   }
 
-  /**
-   * Get available appointment slots for a doctor on a given date.
-   * GET /api/doctor/appointment-timings/doctor/{doctorRegNo}/slots/date/{YYYY-MM-DD}?slotMinutes=30
-   */
-  getAppointmentSlotsForDate(doctorRegNo: string, dateStr: string, slotMinutes = 30): Observable<any> {
-    const safeDoctor = encodeURIComponent((doctorRegNo || '').trim());
-    const safeDate = encodeURIComponent((dateStr || '').trim());
-    const url = `${this.baseUrl}/doctor/appointment-timings/doctor/${safeDoctor}/slots/date/${safeDate}?slotMinutes=${slotMinutes}`;
-    return this.httpService.sendGETRequest(url);
-  }
-
-  /**
-   * Get appointments for a specific patient with this doctor.
-   * Use to pick an appointmentPublicId for chat when doctor selects a patient.
-   * GET /api/appointments/doctor/{doctorCode}/patient/{patientPublicId}
-   * or GET /api/appointments/doctor/{doctorCode}/patient/{patientPublicId}/details
-   */
-  getPatientAppointments(doctorCode: string, patientPublicId: string): Observable<any> {
+  /** GET doctor's patient queue (today's queue order). */
+  getDoctorQueue(doctorCode: string): Observable<any> {
     const safeDoctor = encodeURIComponent((doctorCode || '').trim());
-    const safePatient = encodeURIComponent((patientPublicId || '').trim());
     return this.httpService.sendGETRequest(
-      `${this.baseUrl}/appointments/doctor/${safeDoctor}/patient/${safePatient}`
+      `${this.baseUrl}/appointments/doctor/${safeDoctor}/queue`
     );
   }
 
-  /**
-   * Reschedule an appointment.
-   * PUT /api/appointments/{appointmentPublicId}/reschedule
-   * Body: { newDate, newStartTime, newEndTime }
-   */
-  rescheduleAppointment(appointmentPublicId: string, payload: { newDate: string; newStartTime: string; newEndTime: string }): Observable<any> {
+  /** Reschedule an appointment by public id. */
+  rescheduleAppointment(
+    appointmentPublicId: string,
+    payload: { newDate: string; newStartTime: string; newEndTime: string }
+  ): Observable<any> {
     const safeId = encodeURIComponent((appointmentPublicId || '').trim());
     return this.httpService.sendPUTRequest(
       `${this.baseUrl}/appointments/${safeId}/reschedule`,
       JSON.stringify(payload)
+    );
+  }
+
+  /** GET available appointment slots for a doctor on a date. */
+  getAppointmentSlotsForDate(
+    doctorRegNo: string,
+    date: string,
+    slotMinutes?: number
+  ): Observable<any> {
+    const safeDoctor = encodeURIComponent((doctorRegNo || '').trim());
+    const safeDate = encodeURIComponent((date || '').trim());
+    const params = new URLSearchParams({ date: safeDate });
+    if (slotMinutes != null) params.set('slotMinutes', String(slotMinutes));
+    const qs = `?${params.toString()}`;
+    return this.httpService.sendGETRequest(
+      `${this.baseUrl}/appointments/doctor/${safeDoctor}/slots${qs}`
+    );
+  }
+
+  /** GET total appointment count for a doctor (e.g. for dashboard). */
+  getAllAppointmentsCount(doctorCode: string): Observable<{ count: number }> {
+    const safeDoctor = encodeURIComponent((doctorCode || '').trim());
+    return this.httpService.sendGETRequest(
+      `${this.baseUrl}/appointments/doctor/${safeDoctor}/count`
+    );
+  }
+
+  /** GET pending appointment requests count for a doctor. */
+  getPendingRequestsCount(doctorCode: string): Observable<{ count: number }> {
+    const safeDoctor = encodeURIComponent((doctorCode || '').trim());
+    return this.httpService.sendGETRequest(
+      `${this.baseUrl}/appointments/doctor/${safeDoctor}/requests/count`
+    );
+  }
+
+  /** GET appointments for a specific patient (doctor + patient). */
+  getPatientAppointments(doctorCode: string, patientPublicId: string): Observable<any> {
+    const safeDoctor = encodeURIComponent((doctorCode || '').trim());
+    const safePatient = encodeURIComponent((patientPublicId || '').trim());
+    return this.httpService.sendGETRequest(
+      `${this.baseUrl}/appointments/doctor/${safeDoctor}/patient/${safePatient}/appointments`
     );
   }
 }

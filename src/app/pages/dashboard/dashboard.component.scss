@@ -394,11 +394,30 @@ $spacing-tight: var(--spacing-lg);
 @media (max-width: 768px) {
   .dashboard-page {
     padding: $spacing-tight;
+    padding-bottom: calc(#{$spacing-tight} + var(--safe-area-inset-bottom, 0px));
+  }
+
+  .page-title {
+    font-size: var(--font-size-2xl);
+    margin-bottom: 1rem;
   }
 
   .dashboard-cards {
     grid-template-columns: 1fr;
-    gap: $spacing-tight;
+    gap: 0.875rem;
+  }
+
+  .stat-card {
+    padding: 1rem 1.25rem;
+    border-radius: var(--mobile-radius, 16px);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    min-height: 72px;
+  }
+
+  .stat-card .stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
   }
 
   .dashboard-main {
@@ -408,6 +427,11 @@ $spacing-tight: var(--spacing-lg);
   .main-left,
   .main-right {
     gap: $spacing-tight;
+  }
+
+  .card {
+    border-radius: var(--mobile-radius, 16px);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   }
 
   .card .card-head {
@@ -426,14 +450,19 @@ $spacing-tight: var(--spacing-lg);
   .chart-container {
     padding: 0 16px $spacing-unit;
   }
-
-  .stat-card {
-    padding: $spacing-tight;
-  }
 }
 
 @media (max-width: 480px) {
   .dashboard-page {
-    padding: 12px;
+    padding: 12px 10px 16px 10px;
+    padding-bottom: calc(16px + var(--safe-area-inset-bottom, 0px));
+  }
+
+  .page-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .stat-card {
+    padding: 0.875rem 1rem;
   }
 }

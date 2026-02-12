@@ -150,16 +150,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       this.authService.getDoctorRegistrationNumber() || 'DR1';
   
     this.appointmentService.getAllAppointmentsCount(doctorCode).subscribe({
-      next: (res: any) => {
+      next: (res: { count?: number }) => {
         console.log('All Appointments Count API =>', res);
-  
-        // usually response: { count: number }
         this.allAppointmentCount = res?.count ?? 0;
-  
-      
         this.stats.bookAppointment = this.allAppointmentCount;
       },
-      error: (err) => {
+      error: (err: unknown) => {
         console.error('All appointments count failed', err);
         this.allAppointmentCount = 0;
         this.stats.bookAppointment = 0;
@@ -171,13 +167,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       this.authService.getDoctorRegistrationNumber() || 'DR1';
   
     this.appointmentService.getPendingRequestsCount(doctorCode).subscribe({
-      next: (res: any) => {
+      next: (res: { count?: number }) => {
         console.log('Pending Requests Count API =>', res);
-  
-        // API response usually: { count: number }
         this.pendingRequestCount = res?.count ?? 0;
       },
-      error: (err) => {
+      error: (err: unknown) => {
         console.error('Pending requests count failed', err);
         this.pendingRequestCount = 0;
       }

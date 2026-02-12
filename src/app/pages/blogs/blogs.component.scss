@@ -79,9 +79,7 @@ $panel-divider: 1px solid rgba(0, 0, 0, 0.06);
   min-height: 0;
   height: min(560px, calc(100vh - 3rem));
   max-height: calc(100vh - 2rem);
-  border-radius: 40px;
-  padding: 10px;
-  background: #1c1c1e;
+  border-radius: 32px;
   box-shadow:
     0 0 0 2px #2c2c2e,
     0 0 0 10px #1c1c1e,
@@ -916,6 +914,36 @@ $control-border: 1px solid $border;
     color: $text;
     background: rgba(0, 0, 0, 0.08);
   }
+}
+
+.editor-meta-clickable {
+  margin-top: 0.35rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+
+.editor-attach-summary {
+  margin-top: 0.35rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.editor-attach-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.03);
+  color: $muted;
+  font-size: 0.75rem;
+}
+
+.editor-attach-pill--empty {
+  opacity: 0.8;
 }
 
 .editor-tags {

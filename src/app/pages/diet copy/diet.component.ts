@@ -67,10 +67,6 @@ export class DietComponent implements OnInit, OnDestroy {
   searchQuery: string = '';
   selectedDietType: string = '';
   selectedMealType: string = '';
-  dietPlanCount = 0;
-  
-  weeklyDietPlansCount = 0;
-  dietPlanGroupsCount = 0 ;
 
   mealTypes: { label: string; value: string }[] = [
     { label: 'All', value: '' },
@@ -167,12 +163,6 @@ export class DietComponent implements OnInit, OnDestroy {
     if (currentUrl.includes('/diet/plans')) {
       this.selectedTabIndex = 1; // Diet Plans tab index (second tab)
     }
-    const doctorRegNo =
-      this.authService.getDoctorRegistrationNumber() || 'DR1';
-
-    this.loadDietPlansCount(doctorRegNo);
-    this.loadWeeklyDietPlansCount(doctorRegNo);
-    this.loadDietPlanGroupsCount(doctorRegNo);
   }
 
   ngOnDestroy() {
@@ -297,41 +287,6 @@ export class DietComponent implements OnInit, OnDestroy {
         }
       });
   }
-  loadDietPlansCount(regNo: string) {
-    this.dietservice.getDietPlansCount(regNo).subscribe({
-      next: (res:any) => {
-        console.log('Diet plans count =>', res);
-        this.dietPlanCount = res.count ;
-      },
-      error: (err) => {
-        console.error('Diet plans count error', err);
-      }
-    });
-  }
-
-  loadWeeklyDietPlansCount(regNo: string) {
-    this.dietservice.getWeeklyDietPlansCount(regNo).subscribe({
-      next: (res:any) => {
-        console.log('Weekly diet plans count =>', res);
-        this.weeklyDietPlansCount = res.count;
-      },
-      error: (err) => {
-        console.error('Weekly diet plans count error', err);
-      }
-    });
-  }
-  loadDietPlanGroupsCount(regNo: string) {
-    this.dietservice.getDietPlanGroupsCount(regNo).subscribe({
-      next: (res:any) => {
-        console.log('Diet Plan Groups Count =>', res);
-        this.dietPlanGroupsCount = res.count;
-      },
-      error: (err) => {
-        console.error('Diet Plan Groups Count Error', err);
-      }
-    });
-  }
-  
   
 
 

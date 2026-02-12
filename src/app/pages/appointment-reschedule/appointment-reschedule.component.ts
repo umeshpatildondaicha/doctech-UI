@@ -118,9 +118,11 @@ export class AppointmentRescheduleComponent implements OnInit, AfterViewInit {
           hasConflict: this.hasConflict
         });
       },
-      error: (err) => {
+      error: (err: unknown) => {
         this.isSubmitting = false;
-        const msg = err?.error?.message ?? err?.message ?? 'Failed to reschedule appointment.';
+        const msg = (err as { error?: { message?: string }; message?: string })?.error?.message
+          ?? (err as { message?: string })?.message
+          ?? 'Failed to reschedule appointment.';
         this.snackBar.open(msg, 'Close', { duration: 4000 });
       }
     });
@@ -227,7 +229,7 @@ export class AppointmentRescheduleComponent implements OnInit, AfterViewInit {
     this.availableTimeSlots = [];
 
     this.appointmentService.getAppointmentSlotsForDate(doctorRegNo, dateStr, 30).subscribe({
-      next: (res) => {
+      next: (res: unknown) => {
         const slots = this.mapApiSlotsToTimeSlots(res);
         this.slotsByDate.set(dateStr, slots);
         this.availableTimeSlots = slots;

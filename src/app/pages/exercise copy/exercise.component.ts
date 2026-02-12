@@ -19,8 +19,7 @@ import { ExerciseCreateComponent } from '../exercise-create/exercise-create.comp
 import { ExerciseSetCreateComponent } from '../exercise-set-create/exercise-set-create.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ExerciseCardComponent } from '../../components/exercise-card/exercise-card.component';
-import { EntityToolbarComponent } from '../../components';
-import { ExerciseService } from '../../services/exercise.service';
+import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
 
 @Component({
     selector: 'app-exercise',
@@ -56,14 +55,10 @@ export class ExerciseComponent implements OnInit, OnDestroy {
   viewMode: 'cards' | 'table' = 'cards';
   selectedCategory: string = 'all';
   selectedDifficulty: string = 'all';
-  individualExercisesCount = 0;
-   groupExercisesCount = 0;
-
 
   constructor(
     private dialogService: DialogboxService,
-    private eventService: CoreEventService,
-    private exerciseService :ExerciseService,
+    private eventService: CoreEventService
   ) {}
 
   ngOnInit() {
@@ -355,27 +350,6 @@ export class ExerciseComponent implements OnInit, OnDestroy {
     { value: 'Intermediate', label: 'Intermediate' },
     { value: 'Advanced', label: 'Advanced' }
   ];
-  loadExerciseCounts() {
-
-    // 🔹 Individual Exercise Count
-    this.exerciseService.getIndividualExerciseCount().subscribe({
-      next: (res: any) => {
-        console.log('Individual Exercise Count API =>', res);
-        this.individualExercisesCount = res;
-      },
-      error: () => this.individualExercisesCount = 0
-    });
-  
-    // 🔹 Group Exercise Count
-    this.exerciseService.getGroupExercisesCount().subscribe({
-      next: (res: any) => {
-        console.log('Group Exercise Count API =>', res);
-        this.groupExercisesCount = res;
-      },
-      error: () => this.groupExercisesCount = 0
-    });
-  }
-  
 
   calculateStats() {
     this.exerciseStats = {

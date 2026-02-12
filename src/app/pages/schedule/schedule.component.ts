@@ -18,7 +18,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
-import { AppButtonComponent, AppInputComponent, DividerComponent, IconComponent, CalendarComponent, CoreEventService, DialogboxService, DialogFooterAction, PageComponent, PageBodyDirective, ToggleButtonComponent, type ToggleButtonOption } from '@lk/core';
+import { AppButtonComponent, AppInputComponent, DividerComponent, IconComponent, CalendarComponent, CoreEventService, DialogboxService, DialogFooterAction, PageComponent, PageBodyDirective, ToggleButtonComponent, type ToggleButtonOption, GridComponent, ExtendedGridOptions } from '@lk/core';
+import { ColDef } from 'ag-grid-community';
 import { AppointmentCreateComponent } from '../appointment-create/appointment-create.component';
 import { AppointmentViewComponent } from '../appointment-view/appointment-view.component';
 import { PatientSearchDialogComponent, PatientSearchResult } from '../patient-search-dialog/patient-search-dialog.component';
@@ -37,6 +38,7 @@ import { LeaveDialogComponent } from './leave-dialog/leave-dialog.component';
 import { SpecificdaydialogComponent } from './specificdaydialog/specificdaydialog.component';
 import { DailyBaseDialogComponent } from './daily-base-dialog/daily-base-dialog.component';
 import { WeekroutinedialogComponent } from './weekroutinedialog/weekroutinedialog.component';
+import { AvailabilitySetupDialogComponent } from './availability-setup-dialog/availability-setup-dialog.component';
 
 type TimingPriorityTab = 'p4' | 'p3' | 'p2' | 'p1';
 
@@ -293,6 +295,7 @@ interface DoctorSchedule {
         AppCardComponent,
         AppCardActionsDirective,
         ToggleButtonComponent,
+        GridComponent,
         NgIf
     ],
     templateUrl: './schedule.component.html',
@@ -326,6 +329,13 @@ dailyBaseAvailability: {
     { value: 'manage', label: 'Manage' }
   ];
 
+  /** Priority tooltips: what each level is and overall rule (higher overrides lower) */
+  readonly priorityRuleSummary = 'Priority: higher overrides lower (P1 > P2 > P3 > P4).';
+  readonly priorityTooltipP1 = 'Leave & absences — blocks availability for the date. Highest priority; overrides all others. ' + this.priorityRuleSummary;
+  readonly priorityTooltipP2 = 'Specific date override — custom schedule for a single date. Overrides weekly and daily base. ' + this.priorityRuleSummary;
+  readonly priorityTooltipP3 = 'Weekly routine — same schedule for a weekday every week. Overrides daily base. ' + this.priorityRuleSummary;
+  readonly priorityTooltipP4 = 'Daily base availability — default schedule when no overrides apply. Lowest priority. ' + this.priorityRuleSummary;
+
   // Timings (P4 standard / P3 weekly / P2 overrides / P1 leave)
   timingsDaily = {
     start: '',
@@ -358,6 +368,71 @@ dailyBaseAvailability: {
   manageSpecificDays: ManageSpecificDayItem[] = [];
   manageWeeklyRoutines: ManageWeeklyRoutineItem[] = [];
   manageBaseAvailability: ManageBaseAvailabilityItem[] = [];
+
+  // Grid config for Manage section (core app-grid)
+  leaveColumns: ColDef[] = [
+    { headerName: 'Label', field: 'label', sortable: true, filter: true, flex: 1, minWidth: 140 },
+    { headerName: 'Date range', field: 'rangeLabel', sortable: true, filter: true, flex: 1, minWidth: 180 },
+    { headerName: 'Duration', field: 'durationLabel', sortable: true, width: 100 }
+  ];
+  leaveGridOptions: ExtendedGridOptions = {
+    rowHeight: 44,
+    headerHeight: 36,
+    pagination: false,
+    suppressCellFocus: true,
+    menuActions: [
+      { title: 'Edit', icon: 'edit', click: () => {} },
+      { title: 'Delete', icon: 'delete', click: () => {} }
+    ]
+  };
+
+  specificDayColumns: ColDef[] = [
+    { headerName: 'Label', field: 'label', sortable: true, filter: true, flex: 1, minWidth: 140 },
+    { headerName: 'Date', field: 'dateLabel', sortable: true, width: 100 },
+    { headerName: 'Range', field: 'rangeLabel', sortable: true, filter: true, flex: 1, minWidth: 160 }
+  ];
+  specificDayGridOptions: ExtendedGridOptions = {
+    rowHeight: 44,
+    headerHeight: 36,
+    pagination: false,
+    suppressCellFocus: true,
+    menuActions: [
+      { title: 'Edit', icon: 'edit', click: () => {} },
+      { title: 'Delete', icon: 'delete', click: (p: { data?: ManageSpecificDayItem }) => {} }
+    ]
+  };
+
+  weeklyColumns: ColDef[] = [
+    { headerName: 'Label', field: 'label', sortable: true, filter: true, flex: 1, minWidth: 140 },
+    { headerName: 'Time', field: 'timeLabel', sortable: true, width: 160 },
+    { headerName: 'Days', field: 'days', sortable: true, filter: true, flex: 1, minWidth: 120, valueGetter: (params) => (params.data?.days ?? []).map((d: Weekday) => this.getWeekdayAbbr(d)).join(', ') }
+  ];
+  weeklyGridOptions: ExtendedGridOptions = {
+    rowHeight: 44,
+    headerHeight: 36,
+    pagination: false,
+    suppressCellFocus: true,
+    menuActions: [
+      { title: 'Edit', icon: 'edit', click: () => {} },
+      { title: 'Delete', icon: 'delete', click: () => {} }
+    ]
+  };
+
+  baseAvailabilityColumns: ColDef[] = [
+    { headerName: 'Label', field: 'label', sortable: true, filter: true, flex: 1, minWidth: 140 },
+    { headerName: 'Time', field: 'timeLabel', sortable: true, width: 160 },
+    { headerName: 'Notes', field: 'note', sortable: true, filter: true, flex: 1, minWidth: 120 }
+  ];
+  baseAvailabilityGridOptions: ExtendedGridOptions = {
+    rowHeight: 44,
+    headerHeight: 36,
+    pagination: false,
+    suppressCellFocus: true,
+    menuActions: [
+      { title: 'Edit', icon: 'edit', click: (p: { data?: ManageBaseAvailabilityItem }) => this.openDailyBaseDialog(p?.data ?? null) },
+      { title: 'Delete', icon: 'delete', click: (p: { data?: ManageBaseAvailabilityItem }) => p?.data && this.onDeleteTiming(p.data) }
+    ]
+  };
 
   timingsForecast: ForecastDay[] = [];
   filteredTimingsForecast: ForecastDay[] = [];
@@ -1259,9 +1334,12 @@ dailyBaseAvailability: {
         const startDate = l.startDate as string;
         const endDate = l.endDate as string;
         const days = diffDaysInclusive(startDate, endDate);
+        const rangeLabel = startDate === endDate
+          ? formatDateLong(startDate)
+          : `${formatDateLong(startDate)} – ${formatDateLong(endDate)}`;
         return {
           label: (l.reason || 'Leave').toString(),
-          rangeLabel: `${formatDateLong(startDate)} – ${formatDateLong(endDate)}`,
+          rangeLabel,
           durationLabel: days === 1 ? '1 Day' : `${days} Days`
         } as ManageLeaveItem;
       });
@@ -1508,6 +1586,36 @@ dailyBaseAvailability: {
     }
   }
 
+  /** Format weekly days array for list display (e.g. "MON, WED, FRI") */
+  getWeeklyDaysLabel(days: Weekday[] | undefined): string {
+    if (!days?.length) return '—';
+    return (days as Weekday[]).map(d => this.getWeekdayAbbr(d)).join(', ');
+  }
+
+  onEditLeave(_item: ManageLeaveItem): void {
+    this.onAddLeave(); // Open same dialog; can pass _item for edit when backend supports it
+  }
+
+  onDeleteLeave(_item: ManageLeaveItem): void {
+    // TODO: wire to delete API when available
+  }
+
+  onEditSpecificDay(item: ManageSpecificDayItem): void {
+    this.onAddSpecificDay(); // TODO: open edit dialog with item.raw when supported
+  }
+
+  onDeleteSpecificDay(_item: ManageSpecificDayItem): void {
+    // TODO: wire to delete API when available
+  }
+
+  onEditWeeklyRoutine(_item: ManageWeeklyRoutineItem): void {
+    this.onAddWeeklyRoutine(); // TODO: open edit dialog with item when supported
+  }
+
+  onDeleteWeeklyRoutine(_item: ManageWeeklyRoutineItem): void {
+    // TODO: wire to delete API when available
+  }
+
   // ---- Manage UI actions (mock) ----
   addManageItem(scope: 'p1' | 'p2' | 'p3' | 'p4'): void {
 
@@ -1526,6 +1634,30 @@ dailyBaseAvailability: {
     if (scope === 'p4') {
       this.openDailyBaseDialog(); // 👈 फक्त dialog उघड
     }
+  }
+
+  openAvailabilitySetupWizard(): void {
+    const doctorId = this.resolveDoctorIdForTimings();
+    const footerActions: DialogFooterAction[] = [
+      { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
+      { id: 'back', text: 'Back', color: 'secondary', appearance: 'stroked' },
+      { id: 'apply', text: 'Next', color: 'primary', appearance: 'raised' }
+    ];
+    const ref = this.dialogService.openDialog(AvailabilitySetupDialogComponent, {
+      title: 'Availability Setup',
+      hideHeader: false,
+      width: '980px',
+      maxWidth: '96vw',
+      maxHeight: '90vh',
+      footerActions,
+      data: { doctorId }
+    });
+
+    ref.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.loadTimingsFromApi({ fallbackToDemo: false });
+      }
+    });
   }
   
   // addManageItem(scope: 'p1' | 'p2' | 'p3' | 'p4'): void {
