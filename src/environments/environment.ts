@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'https://doctech.solutions',
+  apiUrl: 'http://doctech.solutions',
   appName: 'Shree Clinic Management System',
   version: '1.0.0',
   buildNumber: '2024.1.0',

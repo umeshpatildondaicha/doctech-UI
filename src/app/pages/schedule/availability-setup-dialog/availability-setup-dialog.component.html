@@ -280,11 +280,11 @@
             <div class="rs-row-2">
               <div class="rs-field">
                 <div class="rs-label">START TIME</div>
-                <div class="rs-value-box">{{ step3.value.startTime }}</div>
+                <div class="rs-value-box">{{ step3.value.startTime || '—' }}</div>
               </div>
               <div class="rs-field">
                 <div class="rs-label">END TIME</div>
-                <div class="rs-value-box">{{ step3.value.endTime }}</div>
+                <div class="rs-value-box">{{ step3.value.endTime || '—' }}</div>
               </div>
             </div>
           </div>
@@ -324,11 +324,11 @@
               @if (schedulingType() === 'slots') {
                 <div class="rs-field">
                   <div class="rs-label">SLOT DURATION</div>
-                  <div class="rs-value-box rs-value-unit">{{ step4.value.slotDurationMinutes }}<span>min</span></div>
+                  <div class="rs-value-box rs-value-unit">{{ step4.value.slotDurationMinutes ?? '—' }}<span>{{ step4.value.slotDurationMinutes ? 'min' : '' }}</span></div>
                 </div>
                 <div class="rs-field">
                   <div class="rs-label">MAX PATIENTS / SLOT</div>
-                  <div class="rs-value-box rs-value-unit">{{ step4.value.maxAppointmentsPerSlot }}<span>min</span></div>
+                  <div class="rs-value-box rs-value-unit">{{ step4.value.maxAppointmentsPerSlot ?? '—' }}</div>
                 </div>
               }
               <div class="rs-capacity">

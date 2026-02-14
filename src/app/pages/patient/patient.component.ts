@@ -2,13 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { GridComponent } from "@lk/core";
 import { Patient } from '../../interfaces/patient.interface';
-import { ColDef, GridOptions } from 'ag-grid-community';
+import { ColDef } from 'ag-grid-community';
 import { IconComponent ,ExtendedGridOptions} from "@lk/core";
 import { PatientCreateComponent } from '../patient-create/patient-create.component';
 import { StatusCellRendererComponent } from "@lk/core";
 import { CoreEventService, DialogboxService, DialogFooterAction } from "@lk/core";
 import { PatientService } from '../../services/patient.service';
-import { environment } from '../../../environments/environment';
 
 @Component({
     selector: 'app-patient',
@@ -17,16 +16,7 @@ import { environment } from '../../../environments/environment';
     styleUrl: './patient.component.scss'
 })
 export class PatientComponent  implements OnInit{
-  // patientData: Patient[] = [
-  //   { patientId: 1, firstName: 'John', lastName: 'Doe', dateOfBirth: '1990-01-01', gender: 'Male', contact: 1234567890, email: 'john.doe@email.com', address: '123 Main St, Anytown, USA', bloodGroup: 'A_POSITIVE', createdDate: '2024-01-15', updatedDate: '2024-01-15' },
-  //   { patientId: 2, firstName: 'Jane', lastName: 'Smith', dateOfBirth: '1995-05-10', gender: 'Female', contact: 1234567890, email: 'jane.smith@email.com', address: '456 Elm St, Anytown, USA', bloodGroup: 'B_NEGATIVE', createdDate: '2024-01-20', updatedDate: '2024-01-20' },
-  //   { patientId: 3, firstName: 'Mike', lastName: 'Johnson', dateOfBirth: '1988-12-15', gender: 'Male', contact: 1234567890, email: 'mike.johnson@email.com', address: '789 Oak St, Anytown, USA', bloodGroup: 'O_POSITIVE', createdDate: '2024-01-18', updatedDate: '2024-01-18' },
-  //   { patientId: 4, firstName: 'Sarah', lastName: 'Wilson', dateOfBirth: '1992-03-20', gender: 'Female', contact: 1234567890, email: 'sarah.wilson@email.com', address: '101 Pine St, Anytown, USA', bloodGroup: 'AB_NEGATIVE', createdDate: '2024-01-16', updatedDate: '2024-01-16' },
-  //   { patientId: 5, firstName: 'David', lastName: 'Brown', dateOfBirth: '1985-07-15', gender: 'Male', contact: 1234567890, email: 'david.brown@email.com', address: '555 Maple Ave, Anytown, USA', bloodGroup: 'O_NEGATIVE', createdDate: '2024-01-05', updatedDate: '2024-01-05' },
-  //   { patientId: 6, firstName: 'Lisa', lastName: 'Davis', dateOfBirth: '1993-11-25', gender: 'Female', contact: 1234567890, email: 'lisa.davis@email.com', address: '777 Pine St, Anytown, USA', bloodGroup: 'A_POSITIVE', createdDate: '2024-01-14', updatedDate: '2024-01-14' },
-  //   { patientId: 7, firstName: 'Robert', lastName: 'Miller', dateOfBirth: '1980-06-10', gender: 'Male', contact: 1234567890, email: 'robert.miller@email.com', address: '999 Oak St, Anytown, USA', bloodGroup: 'B_POSITIVE', createdDate: '2024-01-03', updatedDate: '2024-01-03' },
-  //   { patientId: 8, firstName: 'Emily', lastName: 'Garcia', dateOfBirth: '1991-09-18', gender: 'Female', contact: 1234567890, email: 'emily.garcia@email.com', address: '111 Pine St, Anytown, USA', bloodGroup: 'AB_POSITIVE', createdDate: '2024-01-11', updatedDate: '2024-01-11' }
-  // ];
+  patientData: Patient[] = [];
 
   columnDefs: ColDef[] = [
     { field: 'bloodGroup', headerName: 'Blood Group', width: 140, sortable: true, filter: true, cellRenderer: StatusCellRendererComponent },
@@ -60,53 +50,25 @@ export class PatientComponent  implements OnInit{
     });
   }
   ngOnInit(): void {
-    this.initializeGridOptions()
-    
-    
+    this.initializeGridOptions();
+    this.loadPatients();
   }
 
-apiConfig:any = {
-    dataConfig: {
-      url: environment.apiUrl,
-      rest: '/api/patients', // New format - API endpoint path
-      params: "",
-      context: "",
-      fiqlKey: "", // Key name for FIQL filter parameter
-      lLimitKey: 'llimit',
-      uLimitKey: 'ulimit',
-      requestType: 'GET',
-      type: 'GET', // Alternative format
-      queryParamsUrl: 'llimit=$llimit&ulimit=$ulimit',
-      suppressNullValues: true,
-      suppressDefaultFiqlOnApply: false,
-      dataKey: "content", // Key to extract data from response
-      dataType: 'array'
-    },
-    countConfig: {
-      rest: '/api/patients/doctor/DR1/connected/count',
-      type: 'GET',
-      queryParamsUrl: '',
-      suppressNullValues: true
-    }
+  loadPatients(): void {
+    this.loading = true;
+    this.patientService.getPatients().subscribe({
+      next: (res: any) => {
+        // API returns Spring Boot Page with data under "content" key
+        this.patientData = res?.content || res?.data || (Array.isArray(res) ? res : []);
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Failed to load patients', err);
+        this.loading = false;
+      }
+    });
   }
-  // loadPatients(): void {
-  //   this.loading = true;
-  
-  //   this.patientService.getPatients().subscribe({
-  //     next: (res: any) => {
-  //       console.log('Patients API response 👉', res);
-  
-  //       // 🔥 THIS IS THE FIX
-  //       this.patientData = res.content || [];
-  
-  //       this.loading = false;
-  //     },
-  //     error: (err) => {
-  //       console.error('Failed to load patients ❌', err);
-  //       this.loading = false;
-  //     }
-  //   });
-  // }
+
   
   appointmentGridOptions!: ExtendedGridOptions;
 

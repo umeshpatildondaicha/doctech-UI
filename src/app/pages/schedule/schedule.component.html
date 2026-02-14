@@ -282,15 +282,15 @@
                     <div class="timings-field-grid">
                       <div class="timings-field">
                         <span class="timings-field-label">Start time</span>
-                        <span class="timings-field-value">{{ timingsDaily.start }}</span>
+                        <span class="timings-field-value">{{ timingsDaily.start || '—' }}</span>
                       </div>
                       <div class="timings-field">
                         <span class="timings-field-label">End time</span>
-                        <span class="timings-field-value">{{ timingsDaily.end }}</span>
+                        <span class="timings-field-value">{{ timingsDaily.end || '—' }}</span>
                       </div>
                       <div class="timings-field timings-field-full">
                         <span class="timings-field-label">Slot duration</span>
-                        <span class="timings-field-value">{{ timingsDaily.slotDuration }} min</span>
+                        <span class="timings-field-value">{{ timingsDaily.slotDuration ? timingsDaily.slotDuration + ' min' : '—' }}</span>
                       </div>
                     </div>
                     <div class="timings-block">
@@ -350,8 +350,8 @@
                               <span class="timings-detail-muted">Weekly schedule</span>
                             </div>
                             <div class="timings-field-grid">
-                              <div class="timings-field"><span class="timings-field-label">Start</span><span class="timings-field-value">{{ sr.start }}</span></div>
-                              <div class="timings-field"><span class="timings-field-label">End</span><span class="timings-field-value">{{ sr.end }}</span></div>
+                              <div class="timings-field"><span class="timings-field-label">Start</span><span class="timings-field-value">{{ sr.start || '—' }}</span></div>
+                              <div class="timings-field"><span class="timings-field-label">End</span><span class="timings-field-value">{{ sr.end || '—' }}</span></div>
                               <div class="timings-field timings-field-full"><span class="timings-field-label">Breaks</span><span class="timings-field-value">{{ sr.breaks.length }}</span></div>
                             </div>
                             @if (sr.breaks.length > 0) {
@@ -402,8 +402,8 @@
                               <span class="timings-detail-muted">Date override</span>
                             </div>
                             <div class="timings-field-grid">
-                              <div class="timings-field"><span class="timings-field-label">Start</span><span class="timings-field-value">{{ so.start }}</span></div>
-                              <div class="timings-field"><span class="timings-field-label">End</span><span class="timings-field-value">{{ so.end }}</span></div>
+                              <div class="timings-field"><span class="timings-field-label">Start</span><span class="timings-field-value">{{ so.start || '—' }}</span></div>
+                              <div class="timings-field"><span class="timings-field-label">End</span><span class="timings-field-value">{{ so.end || '—' }}</span></div>
                               <div class="timings-field timings-field-full"><span class="timings-field-label">Breaks</span><span class="timings-field-value">{{ so.breaks.length }}</span></div>
                             </div>
                             @if (so.breaks.length > 0) {
