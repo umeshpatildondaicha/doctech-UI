@@ -1,0 +1,77 @@
+<div class="base-config-form">
+  <form [formGroup]="configForm">
+    <div class="form-grid">
+      <!-- Config Key -->
+      <div class="form-field">
+        <app-input
+          [label]="'Config Key'"
+          [placeholder]="'e.g. THEME'"
+          formControlName="configKey"
+          [disabled]="isViewMode"
+          [prefixIconName]="'key'">
+        </app-input>
+        @if (hasError('configKey')) {
+          <div class="field-error">{{ getErrorMessage('configKey') }}</div>
+        }
+      </div>
+
+      <!-- Config Tag -->
+      <div class="form-field">
+        <app-input
+          [label]="'Config Tag'"
+          [placeholder]="'e.g. UI'"
+          formControlName="configTag"
+          [disabled]="isViewMode"
+          [prefixIconName]="'label'">
+        </app-input>
+        @if (hasError('configTag')) {
+          <div class="field-error">{{ getErrorMessage('configTag') }}</div>
+        }
+      </div>
+
+      <!-- Application Name -->
+      <div class="form-field">
+        <app-input
+          [label]="'Application Name'"
+          [placeholder]="'e.g. doctech'"
+          formControlName="applicationName"
+          [disabled]="isViewMode"
+          [prefixIconName]="'apps'">
+        </app-input>
+        @if (hasError('applicationName')) {
+          <div class="field-error">{{ getErrorMessage('applicationName') }}</div>
+        }
+      </div>
+
+      <!-- Customer ID -->
+      <div class="form-field">
+        <app-input
+          [label]="'Customer ID'"
+          [placeholder]="'e.g. 1'"
+          formControlName="customerId"
+          type="number"
+          [disabled]="isViewMode"
+          [prefixIconName]="'person'">
+        </app-input>
+        @if (hasError('customerId')) {
+          <div class="field-error">{{ getErrorMessage('customerId') }}</div>
+        }
+      </div>
+    </div>
+
+    <!-- Config Value (full width) -->
+    <div class="form-field full-width">
+      <label class="value-label">Config Value</label>
+      <textarea
+        class="config-value-textarea"
+        formControlName="configValue"
+        [attr.disabled]="isViewMode ? '' : null"
+        placeholder="Enter configuration value (supports JSON, plain text, etc.)"
+        rows="8">
+      </textarea>
+      @if (hasError('configValue')) {
+        <div class="field-error">{{ getErrorMessage('configValue') }}</div>
+      }
+    </div>
+  </form>
+</div>

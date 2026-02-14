@@ -40,6 +40,13 @@ export const environment = {
       invoices: '/api/billing/invoices',
       payments: '/api/billing/payments',
       pdf: '/api/billing/invoices/pdf'
+    },
+    baseConfiguration: {
+      base: '/base/util/rest/BaseConfiguration',
+      details: '/base/util/rest/BaseConfiguration/getBaseConfigurationDetails',
+      count: '/base/util/rest/BaseConfiguration/count',
+      getByTag: '/base/util/rest/BaseConfiguration/getBaseConfigByTag',
+      getByKeyTypeApp: '/base/util/rest/BaseConfiguration/key-type-app'
     }
   },
   

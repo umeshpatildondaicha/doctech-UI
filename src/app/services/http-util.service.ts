@@ -142,11 +142,19 @@ export class HttpUtilService {
   }
 
   /**
-   * Gets the HTTP options
+   * Gets the HTTP options (defaults to JSON; typed for JSON for use with typed HttpClient).
+   * When passing responseType: ARRAYBUFFER/BLOB/TEXT, cast the result to the appropriate
+   * options type at the HttpClient call site if needed.
    * @param options - The HTTP options
    * @returns The HTTP options
    */
-  getHttpOptions(options: IHttpOptions = {}) {
+  getHttpOptions(options: IHttpOptions = {}): {
+    headers: HttpHeaders;
+    params: HttpParams;
+    observe: 'body';
+    reportProgress: boolean;
+    responseType?: 'json';
+  } {
     const {
       headers = {},
       observe = Observe.BODY,
@@ -160,8 +168,14 @@ export class HttpUtilService {
       params: params,
       observe: observe as 'body',
       reportProgress: reportProgress,
-      responseType: responseType as 'arraybuffer',
+      responseType: responseType as 'json' | 'arraybuffer' | 'blob' | 'text',
       // withCredentials: withCredentials,
+    } as {
+      headers: HttpHeaders;
+      params: HttpParams;
+      observe: 'body';
+      reportProgress: boolean;
+      responseType?: 'json';
     };
   }
 

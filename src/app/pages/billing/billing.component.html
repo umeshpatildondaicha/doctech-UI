@@ -1,10 +1,18 @@
 <app-page>
   <div class="billing-dashboard" page-body>
-    <app-admin-page-header
-      [title]="'Billing Overview'"
-      [actions]="headerActions"
-      (actionClicked)="onHeaderAction($event)">
-    </app-admin-page-header>
+    <app-entity-toolbar
+      [title]="'Billing'"
+      [showCounts]="false"
+      [newLabel]="'Create Invoice'"
+      [showRefresh]="true"
+      [showFilter]="true"
+      [searchPlaceholder]="'Search by patient name, patient number...'"
+      [searchSuggestions]="billingSearchHints"
+      (search)="onBillingSearch($event)"
+      (newClick)="openPatientProfile()"
+      (refreshClick)="refresh()"
+      (filterClick)="onBillingFilterClick()">
+    </app-entity-toolbar>
 
     @if (isDemoData) {
       <div class="demo-pill">

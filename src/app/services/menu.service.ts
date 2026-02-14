@@ -72,6 +72,20 @@ export class MenuService {
       route: '/billing', 
       section: 'main',
       userTypes: ['doctor']
+    },
+    {
+      label: 'Base Configuration',
+      icon: 'settings',
+      route: '/admin/base-configuration',
+      section: 'main',
+      userTypes: ['doctor']
+    },
+    {
+      label: 'Lists Designer',
+      icon: 'grid_on',
+      route: '/admin/lists-designer',
+      section: 'main',
+      userTypes: ['doctor']
     }
   ];
 
@@ -130,6 +144,20 @@ export class MenuService {
       label: 'Government Schemes', 
       icon: 'account_balance', 
       route: '/admin/schemes', 
+      section: 'administration',
+      userTypes: ['admin']
+    },
+    {
+      label: 'Base Configuration',
+      icon: 'settings',
+      route: '/admin/base-configuration',
+      section: 'administration',
+      userTypes: ['admin']
+    },
+    {
+      label: 'Lists Designer',
+      icon: 'grid_on',
+      route: '/admin/lists-designer',
       section: 'administration',
       userTypes: ['admin']
     }

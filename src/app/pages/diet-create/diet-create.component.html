@@ -7,7 +7,7 @@
         <!-- Large Image Section -->
         <div class="diet-image-section">
           <img [src]="dietForm.get('imageUrl')?.value || imagePreview"
-            alt="Diet image"
+            alt="Diet"
             class="diet-main-image"
             (error)="onImageError($event)">
             <app-button
@@ -16,9 +16,6 @@
             [text]="'Close'"
             (btnClick)="onCancel()"
             ></app-button>
-            <!-- <button mat-button class="close-overlay-btn" (click)="onCancel()">
-              Close
-            </button> -->
           </div>
           <!-- Content Grid -->
           <div class="diet-content-grid">
@@ -84,9 +81,6 @@
                 (btnClick)="onEdit()"
                 [appearance]="'stroked'"
                 ></app-button>
-                <!-- <button mat-stroked-button class="action-btn edit-btn" (click)="onEdit()">
-                  Edit
-                </button> -->
                 <app-button
                 class="action-btn delete-btn"
                 [fontIcon]="'delete'"
@@ -94,9 +88,6 @@
                 (btnClick)="onDelete()"
                 [appearance]="'stroked'"
                 ></app-button>
-                <!-- <button mat-stroked-button class="action-btn delete-btn" (click)="onDelete()">
-                  Delete
-                </button> -->
               </div>
             </div>
           </div>
@@ -107,61 +98,68 @@
     <!-- Form Mode Content -->
     @if (!isViewMode) {
       <div class="dialog-content">
+        @if (mode === 'edit') {
+          <p class="dialog-subtitle">Update the details below and save your changes.</p>
+        }
         <form [formGroup]="dietForm" (ngSubmit)="onSubmit()" class="diet-form">
-          <!-- Name Field -->
-          <div class="form-field-group">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Name *</mat-label>
-              <input matInput formControlName="name" placeholder="Enter diet name">
-              @if (dietForm.get('name')?.hasError('required')) {
-                <mat-error>
-                  Name is required
-                </mat-error>
-              }
-            </mat-form-field>
-          </div>
-          <!-- Description Field -->
-          <div class="form-field-group">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Description</mat-label>
-              <textarea matInput formControlName="description"
-                placeholder="Enter diet description"
-                rows="3"
-                cdkTextareaAutosize
-                cdkAutosizeMinRows="3"
-              cdkAutosizeMaxRows="5"></textarea>
-              @if (dietForm.get('description')?.hasError('required')) {
-                <mat-error>
-                  Description is required
-                </mat-error>
-              }
-            </mat-form-field>
-          </div>
-          <!-- Diet Type Field -->
-          <div class="form-field-group">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Diet Type</mat-label>
-              <mat-select formControlName="dietType">
-                <mat-option value="MEDITERRANEAN">Mediterranean</mat-option>
-                <mat-option value="KETO">Keto</mat-option>
-                <mat-option value="VEGAN">Vegan</mat-option>
-                <mat-option value="VEGETARIAN">Vegetarian</mat-option>
-                <mat-option value="PALEO">Paleo</mat-option>
-                <mat-option value="LOW_CARB">Low Carb</mat-option>
-                <mat-option value="HIGH_PROTEIN">High Protein</mat-option>
-              </mat-select>
-              @if (dietForm.get('dietType')?.hasError('required')) {
-                <mat-error>
-                  Diet type is required
-                </mat-error>
-              }
-            </mat-form-field>
-          </div>
-          <!-- Nutritional Information Section -->
-          <div class="section-title">
-            <h4>Nutritional Information</h4>
-          </div>
-          <div class="nutrition-grid">
+          <!-- Basic Info Card -->
+          <section class="form-card form-card--basic">
+            <div class="section-header">
+              <mat-icon class="section-icon" aria-hidden="true">restaurant</mat-icon>
+              <h3 class="section-title">Basic information</h3>
+            </div>
+            <div class="form-card-body">
+              <div class="form-field-group">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Name *</mat-label>
+                  <input matInput formControlName="name" placeholder="Enter diet name">
+                  @if (dietForm.get('name')?.hasError('required')) {
+                    <mat-error>Name is required</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+              <div class="form-field-group">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Description</mat-label>
+                  <textarea matInput formControlName="description"
+                    placeholder="Enter diet description"
+                    rows="3"
+                    cdkTextareaAutosize
+                    cdkAutosizeMinRows="3"
+                    cdkAutosizeMaxRows="5"></textarea>
+                  @if (dietForm.get('description')?.hasError('required')) {
+                    <mat-error>Description is required</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+              <div class="form-field-group">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Diet Type</mat-label>
+                  <mat-select formControlName="dietType">
+                    <mat-option value="MEDITERRANEAN">Mediterranean</mat-option>
+                    <mat-option value="KETO">Keto</mat-option>
+                    <mat-option value="VEGAN">Vegan</mat-option>
+                    <mat-option value="VEGETARIAN">Vegetarian</mat-option>
+                    <mat-option value="PALEO">Paleo</mat-option>
+                    <mat-option value="LOW_CARB">Low Carb</mat-option>
+                    <mat-option value="HIGH_PROTEIN">High Protein</mat-option>
+                  </mat-select>
+                  @if (dietForm.get('dietType')?.hasError('required')) {
+                    <mat-error>Diet type is required</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+            </div>
+          </section>
+
+          <!-- Nutritional Information Card -->
+          <section class="form-card form-card--nutrition">
+            <div class="section-header">
+              <mat-icon class="section-icon" aria-hidden="true">monitor_heart</mat-icon>
+              <h3 class="section-title">Nutritional information</h3>
+            </div>
+            <div class="form-card-body">
+              <div class="nutrition-grid">
             <div class="form-field-group">
               <mat-form-field appearance="outline">
                 <mat-label>Calories (kcal)</mat-label>
@@ -211,105 +209,111 @@
                 <mat-label>Fiber (g)</mat-label>
                 <input matInput formControlName="fiber" type="number" placeholder="0">
                 @if (dietForm.get('fiber')?.hasError('required')) {
-                  <mat-error>
-                    Fiber is required
-                  </mat-error>
+                  <mat-error>Fiber is required</mat-error>
                 }
               </mat-form-field>
             </div>
-          </div>
-          <!-- Media Links Section -->
-          <div class="section-title">
-            <h4>Media Links</h4>
-          </div>
-          <div class="form-field-group">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>YouTube URL</mat-label>
-              <input matInput formControlName="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
-              <mat-icon matSuffix>video_library</mat-icon>
-            </mat-form-field>
-          </div>
-          <div class="form-field-group">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Document URL (PDF)</mat-label>
-              <input matInput formControlName="documentUrl" placeholder="https://.../doc.pdf">
-              <mat-icon matSuffix>description</mat-icon>
-            </mat-form-field>
-          </div>
-          <!-- Image Section -->
-          <div class="section-title">
-            <h4>Image</h4>
-          </div>
-          <div class="form-field-group">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Image URL</mat-label>
-              <input matInput formControlName="imageUrl" placeholder="https://images.unsplash.com/...">
-              <mat-icon matSuffix>image</mat-icon>
-            </mat-form-field>
-          </div>
-          <div class="form-field-group">
-            <div class="upload-section">
-              <label class="upload-label">Or Upload Image File</label>
-              <div class="file-upload-area" (click)="fileInput.click()" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
-                <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*" style="display: none;">
-                <mat-icon>cloud_upload</mat-icon>
-                <span>Choose file</span>
-                @if (selectedFileName) {
-                  <span class="file-name">{{ selectedFileName }}</span>
-                }
-                @if (!selectedFileName) {
-                  <span class="file-name">No file chosen</span>
-                }
               </div>
             </div>
-          </div>
-          <!-- Image Preview -->
-          @if (imagePreview || dietForm.get('imageUrl')?.value) {
-            <div class="form-field-group">
-              <div class="image-preview-section">
-                <label class="preview-label">Image Preview</label>
-                <div class="image-preview">
-                  <img [src]="imagePreview || dietForm.get('imageUrl')?.value"
-                    alt="Diet preview"
-                    (error)="onImageError($event)">
-                  </div>
+          </section>
+
+          <!-- Media & Image Card -->
+          <section class="form-card form-card--media">
+            <div class="section-header">
+              <mat-icon class="section-icon" aria-hidden="true">perm_media</mat-icon>
+              <h3 class="section-title">Media & image</h3>
+            </div>
+            <div class="form-card-body">
+              <div class="form-field-group">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>YouTube URL</mat-label>
+                  <input matInput formControlName="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
+                  <mat-icon matSuffix>video_library</mat-icon>
+                </mat-form-field>
+              </div>
+              <div class="form-field-group">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Document URL (PDF)</mat-label>
+                  <input matInput formControlName="documentUrl" placeholder="https://.../doc.pdf">
+                  <mat-icon matSuffix>description</mat-icon>
+                </mat-form-field>
+              </div>
+              <div class="form-field-group">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Image URL</mat-label>
+                  <input matInput formControlName="imageUrl" placeholder="https://images.unsplash.com/...">
+                  <mat-icon matSuffix>image</mat-icon>
+                </mat-form-field>
+              </div>
+              <div class="form-field-group">
+                <div class="upload-section">
+                  <span class="upload-label">Or upload image file</span>
+                  <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*" class="file-input-hidden" aria-label="Upload diet image">
+                  <button type="button"
+                    class="file-upload-area"
+                    (click)="fileInput.click()"
+                    (dragover)="onDragOver($event)"
+                    (drop)="onDrop($event)">
+                    <mat-icon>cloud_upload</mat-icon>
+                    <span>Drag and drop or click to choose</span>
+                    @if (selectedFileName) {
+                      <span class="file-name">{{ selectedFileName }}</span>
+                    }
+                    @if (!selectedFileName) {
+                      <span class="file-name placeholder">No file chosen</span>
+                    }
+                  </button>
                 </div>
               </div>
-            }
-            <!-- Tags Section -->
-            <div class="form-field-group">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Tags (comma separated)</mat-label>
-                <input matInput formControlName="tags" placeholder="lunch, quick, healthy">
-                <mat-icon matSuffix>local_offer</mat-icon>
-              </mat-form-field>
-            </div>
-            <!-- Ingredients Section -->
-            <div class="section-title">
-              <h4>Ingredients</h4>
-              <app-button
-              class="add-ingredient-btn"
-              [fontIcon]="'add'"
-              [text]="'Add Ingredient'"
-              [appearance]="'stroked'"
-              (btnClick)="addIngredient()">
-            </app-button>
-            
-            </div>
-            <div class="ingredients-container" formArrayName="ingredients">
-              @for (ingredient of ingredientsArray.controls; track ingredient; let i = $index) {
-                <div class="ingredient-item" [formGroupName]="i">
-                  <div class="ingredient-header">
-                    <h5>Ingredient {{ i + 1 }}</h5>
-                    <app-button
-                    class="remove-ingredient-btn"
-                    [fontIcon]="'delete'"
-                    [color]="'warn'"
-                    [appearance]="'icon'"
-                    (btnClick)="removeIngredient(i)">
-                  </app-button>
-                  
+              @if (imagePreview || dietForm.get('imageUrl')?.value) {
+                <div class="form-field-group image-preview-wrap">
+                  <span class="preview-label">Preview</span>
+                  <div class="image-preview">
+                    <img [src]="imagePreview || dietForm.get('imageUrl')?.value"
+                      alt="Diet preview"
+                      (error)="onImageError($event)">
                   </div>
+                </div>
+              }
+              <div class="form-field-group">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Tags (comma separated)</mat-label>
+                  <input matInput formControlName="tags" placeholder="lunch, quick, healthy">
+                  <mat-icon matSuffix>local_offer</mat-icon>
+                </mat-form-field>
+              </div>
+            </div>
+          </section>
+
+          <!-- Ingredients Card -->
+          <section class="form-card form-card--ingredients">
+            <div class="section-header section-header--with-action">
+              <div class="section-header-left">
+                <mat-icon class="section-icon" aria-hidden="true">list</mat-icon>
+                <h3 class="section-title">Ingredients</h3>
+              </div>
+              <app-button
+                class="add-ingredient-btn"
+                [fontIcon]="'add'"
+                [text]="'Add ingredient'"
+                [appearance]="'stroked'"
+                (btnClick)="addIngredient()">
+              </app-button>
+            </div>
+            <div class="form-card-body">
+              <div class="ingredients-container" formArrayName="ingredients">
+                @for (ingredient of ingredientsArray.controls; track ingredient; let i = $index) {
+                  <div class="ingredient-item" [formGroupName]="i">
+                    <div class="ingredient-header">
+                      <span class="ingredient-number">Ingredient {{ i + 1 }}</span>
+                      <app-button
+                        class="remove-ingredient-btn"
+                        [fontIcon]="'delete'"
+                        [color]="'warn'"
+                        [appearance]="'icon'"
+                        (btnClick)="removeIngredient(i)">
+                      </app-button>
+                    </div>
                   <div class="ingredient-fields">
                     <div class="form-field-group">
                       <mat-form-field appearance="outline">
@@ -375,14 +379,20 @@
                       </mat-form-field>
                     </div>
                   </div>
-                </div>
-              }
+                  </div>
+                }
+              </div>
             </div>
-            <!-- Recipe Section -->
-            <div class="section-title">
-              <h4>Recipe</h4>
+          </section>
+
+          <!-- Recipe Card -->
+          <section class="form-card form-card--recipe">
+            <div class="section-header">
+              <mat-icon class="section-icon" aria-hidden="true">menu_book</mat-icon>
+              <h3 class="section-title">Recipe</h3>
             </div>
-            <div class="recipe-fields">
+            <div class="form-card-body">
+              <div class="recipe-fields">
               <div class="recipe-meta-grid">
                 <div class="form-field-group">
                   <mat-form-field appearance="outline">
@@ -444,12 +454,14 @@
                     rows="3"
                     cdkTextareaAutosize
                     cdkAutosizeMinRows="3"
-                  cdkAutosizeMaxRows="6"></textarea>
+                    cdkAutosizeMaxRows="6"></textarea>
                 </mat-form-field>
               </div>
+              </div>
             </div>
-            <!-- In-form save button ensures updateDietPlan/createDietPlan is triggered -->
-            <div class="form-actions">
+          </section>
+
+          <div class="form-actions">
               <app-button
                 [fontIcon]="'save'"
                 [text]="mode === 'edit' ? 'Save Changes' : 'Create Diet'"

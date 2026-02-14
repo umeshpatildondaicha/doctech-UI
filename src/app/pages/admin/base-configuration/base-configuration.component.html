@@ -1,0 +1,29 @@
+<app-page [breadcrumb]="breadcrumb" [isFooter]="false">
+  <div page-body class="base-configuration-page">
+    <div class="page-card">
+      <!-- Entity Bar: search, Add Configuration, Filter -->
+      <app-entity-toolbar
+      [showCounts]="false"
+      [newLabel]="'Add Configuration'"
+      [showRefresh]="false"
+      [showFilter]="true"
+      [searchPlaceholder]="'Search configurations...'"
+      [searchSuggestions]="configSearchHints"
+      (search)="onEntitySearch($event)"
+      (newClick)="addConfiguration()"
+      (filterClick)="onFilterClick()">
+    </app-entity-toolbar>
+
+    <!-- Configuration Grid (toolbar hidden - search/add/filter in entity bar) -->
+    <div class="config-grid-section grid-toolbar-hidden">
+      <app-grid
+        [rowData]="configurations"
+        [columnDefs]="columnDefs"
+        [gridOptions]="gridOptions"
+        [defaultViewMode]="'list'"
+        [searchPlaceholder]="'Search configurations...'">
+      </app-grid>
+    </div>
+    </div>
+  </div>
+</app-page>

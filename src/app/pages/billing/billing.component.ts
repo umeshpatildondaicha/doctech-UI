@@ -22,7 +22,7 @@ import { BillingService } from '../../services/billing.service';
 import { Invoice } from '../../interfaces/billing.interface';
 import { PatientSearchDialogComponent } from '../patient-search-dialog/patient-search-dialog.component';
 import { AppCardComponent } from '../../core/components/app-card/app-card.component';
-import { AdminPageHeaderComponent, HeaderAction } from '../../components/admin-page-header/admin-page-header.component';
+import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
 import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-card/admin-stats-card.component';
 
 const FORCE_DEMO_BILLING_DATA = false;
@@ -48,7 +48,7 @@ interface PatientBillingSummaryRow {
     ReactiveFormsModule,
     GridComponent,
     AppCardComponent,
-    AdminPageHeaderComponent,
+    EntityToolbarComponent,
     AdminStatsCardComponent,
     AppButtonComponent,
     PageComponent,
@@ -65,11 +65,11 @@ export class BillingComponent implements OnInit, OnDestroy {
   today = new Date();
   isDemoData = false;
 
-  headerActions: HeaderAction[] = [
-    { text: 'Export CSV', color: 'accent', fontIcon: 'description', action: 'export_csv' },
-    { text: 'Download JSON', color: 'accent', fontIcon: 'download', action: 'download_json' },
-    { text: 'Record Payment', color: 'accent', fontIcon: 'payments', action: 'record_payment' },
-    { text: 'Create Invoice', color: 'primary', fontIcon: 'add', action: 'create_invoice' }
+  /** Search bar hint texts (typing animation) */
+  billingSearchHints = [
+    'Search by patient name...',
+    'Search by patient number...',
+    'Search by invoice number...'
   ];
 
   rowData: Invoice[] = [];
@@ -170,21 +170,13 @@ export class BillingComponent implements OnInit, OnDestroy {
     ];
   }
 
-  onHeaderAction(action: string): void {
-    switch (action) {
-      case 'create_invoice':
-        this.openPatientProfile();
-        break;
-      case 'record_payment':
-        this.openPatientBillingFromSearch();
-        break;
-      case 'export_csv':
-        this.exportInvoicesCsv();
-        break;
-      case 'download_json':
-        this.downloadInvoicesJson();
-        break;
-    }
+  onBillingSearch(query: string): void {
+    this.filters.patchValue({ search: query ?? '' });
+    this.refresh();
+  }
+
+  onBillingFilterClick(): void {
+    this.clearFilters();
   }
 
   ngOnDestroy(): void {

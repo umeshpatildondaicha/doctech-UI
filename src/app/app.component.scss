@@ -298,7 +298,8 @@ app-right-sidebar {
     padding-right: 0.5em !important;
   }
   .mat-mdc-tab .mdc-tab-indicator__content--underline{
-    border-color: transparent !important;
+    border-color: var(--black-color) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
   .mat-mdc-tab{
     display: flex;
@@ -312,8 +313,10 @@ app-right-sidebar {
   }
   .mdc-tab--active{
     padding: 0.5em !important;
-    border-radius:2em !important;
-    background-color: var(--primary-color) !important;
+    // border-radius:2em !important;
+    border-bottom: 2px solid var(--black-color) !important;
+    transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                border-bottom-width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
   .mdc-tab__content{
     height: 2.5em !important;
