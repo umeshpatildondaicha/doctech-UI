@@ -2,46 +2,12 @@
   <div class="blogs-dashboard" page-body>
     <div class="dashboard-shell">
     <!-- Overview -->
-    <section class="kpi-grid" aria-label="Blog overview">
-      <button type="button" class="kpi" (click)="setStatusFilter('ALL')">
-        <div class="kpi-ic kpi-ic--primary">
-          <app-icon [fontIcon]="'rss_feed'" [size]="20"></app-icon>
-        </div>
-        <div class="kpi-body">
-          <div class="kpi-k">Total posts</div>
-          <div class="kpi-v">{{ stats().total }}</div>
-        </div>
-      </button>
-
-      <button type="button" class="kpi" (click)="setStatusFilter('PUBLISHED')">
-        <div class="kpi-ic kpi-ic--success">
-          <app-icon [fontIcon]="'public'" [size]="20"></app-icon>
-        </div>
-        <div class="kpi-body">
-          <div class="kpi-k">Published</div>
-          <div class="kpi-v">{{ stats().published }}</div>
-        </div>
-      </button>
-
-      <button type="button" class="kpi" (click)="setStatusFilter('DRAFT')">
-        <div class="kpi-ic kpi-ic--warning">
-          <app-icon [fontIcon]="'edit_note'" [size]="20"></app-icon>
-        </div>
-        <div class="kpi-body">
-          <div class="kpi-k">Drafts</div>
-          <div class="kpi-v">{{ stats().drafts }}</div>
-        </div>
-      </button>
-
-      <button type="button" class="kpi" (click)="setStatusFilter('SCHEDULED')">
-        <div class="kpi-ic kpi-ic--info">
-          <app-icon [fontIcon]="'schedule'" [size]="20"></app-icon>
-        </div>
-        <div class="kpi-body">
-          <div class="kpi-k">Scheduled</div>
-          <div class="kpi-v">{{ stats().scheduled }}</div>
-        </div>
-      </button>
+    <section>
+      <app-admin-stats-card
+        [stats]="overviewStatsCards()"
+        [showTrends]="false"
+        (statClick)="onOverviewStatClick($event)">
+      </app-admin-stats-card>
     </section>
 
     <!-- List -->
@@ -76,7 +42,11 @@
           <div class="grid" aria-label="Blog posts">
             @for (p of filteredPosts(); track p.id) {
               <article class="blog-card">
-                <button type="button" class="cover" (click)="editPost(p)" aria-label="Edit {{ p.title }}">
+                <button
+                  type="button"
+                  class="cover"
+                  (click)="editPost(p)"
+                  [attr.aria-labelledby]="'post-title-' + p.id">
                   @if (p.coverImageUrl) {
                     <img class="cover-img" [src]="p.coverImageUrl" alt="" />
                   } @else {
@@ -88,7 +58,7 @@
 
                 <div class="body">
                   <div class="title-row">
-                    <h3 class="title" [title]="p.title">{{ p.title }}</h3>
+                    <h3 class="title" [title]="p.title" [id]="'post-title-' + p.id">{{ p.title }}</h3>
                     @if (p.status === 'PUBLISHED') {
                       <span class="verified" aria-label="Published">✓</span>
                     }

@@ -46,28 +46,7 @@
           <h2>Hospital Overview</h2>
           <span class="stats-subtitle">Real-time hospital metrics and performance indicators</span>
         </div>
-        <div class="stats-grid">
-          @for (stat of statsCards; track stat) {
-          <div class="stat-card" [class.negative-trend]="stat.trend < 0">
-            <div class="stat-icon" [style.background]="stat.color">
-              <app-icon [fontIcon]="stat.icon" [size]="24"></app-icon>
-            </div>
-            <div class="stat-content">
-              <div class="stat-header">
-                <span class="stat-title">{{ stat.title }}</span>
-                <div class="stat-trend" [class.negative]="stat.trend < 0">
-                  <app-icon [fontIcon]="stat.trend >= 0 ? 'trending_up' : 'trending_down'" [size]="14">
-                  </app-icon>
-                  <span>{{ stat.trend > 0 ? '+' : '' }}{{ stat.trend }}%</span>
-                </div>
-              </div>
-              <div class="stat-value">{{ stat.value }}</div>
-              <div class="stat-description">{{ stat.description }}</div>
-              <div class="stat-period">{{ stat.trendLabel }}</div>
-            </div>
-          </div>
-          }
-        </div>
+        <app-admin-stats-card [stats]="overviewStatsCards" [showTrends]="true"></app-admin-stats-card>
       </div>
       <!-- Main Dashboard Content -->
       <div class="dashboard-content">
@@ -188,7 +167,10 @@
             <div class="card-content">
               <div class="departments-list">
                 @for (dept of departments; track dept) {
-                <div class="department-item" (click)="viewDepartmentDetails(dept)">
+                <button
+                  type="button"
+                  class="department-item"
+                  (click)="viewDepartmentDetails(dept)">
                   <div class="department-info">
                     <div class="department-name">{{ dept.name }}</div>
                     <div class="department-head">{{ dept.head }}</div>
@@ -216,7 +198,7 @@
                     </div>
                     <span class="status-text">{{ dept.status | titlecase }}</span>
                   </div>
-                </div>
+                </button>
                 }
               </div>
             </div>

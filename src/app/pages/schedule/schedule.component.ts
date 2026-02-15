@@ -18,7 +18,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
-import { AppButtonComponent, AppInputComponent, DividerComponent, IconComponent, CalendarComponent, CoreEventService, DialogboxService, DialogFooterAction, PageComponent, PageBodyDirective, ToggleButtonComponent, type ToggleButtonOption, GridComponent, ExtendedGridOptions } from '@lk/core';
+import { AppButtonComponent, AppInputComponent, DividerComponent, IconComponent, CalendarComponent, CoreEventService, DialogboxService, DialogFooterAction, PageComponent, PageBodyDirective, GridComponent, ExtendedGridOptions, TabsComponent, TabComponent } from '@lk/core';
 import { ColDef } from 'ag-grid-community';
 import { AppointmentCreateComponent } from '../appointment-create/appointment-create.component';
 import { AppointmentViewComponent } from '../appointment-view/appointment-view.component';
@@ -39,6 +39,8 @@ import { SpecificdaydialogComponent } from './specificdaydialog/specificdaydialo
 import { DailyBaseDialogComponent } from './daily-base-dialog/daily-base-dialog.component';
 import { WeekroutinedialogComponent } from './weekroutinedialog/weekroutinedialog.component';
 import { AvailabilitySetupDialogComponent } from './availability-setup-dialog/availability-setup-dialog.component';
+import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
+import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-card/admin-stats-card.component';
 
 type TimingPriorityTab = 'p4' | 'p3' | 'p2' | 'p1';
 
@@ -294,8 +296,11 @@ interface DoctorSchedule {
         PageBodyDirective,
         AppCardComponent,
         AppCardActionsDirective,
-        ToggleButtonComponent,
         GridComponent,
+        TabsComponent,
+        TabComponent,
+        EntityToolbarComponent,
+        AdminStatsCardComponent,
         NgIf
     ],
     templateUrl: './schedule.component.html',
@@ -303,6 +308,8 @@ interface DoctorSchedule {
 })
 export class ScheduleComponent implements OnInit {
   activeSection: 'schedule' | 'timings' = 'schedule';
+  /** Index for core app-tabs: 0 = Schedule, 1 = Timings */
+  scheduleTabIndex = 0;
   timingsTab: TimingPriorityTab = 'p4';
   forecastDays = 15;
   /** Number of days from today the doctor has set for scheduling (today + next N-1 days). Patient/doctor can view and book within this window. */
@@ -324,12 +331,6 @@ dailyBaseAvailability: {
   selectedTiming: any = null;
 
   
-
-  /** Options for View/Manage toggle (lk-core ToggleButtonComponent) */
-  readonly timingsModeOptions: ToggleButtonOption[] = [
-    { value: 'view', label: 'View' },
-    { value: 'manage', label: 'Manage' }
-  ];
 
   /** Priority tooltips: what each level is and overall rule (higher overrides lower) */
   readonly priorityRuleSummary = 'Priority: higher overrides lower (P1 > P2 > P3 > P4).';
@@ -844,7 +845,16 @@ dailyBaseAvailability: {
 
   setSection(section: 'schedule' | 'timings'): void {
     this.activeSection = section;
+    this.scheduleTabIndex = section === 'schedule' ? 0 : 1;
     if (section === 'timings' && !this.timingsLoaded && !this.timingsApiLoading) {
+      this.loadTimingsFromApi({ fallbackToDemo: false });
+    }
+  }
+
+  onScheduleTabChange(index: number): void {
+    this.scheduleTabIndex = index;
+    this.activeSection = index === 0 ? 'schedule' : 'timings';
+    if (index === 1 && !this.timingsLoaded && !this.timingsApiLoading) {
       this.loadTimingsFromApi({ fallbackToDemo: false });
     }
   }
@@ -2251,6 +2261,24 @@ dailyBaseAvailability: {
     }
 
     this.scheduleSummary = { totalSlots, booked, available, break: breakCount };
+  }
+
+  /** Blocked slot count (slots not available, booked, or break). */
+  getBlockedCount(): number {
+    const s = this.scheduleSummary;
+    return Math.max(0, s.totalSlots - s.booked - s.available - s.break);
+  }
+
+  /** Overview stats for core admin-stats-card (same pattern as doctor dashboard). */
+  get overviewStatsCards(): StatCard[] {
+    const s = this.scheduleSummary;
+    const fmt = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+    return [
+      { label: 'Total Slots', value: s.totalSlots, icon: 'grid_view', type: 'info' },
+      { label: 'Booked', value: fmt(s.booked), icon: 'event', type: 'success' },
+      { label: 'Available', value: fmt(s.available), icon: 'event_available', type: 'info' },
+      { label: 'Break', value: fmt(s.break), icon: 'free_breakfast', type: 'warning' }
+    ];
   }
 
   private recomputeScheduleAvailability(): void {

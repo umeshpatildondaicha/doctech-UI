@@ -33,6 +33,7 @@ import { DietPlanCardComponent } from '../../components/diet-plan-card/diet-plan
 import { DietService } from '../../services/diet.service';
 import { AuthService } from '../../services/auth.service';
 import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
+import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-card/admin-stats-card.component';
 
 @Component({
   selector: 'app-diet',
@@ -56,7 +57,8 @@ import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-t
     MealTimeDialogComponent,
     DietCardComponent,
     DietPlanCardComponent,
-    EntityToolbarComponent
+    EntityToolbarComponent,
+    AdminStatsCardComponent
   ],
   templateUrl: './diet.component.html',
   styleUrl: './diet.component.scss'
@@ -123,6 +125,24 @@ export class DietComponent implements OnInit, OnDestroy {
   // Mock (screenshot-style) stat
   get patientsOnDiets(): number {
     return 36;
+  }
+
+  get dietsOverviewCards(): StatCard[] {
+    return [
+      { label: 'Total Diets', value: this.dietList.length, icon: 'restaurant_menu', type: 'info' },
+      { label: 'Avg Calories', value: this.avgCalories, icon: 'local_fire_department', type: 'warning' },
+      { label: 'Avg Protein', value: this.avgProtein, icon: 'fitness_center', type: 'success' },
+      { label: 'Patients on Diets', value: this.patientsOnDiets, icon: 'groups', type: 'info' }
+    ];
+  }
+
+  get dietPlansOverviewCards(): StatCard[] {
+    return [
+      { label: 'Total Plans', value: this.dietPlans.length, icon: 'calendar_today', type: 'info' },
+      { label: 'Active Plans', value: this.getActivePlansCount(), icon: 'check_circle', type: 'success' },
+      { label: 'Weekly Plans', value: this.getWeeklyPlansCount(), icon: 'date_range', type: 'warning' },
+      { label: 'Avg Adherence', value: `${this.getAvgAdherence()}%`, icon: 'bar_chart', type: 'info' }
+    ];
   }
 
   constructor(

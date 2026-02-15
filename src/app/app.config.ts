@@ -9,9 +9,14 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { HttpInterceptorService, API_BASE_URL, MenuService } from '@lk/core';
 import { environment } from '../environments/environment';
 import { MenuService as AppMenuService } from './services/menu.service';
+import { provideLottieOptions } from 'ngx-lottie';
+import lottiePlayer from 'lottie-web';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideLottieOptions({
+      player: () => lottiePlayer,
+    }),
     { provide: MenuService, useClass: AppMenuService },
     provideRouter(routes),
     provideClientHydration(),

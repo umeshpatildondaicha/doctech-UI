@@ -262,7 +262,7 @@ export class BaseConfigurationComponent implements OnInit {
       }
     ];
 
-    const dialogRef = this.dialogService.openDialog(BaseConfigurationFormComponent, {
+    this.dialogService.openDialog(BaseConfigurationFormComponent, {
       title: 'Add Base Configuration',
       width: '680px',
       height: 'auto',
@@ -270,28 +270,22 @@ export class BaseConfigurationComponent implements OnInit {
       data: {
         config: undefined,
         isEditMode: false,
-        isViewMode: false
+        isViewMode: false,
+        onSave: (formData: BaseConfiguration) => {
+          const payload = {
+            configKey: formData.configKey,
+            configValue: formData.configValue,
+            configTag: formData.configTag,
+            applicationName: formData.applicationName,
+            customerId: formData.customerId
+          };
+          this.baseConfigService.create(payload).subscribe({
+            next: () => this.loadConfigurations(),
+            error: (err) => console.error('Error creating configuration:', err)
+          });
+        }
       },
       footerActions
-    });
-
-    dialogRef.afterClosed().subscribe((result: any) => {
-      if (result && result.action === 'save') {
-        const formComp = result.componentInstance as BaseConfigurationFormComponent;
-        if (formComp) {
-          const formData = formComp.getFormValue();
-          if (formData) {
-            this.baseConfigService.create(formData).subscribe({
-              next: () => {
-                this.loadConfigurations();
-              },
-              error: (err) => {
-                console.error('Error creating configuration:', err);
-              }
-            });
-          }
-        }
-      }
     });
   }
 
@@ -315,7 +309,7 @@ export class BaseConfigurationComponent implements OnInit {
       }
     ];
 
-    const dialogRef = this.dialogService.openDialog(BaseConfigurationFormComponent, {
+    this.dialogService.openDialog(BaseConfigurationFormComponent, {
       title: `Edit Configuration - ${config.configKey}`,
       width: '680px',
       height: 'auto',
@@ -323,38 +317,17 @@ export class BaseConfigurationComponent implements OnInit {
       data: {
         config,
         isEditMode: true,
-        isViewMode: false
+        isViewMode: false,
+        onSave: (formData: BaseConfiguration) => {
+          this.baseConfigService.update(formData).subscribe({
+            next: () => this.loadConfigurations(),
+            error: (err) => console.error('Error updating configuration:', err)
+          });
+        }
       },
       footerActions
     });
 
-    // After dialog opens, populate the form
-    dialogRef.afterOpened().subscribe(() => {
-      const formComp = dialogRef.componentInstance as unknown as BaseConfigurationFormComponent;
-      if (formComp) {
-        formComp.isEditMode = true;
-        formComp.populateForm(config);
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((result: any) => {
-      if (result && result.action === 'save') {
-        const formComp = result.componentInstance as BaseConfigurationFormComponent;
-        if (formComp) {
-          const formData = formComp.getFormValue();
-          if (formData) {
-            this.baseConfigService.update(formData).subscribe({
-              next: () => {
-                this.loadConfigurations();
-              },
-              error: (err) => {
-                console.error('Error updating configuration:', err);
-              }
-            });
-          }
-        }
-      }
-    });
   }
 
   /**

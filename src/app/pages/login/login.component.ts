@@ -19,6 +19,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AppButtonComponent, AuthService, LoginRequest, UserType } from "@lk/core";
 import { environment } from '../../../environments/environment';
+import { LottieComponent, AnimationOptions } from 'ngx-lottie';
 
 /**
  * Component responsible for user authentication
@@ -34,7 +35,8 @@ import { environment } from '../../../environments/environment';
     MatSelectModule,
     MatCheckboxModule,
     MatProgressSpinnerModule,
-    AppButtonComponent
+    AppButtonComponent,
+    LottieComponent
 ],
     templateUrl: './login.component.html',
     styleUrl: './login.component.scss',
@@ -62,6 +64,11 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   // Environment for template access
   public readonly environment = environment;
+
+  /** Lottie animation on login right side */
+  readonly lottieOptions: AnimationOptions = {
+    path: 'assets/lottie/ai.json',
+  };
 
   // Private properties
   private readonly destroy$ = new Subject<void>();

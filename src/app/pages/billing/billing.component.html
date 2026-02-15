@@ -1,19 +1,5 @@
 <app-page>
   <div class="billing-dashboard" page-body>
-    <app-entity-toolbar
-      [title]="'Billing'"
-      [showCounts]="false"
-      [newLabel]="'Create Invoice'"
-      [showRefresh]="true"
-      [showFilter]="true"
-      [searchPlaceholder]="'Search by patient name, patient number...'"
-      [searchSuggestions]="billingSearchHints"
-      (search)="onBillingSearch($event)"
-      (newClick)="openPatientProfile()"
-      (refreshClick)="refresh()"
-      (filterClick)="onBillingFilterClick()">
-    </app-entity-toolbar>
-
     @if (isDemoData) {
       <div class="demo-pill">
         Demo data (backend not connected)
@@ -24,13 +10,29 @@
     <app-admin-stats-card [stats]="statCards"></app-admin-stats-card>
 
     <div class="grid-wrapper">
+      <app-entity-toolbar
+        [title]="'Billing'"
+        [showCounts]="true"
+        [currentCount]="patientRows.length"
+        [totalCount]="patientRows.length"
+        [newLabel]="'Create Invoice'"
+        [showRefresh]="true"
+        [showFilter]="true"
+        [searchPlaceholder]="'Search by patient name, patient number...'"
+        [searchSuggestions]="billingSearchHints"
+        (search)="onBillingSearch($event)"
+        (newClick)="openPatientProfile()"
+        (refreshClick)="refresh()"
+        (filterClick)="onBillingFilterClick()">
+      </app-entity-toolbar>
+
       <app-grid
         class="billing-grid"
         [rowData]="patientRows"
         [columnDefs]="patientColumnDefs"
         [gridOptions]="patientGridOptions"
+        [showHeader]="false"
         [showAddButton]="false"
-        [searchPlaceholder]="'Search patients...'"
         [height]="'100%'"
         [width]="'100%'"
         (rowClicked)="onPatientRowClick($event)">

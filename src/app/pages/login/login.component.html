@@ -1,133 +1,128 @@
-<!-- Professional Login Component Template -->
-<div class="login-wrapper">
-  <!-- Background with gradient and pattern -->
-  <div class="login-background">
-    <div class="background-gradient"></div>
-    <div class="background-pattern"></div>
-  </div>
-
-  <!-- Main Login Container -->
-  <div class="login-container">
-    <!-- Centered Login Form -->
-    <div class="login-form-section">
-      <div class="form-container">
-        <!-- Form Header -->
-        <div class="form-header">
-          <h2>Welcome Back</h2>
-          <p>Sign in to access your account</p>
-        </div>
-
-        <!-- Quick Login Buttons -->
-        <div class="quick-login-buttons">
-          <app-button
-            type="button"
-            class="quick-btn doctor"
-            [fontIcon]="'medical_services'"
-            [text]="'Login as Doctor'"
-            (btnClick)="fillDoctorCredentials()">
-          </app-button>
-          <app-button
-            type="button"
-            class="quick-btn hospital"
-            [fontIcon]="'business'"
-            [text]="'Login as Admin'"
-            (btnClick)="fillHospitalCredentials()">
-          </app-button>
-        </div>
-
-        <!-- Login Form -->
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-          <!-- Email Field -->
-          <div class="form-field">
-            <label class="form-label" for="email-input">Email Address</label>
-            <div class="input-container" [class.error]="isFieldInvalid('email')">
-              <mat-icon class="input-icon">email</mat-icon>
-              <input
-                id="email-input"
-                type="email"
-                formControlName="email"
-                placeholder="Enter your email address"
-                class="form-input"
-                autocomplete="email">
-              </div>
-              @if (isFieldInvalid('email')) {
-                <div class="error-message">
-                  {{ getErrorMessage('email') }}
-                </div>
-              }
-            </div>
-
-            <!-- Password Field -->
-            <div class="form-field">
-              <label class="form-label" for="password-input">Password</label>
-              <div class="input-container" [class.error]="isFieldInvalid('password')">
-                <mat-icon class="input-icon">lock</mat-icon>
-                <input
-                  id="password-input"
-                  [type]="showPassword ? 'text' : 'password'"
-                  formControlName="password"
-                  placeholder="Enter your password"
-                  class="form-input"
-                  autocomplete="current-password">
-                  <app-button
-                    type="button"
-                    class="password-toggle"
-                    [fontIcon]="showPassword ? 'visibility_off' : 'visibility'"
-                    [appearance]="'icon'"
-                    (btnClick)="togglePasswordVisibility()">
-                  </app-button>
-                </div>
-                @if (isFieldInvalid('password')) {
-                  <div class="error-message">
-                    {{ getErrorMessage('password') }}
-                  </div>
-                }
-              </div>
-
-              <!-- Remember Me & Forgot Password -->
-              <div class="form-options">
-                <label class="checkbox-container">
-                  <input type="checkbox" formControlName="rememberMe" class="checkbox-input">
-                  <span class="checkmark"></span>
-                  <span class="checkbox-label">Remember me</span>
-                </label>
-                <a href="#" class="forgot-link">Forgot Password?</a>
-              </div>
-
-              <!-- Error Message -->
-              @if (errorMessage) {
-                <div class="alert alert-error">
-                  <mat-icon>error</mat-icon>
-                  <span>{{ errorMessage }}</span>
-                </div>
-              }
-
-              <!-- Success Message -->
-              @if (successMessage) {
-                <div class="alert alert-success">
-                  <mat-icon>check_circle</mat-icon>
-                  <span>{{ successMessage }}</span>
-                </div>
-              }
-
-              <!-- Submit Button -->
-              <app-button
-                type="button"
-                class="submit-button"
-                [fontIcon]="'login'"
-                [text]="isLoading ? 'Signing In...' : 'Sign In'"
-                [disabled]="loginForm.invalid || isLoading"
-                [appearance]="'raised'"
-                (btnClick)="onSubmit()">
-              </app-button>
-            </form>
-
-            <!-- Footer -->
-            <div class="form-footer">
-              <p class="version-info">Version {{ environment.version }} | Build {{ environment.buildNumber }}</p>
-              <p class="copyright">© 2024 Shree Clinic. All rights reserved.</p>
-            </div>
-          </div>
+<!-- Login — Hospital Management Software -->
+<div class="login-shell">
+  <div class="login-left">
+    <div class="login-panel">
+      <div class="panel-brand">
+        <div class="panel-brand-text">
+          <h1 class="panel-title">Welcome to DOCTECH</h1>
+          <p class="panel-subtitle">Every Life Matters</p>
         </div>
       </div>
+
+      <div class="quick-login-buttons">
+        <app-button
+          type="button"
+          class="quick-btn doctor"
+          [fontIcon]="'medical_services'"
+          [text]="'Doctor'"
+          appearance="basic"
+          (btnClick)="fillDoctorCredentials()">
+        </app-button>
+        <app-button
+          type="button"
+          class="quick-btn hospital"
+          [fontIcon]="'business'"
+          [text]="'Hospital'"
+          appearance="basic"
+          (btnClick)="fillHospitalCredentials()">
+        </app-button>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <div class="form-field">
+          <label class="form-label" for="email-input">Email Address</label>
+          <div class="input-container" [class.error]="isFieldInvalid('email')">
+            <mat-icon class="input-icon">email</mat-icon>
+            <input
+              id="email-input"
+              type="email"
+              formControlName="email"
+              placeholder="Enter your email address"
+              class="form-input"
+              autocomplete="email">
+          </div>
+          @if (isFieldInvalid('email')) {
+            <div class="error-message">
+              {{ getErrorMessage('email') }}
+            </div>
+          }
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="password-input">Password</label>
+          <div class="input-container" [class.error]="isFieldInvalid('password')">
+            <mat-icon class="input-icon">lock</mat-icon>
+            <input
+              id="password-input"
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Enter your password"
+              class="form-input"
+              autocomplete="current-password">
+            <app-button
+              type="button"
+              class="password-toggle"
+              [fontIcon]="showPassword ? 'visibility_off' : 'visibility'"
+              [appearance]="'icon'"
+              (btnClick)="togglePasswordVisibility()">
+            </app-button>
+          </div>
+          @if (isFieldInvalid('password')) {
+            <div class="error-message">
+              {{ getErrorMessage('password') }}
+            </div>
+          }
+        </div>
+
+        <div class="form-options">
+          <label class="checkbox-container">
+            <input type="checkbox" formControlName="rememberMe" class="checkbox-input">
+            <span class="checkmark"></span>
+            <span class="checkbox-label">Remember me</span>
+          </label>
+          <a href="#" class="forgot-link">Forgot password</a>
+        </div>
+
+        @if (errorMessage) {
+          <div class="alert alert-error" role="alert">
+            <mat-icon>error</mat-icon>
+            <span>{{ errorMessage }}</span>
+          </div>
+        }
+
+        @if (successMessage) {
+          <div class="alert alert-success">
+            <mat-icon>check_circle</mat-icon>
+            <span>{{ successMessage }}</span>
+          </div>
+        }
+
+        <app-button
+          type="button"
+          class="submit-button"
+          [fontIcon]="'login'"
+          [text]="isLoading ? 'Signing In...' : 'Sign In'"
+          [disabled]="loginForm.invalid || isLoading"
+          [appearance]="'raised'"
+          (btnClick)="onSubmit()">
+        </app-button>
+      </form>
+
+      <div class="form-footer">
+        <p class="version-info">Version {{ environment.version }} · Build {{ environment.buildNumber }}</p>
+        <p class="copyright">Hospital Management Software</p>
+      </div>
     </div>
+  </div>
+
+  <div class="login-right" aria-hidden="true">
+    <div class="hero-tagline">Secure · Reliable · Care-first</div>
+    <div class="hero-lottie">
+      <ng-lottie
+        [options]="lottieOptions"
+        width="100%"
+        height="100%">
+      </ng-lottie>
+    </div>
+  </div>
+</div>

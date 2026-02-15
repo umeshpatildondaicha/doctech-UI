@@ -106,13 +106,6 @@ export class MenuService {
       userTypes: ['admin']
     },
     { 
-      label: 'Hospital Services', 
-      icon: 'healing', 
-      route: '/admin/services', 
-      section: 'services',
-      userTypes: ['admin']
-    },
-    { 
       label: 'Doctor Permissions', 
       icon: 'tune', 
       route: '/admin/doctor-permissions', 
@@ -130,20 +123,6 @@ export class MenuService {
       label: 'Plans & Offers', 
       icon: 'card_giftcard', 
       route: '/admin/plans', 
-      section: 'administration',
-      userTypes: ['admin']
-    },
-    { 
-      label: 'Rooms & Beds', 
-      icon: 'hotel', 
-      route: '/admin/rooms', 
-      section: 'services',
-      userTypes: ['admin']
-    },
-    { 
-      label: 'Government Schemes', 
-      icon: 'account_balance', 
-      route: '/admin/schemes', 
       section: 'administration',
       userTypes: ['admin']
     },

@@ -1,36 +1,87 @@
 <div class="admin-stats-grid" [style.grid-template-columns]="getGridColumns()">
   @for (stat of stats; track stat) {
-    <div class="stat-card" [class]="stat.type">
-      @if (stat.icon) {
-        <div class="stat-icon" [attr.data-icon]="stat.icon">
-          <app-icon [fontIcon]="stat.icon" [size]="24"></app-icon>
-        </div>
-      }
-      <div class="stat-content">
-        <div class="stat-value" [style.color]="stat.valueColor">
-          {{ stat.value }}
-        </div>
-        <div class="stat-label">
-          {{ stat.label }}
-        </div>
-        @if (showTrends && stat.trend) {
-          <div class="stat-trend">
-            <app-icon
-              [fontIcon]="stat.trend.isPositive ? 'trending_up' : 'trending_down'"
-              [size]="16"
-              [class]="stat.trend.isPositive ? 'trend-positive' : 'trend-negative'">
-            </app-icon>
-            <span class="trend-value" [class]="stat.trend.isPositive ? 'trend-positive' : 'trend-negative'">
-              {{ stat.trend.value }}%
-            </span>
-            @if (stat.trend.label) {
-              <span class="trend-label">
-                {{ stat.trend.label }}
-              </span>
-            }
+    @if (isClickable(stat)) {
+      <button
+        type="button"
+        class="stat-card stat-card--button"
+        [class]="stat.type"
+        [disabled]="stat.disabled"
+        [attr.aria-label]="stat.label"
+        (click)="onStatClick(stat)">
+        @if (stat.icon) {
+          <div class="stat-icon" [attr.data-icon]="stat.icon">
+            <app-icon [fontIcon]="stat.icon" [size]="24"></app-icon>
           </div>
         }
+        <div class="stat-content">
+          <div class="stat-value" [style.color]="stat.valueColor">
+            {{ stat.value }}
+          </div>
+          <div class="stat-label">
+            {{ stat.label }}
+          </div>
+        @if (stat.hint) {
+          <div class="stat-hint">
+            {{ stat.hint }}
+          </div>
+        }
+          @if (showTrends && stat.trend) {
+            <div class="stat-trend">
+              <app-icon
+                [fontIcon]="stat.trend.isPositive ? 'trending_up' : 'trending_down'"
+                [size]="16"
+                [class]="stat.trend.isPositive ? 'trend-positive' : 'trend-negative'">
+              </app-icon>
+              <span class="trend-value" [class]="stat.trend.isPositive ? 'trend-positive' : 'trend-negative'">
+                {{ stat.trend.value }}%
+              </span>
+              @if (stat.trend.label) {
+                <span class="trend-label">
+                  {{ stat.trend.label }}
+                </span>
+              }
+            </div>
+          }
+        </div>
+      </button>
+    } @else {
+      <div class="stat-card" [class]="stat.type">
+        @if (stat.icon) {
+          <div class="stat-icon" [attr.data-icon]="stat.icon">
+            <app-icon [fontIcon]="stat.icon" [size]="24"></app-icon>
+          </div>
+        }
+        <div class="stat-content">
+          <div class="stat-value" [style.color]="stat.valueColor">
+            {{ stat.value }}
+          </div>
+          <div class="stat-label">
+            {{ stat.label }}
+          </div>
+        @if (stat.hint) {
+          <div class="stat-hint">
+            {{ stat.hint }}
+          </div>
+        }
+          @if (showTrends && stat.trend) {
+            <div class="stat-trend">
+              <app-icon
+                [fontIcon]="stat.trend.isPositive ? 'trending_up' : 'trending_down'"
+                [size]="16"
+                [class]="stat.trend.isPositive ? 'trend-positive' : 'trend-negative'">
+              </app-icon>
+              <span class="trend-value" [class]="stat.trend.isPositive ? 'trend-positive' : 'trend-negative'">
+                {{ stat.trend.value }}%
+              </span>
+              @if (stat.trend.label) {
+                <span class="trend-label">
+                  {{ stat.trend.label }}
+                </span>
+              }
+            </div>
+          }
+        </div>
       </div>
-    </div>
+    }
   }
 </div>

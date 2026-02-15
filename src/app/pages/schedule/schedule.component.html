@@ -1,44 +1,13 @@
 <app-page>
   <div class="schedule-page schedule-container" page-body>
 
-    <!-- Section Switcher: Schedule | Timings -->
-    <nav class="section-tabs" role="tablist" aria-label="Schedule sections">
-      <app-button
-        type="button"
-        class="section-tab"
-        [class.active]="activeSection === 'schedule'"
-        [fontIcon]="'schedule'"
-        [text]="'Schedule'"
-        (btnClick)="setSection('schedule')">
-      </app-button>
-      <app-button
-        type="button"
-        class="section-tab"
-        [class.active]="activeSection === 'timings'"
-        [fontIcon]="'access_time'"
-        [text]="'Timings'"
-        (btnClick)="setSection('timings')">
-      </app-button>
-    </nav>
-
-  @if (activeSection === 'schedule') {
+    <!-- Schedule | Timings (core app-tabs) -->
+    <app-tabs
+      [selectedIndex]="scheduleTabIndex"
+      (selectedIndexChange)="onScheduleTabChange($event)"
+      class="schedule-page-tabs">
+      <app-tab label="Schedule">
     <section class="schedule-section" aria-label="Appointments">
-      <!-- Legend + New Appointment -->
-      <app-card class="sched-header-card" [dense]="true">
-        <div class="sched-legend-row">
-          <div class="legend-inline" aria-label="Slot status">
-            <span class="legend-item"><span class="legend-dot legend-dot--available"></span>Available</span>
-            <span class="legend-item"><span class="legend-dot legend-dot--booked"></span>Booked</span>
-            <span class="legend-item"><span class="legend-dot legend-dot--break"></span>Break</span>
-            <span class="legend-item"><span class="legend-dot legend-dot--blocked"></span>Blocked</span>
-          </div>
-          <app-button appearance="raised" (btnClick)="createAppointment()">
-            <app-icon fontIcon="add" [size]="16"></app-icon>
-            New Appointment
-          </app-button>
-        </div>
-      </app-card>
-
       <!-- Select day (core app-card) -->
       <app-card class="sched-days-card" [dense]="true" [divider]="true" title="Select day" [subtitle]="'Next ' + scheduleWindowDays + ' days'">
         <div class="day-strip" role="list" aria-label="Select day for appointments">
@@ -56,10 +25,19 @@
         </div>
       </app-card>
 
-      <!-- Appointments list (core app-card + app-divider) -->
-      <app-card class="sched-list-card" [divider]="true" title="Appointments" [subtitle]="(selectedDate | date:'EEEE, MMM d, y') ?? ''" [dense]="false">
-        <div appCardActions class="sched-list-meta">
-          <span class="sched-count">{{ getScheduleListAppointments().length }} appointment(s)</span>
+      <!-- Appointments list: entity-toolbar + Book appointment -->
+      <app-card class="sched-list-card" [divider]="true" [dense]="false">
+        <div class="sched-list-header">
+          <app-entity-toolbar
+            [title]="''"
+            [subtitle]="''"
+            [showCounts]="false"
+            [newLabel]="'Book appointment'"
+            [showRefresh]="false"
+            [showFilter]="false"
+            [searchPlaceholder]="'Search appointments...'"
+            (newClick)="createAppointment()">
+          </app-entity-toolbar>
         </div>
         <div class="sched-list-body">
           @if (scheduleApiError) {
@@ -68,26 +46,12 @@
               <p class="empty-sub">{{ scheduleApiError }}</p>
             </div>
           } @else {
-          <!-- Day overview: Total · Booked · Available · Break + Available slots (all in one place) -->
-          <div class="appointments-day-overview">
-            <div class="day-overview-stats">
-              <div class="day-overview-stat">
-                <span class="day-overview-label">Total Slots</span>
-                <span class="day-overview-value">{{ scheduleSummary.totalSlots }}</span>
-              </div>
-              <div class="day-overview-stat">
-                <span class="day-overview-label">Booked</span>
-                <span class="day-overview-value">{{ scheduleSummary.booked < 10 ? ('0' + scheduleSummary.booked) : scheduleSummary.booked }}</span>
-              </div>
-              <div class="day-overview-stat">
-                <span class="day-overview-label">Available</span>
-                <span class="day-overview-value">{{ scheduleSummary.available < 10 ? ('0' + scheduleSummary.available) : scheduleSummary.available }}</span>
-              </div>
-              <div class="day-overview-stat">
-                <span class="day-overview-label">Break</span>
-                <span class="day-overview-value">{{ scheduleSummary.break < 10 ? ('0' + scheduleSummary.break) : scheduleSummary.break }}</span>
-              </div>
-            </div>
+          <!-- Overview: core admin-stats-card (same as doctor dashboard) -->
+
+            <app-admin-stats-card
+              [stats]="overviewStatsCards"
+              [showTrends]="false">
+            </app-admin-stats-card>
             @if (!isSlotBasedScheduling()) {
             <div class="sched-availability">
               <div class="avail-left">
@@ -110,29 +74,32 @@
                 </app-button>
               </div>
             </div>
-          }
+            }
 
+
+          <!-- Available slots (separate section) -->
           @if (isSlotBasedScheduling()) {
-            <div class="avail-cards-shell">
-              <div class="avail-cards-head">
-                <div class="avail-cards-title">Available slots</div>
-                <div class="avail-cards-sub">{{ scheduleSummary.available }} available</div>
-              </div>
-              @if (getAvailableSlotCards(12).length > 0) {
-                <div class="avail-cards">
-                  @for (c of getAvailableSlotCards(12); track c.slotId) {
-                    <button type="button" class="avail-slot-card" (click)="openQuickAddAt(c.start)">
-                      <div class="t">{{ c.startLabel }} – {{ c.endLabel }}</div>
-                      <div class="sub">Tap to add patient</div>
-                    </button>
-                  }
+            <div class="appointments-available-slots">
+              <div class="avail-cards-shell">
+                <div class="avail-cards-head">
+                  <div class="avail-cards-title">Available slots</div>
+                  <div class="avail-cards-sub">{{ scheduleSummary.available }} available</div>
                 </div>
-              } @else {
-                <div class="avail-empty">No available slots</div>
-              }
+                @if (getAvailableSlotCards(12).length > 0) {
+                  <div class="avail-cards">
+                    @for (c of getAvailableSlotCards(12); track c.slotId) {
+                      <button type="button" class="avail-slot-card" (click)="openQuickAddAt(c.start)">
+                        <div class="t">{{ c.startLabel }} – {{ c.endLabel }}</div>
+                        <div class="sub">Tap to add patient</div>
+                      </button>
+                    }
+                  </div>
+                } @else {
+                  <div class="avail-empty">No available slots</div>
+                }
+              </div>
             </div>
           }
-          </div>
           @if (getScheduleListAppointments().length > 0) {
             @for (appointment of getScheduleListAppointments(); track appointment) {
               <div
@@ -223,24 +190,11 @@
       </div>
     }
     </section>
-  } @else {
+      </app-tab>
+      <app-tab label="Timings">
     <section class="timings-section" aria-label="Doctor timings and availability">
       <div class="timings-hero">
-        <div class="timings-hero-text">
-          <h1 class="timings-title">Timings</h1>
-          <p class="timings-subtitle">Configure availability and see how priority rules apply over the next {{ forecastDays }} days.</p>
-        </div>
-        <div class="timings-mode-switch" role="tablist" aria-label="View or manage timings">
-          <app-toggle-button
-            [options]="timingsModeOptions"
-            [value]="timingsMode"
-            (valueChange)="setTimingsMode($event)">
-          </app-toggle-button>
-        </div>
-      </div>
-
-      @if (timingsMode === 'view') {
-        <div class="timings-view">
+        @if (timingsMode === 'view') {
           <div class="timings-priority-nav" role="tablist" aria-label="Timing priorities">
             <button type="button" class="priority-nav-btn" [class.active]="timingsTab === 'p4'" (click)="setTimingsTab('p4')"
               [matTooltip]="priorityTooltipP4" matTooltipPosition="below">
@@ -267,7 +221,35 @@
               <span class="priority-nav-badge">P1</span>
             </button>
           </div>
+        } @else {
+          <div class="timings-manage-hero-title">Configure availability</div>
+        }
 
+        <div class="timings-hero-actions">
+          @if (timingsMode === 'view') {
+            <app-button
+              type="button"
+              class="timings-configure-btn"
+              appearance="raised"
+              [text]="'Configure'"
+              [fontIcon]="'settings'"
+              (btnClick)="setTimingsMode('manage')">
+            </app-button>
+          } @else {
+            <app-button
+              type="button"
+              class="timings-back-btn"
+              appearance="basic"
+              [text]="'Back'"
+              [fontIcon]="'arrow_back'"
+              (btnClick)="setTimingsMode('view')">
+            </app-button>
+          }
+        </div>
+      </div>
+
+      @if (timingsMode === 'view') {
+        <div class="timings-view">
           <div class="timings-view-grid">
               <div class="timings-config-pane">
                 <div class="timings-pane-header">
@@ -478,10 +460,6 @@
         <!-- This Week Schedule (view-only) -->
         @if (timingsMode === 'view') {
           <div class="week-schedule-card">
-            <div class="week-head">
-              <h3>This Week Schedule</h3>
-              <app-button type="button" class="week-add-btn" [text]="'+ Add New Schedule'"  [disabled]="true"></app-button>
-            </div>
             <div class="week-row" aria-label="This week schedule">
               @for (d of thisWeekScheduleCards; track d) {
                 <div class="week-day" [class.empty]="!d.hasSchedule">
@@ -691,7 +669,8 @@
             </div>
           }
     </section>
-  }
+      </app-tab>
+    </app-tabs>
 
   </div>
 </app-page>

@@ -2,46 +2,12 @@
   <div class="dashboard-page" page-body>
 
     <!-- KPI Cards -->
-    <section class="dashboard-cards" aria-label="Key metrics">
-      <button type="button" class="stat-card" (click)="openDetails('billing')">
-        <div class="stat-icon stat-icon--primary">
-          <app-icon [fontIcon]="'meeting_room'" [size]="20"></app-icon>
-        </div>
-        <div class="stat-content">
-          <span class="stat-label">Room Availability</span>
-          <span class="stat-value">{{ stats.roomAvailability }}<span class="stat-value-muted">/{{ stats.totalRooms }}</span></span>
-        </div>
-      </button>
-
-      <button type="button" class="stat-card" (click)="navigateToAppointments()">
-        <div class="stat-icon stat-icon--accent">
-          <app-icon [fontIcon]="'event'" [size]="20"></app-icon>
-        </div>
-        <div class="stat-content">
-          <span class="stat-label">Appointments List</span>
-          <span class="stat-value">{{ stats.bookAppointment }}</span>
-        </div>
-      </button>
-
-      <button type="button" class="stat-card" (click)="openDetails('patients')">
-        <div class="stat-icon stat-icon--success">
-          <app-icon [fontIcon]="'people'" [size]="20"></app-icon>
-        </div>
-        <div class="stat-content">
-          <span class="stat-label">Total Patients</span>
-          <span class="stat-value">{{ stats.totalPatients }}</span>
-        </div>
-      </button>
-
-      <button type="button" class="stat-card" (click)="openDetails('patients')">
-        <div class="stat-icon stat-icon--neutral">
-          <app-icon [fontIcon]="'trending_up'" [size]="20"></app-icon>
-        </div>
-        <div class="stat-content">
-          <span class="stat-label">Overall Visitors</span>
-          <span class="stat-value">{{ stats.overallVisitors | number }} <span class="stat-badge stat-badge--success">+15%</span></span>
-        </div>
-      </button>
+    <section aria-label="Key metrics">
+      <app-admin-stats-card
+        [stats]="overviewStatsCards"
+        [showTrends]="false"
+        (statClick)="onOverviewStatClick($event)">
+      </app-admin-stats-card>
     </section>
 
     <!-- Main Content -->

@@ -61,7 +61,6 @@
   border-radius: var(--card-border-radius);
   border: var(--primary-border);
   overflow: hidden;
-  padding: var(--spacing-sm);
   box-shadow: var(--card-shadow);
   height: clamp(420px, calc(100vh - 520px), 720px);
   margin-top: var(--spacing-sm);

@@ -1,7 +1,9 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, Optional, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Subject } from 'rxjs';
+import { takeUntil, filter } from 'rxjs/operators';
 import {
   AppInputComponent,
   AppSelectboxComponent,
@@ -14,6 +16,7 @@ export interface BaseConfigFormData {
   config?: BaseConfiguration;
   isEditMode: boolean;
   isViewMode: boolean;
+  onSave?: (formData: BaseConfiguration) => void;
 }
 
 @Component({
@@ -30,17 +33,39 @@ export interface BaseConfigFormData {
   templateUrl: './base-configuration-form.component.html',
   styleUrl: './base-configuration-form.component.scss'
 })
-export class BaseConfigurationFormComponent implements OnInit {
+export class BaseConfigurationFormComponent implements OnInit, OnDestroy {
   configForm!: FormGroup;
   isEditMode = false;
   isViewMode = false;
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
-    private readonly fb: FormBuilder
+    private readonly fb: FormBuilder,
+    private readonly dialogRef: MatDialogRef<BaseConfigurationFormComponent>,
+    @Optional() @Inject(MAT_DIALOG_DATA) private readonly dialogData: { componentData?: BaseConfigFormData } | null
   ) {}
 
   ngOnInit(): void {
     this.initForm();
+    const data = this.dialogData?.componentData;
+    if (data?.config && data?.isEditMode) {
+      this.isEditMode = true;
+      this.populateForm(data.config);
+    }
+    this.dialogRef.beforeClosed().pipe(
+      takeUntil(this.destroy$),
+      filter((r: any) => r?.action === 'save')
+    ).subscribe(() => {
+      const formData = this.getFormValue();
+      if (formData) {
+        data?.onSave?.(formData);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   initForm(): void {

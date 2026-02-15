@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AppButtonComponent, DividerComponent, IconComponent, PageBodyDirective, PageComponent } from '@lk/core';
 import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
+import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-card/admin-stats-card.component';
 
 import { BlogPost, BlogStatus } from '../blogs/blogs.data';
 import { BlogService } from '../../services/blog.service';
@@ -15,7 +16,7 @@ type SortBy = 'UPDATED' | 'VIEWS' | 'LIKES' | 'TITLE';
 @Component({
   selector: 'app-blogs-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, PageComponent, PageBodyDirective, IconComponent, DividerComponent, AppButtonComponent, EntityToolbarComponent],
+  imports: [CommonModule, FormsModule, PageComponent, PageBodyDirective, IconComponent, DividerComponent, AppButtonComponent, EntityToolbarComponent, AdminStatsCardComponent],
   templateUrl: './blogs-dashboard.component.html',
   styleUrl: './blogs-dashboard.component.scss'
 })
@@ -54,6 +55,16 @@ export class BlogsDashboardComponent implements OnInit {
     return { total, published, drafts, scheduled, views, likes };
   });
 
+  readonly overviewStatsCards = computed<StatCard[]>(() => {
+    const s = this.stats();
+    return [
+      { id: 'ALL', label: 'Total posts', value: s.total, icon: 'rss_feed', type: 'info' },
+      { id: 'PUBLISHED', label: 'Published', value: s.published, icon: 'public', type: 'success' },
+      { id: 'DRAFT', label: 'Drafts', value: s.drafts, icon: 'edit_note', type: 'warning' },
+      { id: 'SCHEDULED', label: 'Scheduled', value: s.scheduled, icon: 'schedule', type: 'danger' },
+    ];
+  });
+
   readonly filteredPosts = computed(() => {
     const q = this.search().trim().toLowerCase();
     const filter = this.statusFilter();
@@ -89,6 +100,12 @@ export class BlogsDashboardComponent implements OnInit {
 
   setStatusFilter(v: StatusFilter): void {
     this.statusFilter.set(v);
+  }
+
+  onOverviewStatClick(stat: StatCard): void {
+    const id = stat?.id as StatusFilter | undefined;
+    if (!id) return;
+    this.setStatusFilter(id);
   }
 
   onSearch(term: string): void {

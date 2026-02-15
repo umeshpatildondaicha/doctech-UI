@@ -5,48 +5,8 @@
     <!-- Diets Tab -->
     <mat-tab label="Diets">
       <div class="tab-content">
-        <!-- Statistics Cards (screenshot-style) -->
-        <div class="stats-row">
-          <div class="mini-stat">
-            <div class="mini-icon bg-blue">
-              <mat-icon>restaurant_menu</mat-icon>
-            </div>
-            <div class="mini-text">
-              <div class="mini-label">Total Diets</div>
-              <div class="mini-value">{{ dietList.length }}</div>
-            </div>
-          </div>
-
-          <div class="mini-stat">
-            <div class="mini-icon bg-orange">
-              <mat-icon>local_fire_department</mat-icon>
-            </div>
-            <div class="mini-text">
-              <div class="mini-label">Avg Calories</div>
-              <div class="mini-value">{{ avgCalories }}</div>
-            </div>
-          </div>
-
-          <div class="mini-stat">
-            <div class="mini-icon bg-green">
-              <mat-icon>fitness_center</mat-icon>
-            </div>
-            <div class="mini-text">
-              <div class="mini-label">Avg Protein</div>
-              <div class="mini-value">{{ avgProtein }}</div>
-            </div>
-          </div>
-
-          <div class="mini-stat">
-            <div class="mini-icon bg-purple">
-              <mat-icon>groups</mat-icon>
-            </div>
-            <div class="mini-text">
-              <div class="mini-label">Patients on Diets</div>
-              <div class="mini-value">{{ patientsOnDiets }}</div>
-            </div>
-          </div>
-        </div>
+        <!-- Overview -->
+        <app-admin-stats-card [stats]="dietsOverviewCards" [showTrends]="false"></app-admin-stats-card>
 
         <!-- Entity Toolbar: Search + Counts + Actions -->
         <app-entity-toolbar
@@ -93,48 +53,8 @@
     <!-- Diet Plans Tab -->
     <mat-tab label="Diet Plans">
       <div class="tab-content">
-        <!-- Statistics Cards for Diet Plans -->
-        <div class="stats-row">
-          <div class="mini-stat">
-            <div class="mini-icon bg-blue">
-              <mat-icon>calendar_today</mat-icon>
-            </div>
-            <div class="mini-text">
-              <div class="mini-label">Total Plans</div>
-              <div class="mini-value">{{ dietPlans.length }}</div>
-            </div>
-          </div>
-
-          <div class="mini-stat">
-            <div class="mini-icon bg-orange">
-              <mat-icon>check_circle</mat-icon>
-            </div>
-            <div class="mini-text">
-              <div class="mini-label">Active Plans</div>
-              <div class="mini-value">{{ getActivePlansCount() }}</div>
-            </div>
-          </div>
-
-          <div class="mini-stat">
-            <div class="mini-icon bg-green">
-              <mat-icon>date_range</mat-icon>
-            </div>
-            <div class="mini-text">
-              <div class="mini-label">Weekly Plans</div>
-              <div class="mini-value">{{ getWeeklyPlansCount() }}</div>
-            </div>
-          </div>
-
-          <div class="mini-stat">
-            <div class="mini-icon bg-purple">
-              <mat-icon>bar_chart</mat-icon>
-            </div>
-            <div class="mini-text">
-              <div class="mini-label">Avg Adherence</div>
-              <div class="mini-value">{{ getAvgAdherence() }}%</div>
-            </div>
-          </div>
-        </div>
+        <!-- Overview -->
+        <app-admin-stats-card [stats]="dietPlansOverviewCards" [showTrends]="false"></app-admin-stats-card>
 
         <!-- Diet Plans Entity Toolbar: Search + Counts + Actions -->
         <app-entity-toolbar

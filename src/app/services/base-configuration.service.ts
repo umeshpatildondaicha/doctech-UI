@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { HttpUtilService } from './http-util.service';
+import { environment } from '../../environments/environment';
 
 export interface BaseConfiguration {
   id?: number;
@@ -41,7 +42,7 @@ export type BaseConfigDetailsRequest = BaseConfigSearchRequest;
   providedIn: 'root',
 })
 export class BaseConfigurationService {
-  private baseUrl = '/base/util/rest/BaseConfiguration';
+  private baseUrl = `${environment.apiUrl}/base/util/rest/BaseConfiguration`;
 
   constructor(
     private http: HttpClient,

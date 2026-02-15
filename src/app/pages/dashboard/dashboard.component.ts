@@ -10,14 +10,12 @@ import { HighchartsChartModule } from 'highcharts-angular';
 import { DashboardDetailsComponent } from '../dashboard-details/dashboard-details.component';
 import { AppointmentRescheduleComponent } from '../appointment-reschedule/appointment-reschedule.component';
 import { Appointment } from '../../interfaces/appointment.interface';
-import { RoomsService } from '../../services/rooms.service';
 import { AppointmentService } from '../../services/appointment.service';
 import { AuthService } from '../../services/auth.service';
 import { PatientService } from '../../services/patient.service';
+import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-card/admin-stats-card.component';
 
 interface DashboardStats {
-  roomAvailability: number;
-  totalRooms: number;
   bookAppointment: number;
   totalPatients: number;
   overallVisitors: number;
@@ -60,6 +58,7 @@ interface AppointmentRequest {
         
         DashboardDetailsComponent,
         HighchartsChartModule,
+        AdminStatsCardComponent,
         AppButtonComponent,
         DividerComponent,
         GridComponent,
@@ -88,8 +87,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   // Stats
   stats: DashboardStats = {
-    roomAvailability: 2,
-    totalRooms: 100,
     bookAppointment: 0,
     totalPatients: 0,
     overallVisitors: 1210
@@ -126,7 +123,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     private readonly dialogService: DialogboxService,
     private readonly router: Router,
     private patientService :PatientService,
-    private readonly roomsService: RoomsService,
     private readonly appointmentService: AppointmentService,
     private readonly authService: AuthService,
     @Inject(PLATFORM_ID) private readonly platformId: Object
@@ -266,19 +262,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   loadDashboardData() {
     const doctorRegNo = this.authService.getDoctorRegistrationNumber() || 'DR1';
-
-    // Load room availability
-    this.roomsService.getRooms().subscribe((res: any) => {
-      const rooms = res?.content ?? [];
-    
-      const availableRooms = rooms.filter(
-        (r: any) => r.status === 'Available'
-      ).length;
-    
-      this.stats.roomAvailability = availableRooms;
-      this.stats.totalRooms = rooms.length;
-    });
-    
 
     // Appointment requests from API (GET .../requests)
     this.appointmentService.getAppointmentRequests(doctorRegNo).subscribe({
@@ -711,5 +694,47 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   formatTime(dateTime: string): string {
     // Format time helper
     return dateTime;
+  }
+
+  get overviewStatsCards(): StatCard[] {
+    return [
+      {
+        id: 'appointments',
+        label: 'Appointments List',
+        value: this.stats.bookAppointment ?? 0,
+        icon: 'event',
+        type: 'success'
+      },
+      {
+        id: 'patients',
+        label: 'Total Patients',
+        value: this.stats.totalPatients ?? 0,
+        icon: 'people',
+        type: 'warning'
+      },
+      {
+        id: 'requests',
+        label: 'Pending Requests',
+        value: this.pendingRequestCount ?? 0,
+        icon: 'schedule',
+        type: 'danger'
+      }
+    ];
+  }
+
+  onOverviewStatClick(stat: StatCard): void {
+    switch (stat?.id) {
+      case 'appointments':
+        this.navigateToAppointments();
+        break;
+      case 'patients':
+        this.openDetails('patients');
+        break;
+      case 'requests':
+        // Keep current view; could also scroll to the requests section if needed.
+        break;
+      default:
+        break;
+    }
   }
 }

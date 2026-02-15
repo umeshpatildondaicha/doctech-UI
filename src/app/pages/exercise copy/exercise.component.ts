@@ -20,6 +20,7 @@ import { ExerciseSetCreateComponent } from '../exercise-set-create/exercise-set-
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ExerciseCardComponent } from '../../components/exercise-card/exercise-card.component';
 import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
+import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-card/admin-stats-card.component';
 
 @Component({
     selector: 'app-exercise',
@@ -43,7 +44,8 @@ import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-t
     ReactiveFormsModule,
     ExerciseCardComponent,
     AppInputComponent,
-    EntityToolbarComponent
+    EntityToolbarComponent,
+    AdminStatsCardComponent
 ],
     templateUrl: './exercise.component.html',
     styleUrl: './exercise.component.scss'
@@ -235,6 +237,25 @@ export class ExerciseComponent implements OnInit, OnDestroy {
     categories: { 'Strength': 3, 'Core': 1, 'Cardio': 1 },
     topMuscles: ['Chest', 'Quads', 'Core']
   };
+
+  /** Overview cards for Individual tab (kept screenshot-style values for now) */
+  get individualOverviewCards(): StatCard[] {
+    return [
+      { label: 'Total Patients', value: 124, icon: 'people', type: 'info' },
+      { label: 'Active Exercise Plans', value: 98, icon: 'assignment', type: 'warning' },
+      { label: 'Overall Completion Rate', value: '74%', icon: 'verified', type: 'success' },
+      { label: 'Missed Exercises Today', value: 18, icon: 'report', type: 'danger' }
+    ];
+  }
+
+  /** Overview cards for Groups tab */
+  get groupOverviewCards(): StatCard[] {
+    return [
+      { label: 'Total Groups', value: this.exerciseGroups.length, icon: 'group_work', type: 'info' },
+      { label: 'Total Exercises', value: this.getTotalExercisesInGroups(), icon: 'fitness_center', type: 'success' },
+      { label: 'Categories', value: this.getGroupCategoriesCount(), icon: 'category', type: 'warning' }
+    ];
+  }
 
   exerciseGridOptions: any = {};
   exerciseSetGridOptions: any = {};

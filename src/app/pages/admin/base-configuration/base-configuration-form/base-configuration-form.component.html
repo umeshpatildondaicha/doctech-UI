@@ -7,7 +7,6 @@
           [label]="'Config Key'"
           [placeholder]="'e.g. THEME'"
           formControlName="configKey"
-          [disabled]="isViewMode"
           [prefixIconName]="'key'">
         </app-input>
         @if (hasError('configKey')) {
@@ -21,7 +20,6 @@
           [label]="'Config Tag'"
           [placeholder]="'e.g. UI'"
           formControlName="configTag"
-          [disabled]="isViewMode"
           [prefixIconName]="'label'">
         </app-input>
         @if (hasError('configTag')) {
@@ -35,7 +33,6 @@
           [label]="'Application Name'"
           [placeholder]="'e.g. doctech'"
           formControlName="applicationName"
-          [disabled]="isViewMode"
           [prefixIconName]="'apps'">
         </app-input>
         @if (hasError('applicationName')) {
@@ -50,7 +47,6 @@
           [placeholder]="'e.g. 1'"
           formControlName="customerId"
           type="number"
-          [disabled]="isViewMode"
           [prefixIconName]="'person'">
         </app-input>
         @if (hasError('customerId')) {
@@ -65,7 +61,6 @@
       <textarea
         class="config-value-textarea"
         formControlName="configValue"
-        [attr.disabled]="isViewMode ? '' : null"
         placeholder="Enter configuration value (supports JSON, plain text, etc.)"
         rows="8">
       </textarea>

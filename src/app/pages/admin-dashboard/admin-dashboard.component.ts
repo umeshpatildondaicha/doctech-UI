@@ -5,8 +5,9 @@ import { AuthService, AppButtonComponent, AppInputComponent, IconComponent, TabC
 import * as Highcharts from 'highcharts';
 import { HighchartsChartModule } from 'highcharts-angular';
 import { RouterLink } from '@angular/router';
+import { AdminStatsCardComponent, StatCard as OverviewStatCard } from '../../components/admin-stats-card/admin-stats-card.component';
 
-interface StatCard {
+interface AdminDashboardStatCard {
   title: string;
   value: string | number;
   icon: string;
@@ -48,7 +49,7 @@ type TabType = 'overview' | 'staff' | 'patients' | 'billing' | 'analytics';
 
 @Component({
     selector: 'app-admin-dashboard',
-    imports: [CommonModule, HighchartsChartModule,RouterLink, AppButtonComponent, AppInputComponent, IconComponent,AppInputComponent,TabComponent,TabsComponent,NgIf],
+    imports: [CommonModule, HighchartsChartModule,RouterLink, AppButtonComponent, AppInputComponent, IconComponent,AppInputComponent,TabComponent,TabsComponent,NgIf, AdminStatsCardComponent],
     templateUrl: './admin-dashboard.component.html',
     styleUrl: './admin-dashboard.component.scss'
 })
@@ -71,7 +72,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   };
 
   // Dashboard statistics
-  statsCards: StatCard[] = [
+  statsCards: AdminDashboardStatCard[] = [
     {
       title: 'Total Revenue',
       value: '₹2.8M',
@@ -100,15 +101,6 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
       description: 'Total hospital staff'
     },
     {
-      title: 'Bed Occupancy',
-      value: '87%',
-      icon: 'hotel',
-      trend: -2.3,
-      trendLabel: 'vs last month',
-      color: 'var(--admin-gradient-danger)',
-      description: 'Current bed utilization'
-    },
-    {
       title: 'Today\'s Appointments',
       value: '156',
       icon: 'event',
@@ -127,6 +119,27 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
       description: 'Active emergency cases'
     }
   ];
+
+  get overviewStatsCards(): OverviewStatCard[] {
+    const types: OverviewStatCard['type'][] = ['success', 'info', 'warning', 'danger', 'info'];
+    return this.statsCards.map((s, idx) => {
+      const type: OverviewStatCard['type'] = types[idx] ?? 'info';
+
+      return {
+        id: s.title,
+        label: s.title,
+        value: s.value,
+        icon: s.icon,
+        type,
+        hint: s.description,
+        trend: {
+          value: Math.abs(s.trend),
+          isPositive: s.trend >= 0,
+          label: s.trendLabel
+        }
+      };
+    });
+  }
 
   // Department overview
   departments: Department[] = [

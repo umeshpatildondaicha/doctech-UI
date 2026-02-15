@@ -136,7 +136,6 @@ export class BreadcrumbComponent implements OnInit {
     
     const iconMap: { [key: string]: string } = {
       'admin': 'admin_panel_settings',
-      'services': 'medical_services',
       'doctors': 'person',
       'patients': 'people',
       'appointments': 'event',
@@ -145,7 +144,6 @@ export class BreadcrumbComponent implements OnInit {
       'rooms': 'meeting_room',
       'roles': 'security',
       'plans': 'card_membership',
-      'schemes': 'local_offer',
       'billing': 'receipt',
       'diet': 'restaurant',
       'exercise': 'fitness_center',

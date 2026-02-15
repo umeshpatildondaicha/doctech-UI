@@ -51,7 +51,17 @@ $transition: var(--transition-fast);
   margin: 0 0 var(--spacing-lg) 0;
 }
 
-// Top-level Schedule/Timings switcher — professional pill group
+// Top-level Schedule | Timings (core app-tabs)
+.schedule-page-tabs {
+  margin-bottom: $spacing-unit;
+  width: 100%;
+
+  ::ng-deep .app-tabs .mat-mdc-tab-header {
+    margin-bottom: var(--spacing-lg);
+  }
+}
+
+// Legacy (kept for reference; replaced by app-tabs)
 .section-tabs {
   display: inline-flex;
   align-items: center;
@@ -124,50 +134,15 @@ $transition: var(--transition-fast);
 .legend-dot--break { background: $warning; }
 .legend-dot--blocked { background: $neutral; }
 
-// Appointments card: day overview (stats + available slots in one place)
-.appointments-day-overview {
+// Available slots (separate section below overview)
+.appointments-available-slots {
   margin-bottom: var(--spacing-lg);
   padding: var(--spacing-lg);
   border-radius: var(--card-border-radius);
   background: $card-bg;
   border: 1px solid $border-subtle;
-  border-left: 3px solid $primary;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
-
-.day-overview-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
-}
-
-.day-overview-stat {
-  text-align: center;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: $radius-icon;
-  background: $page-bg;
-  border: 1px solid $border-subtle;
-}
-
-.day-overview-label {
-  display: block;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: $text-secondary;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 2px;
-}
-
-.day-overview-value {
-  display: block;
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: $text-primary;
-  line-height: 1.2;
-}
-
 
 // Header card: legend + New Appointment (core app-card)
 .sched-header-card {
@@ -386,6 +361,22 @@ $transition: var(--transition-fast);
   margin-bottom: var(--spacing-lg);
 }
 
+.sched-list-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+
+  app-entity-toolbar {
+    flex-shrink: 0;
+  }
+
+  .sched-legend-row {
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+  }
+}
+
 .sched-list-meta {
   display: inline-flex;
   align-items: center;
@@ -454,10 +445,7 @@ $transition: var(--transition-fast);
   flex-wrap: wrap;
 }
 
-// Appointments list body (inside core app-card)
-.sched-list-body {
-  padding-top: var(--spacing-md);
-}
+
 
 
 // Legacy: flexible scheduling "Daily capacity" block (keep same class for consistency)
@@ -535,9 +523,9 @@ $transition: var(--transition-fast);
 
 // Slot-based scheduling: available slots as cards
 .avail-cards-shell {
-  margin-top: var(--spacing-md);
-  padding-top: var(--spacing-md);
-  border-top: 1px dashed $border-subtle;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
 }
 
 .avail-cards-head {
@@ -761,9 +749,6 @@ $transition: var(--transition-fast);
 }
 
 @media (max-width: 980px) {
-  .day-overview-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
   .legend-inline {
     gap: var(--spacing-md);
   }
@@ -805,68 +790,16 @@ $transition: var(--transition-fast);
 
 .timings-hero {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-xl);
-  flex-wrap: wrap;
+  gap: var(--spacing-lg);
+  flex-wrap: nowrap;
   margin-bottom: var(--spacing-2xl);
-  padding: var(--spacing-2xl) var(--spacing-2xl);
+  padding: var(--spacing-lg) var(--spacing-2xl);
   background: $card-bg;
   border-radius: var(--card-border-radius);
   border: 1px solid $border-subtle;
-  border-left: 4px solid $primary;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.timings-title {
-  margin: 0;
-  font-size: var(--font-size-4xl);
-  font-weight: var(--font-weight-bold);
-  color: $text-primary;
-  letter-spacing: -0.025em;
-  line-height: 1.2;
-}
-
-.timings-subtitle {
-  margin: var(--spacing-md) 0 0;
-  font-size: var(--font-size-base);
-  color: $text-secondary;
-  line-height: 1.55;
-  max-width: 44ch;
-}
-
-.timings-mode-switch {
-  flex-shrink: 0;
-  padding: 4px;
-  border-radius: 999px;
-  background: $neutral-bg;
-  border: 1px solid $border-subtle;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
-
-  ::ng-deep .toggle-buttons {
-    display: flex;
-    gap: 0;
-    border-radius: 999px;
-    overflow: hidden;
-    app-button {
-      min-height: 40px !important;
-      padding: 0 var(--spacing-lg) !important;
-      button {
-        min-height: 40px !important;
-        padding: 0 var(--spacing-lg) !important;
-        font-weight: var(--font-weight-semibold) !important;
-        font-size: var(--font-size-sm) !important;
-        background: transparent !important;
-        color: $text-secondary !important;
-        transition: background 0.2s ease, color 0.2s ease;
-      }
-      &.selected button {
-        background: $primary !important;
-        color: var(--primary-text-color) !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-      }
-    }
-  }
 }
 
 // View mode: priority nav + grid
@@ -876,9 +809,33 @@ $transition: var(--transition-fast);
 
 .timings-priority-nav {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-xl);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.timings-hero .timings-priority-nav {
+  margin-bottom: 0;
+}
+
+.timings-manage-hero-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: $text-primary;
+}
+
+.timings-hero-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.timings-configure-btn {
+  flex-shrink: 0;
 }
 
 .priority-nav-btn {
@@ -1397,6 +1354,23 @@ $transition: var(--transition-fast);
   margin-bottom: var(--spacing-2xl);
 }
 
+.timings-manage-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.timings-back-btn {
+  flex-shrink: 0;
+}
+
+.timings-manage-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: $text-primary;
+}
+
 .timings-priority-flow {
   margin-bottom: var(--spacing-xl);
   padding: var(--spacing-lg) var(--spacing-xl);
@@ -1873,8 +1847,9 @@ $transition: var(--transition-fast);
   .timings-hero {
     flex-direction: column;
     align-items: stretch;
+    flex-wrap: wrap;
   }
-  .timings-mode-switch {
+  .timings-hero-actions {
     align-self: flex-start;
   }
 }

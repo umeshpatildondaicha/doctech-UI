@@ -20,6 +20,7 @@ import { IconComponent } from "@lk/core";
 import { AppInputComponent } from "@lk/core";
 import { AppButtonComponent } from "@lk/core";
 import { AppSelectboxComponent } from "@lk/core";
+import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-card/admin-stats-card.component';
 
 interface Doctor {
   id: string;
@@ -67,6 +68,8 @@ interface DoctorStats {
     AppInputComponent,
     AppButtonComponent,
     AppSelectboxComponent
+    ,
+    AdminStatsCardComponent
 ],
     templateUrl: './doctor.component.html',
     styleUrl: './doctor.component.scss'
@@ -387,5 +390,15 @@ export class DoctorComponent implements OnInit {
       horizontalPosition: 'center',
       verticalPosition: 'bottom'
     });
+  }
+
+  get overviewStatsCards(): StatCard[] {
+    return [
+      { label: 'Total Doctors', value: this.stats.total ?? 0, icon: 'groups', type: 'info' },
+      { label: 'Active Today', value: this.stats.active ?? 0, icon: 'check_circle', type: 'success' },
+      { label: 'On Leave', value: this.stats.onLeave ?? 0, icon: 'pause_circle', type: 'warning' },
+      { label: 'Inactive', value: this.stats.inactive ?? 0, icon: 'block', type: 'danger' },
+      { label: 'Specializations', value: this.getSpecializationCount() ?? 0, icon: 'category', type: 'info' },
+    ];
   }
 }

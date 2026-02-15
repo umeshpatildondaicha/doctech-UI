@@ -25,28 +25,9 @@
   </div>
 
   <!-- 2. Mini Dashboard/Stats Bar -->
-  <div class="stats-bar">
-    <div class="stat-card">
-      <div class="stat-number">{{ stats.total }}</div>
-      <div class="stat-label">Total Doctors</div>
-    </div>
-    <div class="stat-card active">
-      <div class="stat-number">{{ stats.active }}</div>
-      <div class="stat-label">Active Today</div>
-    </div>
-    <div class="stat-card on-leave">
-      <div class="stat-number">{{ stats.onLeave }}</div>
-      <div class="stat-label">On Leave</div>
-    </div>
-    <div class="stat-card inactive">
-      <div class="stat-number">{{ stats.inactive }}</div>
-      <div class="stat-label">Inactive</div>
-    </div>
-    <div class="stat-card specializations">
-      <div class="stat-number">{{ getSpecializationCount() }}</div>
-      <div class="stat-label">Specializations</div>
-    </div>
-  </div>
+  <section aria-label="Doctor overview">
+    <app-admin-stats-card [stats]="overviewStatsCards" [showTrends]="false"></app-admin-stats-card>
+  </section>
 
   <!-- 3. Search and Filters Section -->
   <div class="filters-section">

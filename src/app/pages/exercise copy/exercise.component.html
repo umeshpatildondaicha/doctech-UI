@@ -5,37 +5,8 @@
     <!-- Individual Tab (screenshot-style label) -->
     <mat-tab label="Individual">
       <div class="tab-content">
-        <!-- Statistics Cards (screenshot-style) -->
-        <div class="stats-row">
-          <div class="mini-stat">
-            <div class="mini-icon bg-blue"><mat-icon>people</mat-icon></div>
-            <div class="mini-text">
-              <div class="mini-label">Total Patients</div>
-              <div class="mini-value">124</div>
-            </div>
-          </div>
-          <div class="mini-stat">
-            <div class="mini-icon bg-orange"><mat-icon>assignment</mat-icon></div>
-            <div class="mini-text">
-              <div class="mini-label">Active Exercise Plans</div>
-              <div class="mini-value">98</div>
-            </div>
-          </div>
-          <div class="mini-stat">
-            <div class="mini-icon bg-green"><mat-icon>verified</mat-icon></div>
-            <div class="mini-text">
-              <div class="mini-label">Overall Completion Rate</div>
-              <div class="mini-value">74%</div>
-            </div>
-          </div>
-          <div class="mini-stat">
-            <div class="mini-icon bg-red"><mat-icon>report</mat-icon></div>
-            <div class="mini-text">
-              <div class="mini-label">Missed Exercises Today</div>
-              <div class="mini-value">18</div>
-            </div>
-          </div>
-        </div>
+        <!-- Overview -->
+        <app-admin-stats-card [stats]="individualOverviewCards" [showTrends]="false"></app-admin-stats-card>
 
         <!-- Entity Toolbar: Search + Counts + Actions -->
         <app-entity-toolbar
@@ -87,44 +58,8 @@
     <!-- Exercise Groups Tab -->
     <mat-tab label="Groups">
       <div class="tab-content">
-        <!-- Statistics Cards -->
-        <div class="stats-cards">
-          <mat-card class="stat-card total-card">
-            <div class="stat-content">
-              <div class="stat-icon">
-                <mat-icon>group_work</mat-icon>
-              </div>
-              <div class="stat-info">
-                <div class="stat-number">{{ exerciseGroups.length }}</div>
-                <div class="stat-label">Total Groups</div>
-              </div>
-            </div>
-          </mat-card>
-
-          <mat-card class="stat-card exercises-card">
-            <div class="stat-content">
-              <div class="stat-icon">
-                <mat-icon>fitness_center</mat-icon>
-              </div>
-              <div class="stat-info">
-                <div class="stat-number">{{ getTotalExercisesInGroups() }}</div>
-                <div class="stat-label">Total Exercises</div>
-              </div>
-            </div>
-          </mat-card>
-
-          <mat-card class="stat-card categories-card">
-            <div class="stat-content">
-              <div class="stat-icon">
-                <mat-icon>category</mat-icon>
-              </div>
-              <div class="stat-info">
-                <div class="stat-number">{{ getGroupCategoriesCount() }}</div>
-                <div class="stat-label">Categories</div>
-              </div>
-            </div>
-          </mat-card>
-        </div>
+        <!-- Overview -->
+        <app-admin-stats-card [stats]="groupOverviewCards" [showTrends]="false"></app-admin-stats-card>
 
         <!-- Entity Toolbar for Groups: Search + Counts + Actions -->
         <app-entity-toolbar

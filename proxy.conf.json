@@ -7,5 +7,14 @@
     "headers": {
       "Origin": "https://doctech.solutions"
     }
+  },
+  "/base/*": {
+    "target": "https://doctech.solutions",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "headers": {
+      "Origin": "https://doctech.solutions"
+    }
   }
 }

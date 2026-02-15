@@ -74,6 +74,23 @@
   height: 100%;
 }
 
+.grid-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 0;
+
+  app-entity-toolbar {
+    flex-shrink: 0;
+    margin-bottom: 16px;
+  }
+
+  app-grid {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
 // Responsive design
 @media (max-width: 768px) {
   .appointment-container {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 
 import { ActivatedRoute, Router } from '@angular/router';
 import { ColDef } from 'ag-grid-community';
@@ -16,14 +16,17 @@ import { CoreEventService, DialogboxService, DialogFooterAction, PageComponent, 
 import { AppointmentService } from '../../services/appointment.service';
 import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment';
+import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
 
 @Component({
   selector: 'app-appointment',
-  imports: [GridComponent, AppButtonComponent, IconComponent, CalendarComponent, PageComponent],
+  imports: [GridComponent, AppButtonComponent, IconComponent, CalendarComponent, PageComponent, EntityToolbarComponent],
   templateUrl: './appointment.component.html',
   styleUrl: './appointment.component.scss'
 })
-export class AppointmentComponent implements OnInit {
+export class AppointmentComponent implements OnInit, AfterViewInit {
+  @ViewChild('appointmentGrid') appointmentGridRef?: GridComponent;
+
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Dashboard', route: '/dashboard', icon: 'dashboard' },
     { label: 'Appointments', route: '/appointment', icon: 'event', isActive: true }
@@ -31,6 +34,16 @@ export class AppointmentComponent implements OnInit {
   // All appointments data
   //apiConfig :any = null;
   isLoading = false;
+
+  /** For entity-toolbar counts (synced from grid when available) */
+  displayedRows = 0;
+  totalRows = 0;
+
+  appointmentSearchHints = [
+    'Search by patient name...',
+    'Search by doctor name...',
+    'Search by status or reason...'
+  ];
 
   appointmentColumns: ColDef[] = [];
   appointmentGridOptions: ExtendedGridOptions = {
@@ -73,8 +86,11 @@ export class AppointmentComponent implements OnInit {
   ngOnInit() {
     this.getQueryParams();
     this.initializeAppointmentGrid();
- 
-   
+  }
+
+  ngAfterViewInit(): void {
+    // Sync display counts after grid has loaded data (grid uses apiConfig so data loads async)
+    setTimeout(() => this.syncDisplayCounts(), 800);
   }
    apiConfig: any = {
     dataConfig: {
@@ -211,6 +227,34 @@ export class AppointmentComponent implements OnInit {
 
   onAppointmentRowClick(event: any) {
     console.log('Appointment row clicked:', event.data);
+  }
+
+  onAppointmentSearch(value: string): void {
+    const grid = this.appointmentGridRef;
+    if (grid?.gridApi) {
+      grid.gridApi.setGridOption('quickFilterText', value ?? '');
+    }
+    this.syncDisplayCounts();
+  }
+
+  refreshAppointmentGrid(): void {
+    const grid = this.appointmentGridRef;
+    if (grid?.gridApi) {
+      grid.gridApi.refreshInfiniteCache();
+    }
+    this.syncDisplayCounts();
+  }
+
+  onAppointmentFilterClick(): void {
+    // Grid column filters are available via column menu; or open a filter dialog here
+  }
+
+  private syncDisplayCounts(): void {
+    const grid = this.appointmentGridRef;
+    if (grid) {
+      this.displayedRows = grid.displayedRows ?? 0;
+      this.totalRows = grid.totalRows ?? 0;
+    }
   }
 
   openDialog(mode: Mode, data?: Appointment) {
