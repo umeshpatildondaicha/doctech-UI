@@ -58,6 +58,10 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.isAuthenticated) {
       this.userType = user?.userType || null;
     }
+    // Right sidebar should only exist for doctors
+    if (this.userType !== 'DOCTOR') {
+      this.rightSidebarOpen = false;
+    }
 
     // Set initial view mode synchronously to prevent both views showing
     // Check if route is root (/) or login - show login view initially
@@ -93,6 +97,10 @@ export class AppComponent implements OnInit, OnDestroy {
       const wasAuthenticated = this.isAuthenticated;
       this.isAuthenticated = state.isAuthenticated;
       this.userType = state.currentUser?.user?.userType || null;
+      // Right sidebar should only exist for doctors
+      if (this.userType !== 'DOCTOR') {
+        this.rightSidebarOpen = false;
+      }
 
       if (state.isAuthenticated) {
         this.patientQueueService.loadSampleData();

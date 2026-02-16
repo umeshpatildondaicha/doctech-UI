@@ -36,20 +36,105 @@ $muted: rgba(0, 0, 0, 0.62);
   cursor: pointer;
 }
 
-.avail-progress {
-  margin: 12px 0 18px;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
+/* Horizontal stepper (reference: Add new dataset style) */
+.avail-dialog {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 100%;
 }
 
-.avail-progress .seg {
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.08);
+.avail-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
-.avail-progress .seg.on {
-  background: $primary;
+
+.avail-stepper-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid $border;
+}
+
+.avail-stepper-step {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 0;
+}
+
+.avail-stepper-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.18);
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+
+  .avail-stepper-num {
+    font-size: 12px;
+    font-weight: 700;
+    color: $muted;
+  }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: #fff;
+  }
+}
+
+.avail-stepper-step.active .avail-stepper-circle {
+  background: rgba(0, 0, 0, 0.88);
+  border-color: rgba(0, 0, 0, 0.88);
+  .avail-stepper-num {
+    color: #fff;
+  }
+}
+
+.avail-stepper-step.completed .avail-stepper-circle {
+  background: rgba(0, 0, 0, 0.88);
+  border-color: rgba(0, 0, 0, 0.88);
+}
+
+.avail-stepper-label {
+  margin-left: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: $muted;
+  white-space: nowrap;
+}
+
+.avail-stepper-step.active .avail-stepper-label {
+  color: $text;
+  font-weight: 700;
+}
+
+.avail-stepper-step.completed .avail-stepper-label {
+  color: $text;
+}
+
+.avail-stepper-connector {
+  width: 32px;
+  height: 2px;
+  margin-left: 8px;
+  margin-right: 4px;
+  background: rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+  border-radius: 1px;
+  transition: background 0.2s ease;
+}
+
+.avail-stepper-connector.on {
+  background: rgba(0, 0, 0, 0.88);
 }
 
 .avail-alert {

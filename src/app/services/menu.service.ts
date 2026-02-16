@@ -80,13 +80,6 @@ export class MenuService {
       section: 'main',
       userTypes: ['doctor']
     },
-    {
-      label: 'Lists Designer',
-      icon: 'grid_on',
-      route: '/admin/lists-designer',
-      section: 'main',
-      userTypes: ['doctor']
-    }
   ];
 
   // Admin menu items
@@ -127,19 +120,19 @@ export class MenuService {
       userTypes: ['admin']
     },
     {
+      label: 'Hospital Flow',
+      icon: 'apartment',
+      route: '/admin/hospital',
+      section: 'administration',
+      userTypes: ['admin']
+    },
+    {
       label: 'Base Configuration',
       icon: 'settings',
       route: '/admin/base-configuration',
       section: 'administration',
       userTypes: ['admin']
     },
-    {
-      label: 'Lists Designer',
-      icon: 'grid_on',
-      route: '/admin/lists-designer',
-      section: 'administration',
-      userTypes: ['admin']
-    }
   ];
 
   constructor() {}

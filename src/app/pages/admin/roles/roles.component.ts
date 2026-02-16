@@ -88,18 +88,9 @@ interface Doctor {
 })
 export class RolesComponent implements OnInit {
   // State Management
-  activeTab: 'overview' | 'permissions' | 'staff' | 'assignments' | 'attendance' = 'overview';
+  activeTab: 'overview' | 'permissions' | 'assignments' = 'overview';
   selectedTabIndex = 0;
   selectedRole: Role | null = null;
-  selectedStaff: Staff | null = null;
-  showStaffDetails = false;
-  searchTerm = '';
-  selectedRoleFilter = '';
-  selectedStatusFilter = '';
-  attendanceSearchTerm = '';
-  selectedDate = new Date().toISOString().split('T')[0];
-  bulkSelectedStaff: Set<number> = new Set();
-  showBulkActions = false;
 
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Roles & Staff', route: '/admin/roles', icon: 'badge', isActive: true }
@@ -109,12 +100,6 @@ export class RolesComponent implements OnInit {
 
   // Page header configuration
   headerActions: HeaderAction[] = [
-    {
-      text: 'Add Staff',
-      color: 'primary',
-      fontIcon: 'person_add',
-      action: 'add-staff'
-    },
     {
       text: 'Reports',
       color: 'accent',
@@ -136,27 +121,14 @@ export class RolesComponent implements OnInit {
       icon: 'security'
     },
     {
-      id: 'staff',
-      label: 'Staff Management',
-      icon: 'groups'
-    },
-    {
       id: 'assignments',
       label: 'Assignments',
       icon: 'assignment_ind'
-    },
-    {
-      id: 'attendance',
-      label: 'Attendance',
-      icon: 'schedule'
     }
   ];
 
   // Stats configuration
   statsCards: StatCard[] = [];
-
-  // Forms
-  staffForm: FormGroup;
 
   // Data
   roles: Role[] = [
@@ -322,59 +294,20 @@ export class RolesComponent implements OnInit {
 
   permissionLevels = ['read', 'write', 'update', 'delete'];
 
-  // Filter Options
-  get statusFilterOptions() {
-    return [
-      { label: 'All Status', value: '' },
-      { label: 'On Duty', value: 'on-duty' },
-      { label: 'Off Duty', value: 'off-duty' },
-      { label: 'Late', value: 'late' },
-      { label: 'Absent', value: 'absent' }
-    ];
-  }
-
-  get attendanceStatusOptions() {
-    return [
-      { label: 'All', value: '' },
-      { label: 'Present', value: 'on-duty' },
-      { label: 'Late', value: 'late' },
-      { label: 'Absent', value: 'absent' }
-    ];
-  }
-
   constructor(
     private readonly fb: FormBuilder,
     private readonly dialogService: DialogboxService
-  ) {
-    this.staffForm = this.createStaffForm();
-  }
+  ) {}
 
   ngOnInit() {
-    this.generateAttendanceHistory();
     this.updateStatsCards();
-    // Select the first role by default for a better user experience
     if (this.roles.length > 0) {
       this.selectedRole = this.roles[0];
     }
   }
 
-
-
-  createStaffForm(): FormGroup {
-    return this.fb.group({
-      fullName: ['', [Validators.required]],
-      employeeId: ['', [Validators.required]],
-      role: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required]],
-      specialization: [''],
-      assignedDoctors: [[]]
-    });
-  }
-
   // Tab Management
-  setActiveTab(tab: 'overview' | 'permissions' | 'staff' | 'assignments' | 'attendance') {
-    console.log('Setting active tab to:', tab);
+  setActiveTab(tab: 'overview' | 'permissions' | 'assignments') {
     this.activeTab = tab;
     if (tab === 'permissions' && !this.selectedRole && this.roles.length > 0) {
       this.selectedRole = this.roles[0];
@@ -386,83 +319,19 @@ export class RolesComponent implements OnInit {
     this.selectedRole = role;
   }
 
-  // Staff Management Methods
-  selectStaff(staff: Staff) {
-    this.selectedStaff = staff;
-    this.showStaffDetails = true;
-  }
-
-  closeStaffDetails() {
-    this.showStaffDetails = false;
-    this.selectedStaff = null;
-    document.body.style.overflow = 'auto';
-  }
-
   assignStaffToDoctor(staffId: number, doctorId: number) {
-    const staff = this.staff.find(s => s.id === staffId);
-    if (staff && !staff.assignedDoctors.includes(doctorId)) {
-      staff.assignedDoctors.push(doctorId);
+    const s = this.staff.find(st => st.id === staffId);
+    if (s && !s.assignedDoctors.includes(doctorId)) {
+      s.assignedDoctors.push(doctorId);
     }
-  }
-
-  removeStaffFromDoctor(staffId: number, doctorId: number) {
-    const staff = this.staff.find(s => s.id === staffId);
-    if (staff) {
-      staff.assignedDoctors = staff.assignedDoctors.filter(id => id !== doctorId);
-    }
-  }
-
-  // Bulk Actions
-  toggleStaffSelection(staffId: number) {
-    if (this.bulkSelectedStaff.has(staffId)) {
-      this.bulkSelectedStaff.delete(staffId);
-    } else {
-      this.bulkSelectedStaff.add(staffId);
-    }
-    this.showBulkActions = this.bulkSelectedStaff.size > 0;
-  }
-
-  selectAllStaff() {
-    this.filteredStaff.forEach(staff => this.bulkSelectedStaff.add(staff.id));
-    this.showBulkActions = true;
-  }
-
-  clearSelection() {
-    this.bulkSelectedStaff.clear();
-    this.showBulkActions = false;
-  }
-
-  bulkAssignToDoctor(doctorId: number) {
-    this.bulkSelectedStaff.forEach(staffId => {
-      this.assignStaffToDoctor(staffId, doctorId);
-    });
-    this.clearSelection();
-  }
-
-  // Computed Properties
-  get filteredStaff(): Staff[] {
-    return this.staff.filter(staff => {
-      const matchesSearch = staff.fullName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                           staff.employeeId.toLowerCase().includes(this.searchTerm.toLowerCase());
-      const matchesRole = !this.selectedRoleFilter || staff.role === this.selectedRoleFilter;
-      return matchesSearch && matchesRole;
-    });
   }
 
   get unassignedStaff(): Staff[] {
-    return this.staff.filter(staff => staff.assignedDoctors.length === 0);
-  }
-
-  get roleOptions() {
-    return this.roles.map(role => ({ label: role.name, value: role.name }));
+    return this.staff.filter(s => s.assignedDoctors.length === 0);
   }
 
   get doctorOptions() {
     return this.doctors.map(doctor => ({ label: doctor.name, value: doctor.id }));
-  }
-
-  get allRoleOptions() {
-    return [{ label: 'All Roles', value: '' }, ...this.roleOptions];
   }
 
   getStaffCountForDoctor(doctorId: number): number {
@@ -512,46 +381,12 @@ export class RolesComponent implements OnInit {
     }
   }
 
-  generateAttendanceHistory() {
-    // Generate mock attendance history for demonstration
-    this.staff.forEach(staff => {
-      staff.attendanceHistory = Array.from({ length: 7 }, (_, i) => ({
-        date: new Date(Date.now() - (i * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
-        inTime: '08:00',
-        outTime: '16:00',
-        totalHours: 8,
-        status: i === 0 ? staff.attendance.status : 'on-duty'
-      }));
-    });
-  }
-
-  // Navigation Methods
-  navigateToStaffForm() {
-    // Navigate to staff form
-    console.log('Navigate to staff form');
-  }
-
   navigateToReports() {
-    // Navigate to reports
     console.log('Navigate to reports');
   }
 
   exportReports() {
-    // Export reports logic
     console.log('Export reports');
-  }
-
-  // Staff Management Methods
-  editStaff(staff: Staff) {
-    console.log('Edit staff:', staff);
-  }
-
-  manageAssignments(staff: Staff) {
-    console.log('Manage assignments for:', staff);
-  }
-
-  trackByStaffId(index: number, staff: Staff): number {
-    return staff.id;
   }
 
   // Assignment Methods
@@ -582,25 +417,8 @@ export class RolesComponent implements OnInit {
     this.assignStaffToDoctor(staffId, doctorId);
   }
 
-  // Attendance Methods
-  setToday() {
-    this.selectedDate = new Date().toISOString().split('T')[0];
-  }
-
   getActiveStaffCount(): number {
     return this.staff.filter(s => s.attendance.status === 'on-duty').length;
-  }
-
-  getPresentStaffCount(): number {
-    return this.staff.filter(s => s.attendance.status === 'on-duty').length;
-  }
-
-  getLateStaffCount(): number {
-    return this.staff.filter(s => s.attendance.status === 'late').length;
-  }
-
-  getAbsentStaffCount(): number {
-    return this.staff.filter(s => s.attendance.status === 'absent').length;
   }
 
   // New methods for standardized components
@@ -643,9 +461,6 @@ export class RolesComponent implements OnInit {
 
   onHeaderAction(action: string) {
     switch (action) {
-      case 'add-staff':
-        this.navigateToStaffForm();
-        break;
       case 'reports':
         this.navigateToReports();
         break;
@@ -653,32 +468,6 @@ export class RolesComponent implements OnInit {
   }
 
   onTabChange(tabId: string) {
-    this.setActiveTab(tabId as 'overview' | 'permissions' | 'staff' | 'assignments' | 'attendance');
-  }
-
-  getAttendancePercentage(): number {
-    const present = this.getPresentStaffCount();
-    const total = this.staff.length;
-    return total > 0 ? Math.round((present / total) * 100) : 0;
-  }
-
-  getFilteredAttendanceStaff(): Staff[] {
-    return this.staff.filter(staff => {
-      const matchesSearch = staff.fullName.toLowerCase().includes(this.attendanceSearchTerm.toLowerCase()) ||
-                           staff.employeeId.toLowerCase().includes(this.attendanceSearchTerm.toLowerCase());
-      return matchesSearch;
-    });
-  }
-
-  isLateArrival(staff: Staff): boolean {
-    return staff.attendance.status === 'late';
-  }
-
-  viewAttendanceHistory(staff: Staff) {
-    console.log('View attendance history for:', staff);
-  }
-
-  editAttendance(staff: Staff) {
-    console.log('Edit attendance for:', staff);
+    this.setActiveTab(tabId as 'overview' | 'permissions' | 'assignments');
   }
 } 

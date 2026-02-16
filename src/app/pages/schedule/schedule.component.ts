@@ -1667,7 +1667,7 @@ dailyBaseAvailability: {
     const doctorId = this.resolveDoctorIdForTimings();
     const footerActions: DialogFooterAction[] = [
       { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
-      { id: 'back', text: 'Back', color: 'secondary', appearance: 'stroked' },
+      { id: 'back', text: 'Previous', color: 'secondary', appearance: 'stroked' },
       { id: 'apply', text: 'Next', color: 'primary', appearance: 'raised' }
     ];
     const ref = this.dialogService.openDialog(AvailabilitySetupDialogComponent, {

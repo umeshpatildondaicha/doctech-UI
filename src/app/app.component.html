@@ -12,21 +12,23 @@
       appTitle="Shree Clinic"
       (toggle)="toggleSidebar()"
     ></app-sidebar>
-    <div class="main-section" [class.right-sidebar-expanded]="rightSidebarOpen">
+    <div class="main-section" [class.right-sidebar-expanded]="rightSidebarOpen && userType === 'DOCTOR'">
       <app-app-topbar></app-app-topbar>
       <div class="main-section-content">
         <main class="main-content">
           <router-outlet></router-outlet>
         </main>
-        <app-right-sidebar
-          [expanded]="rightSidebarOpen"
-          (expandChange)="rightSidebarOpen = $event"
-        >
-          <app-app-patient-queue-content
-            (startClick)="onStartPatient($event)"
-            (patientClick)="onQueuePatientClick($event)"
-          ></app-app-patient-queue-content>
-        </app-right-sidebar>
+        @if (userType === 'DOCTOR') {
+          <app-right-sidebar
+            [expanded]="rightSidebarOpen"
+            (expandChange)="rightSidebarOpen = $event"
+          >
+            <app-app-patient-queue-content
+              (startClick)="onStartPatient($event)"
+              (patientClick)="onQueuePatientClick($event)"
+            ></app-app-patient-queue-content>
+          </app-right-sidebar>
+        }
       </div>
     </div>
   </div>

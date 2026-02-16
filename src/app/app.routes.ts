@@ -36,8 +36,7 @@ import { InvoiceDetailComponent } from './pages/billing/invoice-detail.component
 import { AuthGuard, LoginGuard } from "@lk/core";
 import { DoctorPermissionsComponent } from './pages/admin/doctor-permissions/doctor-permissions.component';
 import { BaseConfigurationComponent } from './pages/admin/base-configuration/base-configuration.component';
-import { ListsDesignerComponent } from './pages/admin/lists-designer/lists-designer.component';
-import { ListsDesignerEditorComponent } from './pages/admin/lists-designer/lists-designer-editor/lists-designer-editor.component';
+import { HospitalComponent } from './pages/admin/hospital/hospital.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
@@ -79,23 +78,12 @@ export const routes: Routes = [
   { path: 'admin/roles', component: RolesComponent, canActivate: [AuthGuard] },
   { path: 'admin/plans', component: PlansComponent, canActivate: [AuthGuard] },
   { path: 'admin/doctor-permissions', component: DoctorPermissionsComponent, canActivate: [AuthGuard] },
+  { path: 'admin/hospital', component: HospitalComponent, canActivate: [AuthGuard], data: { breadcrumb: 'Hospital', breadcrumbIcon: 'apartment' } },
   {
     path: 'admin/base-configuration',
     component: BaseConfigurationComponent,
     canActivate: [AuthGuard],
     data: { breadcrumb: 'Base Configuration', breadcrumbIcon: 'settings' }
-  },
-  {
-    path: 'admin/lists-designer',
-    component: ListsDesignerComponent,
-    canActivate: [AuthGuard],
-    data: { breadcrumb: 'Lists Designer', breadcrumbIcon: 'grid_on' }
-  },
-  {
-    path: 'admin/lists-designer/edit/:id',
-    component: ListsDesignerEditorComponent,
-    canActivate: [AuthGuard],
-    data: { breadcrumb: 'Edit List', breadcrumbIcon: 'edit' }
   },
   // Additional routes for better navigation
   { path: 'exercise-create', component: ExerciseCreateComponent, canActivate: [AuthGuard] },

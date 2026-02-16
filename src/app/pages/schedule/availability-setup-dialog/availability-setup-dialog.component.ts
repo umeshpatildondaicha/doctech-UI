@@ -108,6 +108,33 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
   readonly totalSteps = computed(() => (this.setupType() === 'leave' ? 2 : 5));
   readonly progressSteps = computed(() => Array.from({ length: this.totalSteps() }, (_, i) => i));
 
+  /** Step labels for the horizontal stepper (reference "Add new dataset" style) */
+  readonly stepLabels = computed(() => {
+    if (this.setupType() === 'leave') {
+      return ['Type selection', 'Mark Leave'];
+    }
+    return [
+      'Type selection',
+      'Scheduling type',
+      'Working hours',
+      'Advanced settings',
+      'Review & confirm'
+    ];
+  });
+
+  /** Current step index (1-based) for "Step X of Y" and stepper state; kept in sync in updateFooterFromStep */
+  readonly currentStepIndex = signal(1);
+
+  /** Whether a step is completed (for checkmark in stepper) */
+  isStepCompleted(stepOneBased: number): boolean {
+    return this.currentStepIndex() > stepOneBased;
+  }
+
+  /** Whether a step is the active one */
+  isStepActive(stepOneBased: number): boolean {
+    return this.currentStepIndex() === stepOneBased;
+  }
+
   /** Calendar month to show for leave; defaults to leaveStart or current month */
   leaveCalendarStart(): Date {
     const start = this.step3.value.leaveStart;
@@ -272,16 +299,27 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
   /** Update core dialog footer button labels, visibility, and disabled state */
   private updateFooterFromStep(): void {
     const host = (this.dialogRef as any)?.componentInstance;
-    if (!host?.updateFooterActions || !host?.setFooterActionDisabled) return;
-
     const onLeaveScreen = this.setupType() === 'leave' && this.showLeaveScreen();
     const idx = this.stepper?.selectedIndex ?? 0;
+    const stepOneBased = onLeaveScreen ? 2 : idx + 1;
+    this.currentStepIndex.set(Math.min(Math.max(stepOneBased, 1), this.totalSteps()));
+
+    if (!host?.updateFooterActions || !host?.setFooterActionDisabled) return;
+
     const isFirst = !onLeaveScreen && idx === 0 && !this.showLeaveScreen();
     const isLast = onLeaveScreen || (this.stepper ? idx >= this.stepper.steps.length - 1 : false);
 
-    // Update dialog title
+    // Update dialog title + footer center text (Step X of Y)
+    let needsDetect = false;
     if (host.data?.title !== undefined) {
       host.data.title = onLeaveScreen ? 'Mark Leave' : 'Availability Setup';
+      needsDetect = true;
+    }
+    if (host.data) {
+      host.data.footerCenterText = `Step ${this.currentStepIndex()} of ${this.totalSteps()}`;
+      needsDetect = true;
+    }
+    if (needsDetect) {
       host.changeDetectorRef?.detectChanges();
     }
 
@@ -299,12 +337,21 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
       const hasBack = actions.some((a: any) => a.id === 'back');
       let list = hasBack ? actions : [
         ...actions.slice(0, 1),
-        { id: 'back', text: 'Back', color: 'secondary', appearance: 'stroked' },
+        { id: 'back', text: 'Previous', color: 'secondary', appearance: 'stroked' },
         ...actions.slice(1)
       ];
-      return list
+      const normalized = list
         .filter((a: any) => !(a.id === 'back' && isFirst))
         .map((a: any) => (a.id === 'apply' ? { ...a, text: primaryText } : a));
+
+      // Force footer ordering for this wizard:
+      // Previous (leftmost), Cancel, ...others..., Next (rightmost)
+      const apply = normalized.find((a: any) => a.id === 'apply');
+      const rest = normalized.filter((a: any) => a.id !== 'apply');
+      const priority: Record<string, number> = { back: 0, cancel: 1 };
+      rest.sort((a: any, b: any) => (priority[a.id] ?? 100) - (priority[b.id] ?? 100));
+
+      return apply ? [...rest, apply] : rest;
     });
 
     host.setFooterActionDisabled('apply', this.saving() || !this.canAdvance());

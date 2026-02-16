@@ -1,6 +1,26 @@
-<div>
+<div class="avail-dialog">
+  <!-- Dialog: stepper at top, scrollable content, step indicator at bottom -->
+
   @if (setupType() === 'leave' && showLeaveScreen()) {
-    <!-- Leave-only screen -->
+    <nav class="avail-stepper-header" aria-label="Availability setup steps">
+      @for (label of stepLabels(); track $index) {
+        @let stepNum = $index + 1;
+        <div class="avail-stepper-step" [class.completed]="isStepCompleted(stepNum)" [class.active]="isStepActive(stepNum)">
+          <span class="avail-stepper-circle">
+            @if (isStepCompleted(stepNum)) {
+              <mat-icon>check</mat-icon>
+            } @else {
+              <span class="avail-stepper-num">{{ stepNum }}</span>
+            }
+          </span>
+          <span class="avail-stepper-label">{{ label }}</span>
+          @if (stepNum < totalSteps()) {
+            <span class="avail-stepper-connector" [class.on]="isStepCompleted(stepNum)"></span>
+          }
+        </div>
+      }
+    </nav>
+    <div class="avail-content">
     @if (apiError(); as err) {
       <div class="avail-alert avail-alert--error"><mat-icon>error</mat-icon><span>{{ err }}</span></div>
     }
@@ -42,22 +62,57 @@
         </div>
       </div>
     </form>
+    </div>
   } @else if (setupType() === 'leave') {
-    <!-- Leave type-selection (no stepper) -->
+    <!-- Leave type-selection: show 2-step stepper -->
+    <nav class="avail-stepper-header" aria-label="Availability setup steps">
+      @for (label of stepLabels(); track $index) {
+        @let stepNum = $index + 1;
+        <div class="avail-stepper-step" [class.completed]="isStepCompleted(stepNum)" [class.active]="isStepActive(stepNum)">
+          <span class="avail-stepper-circle">
+            @if (isStepCompleted(stepNum)) {
+              <mat-icon>check</mat-icon>
+            } @else {
+              <span class="avail-stepper-num">{{ stepNum }}</span>
+            }
+          </span>
+          <span class="avail-stepper-label">{{ label }}</span>
+          @if (stepNum < totalSteps()) {
+            <span class="avail-stepper-connector" [class.on]="isStepCompleted(stepNum)"></span>
+          }
+        </div>
+      }
+    </nav>
+    <div class="avail-content">
     @if (apiError(); as err) {
       <div class="avail-alert avail-alert--error"><mat-icon>error</mat-icon><span>{{ err }}</span></div>
     }
     <form [formGroup]="step1" class="avail-step">
       <ng-container *ngTemplateOutlet="typeCards"></ng-container>
     </form>
+    </div>
   } @else {
-  <!-- Non-leave stepper flow -->
-  <div class="avail-progress" aria-hidden="true" [style.gridTemplateColumns]="'repeat(' + totalSteps() + ', 1fr)'">
-    @for (i of progressSteps(); track i) {
-      <span class="seg" [class.on]="(stepper?.selectedIndex ?? 0) >= i"></span>
+  <!-- Non-leave stepper flow: labeled stepper + content -->
+  <nav class="avail-stepper-header" aria-label="Availability setup steps">
+    @for (label of stepLabels(); track $index) {
+      @let stepNum = $index + 1;
+      <div class="avail-stepper-step" [class.completed]="isStepCompleted(stepNum)" [class.active]="isStepActive(stepNum)">
+        <span class="avail-stepper-circle">
+          @if (isStepCompleted(stepNum)) {
+            <mat-icon>check</mat-icon>
+          } @else {
+            <span class="avail-stepper-num">{{ stepNum }}</span>
+          }
+        </span>
+        <span class="avail-stepper-label">{{ label }}</span>
+        @if (stepNum < totalSteps()) {
+          <span class="avail-stepper-connector" [class.on]="isStepCompleted(stepNum)"></span>
+        }
+      </div>
     }
-  </div>
+  </nav>
 
+  <div class="avail-content">
   @if (apiError(); as err) {
     <div class="avail-alert avail-alert--error"><mat-icon>error</mat-icon><span>{{ err }}</span></div>
   }
@@ -371,6 +426,7 @@
       </form>
     </mat-step>
   </mat-horizontal-stepper>
+  </div>
   }
 </div>
 
