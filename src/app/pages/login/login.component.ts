@@ -3,23 +3,16 @@
  * Following enterprise-level standards with proper form validation, error handling, and UX
  */
 
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-import { AppButtonComponent, AuthService, LoginRequest, UserType } from "@lk/core";
+import { AuthService, LoginRequest, UserType } from "@lk/core";
 import { environment } from '../../../environments/environment';
-import { LottieComponent, AnimationOptions } from 'ngx-lottie';
 
 /**
  * Component responsible for user authentication
@@ -28,28 +21,28 @@ import { LottieComponent, AnimationOptions } from 'ngx-lottie';
     selector: 'app-login',
     imports: [
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
     MatIconModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatProgressSpinnerModule,
-    AppButtonComponent,
-    LottieComponent
 ],
     templateUrl: './login.component.html',
     styleUrl: './login.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   // Form and state management
   public loginForm!: FormGroup;
   public isLoading = false;
   public showPassword = false;
   public errorMessage = '';
   public successMessage = '';
-  
+
+  // Animated stat counters
+  public statHospitals = '0';
+  public statDoctors = '0';
+  public statPatients = '0';
+  public statStaff = '0';
+  public currentTime = '';
+  private clockInterval: ReturnType<typeof setInterval> | null = null;
+
   // User type options
   public readonly userTypes = [
     { value: UserType.HOSPITAL, label: 'Hospital Admin', icon: 'business', description: 'Manage hospital operations and staff' },
@@ -65,11 +58,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   // Environment for template access
   public readonly environment = environment;
 
-  /** Lottie animation on login right side */
-  readonly lottieOptions: AnimationOptions = {
-    path: 'assets/lottie/ai.json',
-  };
-
   // Private properties
   private readonly destroy$ = new Subject<void>();
   private loginAttempts = 0;
@@ -79,7 +67,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
     private readonly router: Router,
-    private readonly snackBar: MatSnackBar
+    private readonly snackBar: MatSnackBar,
+    private readonly cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -88,9 +77,17 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.setupAuthStateSubscription();
   }
 
+  ngAfterViewInit(): void {
+    this.startCounterAnimation();
+    this.startClock();
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    if (this.clockInterval) {
+      clearInterval(this.clockInterval);
+    }
   }
 
   /**
@@ -121,6 +118,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     ).subscribe(isAuthenticated => {
       if (isAuthenticated) {
         this.redirectToDashboard();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -141,6 +139,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.showSuccessMessage(`Welcome back, ${state.currentUser.user.fullName}!`);
         this.redirectToDashboard();
       }
+      this.cdr.markForCheck();
     });
   }
 
@@ -172,12 +171,14 @@ export class LoginComponent implements OnInit, OnDestroy {
         console.log('Login successful:', result);
         this.loginAttempts = 0;
         this.showSuccessMessage('Login successful! Redirecting...');
+        this.cdr.markForCheck();
       },
       error: (error: Error) => {
         console.error('Login failed:', error);
         this.loginAttempts++;
         this.errorMessage = error.message;
         this.handleLoginError();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -195,6 +196,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.loginAttempts = 0;
         this.loginForm.enable();
         this.showSuccessMessage('Login form unlocked. Please try again.');
+        this.cdr.markForCheck();
       }, environment.security.lockoutDurationMinutes * 60 * 1000);
     }
   }
@@ -384,5 +386,44 @@ export class LoginComponent implements OnInit, OnDestroy {
       event.preventDefault();
       this.selectUserType(userType);
     }
+  }
+
+  /**
+   * Animate stat counters from 0 to target with ease-out cubic
+   */
+  private startCounterAnimation(): void {
+    const duration = 2200;
+    const start = performance.now();
+    const targets = { hospitals: 56, doctors: 1243, patients: 48720, staff: 3856 };
+
+    const step = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+
+      this.statHospitals = Math.floor(ease * targets.hospitals).toLocaleString();
+      this.statDoctors = Math.floor(ease * targets.doctors).toLocaleString();
+      this.statPatients = Math.floor(ease * targets.patients).toLocaleString();
+      this.statStaff = Math.floor(ease * targets.staff).toLocaleString();
+      this.cdr.markForCheck();
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+
+    setTimeout(() => requestAnimationFrame(step), 800);
+  }
+
+  /**
+   * Live clock ticking every second
+   */
+  private startClock(): void {
+    const update = () => {
+      const now = new Date();
+      this.currentTime = now.toLocaleTimeString('en-US', { hour12: false });
+      this.cdr.markForCheck();
+    };
+    update();
+    this.clockInterval = setInterval(update, 1000);
   }
 } 

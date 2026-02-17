@@ -1,297 +1,128 @@
-<div class="admin-dashboard">
-  <!-- Dashboard Header -->
-  <div class="dashboard-header">
-    <div class="header-left">
-      <div class="welcome-section">
-        <h1>Hospital Administration Dashboard</h1>
-        <p class="welcome-text">Welcome back, {{ currentUser.name }}</p>
-        <span class="last-login">Last login: {{ currentUser.lastLogin }}</span>
+<app-page [breadcrumb]="breadcrumb" [isFooter]="false">
+  <div page-body class="dashboard">
+    <!-- Stats cards -->
+    <section class="stats-row">
+      <app-admin-stats-card [stats]="overviewStatsCards" [showTrends]="true"></app-admin-stats-card>
+    </section>
+
+    <!-- Main grid -->
+    <div class="grid">
+      <!-- Left column -->
+      <div class="col">
+        <!-- Revenue Analytics -->
+        <app-card [title]="'Revenue Analytics'" [subtitle]="'Monthly View'" [divider]="true">
+          <div appCardActions>
+            <app-button [fontIcon]="'more_vert'" [color]="'accent'" class="card-menu-btn"></app-button>
+          </div>
+          @if (isBrowser) {
+            <highcharts-chart [Highcharts]="Highcharts" [options]="revenueChartOptions" class="chart"></highcharts-chart>
+          } @else {
+            <div class="chart-empty">
+              <app-icon [fontIcon]="'show_chart'" [size]="40"></app-icon>
+              <span>Loading chart...</span>
+            </div>
+          }
+        </app-card>
+
+        <!-- Patient Flow -->
+        <app-card [title]="'Weekly Patient Flow'" [subtitle]="'This Week'" [divider]="true">
+          @if (isBrowser) {
+            <highcharts-chart [Highcharts]="Highcharts" [options]="patientFlowChartOptions" class="chart"></highcharts-chart>
+          } @else {
+            <div class="chart-empty">
+              <app-icon [fontIcon]="'bar_chart'" [size]="40"></app-icon>
+              <span>Loading chart...</span>
+            </div>
+          }
+        </app-card>
+
+        <!-- Financial Summary -->
+        <app-card [title]="'Financial Summary'" [divider]="true">
+          <div appCardActions>
+            <app-button [text]="'View Details'" [color]="'primary'" [appearance]="'stroked'"></app-button>
+          </div>
+          <div class="fin-grid">
+            @for (metric of financialMetrics; track metric.label) {
+              <div class="fin-item">
+                <div class="fin-head">
+                  <span class="fin-label">{{ metric.label }}</span>
+                  <span class="fin-trend" [class.neg]="metric.trend < 0">
+                    <app-icon [fontIcon]="metric.trend >= 0 ? 'arrow_upward' : 'arrow_downward'" [size]="12"></app-icon>
+                    {{ metric.trend > 0 ? '+' : '' }}{{ metric.trend }}%
+                  </span>
+                </div>
+                <div class="fin-value" [style.color]="metric.color">
+                  {{ metric.currency }}{{ formatCurrency(metric.value).replace('₹', '') }}
+                </div>
+              </div>
+            }
+          </div>
+        </app-card>
       </div>
-    </div>
 
-    <div class="header-right">
-      <div class="header-actions">
-        <app-button [fontIcon]="'refresh'" [color]="'accent'" (btnClick)="refreshDashboard()" class="refresh-btn"
-          text="Refresh">
-        </app-button>
+      <!-- Right column -->
+      <div class="col">
+        <!-- Department Distribution -->
+        <app-card [title]="'Department Distribution'" [divider]="true">
+          @if (isBrowser) {
+            <highcharts-chart [Highcharts]="Highcharts" [options]="departmentChartOptions" class="chart"></highcharts-chart>
+          } @else {
+            <div class="chart-empty">
+              <app-icon [fontIcon]="'donut_small'" [size]="40"></app-icon>
+              <span>Loading chart...</span>
+            </div>
+          }
+        </app-card>
 
-        <app-button [fontIcon]="'notifications'" [color]="'accent'" class="notifications-btn" text="Notifications">
-        </app-button>
+        <!-- Department Performance -->
+        <app-card [title]="'Department Performance'" [divider]="true">
+          <div appCardActions>
+            <app-button [text]="'View All'" [color]="'accent'" [appearance]="'stroked'"></app-button>
+          </div>
+          <div class="dept-list">
+            @for (dept of departments; track dept.id) {
+              <button type="button" class="dept-row" (click)="viewDepartmentDetails(dept)">
+                <div class="dept-info">
+                  <div class="dept-name">{{ dept.name }}</div>
+                  <div class="dept-head">{{ dept.head }}</div>
+                </div>
+                <div class="dept-stats">
+                  <span class="dept-stat"><strong>{{ dept.staff }}</strong> Staff</span>
+                  <span class="dept-stat"><strong>{{ dept.patients }}</strong> Patients</span>
+                  <span class="dept-stat"><strong>{{ dept.occupancy }}%</strong> Occ.</span>
+                </div>
+                <div class="dept-revenue">{{ formatCurrency(dept.revenue) }}</div>
+                <div class="dept-status">
+                  <span class="status-dot" [style.background]="getDepartmentStatusColor(dept.status)"></span>
+                  {{ dept.status | titlecase }}
+                </div>
+              </button>
+            }
+          </div>
+        </app-card>
 
-        <app-button [fontIcon]="'settings'" [color]="'accent'" (btnClick)="navigateToSettings()" class="settings-btn"
-          text="Settings">
-        </app-button>
-      </div>
-
-      <div class="user-avatar">
-        <div class="avatar-placeholder">
-          <app-icon [fontIcon]="'person'" [size]="20"></app-icon>
-        </div>
-        <div class="user-info">
-          <span class="user-name">{{ currentUser.name }}</span>
-          <span class="user-role">{{ currentUser.role }}</span>
-        </div>
+        <!-- Recent Activities -->
+        <app-card [title]="'Recent Activities'" [divider]="true">
+          <div appCardActions>
+            <app-button [text]="'View All'" [color]="'accent'" [appearance]="'stroked'" (btnClick)="viewAllActivities()"></app-button>
+          </div>
+          <div class="act-list">
+            @for (activity of recentActivities; track activity.id) {
+              <div class="act-row">
+                <div class="act-icon" [style.color]="getActivityColor(activity.priority)">
+                  <app-icon [fontIcon]="getActivityIcon(activity.type)" [size]="16"></app-icon>
+                </div>
+                <div class="act-body">
+                  <div class="act-title">{{ activity.title }}</div>
+                  <div class="act-desc">{{ activity.description }}</div>
+                  <div class="act-time">{{ activity.time }}</div>
+                </div>
+                <span class="act-dot" [class]="'p-' + activity.priority"></span>
+              </div>
+            }
+          </div>
+        </app-card>
       </div>
     </div>
   </div>
-
-  <!-- Navigation Tabs + Content -->
-  <div class="navigation-tabs">
-    <app-tabs [selectedIndex]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)" class="tabs-container">
-      <app-tab label="Overview">
-        <div class="tab-panel">
-      <!-- Statistics Cards -->
-      <div class="stats-section">
-        <div class="stats-header">
-          <h2>Hospital Overview</h2>
-          <span class="stats-subtitle">Real-time hospital metrics and performance indicators</span>
-        </div>
-        <app-admin-stats-card [stats]="overviewStatsCards" [showTrends]="true"></app-admin-stats-card>
-      </div>
-      <!-- Main Dashboard Content -->
-      <div class="dashboard-content">
-        <!-- Left Column -->
-        <div class="content-left">
-          <!-- Revenue Chart -->
-          <div class="dashboard-card revenue-card">
-            <div class="card-header">
-              <div class="card-title">
-                <app-icon [fontIcon]="'trending_up'" [size]="20"></app-icon>
-                <span>Revenue Analytics</span>
-              </div>
-              <div class="card-actions">
-                <span class="period-selector">Monthly View</span>
-                <app-button [fontIcon]="'more_vert'" [color]="'accent'" class="card-menu"></app-button>
-              </div>
-            </div>
-            <div class="card-content">
-              @if(isBrowser) {
-              <highcharts-chart [Highcharts]="Highcharts" [options]="revenueChartOptions" class="chart-container">
-              </highcharts-chart>
-              } @else {
-              <div class="chart-placeholder">
-                <app-icon [fontIcon]="'show_chart'" [size]="48"></app-icon>
-                <span>Loading revenue chart...</span>
-              </div>
-              }
-            </div>
-          </div>
-          <!-- Patient Flow Chart -->
-          <div class="dashboard-card patient-flow-card">
-            <div class="card-header">
-              <div class="card-title">
-                <app-icon [fontIcon]="'people'" [size]="20"></app-icon>
-                <span>Weekly Patient Flow</span>
-              </div>
-              <div class="card-actions">
-                <span class="period-selector">This Week</span>
-              </div>
-            </div>
-            <div class="card-content">
-              @if(isBrowser) {
-              <highcharts-chart [Highcharts]="Highcharts" [options]="patientFlowChartOptions" class="chart-container">
-              </highcharts-chart>
-              } @else {
-              <div class="chart-placeholder">
-                <app-icon [fontIcon]="'bar_chart'" [size]="48"></app-icon>
-                <span>Loading patient flow chart...</span>
-              </div>
-              }
-            </div>
-          </div>
-          <!-- Financial Summary -->
-          <div class="dashboard-card financial-card">
-            <div class="card-header">
-              <div class="card-title">
-                <app-icon [fontIcon]="'account_balance_wallet'" [size]="20"></app-icon>
-                <span>Financial Summary</span>
-              </div>
-              <div class="card-actions">
-                <app-button [text]="'View Details'" [color]="'primary'" class="view-details-btn"></app-button>
-              </div>
-            </div>
-            <div class="card-content">
-              <div class="financial-metrics">
-                @for (metric of financialMetrics; track metric) {
-                <div class="financial-metric">
-                  <div class="metric-header">
-                    <span class="metric-label">{{ metric.label }}</span>
-                    <div class="metric-trend" [class.negative]="metric.trend < 0">
-                      <app-icon [fontIcon]="metric.trend >= 0 ? 'arrow_upward' : 'arrow_downward'" [size]="12">
-                      </app-icon>
-                      <span>{{ metric.trend > 0 ? '+' : '' }}{{ metric.trend }}%</span>
-                    </div>
-                  </div>
-                  <div class="metric-value" [style.color]="metric.color">
-                    {{ metric.currency }}{{ formatCurrency(metric.value).replace('₹', '') }}
-                  </div>
-                </div>
-                }
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Right Column -->
-        <div class="content-right">
-          <!-- Department Distribution -->
-          <div class="dashboard-card department-card">
-            <div class="card-header">
-              <div class="card-title">
-                <app-icon [fontIcon]="'pie_chart'" [size]="20"></app-icon>
-                <span>Department Distribution</span>
-              </div>
-            </div>
-            <div class="card-content">
-              @if(isBrowser) {
-              <highcharts-chart [Highcharts]="Highcharts" [options]="departmentChartOptions" class="chart-container">
-              </highcharts-chart>
-              } @else {
-              <div class="chart-placeholder">
-                <app-icon [fontIcon]="'donut_small'" [size]="48"></app-icon>
-                <span>Loading department chart...</span>
-              </div>
-              }
-            </div>
-          </div>
-          <!-- Department Overview -->
-          <div class="dashboard-card departments-overview-card">
-            <div class="card-header">
-              <div class="card-title">
-                <app-icon [fontIcon]="'business'" [size]="20"></app-icon>
-                <span>Department Performance</span>
-              </div>
-              <div class="card-actions">
-                <app-button [text]="'View All'" [color]="'accent'" class="view-all-btn"></app-button>
-              </div>
-            </div>
-            <div class="card-content">
-              <div class="departments-list">
-                @for (dept of departments; track dept) {
-                <button
-                  type="button"
-                  class="department-item"
-                  (click)="viewDepartmentDetails(dept)">
-                  <div class="department-info">
-                    <div class="department-name">{{ dept.name }}</div>
-                    <div class="department-head">{{ dept.head }}</div>
-                  </div>
-                  <div class="department-stats">
-                    <div class="stat-group">
-                      <span class="stat-label">Staff:</span>
-                      <span class="stat-value">{{ dept.staff }}</span>
-                    </div>
-                    <div class="stat-group">
-                      <span class="stat-label">Patients:</span>
-                      <span class="stat-value">{{ dept.patients }}</span>
-                    </div>
-                    <div class="stat-group">
-                      <span class="stat-label">Occupancy:</span>
-                      <span class="stat-value">{{ dept.occupancy }}%</span>
-                    </div>
-                  </div>
-                  <div class="department-revenue">
-                    <span class="revenue-label">Revenue</span>
-                    <span class="revenue-value">{{ formatCurrency(dept.revenue) }}</span>
-                  </div>
-                  <div class="department-status">
-                    <div class="status-indicator" [style.background-color]="getDepartmentStatusColor(dept.status)">
-                    </div>
-                    <span class="status-text">{{ dept.status | titlecase }}</span>
-                  </div>
-                </button>
-                }
-              </div>
-            </div>
-          </div>
-          <!-- Recent Activities -->
-          <div class="dashboard-card activities-card">
-            <div class="card-header">
-              <div class="card-title">
-                <app-icon [fontIcon]="'history'" [size]="20"></app-icon>
-                <span>Recent Activities</span>
-              </div>
-              <div class="card-actions">
-                <app-button [text]="'View All'" [color]="'accent'" (btnClick)="viewAllActivities()"
-                  class="view-all-btn">
-                </app-button>
-              </div>
-            </div>
-            <div class="card-content">
-              <div class="activities-list">
-                @for (activity of recentActivities; track activity) {
-                <div class="activity-item">
-                  <div class="activity-icon" [style.color]="getActivityColor(activity.priority)">
-                    <app-icon [fontIcon]="getActivityIcon(activity.type)" [size]="16"></app-icon>
-                  </div>
-                  <div class="activity-content">
-                    <div class="activity-title">{{ activity.title }}</div>
-                    <div class="activity-description">{{ activity.description }}</div>
-                    <div class="activity-time">{{ activity.time }}</div>
-                  </div>
-                  <div class="activity-priority">
-                    <div class="priority-indicator" [class]="'priority-' + activity.priority">
-                    </div>
-                  </div>
-                </div>
-                }
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-        </div>
-      </app-tab>
-
-      <app-tab label="Staff Management">
-        <div class="tab-panel">
-          <div class="tab-content-placeholder">
-            <div class="placeholder-card">
-              
-              <h2>Staff Management</h2>
-              <p>Manage hospital staff, roles, and assignments</p>
-             
-            </div>
-          </div>
-        </div>
-      </app-tab>
-
-      <app-tab label="Patient Records">
-        <div class="tab-panel">
-          <div class="tab-content-placeholder">
-            <div class="placeholder-card">
-              
-              <h2>Patient Records</h2>
-              <p>Access and manage patient medical records</p>
-              
-            </div>
-          </div>
-        </div>
-      </app-tab>
-
-      <app-tab label="Billing & Finance">
-        <div class="tab-panel">
-          <div class="tab-content-placeholder">
-            <div class="placeholder-card">
-             
-              <h2>Billing & Finance</h2>
-              <p>Manage billing, payments, and financial reports</p>
-             
-            </div>
-          </div>
-        </div>
-      </app-tab>
-
-      <app-tab label="Analytics & Reports">
-        <div class="tab-panel">
-          <div class="tab-content-placeholder">
-            <div class="placeholder-card">
-              
-              <h2>Analytics & Reports</h2>
-              <p>View detailed analytics and generate reports</p>
-             
-            </div>
-          </div>
-        </div>
-      </app-tab>
-    </app-tabs>
-  </div>
+</app-page>

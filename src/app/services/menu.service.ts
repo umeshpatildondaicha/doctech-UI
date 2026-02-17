@@ -99,13 +99,6 @@ export class MenuService {
       userTypes: ['admin']
     },
     { 
-      label: 'Doctor Permissions', 
-      icon: 'tune', 
-      route: '/admin/doctor-permissions', 
-      section: 'management',
-      userTypes: ['admin']
-    },
-    { 
       label: 'Role Management', 
       icon: 'security', 
       route: '/admin/roles', 

@@ -200,11 +200,6 @@ export class DoctorsComponent implements OnInit, OnDestroy {
           click: (param: any) => { this.scheduleDoctor(param.data); }
         },
         {
-          title: 'Permissions',
-          icon: 'tune',
-          click: (param: any) => { this.openPermissions(param.data); }
-        },
-        {
           title: 'Delete',
           icon: 'delete',
           click: (param: any) => { this.deleteDoctor(param.data); }
@@ -232,14 +227,6 @@ export class DoctorsComponent implements OnInit, OnDestroy {
      })
   }
 
-  openPermissions(doctor: any) {
-    const doctorPublicId = doctor?.id;
-    if (doctorPublicId) {
-      this.router.navigate(['/admin/doctor-permissions'], { queryParams: { doctorPublicId: doctorPublicId, from:'doctors' } });
-    } else {
-      this.showSnackBar('Doctor ID not available');
-    }
-  }
 
   // Action methods
   addNewDoctor() {

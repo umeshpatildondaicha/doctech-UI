@@ -1,133 +1,181 @@
-
-    <!-- Optional: Data Grid (keep for table view if needed)  -->
- <app-page [breadcrumb]="breadcrumb" [isFooter]="false">
+<app-page [breadcrumb]="breadcrumb" [isFooter]="false">
   <div page-body class="plans-page">
-    <!-- Page Header (same label style as diet) -->
-    <app-admin-page-header
-      title="Plans & Offers"
-      subtitle="Manage healthcare plans and offers"
-      [actions]="headerActions"
-      (actionClicked)="onHeaderAction($event)">
-    </app-admin-page-header>
 
-    <!-- Stats Row (same structure/labels as diet.component.html) -->
-    <div class="stats-row">
-      <div class="mini-stat">
-        <div class="mini-icon bg-blue">
-          <mat-icon>payments</mat-icon>
-        </div>
-        <div class="mini-text">
-          <div class="mini-label">Total Plans</div>
-          <div class="mini-value">{{ plans.length }}</div>
+    <!-- Hero Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-pill">
+        <mat-icon>payments</mat-icon>
+        <div class="sp-info">
+          <span class="sp-val">{{ plans.length }}</span>
+          <span class="sp-lbl">Plans</span>
         </div>
       </div>
-      <div class="mini-stat">
-        <div class="mini-icon bg-orange">
-          <mat-icon>check_circle</mat-icon>
-        </div>
-        <div class="mini-text">
-          <div class="mini-label">Active Plans</div>
-          <div class="mini-value">{{ getActivePlansCount() }}</div>
+      <div class="stat-pill">
+        <mat-icon>check_circle</mat-icon>
+        <div class="sp-info">
+          <span class="sp-val">{{ activePlans() }}</span>
+          <span class="sp-lbl">Active</span>
         </div>
       </div>
-      <div class="mini-stat">
-        <div class="mini-icon bg-green">
-          <mat-icon>groups</mat-icon>
-        </div>
-        <div class="mini-text">
-          <div class="mini-label">Total Subscribers</div>
-          <div class="mini-value">{{ getTotalSubscribers() }}</div>
+      <div class="stat-pill">
+        <mat-icon>groups</mat-icon>
+        <div class="sp-info">
+          <span class="sp-val">{{ totalSubscribers() }}</span>
+          <span class="sp-lbl">Subscribers</span>
         </div>
       </div>
-      <div class="mini-stat">
-        <div class="mini-icon bg-purple">
-          <mat-icon>featured_play_list</mat-icon>
-        </div>
-        <div class="mini-text">
-          <div class="mini-label">Features</div>
-          <div class="mini-value">{{ getTotalFeaturesCount() }}</div>
+      <div class="stat-pill">
+        <mat-icon>currency_rupee</mat-icon>
+        <div class="sp-info">
+          <span class="sp-val">{{ formatPrice(totalRevenue()) }}</span>
+          <span class="sp-lbl">Est. Revenue</span>
         </div>
       </div>
     </div>
 
-    <!-- Filters Row (same style as diet) -->
-    <div class="filters-row">
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-icon matPrefix>search</mat-icon>
-        <input matInput [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Search plans..." />
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="select-field">
-        <mat-select [(ngModel)]="selectedStatus" (selectionChange)="filterPlans()" placeholder="Status">
-          <mat-option value="">All Status</mat-option>
-          <mat-option value="Active">Active</mat-option>
-          <mat-option value="Inactive">Inactive</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <app-button
-        class="clear-link"
-        [fontIcon]="'clear_all'"
-        title="Clear Filters"
-        (btnClick)="clearFilters()">
-      </app-button>
-      <app-button
-        class="add-btn"
-        [fontIcon]="'add'"
-        title="Add New Plan"
-        (btnClick)="addNewPlan()">
-      </app-button>
+    <!-- Billing Cycle Toggle + Add -->
+    <div class="section-head">
+      <div class="sh-left">
+        <h2 class="section-title">Pricing Plans</h2>
+        <p class="section-sub">Choose the perfect plan for your patients</p>
+      </div>
+      <div class="sh-right">
+        <div class="cycle-toggle">
+          <button type="button" class="ct-btn" [class.active]="billingCycle() === 'monthly'" (click)="billingCycle.set('monthly')">Monthly</button>
+          <button type="button" class="ct-btn" [class.active]="billingCycle() === 'yearly'" (click)="billingCycle.set('yearly')">
+            Yearly
+            <span class="ct-save">Save 17%</span>
+          </button>
+        </div>
+        <button type="button" class="add-plan-btn" (click)="addNewPlan()">
+          <mat-icon>add</mat-icon>
+          Add Plan
+        </button>
+      </div>
     </div>
 
-    <!-- Cards Grid (same structure as diet cards grid) -->
-    <div class="cards-grid">
-      @for (plan of filteredPlans; track plan.id) {
-        <app-listing-card
-          [title]="plan.name"
-          [description]="plan.priceDisplay"
-          [stats]="getPlanCardStats(plan)"
-          [topRightBadge]="getPlanStatusBadge(plan)"
-          [primaryAction]="primaryPlanAction"
-          [iconActions]="planIconActions"
-          [clickable]="true"
-          placeholderIcon="payments"
-          placeholderText="No Image"
-          (cardClick)="viewPlan(plan)"
-          (actionClick)="onPlanCardAction($event, plan)">
-        </app-listing-card>
+    <!-- Plans Grid -->
+    <div class="plans-grid">
+      @for (plan of plans; track plan.id) {
+        <div class="plan-card" [class.popular]="plan.popular" [class.inactive]="plan.status === 'inactive'">
+          <!-- Popular badge -->
+          @if (plan.badge) {
+            <div class="plan-badge" [style.background]="plan.gradient">{{ plan.badge }}</div>
+          }
+
+          <!-- Card header -->
+          <div class="pc-head">
+            <div class="pc-icon" [style.background]="plan.gradient">
+              <mat-icon>{{ plan.icon }}</mat-icon>
+            </div>
+            <div class="pc-name">{{ plan.name }}</div>
+            <div class="pc-tagline">{{ plan.tagline }}</div>
+          </div>
+
+          <!-- Price -->
+          <div class="pc-price">
+            <span class="pc-currency">{{ plan.currency }}</span>
+            <span class="pc-amount">{{ getPrice(plan) }}</span>
+            <span class="pc-period">/{{ billingCycle() === 'monthly' ? 'mo' : 'yr' }}</span>
+          </div>
+          @if (billingCycle() === 'yearly') {
+            <div class="pc-savings">You save {{ plan.currency }}{{ getSavings(plan) }}/year</div>
+          }
+
+          <!-- Subscribers -->
+          <div class="pc-subs">
+            <mat-icon>people</mat-icon>
+            <span>{{ plan.subscribers }} active subscribers</span>
+          </div>
+
+          <!-- Features -->
+          <div class="pc-features">
+            @for (feat of plan.features; track feat.name) {
+              <div class="pc-feat" [class.disabled]="!feat.included">
+                <mat-icon class="feat-check" [class.yes]="feat.included" [class.no]="!feat.included">
+                  {{ feat.included ? 'check_circle' : 'cancel' }}
+                </mat-icon>
+                <span>{{ feat.name }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Actions -->
+          <div class="pc-actions">
+            <button type="button" class="pca-primary" [style.background]="plan.gradient" (click)="editPlan(plan)">
+              <mat-icon>edit</mat-icon>
+              Edit Plan
+            </button>
+            <div class="pca-secondary">
+              <button type="button" class="pca-icon" [matTooltip]="plan.status === 'active' ? 'Deactivate' : 'Activate'" (click)="togglePlanStatus(plan)">
+                <mat-icon>{{ plan.status === 'active' ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+              </button>
+              <button type="button" class="pca-icon pca-del" matTooltip="Delete plan" (click)="deletePlan(plan)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
       }
     </div>
 
-    <!-- No Results (same as diet) -->
-    @if (filteredPlans.length === 0) {
-      <div class="no-results">
-        <div class="no-results-card">
-          <div class="no-results-content">
-            <mat-icon class="no-results-icon">payments</mat-icon>
-            <h3>No plans found</h3>
-            <p>Try adjusting your search or add a new plan.</p>
-            <app-button
-              class="add-btn"
-              [fontIcon]="'add'"
-              title="Add New Plan"
-              (btnClick)="addNewPlan()">
-            </app-button>
+    <!-- Offers Section -->
+    <div class="section-head section-head--offers">
+      <div class="sh-left">
+        <h2 class="section-title">Active Offers</h2>
+        <p class="section-sub">Special promotions and discount codes</p>
+      </div>
+      <div class="sh-right">
+        <button type="button" class="add-plan-btn" (click)="addNewPlan()">
+          <mat-icon>add</mat-icon>
+          Add Offer
+        </button>
+      </div>
+    </div>
+
+    <div class="offers-grid">
+      @for (offer of offers; track offer.id) {
+        <div class="offer-card">
+          <div class="oc-accent" [style.background]="offer.color"></div>
+          <div class="oc-body">
+            <div class="oc-head">
+              <div class="oc-icon" [style.background]="offer.color + '18'" [style.color]="offer.color">
+                <mat-icon>{{ offer.icon }}</mat-icon>
+              </div>
+              <div class="oc-discount" [style.background]="offer.color + '14'" [style.color]="offer.color">
+                {{ offer.discount }}
+              </div>
+            </div>
+            <div class="oc-title">{{ offer.title }}</div>
+            <div class="oc-desc">{{ offer.description }}</div>
+            <div class="oc-meta">
+              <div class="oc-code" (click)="copyCode(offer.code)" matTooltip="Click to copy">
+                <mat-icon>content_copy</mat-icon>
+                <span>{{ offer.code }}</span>
+              </div>
+              <div class="oc-expires">
+                <mat-icon>schedule</mat-icon>
+                <span>{{ offer.daysLeft }} days left</span>
+              </div>
+            </div>
+            <div class="oc-plans">
+              @for (p of offer.applicablePlans; track p) {
+                <span class="oc-plan-chip">{{ p }}</span>
+              }
+            </div>
+            <div class="oc-actions">
+              <button type="button" class="oca-edit" (click)="editOffer(offer)">
+                <mat-icon>edit</mat-icon>
+                Edit
+              </button>
+              <button type="button" class="oca-del" (click)="deleteOffer(offer)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    }
+      }
+    </div>
 
-    <!-- Optional: Data Grid (keep for table view if needed) -->
-    <!-- <div class="grid-section">
-      <app-grid
-        [rowData]="plans"
-        [columnDefs]="columnDefs"
-        [gridOptions]="gridOptions"
-        [height]="'600px'"
-        [animateRows]="true"
-        searchPlaceholder="Search plans..."
-        class="plans-grid">
-      </app-grid>
-    </div> -->
   </div>
 </app-page>
-  
-

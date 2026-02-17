@@ -1,316 +1,263 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-import { ColDef } from 'ag-grid-community';
-import { 
-  AdminPageHeaderComponent, 
-  AdminActionBarComponent,
-  type HeaderAction
-} from '../../../components';
-import {
-  ListingCardComponent,
-  type ListingCardAction,
-  type ListingCardStat,
-  type ListingCardBadge
-} from '../../../components/listing-card/listing-card.component';
-import { GridComponent, StatusCellRendererComponent, ChipCellRendererComponent, PageComponent, BreadcrumbItem, DialogboxService, AppButtonComponent } from '@lk/core';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { PageComponent, BreadcrumbItem, DialogboxService } from '@lk/core';
+
+interface PlanFeature {
+  name: string;
+  icon: string;
+  included: boolean;
+}
+
+interface Plan {
+  id: number;
+  name: string;
+  tagline: string;
+  monthlyPrice: number;
+  yearlyPrice: number;
+  currency: string;
+  color: string;
+  gradient: string;
+  icon: string;
+  popular: boolean;
+  subscribers: number;
+  features: PlanFeature[];
+  status: 'active' | 'inactive';
+  badge?: string;
+}
+
+interface Offer {
+  id: number;
+  title: string;
+  description: string;
+  discount: string;
+  code: string;
+  validUntil: string;
+  daysLeft: number;
+  color: string;
+  icon: string;
+  applicablePlans: string[];
+}
 
 @Component({
-    selector: 'app-plans',
-    imports: [
-      FormsModule,
-      MatFormFieldModule,
-      MatInputModule,
-      MatSelectModule,
-      MatIconModule,
-      AdminPageHeaderComponent,
-      AdminActionBarComponent,
-      GridComponent,
-      PageComponent,
-      ListingCardComponent,
-      AppButtonComponent
-    ],
-    templateUrl: './plans.component.html',
-    styleUrl: './plans.component.scss'
+  selector: 'app-plans',
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatIconModule,
+    MatTooltipModule,
+    PageComponent
+  ],
+  templateUrl: './plans.component.html',
+  styleUrl: './plans.component.scss'
 })
 export class PlansComponent implements OnInit {
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Plans & Offers', route: '/admin/plans', icon: 'payments', isActive: true }
   ];
-  // Grid configuration (kept for optional grid view)
-  columnDefs: ColDef[] = [];
-  gridOptions: any = {};
 
-  // Card view state (same pattern as diet)
-  searchQuery = '';
-  selectedStatus = '';
-  filteredPlans: any[] = [];
+  billingCycle = signal<'monthly' | 'yearly'>('monthly');
 
-  primaryPlanAction: ListingCardAction = {
-    id: 'view',
-    label: 'View',
-    icon: 'visibility',
-    tooltip: 'View plan details'
-  };
-
-  planIconActions: ListingCardAction[] = [
-    { id: 'edit', label: 'Edit', icon: 'edit', tooltip: 'Edit plan' },
-    { id: 'toggle', label: 'Toggle status', icon: 'power_settings_new', tooltip: 'Activate/Deactivate' },
-    { id: 'delete', label: 'Delete', icon: 'delete', tooltip: 'Delete plan' }
-  ];
-  
-  plans = [
-    { 
-      id: 1, 
-      name: 'Basic Health Plan', 
-      price: 999, 
-      priceDisplay: '₹999/month',
-      features: ['General Consultation', 'Basic Tests'], 
-      featuresCount: 2,
-      status: 'Active',
-      subscribers: 150,
-      createdDate: '2024-01-15',
-      validUntil: '2024-12-31'
-    },
-    { 
-      id: 2, 
-      name: 'Premium Health Plan', 
-      price: 1999, 
-      priceDisplay: '₹1999/month',
-      features: ['All Consultations', 'All Tests', 'Priority Care'], 
-      featuresCount: 3,
-      status: 'Active',
-      subscribers: 85,
-      createdDate: '2024-01-20',
-      validUntil: '2024-12-31'
-    },
-    { 
-      id: 3, 
-      name: 'Family Health Plan', 
-      price: 3999, 
-      priceDisplay: '₹3999/month',
-      features: ['Family Coverage', 'All Services', '24/7 Support'], 
-      featuresCount: 3,
-      status: 'Active',
-      subscribers: 65,
-      createdDate: '2024-02-01',
-      validUntil: '2024-12-31'
-    },
-    { 
-      id: 4, 
-      name: 'Student Health Plan', 
-      price: 499, 
-      priceDisplay: '₹499/month',
-      features: ['Basic Consultation', 'Student Discount'], 
-      featuresCount: 2,
-      status: 'Inactive',
-      subscribers: 25,
-      createdDate: '2024-01-10',
-      validUntil: '2024-06-30'
-    }
-  ];
-
-  headerActions: HeaderAction[] = [
+  plans: Plan[] = [
     {
-      text: 'Add New Plan',
-      color: 'primary',
-      fontIcon: 'add',
-      action: 'add-plan'
+      id: 1,
+      name: 'Basic',
+      tagline: 'Perfect for individuals',
+      monthlyPrice: 499,
+      yearlyPrice: 4990,
+      currency: '₹',
+      color: '#3b82f6',
+      gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+      icon: 'person',
+      popular: false,
+      subscribers: 150,
+      status: 'active',
+      features: [
+        { name: 'General Consultation', icon: 'medical_services', included: true },
+        { name: 'Basic Lab Tests', icon: 'biotech', included: true },
+        { name: 'Digital Prescriptions', icon: 'description', included: true },
+        { name: 'Email Support', icon: 'email', included: true },
+        { name: 'Specialist Access', icon: 'local_hospital', included: false },
+        { name: 'Priority Booking', icon: 'event_available', included: false },
+        { name: '24/7 Emergency', icon: 'emergency', included: false },
+        { name: 'Family Coverage', icon: 'family_restroom', included: false }
+      ]
+    },
+    {
+      id: 2,
+      name: 'Premium',
+      tagline: 'Most popular for families',
+      monthlyPrice: 1499,
+      yearlyPrice: 14990,
+      currency: '₹',
+      color: '#8b5cf6',
+      gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+      icon: 'workspace_premium',
+      popular: true,
+      subscribers: 320,
+      status: 'active',
+      badge: 'Most Popular',
+      features: [
+        { name: 'General Consultation', icon: 'medical_services', included: true },
+        { name: 'All Lab Tests', icon: 'biotech', included: true },
+        { name: 'Digital Prescriptions', icon: 'description', included: true },
+        { name: 'Priority Support', icon: 'support_agent', included: true },
+        { name: 'Specialist Access', icon: 'local_hospital', included: true },
+        { name: 'Priority Booking', icon: 'event_available', included: true },
+        { name: '24/7 Emergency', icon: 'emergency', included: false },
+        { name: 'Family Coverage', icon: 'family_restroom', included: false }
+      ]
+    },
+    {
+      id: 3,
+      name: 'Enterprise',
+      tagline: 'Complete healthcare solution',
+      monthlyPrice: 3999,
+      yearlyPrice: 39990,
+      currency: '₹',
+      color: '#f59e0b',
+      gradient: 'linear-gradient(135deg, #f59e0b, #d97706)',
+      icon: 'diamond',
+      popular: false,
+      subscribers: 85,
+      status: 'active',
+      features: [
+        { name: 'General Consultation', icon: 'medical_services', included: true },
+        { name: 'All Lab Tests', icon: 'biotech', included: true },
+        { name: 'Digital Prescriptions', icon: 'description', included: true },
+        { name: 'Dedicated Manager', icon: 'person_pin', included: true },
+        { name: 'Specialist Access', icon: 'local_hospital', included: true },
+        { name: 'Priority Booking', icon: 'event_available', included: true },
+        { name: '24/7 Emergency', icon: 'emergency', included: true },
+        { name: 'Family Coverage', icon: 'family_restroom', included: true }
+      ]
+    },
+    {
+      id: 4,
+      name: 'Student',
+      tagline: 'Affordable student care',
+      monthlyPrice: 199,
+      yearlyPrice: 1990,
+      currency: '₹',
+      color: '#10b981',
+      gradient: 'linear-gradient(135deg, #10b981, #059669)',
+      icon: 'school',
+      popular: false,
+      subscribers: 210,
+      status: 'active',
+      badge: 'Best Value',
+      features: [
+        { name: 'General Consultation', icon: 'medical_services', included: true },
+        { name: 'Basic Lab Tests', icon: 'biotech', included: true },
+        { name: 'Digital Prescriptions', icon: 'description', included: true },
+        { name: 'Email Support', icon: 'email', included: true },
+        { name: 'Mental Wellness', icon: 'psychology', included: true },
+        { name: 'Priority Booking', icon: 'event_available', included: false },
+        { name: '24/7 Emergency', icon: 'emergency', included: false },
+        { name: 'Family Coverage', icon: 'family_restroom', included: false }
+      ]
     }
   ];
+
+  offers: Offer[] = [
+    {
+      id: 1,
+      title: 'New Year Health Boost',
+      description: 'Start the year healthy! Get 30% off on Premium plan for the first 3 months.',
+      discount: '30% OFF',
+      code: 'HEALTH2026',
+      validUntil: '2026-03-31',
+      daysLeft: 42,
+      color: '#8b5cf6',
+      icon: 'celebration',
+      applicablePlans: ['Premium']
+    },
+    {
+      id: 2,
+      title: 'Family Bundle Deal',
+      description: 'Enroll your whole family and save big. Enterprise plan at a special rate.',
+      discount: '₹5,000 OFF',
+      code: 'FAMILY5K',
+      validUntil: '2026-04-15',
+      daysLeft: 57,
+      color: '#f59e0b',
+      icon: 'family_restroom',
+      applicablePlans: ['Enterprise']
+    },
+    {
+      id: 3,
+      title: 'Student Welcome Offer',
+      description: 'First 2 months free for new student sign-ups with valid student ID.',
+      discount: '2 Months Free',
+      code: 'STUDENT2M',
+      validUntil: '2026-06-30',
+      daysLeft: 133,
+      color: '#10b981',
+      icon: 'school',
+      applicablePlans: ['Student']
+    },
+    {
+      id: 4,
+      title: 'Refer & Earn',
+      description: 'Refer a friend and both get 1 month free on any active plan.',
+      discount: '1 Month Free',
+      code: 'REFER1M',
+      validUntil: '2026-12-31',
+      daysLeft: 317,
+      color: '#3b82f6',
+      icon: 'share',
+      applicablePlans: ['Basic', 'Premium', 'Enterprise', 'Student']
+    }
+  ];
+
+  totalSubscribers = computed(() => this.plans.reduce((s, p) => s + p.subscribers, 0));
+  activePlans = computed(() => this.plans.filter(p => p.status === 'active').length);
+  totalRevenue = computed(() => {
+    const cycle = this.billingCycle();
+    return this.plans.reduce((s, p) => s + (cycle === 'monthly' ? p.monthlyPrice : p.yearlyPrice) * p.subscribers, 0);
+  });
 
   constructor(private readonly dialogService: DialogboxService) {}
 
-  ngOnInit() {
-    this.setupGrid();
-    this.filterPlans();
-    console.log("plans" + this.plans);
+  ngOnInit() {}
+
+  toggleCycle() {
+    this.billingCycle.set(this.billingCycle() === 'monthly' ? 'yearly' : 'monthly');
   }
 
-  // Card view: filter and stats (same pattern as diet)
-  filterPlans() {
-    let list = [...this.plans];
-    if (this.searchQuery?.trim()) {
-      const q = this.searchQuery.trim().toLowerCase();
-      list = list.filter(p => (p.name || '').toLowerCase().includes(q));
-    }
-    if (this.selectedStatus) {
-      list = list.filter(p => (p.status || '') === this.selectedStatus);
-    }
-    this.filteredPlans = list;
+  getPrice(plan: Plan): number {
+    return this.billingCycle() === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice;
   }
 
-  onSearchChange() {
-    this.filterPlans();
+  getSavings(plan: Plan): number {
+    return (plan.monthlyPrice * 12) - plan.yearlyPrice;
   }
 
-  clearFilters() {
-    this.searchQuery = '';
-    this.selectedStatus = '';
-    this.filterPlans();
+  formatPrice(value: number): string {
+    if (value >= 100000) return `${(value / 100000).toFixed(1)}L`;
+    if (value >= 1000) return `${(value / 1000).toFixed(value % 1000 === 0 ? 0 : 1)}K`;
+    return value.toString();
   }
 
-  getActivePlansCount(): number {
-    return this.plans.filter(p => (p.status || '').toLowerCase() === 'active').length;
+  getIncludedCount(plan: Plan): number {
+    return plan.features.filter(f => f.included).length;
   }
 
-  getTotalSubscribers(): number {
-    return this.plans.reduce((sum, p) => sum + (p.subscribers || 0), 0);
+  copyCode(code: string) {
+    navigator.clipboard.writeText(code);
   }
 
-  getTotalFeaturesCount(): number {
-    return this.plans.reduce((sum, p) => sum + (p.featuresCount || 0), 0);
-  }
-
-  getPlanCardStats(plan: any): ListingCardStat[] {
-    return [
-      { label: 'Subscribers', value: plan.subscribers ?? 0, icon: 'groups' },
-      { label: 'Status', value: plan.status ?? '—', icon: 'info' },
-      { label: 'Features', value: plan.featuresCount ?? 0, unit: 'features', icon: 'featured_play_list' }
-    ];
-  }
-
-  getPlanStatusBadge(plan: any): ListingCardBadge {
-    const isActive = (plan?.status || '').toLowerCase() === 'active';
-    return {
-      text: plan?.status || '—',
-      backgroundColor: isActive ? '#2e7d32' : '#6c757d'
-    };
-  }
-
-  onPlanCardAction(action: ListingCardAction, plan: any) {
-    switch (action.id) {
-      case 'view': this.viewPlan(plan); break;
-      case 'edit': this.editPlan(plan); break;
-      case 'toggle': this.togglePlanStatus(plan); break;
-      case 'delete': this.deletePlan(plan); break;
-    }
-  }
-
-  setupGrid() {
-    this.columnDefs = [
-      {
-        headerName: 'Plan ID',
-        field: 'id',
-        width: 100,
-        sortable: true,
-        filter: true
-      },
-      {
-        headerName: 'Plan Name',
-        field: 'name',
-        width: 200,
-        sortable: true,
-        filter: true
-      },
-      {
-        headerName: 'Price',
-        field: 'priceDisplay',
-        width: 140,
-        sortable: true,
-        filter: true
-      },
-      {
-        headerName: 'Features',
-        field: 'featuresCount',
-        width: 120,
-        sortable: true,
-        filter: true,
-        valueFormatter: (params: any) => `${params.value} features`
-      },
-      {
-        headerName: 'Subscribers',
-        field: 'subscribers',
-        width: 120,
-        sortable: true,
-        filter: true
-      },
-      {
-        headerName: 'Status',
-        field: 'status',
-        width: 120,
-        sortable: true,
-        filter: true,
-        cellRenderer: StatusCellRendererComponent
-      },
-      {
-        headerName: 'Created Date',
-        field: 'createdDate',
-        width: 140,
-        sortable: true,
-        filter: true,
-        valueFormatter: (params: any) => {
-          return new Date(params.value).toLocaleDateString();
-        }
-      },
-      {
-        headerName: 'Valid Until',
-        field: 'validUntil',
-        width: 140,
-        sortable: true,
-        filter: true,
-        valueFormatter: (params: any) => {
-          return new Date(params.value).toLocaleDateString();
-        }
-      }
-    ];
-
-    this.gridOptions = {
-      menuActions: [
-        {
-          title: 'View Details',
-          icon: 'visibility',
-          click: (param: any) => { this.viewPlan(param.data); }
-        },
-        {
-          title: 'Edit Plan',
-          icon: 'edit',
-          click: (param: any) => { this.editPlan(param.data); }
-        },
-        {
-          title: 'Activate/Deactivate',
-          icon: 'power_settings_new',
-          click: (param: any) => { this.togglePlanStatus(param.data); }
-        },
-        {
-          title: 'Delete',
-          icon: 'delete',
-          click: (param: any) => { this.deletePlan(param.data); }
-        }
-      ]
-    };
-  }
-
-  onHeaderAction(action: string) {
-    switch (action) {
-      case 'add-plan':
-        this.addNewPlan();
-        break;
-    }
-  }
-
-  addNewPlan() {
-    console.log('Add new plan');
-  }
-
-  viewPlan(plan: any) {
-    console.log('View plan details:', plan);
-  }
-
-  editPlan(plan: any) {
+  editPlan(plan: Plan) {
     console.log('Edit plan:', plan);
   }
 
-  togglePlanStatus(plan: any) {
-    plan.status = plan.status === 'Active' ? 'Inactive' : 'Active';
-    console.log('Toggled plan status:', plan);
+  togglePlanStatus(plan: Plan) {
+    plan.status = plan.status === 'active' ? 'inactive' : 'active';
   }
 
-  deletePlan(plan: any) {
+  deletePlan(plan: Plan) {
     const dialogRef = this.dialogService.openConfirmationDialog({
       title: 'Delete Plan',
       message: `Are you sure you want to delete "${plan.name}"?`,
@@ -320,12 +267,22 @@ export class PlansComponent implements OnInit {
       showConfirm: true,
       showCancel: true
     });
-
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result === 'confirm' || result?.action === 'confirm' || result === true) {
         this.plans = this.plans.filter(p => p.id !== plan.id);
-        console.log('Deleted plan:', plan);
       }
     });
   }
-} 
+
+  addNewPlan() {
+    console.log('Add new plan');
+  }
+
+  editOffer(offer: Offer) {
+    console.log('Edit offer:', offer);
+  }
+
+  deleteOffer(offer: Offer) {
+    this.offers = this.offers.filter(o => o.id !== offer.id);
+  }
+}

@@ -1,128 +1,296 @@
-<!-- Login — Hospital Management Software -->
+<!-- DocTech — Healthcare Intelligence Platform Login -->
 <div class="login-shell">
-  <div class="login-left">
-    <div class="login-panel">
-      <div class="panel-brand">
-        <div class="panel-brand-text">
-          <h1 class="panel-title">Welcome to DOCTECH</h1>
-          <p class="panel-subtitle">Every Life Matters</p>
+
+  <!-- ─── LEFT PANEL: Login Form ─────────────────────── -->
+  <aside class="login-left">
+    <div class="left-inner">
+
+      <!-- Logo -->
+      <div class="logo-wrap">
+        <div class="logo-icon">
+          <div class="plus-icon"></div>
         </div>
+        <h1 class="logo-title"><span>Doc</span>Tech</h1>
+        <p class="logo-sub">HEALTHCARE INTELLIGENCE</p>
       </div>
 
-      <div class="quick-login-buttons">
-        <app-button
-          type="button"
-          class="quick-btn doctor"
-          [fontIcon]="'medical_services'"
-          [text]="'Doctor'"
-          appearance="basic"
-          (btnClick)="fillDoctorCredentials()">
-        </app-button>
-        <app-button
-          type="button"
-          class="quick-btn hospital"
-          [fontIcon]="'business'"
-          [text]="'Hospital'"
-          appearance="basic"
-          (btnClick)="fillHospitalCredentials()">
-        </app-button>
+      <p class="panel-tagline">Secure access to enterprise healthcare management</p>
+
+      <!-- Quick-login SSO-style buttons -->
+      <div class="quick-login-row">
+        <button type="button" class="sso-btn" (click)="fillDoctorCredentials()">
+          <mat-icon>medical_services</mat-icon>
+          <span>Doctor</span>
+        </button>
+        <button type="button" class="sso-btn" (click)="fillHospitalCredentials()">
+          <mat-icon>domain</mat-icon>
+          <span>Hospital</span>
+        </button>
       </div>
 
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-        <div class="form-field">
-          <label class="form-label" for="email-input">Email Address</label>
-          <div class="input-container" [class.error]="isFieldInvalid('email')">
-            <mat-icon class="input-icon">email</mat-icon>
-            <input
-              id="email-input"
-              type="email"
-              formControlName="email"
-              placeholder="Enter your email address"
-              class="form-input"
-              autocomplete="email">
-          </div>
-          @if (isFieldInvalid('email')) {
-            <div class="error-message">
-              {{ getErrorMessage('email') }}
-            </div>
-          }
-        </div>
+      <div class="divider-text">OR SIGN IN WITH CREDENTIALS</div>
 
-        <div class="form-field">
-          <label class="form-label" for="password-input">Password</label>
-          <div class="input-container" [class.error]="isFieldInvalid('password')">
-            <mat-icon class="input-icon">lock</mat-icon>
-            <input
-              id="password-input"
-              [type]="showPassword ? 'text' : 'password'"
-              formControlName="password"
-              placeholder="Enter your password"
-              class="form-input"
-              autocomplete="current-password">
-            <app-button
-              type="button"
-              class="password-toggle"
-              [fontIcon]="showPassword ? 'visibility_off' : 'visibility'"
-              [appearance]="'icon'"
-              (btnClick)="togglePasswordVisibility()">
-            </app-button>
-          </div>
-          @if (isFieldInvalid('password')) {
-            <div class="error-message">
-              {{ getErrorMessage('password') }}
-            </div>
-          }
+      <!-- Login Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form" autocomplete="off">
+
+        <label class="field-label" for="login-email">STAFF ID OR EMAIL</label>
+        <div class="field-wrap" [class.field-error]="isFieldInvalid('email')">
+          <mat-icon class="field-icon">person_outline</mat-icon>
+          <input
+            id="login-email"
+            type="email"
+            formControlName="email"
+            placeholder="staff&#64;hospital.com"
+            autocomplete="email">
         </div>
+        @if (isFieldInvalid('email')) {
+          <div class="error-msg">{{ getErrorMessage('email') }}</div>
+        }
+
+        <label class="field-label" for="login-password">PASSWORD</label>
+        <div class="field-wrap" [class.field-error]="isFieldInvalid('password')">
+          <mat-icon class="field-icon">lock_outline</mat-icon>
+          <input
+            id="login-password"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="••••••••••"
+            autocomplete="current-password">
+          <button type="button" class="eye-toggle" (click)="togglePasswordVisibility()" aria-label="Toggle password visibility">
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </div>
+        @if (isFieldInvalid('password')) {
+          <div class="error-msg">{{ getErrorMessage('password') }}</div>
+        }
 
         <div class="form-options">
           <label class="checkbox-container">
-            <input type="checkbox" formControlName="rememberMe" class="checkbox-input">
+            <input type="checkbox" formControlName="rememberMe">
             <span class="checkmark"></span>
-            <span class="checkbox-label">Remember me</span>
+            <span class="checkbox-text">Remember me</span>
           </label>
-          <a href="#" class="forgot-link">Forgot password</a>
+          <a href="#" class="forgot-link">Forgot password?</a>
         </div>
 
         @if (errorMessage) {
           <div class="alert alert-error" role="alert">
-            <mat-icon>error</mat-icon>
+            <mat-icon>error_outline</mat-icon>
             <span>{{ errorMessage }}</span>
           </div>
         }
 
         @if (successMessage) {
-          <div class="alert alert-success">
-            <mat-icon>check_circle</mat-icon>
+          <output class="alert alert-success">
+            <mat-icon>check_circle_outline</mat-icon>
             <span>{{ successMessage }}</span>
-          </div>
+          </output>
         }
 
-        <app-button
-          type="button"
-          class="submit-button"
-          [fontIcon]="'login'"
-          [text]="isLoading ? 'Signing In...' : 'Sign In'"
+        <button
+          type="submit"
+          class="sign-btn"
           [disabled]="loginForm.invalid || isLoading"
-          [appearance]="'raised'"
-          (btnClick)="onSubmit()">
-        </app-button>
+          [class.is-loading]="isLoading">
+          @if (isLoading) {
+            <span class="btn-spinner"></span>
+          }
+          {{ isLoading ? 'SIGNING IN...' : 'SIGN IN SECURELY' }}
+        </button>
       </form>
 
-      <div class="form-footer">
-        <p class="version-info">Version {{ environment.version }} · Build {{ environment.buildNumber }}</p>
-        <p class="copyright">Hospital Management Software</p>
+      <p class="request-link">Don't have access?&nbsp;<a href="#">Request credentials</a></p>
+      <span class="version">Version {{ environment.version }} · Build {{ environment.buildNumber }}</span>
+    </div>
+  </aside>
+
+  <!-- ─── RIGHT PANEL: Circuit-Hub Visualization ──────── -->
+  <main class="login-right" aria-hidden="true">
+    <div class="scan-line"></div>
+    <div class="grid-bg"></div>
+    <div class="glow-bg"></div>
+
+    <!-- Floating particles -->
+    <div class="particle p1"></div>
+    <div class="particle p2"></div>
+    <div class="particle p3"></div>
+    <div class="particle p4"></div>
+    <div class="particle p5"></div>
+    <div class="particle p6"></div>
+    <div class="particle p7"></div>
+    <div class="particle p8"></div>
+
+    <!-- System status bar -->
+    <div class="status-bar">
+      <div class="status-item">
+        <span class="status-dot"></span>
+        <span>SYSTEM OPERATIONAL</span>
+      </div>
+      <div class="status-item">
+        <span class="status-dot amber"></span>
+        <span>ENCRYPTED</span>
+      </div>
+      <div class="status-time">{{ currentTime }}</div>
+    </div>
+
+    <!-- Corner decorations -->
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+
+    <!-- Typing banner -->
+    <div class="typing-banner">
+      <span class="typing-text">HEALTHCARE INTELLIGENCE NETWORK — SECURE GATEWAY</span>
+    </div>
+
+    <!-- Circuit Hub -->
+    <div class="hub-wrap">
+
+      <!-- SVG circuit lines -->
+      <svg class="circuit-svg" viewBox="0 0 700 580" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="dot" markerWidth="4" markerHeight="4" refX="2" refY="2">
+            <circle cx="2" cy="2" r="1.5" fill="#00d4ff"/>
+          </marker>
+        </defs>
+
+        <!-- Top: Appointments (350,57) -->
+        <polyline points="350,235 350,140 350,84" fill="none" stroke="#00d4ff"
+          stroke-width="1.5" stroke-dasharray="4,4" opacity=".5" marker-end="url(#dot)"/>
+        <!-- Top-right: Billing (619,87) -->
+        <polyline points="405,250 530,160 592,87" fill="none" stroke="#00d4ff"
+          stroke-width="1.5" stroke-dasharray="4,4" opacity=".5" marker-end="url(#dot)"/>
+        <!-- Right: Doctors (653,263) -->
+        <polyline points="465,290 560,290 626,290" fill="none" stroke="#00d4ff"
+          stroke-width="1.5" stroke-dasharray="4,4" opacity=".5" marker-end="url(#dot)"/>
+        <!-- Bottom-right: Pharmacy (619,493) -->
+        <polyline points="405,330 530,420 592,493" fill="none" stroke="#00d4ff"
+          stroke-width="1.5" stroke-dasharray="4,4" opacity=".5" marker-end="url(#dot)"/>
+        <!-- Bottom: Records (350,523) -->
+        <polyline points="350,345 350,440 350,496" fill="none" stroke="#00d4ff"
+          stroke-width="1.5" stroke-dasharray="4,4" opacity=".5" marker-end="url(#dot)"/>
+        <!-- Bottom-left: Lab (81,493) -->
+        <polyline points="295,330 170,420 108,493" fill="none" stroke="#00d4ff"
+          stroke-width="1.5" stroke-dasharray="4,4" opacity=".5" marker-end="url(#dot)"/>
+        <!-- Left: ICU (47,263) -->
+        <polyline points="235,290 140,290 74,290" fill="none" stroke="#00d4ff"
+          stroke-width="1.5" stroke-dasharray="4,4" opacity=".5" marker-end="url(#dot)"/>
+        <!-- Top-left: Emergency (81,87) -->
+        <polyline points="295,250 170,160 108,87" fill="none" stroke="#00d4ff"
+          stroke-width="1.5" stroke-dasharray="4,4" opacity=".5" marker-end="url(#dot)"/>
+
+        <!-- Animated flow dots -->
+        <circle class="flow-dot" r="3">
+          <animateMotion dur="3s" repeatCount="indefinite" path="M350,235 350,140 350,84"/>
+        </circle>
+        <circle class="flow-dot" r="3">
+          <animateMotion dur="3.5s" repeatCount="indefinite" begin="0.4s" path="M405,250 530,160 592,87"/>
+        </circle>
+        <circle class="flow-dot" r="3">
+          <animateMotion dur="2.8s" repeatCount="indefinite" begin="0.8s" path="M465,290 560,290 626,290"/>
+        </circle>
+        <circle class="flow-dot" r="3">
+          <animateMotion dur="3.2s" repeatCount="indefinite" begin="1.2s" path="M405,330 530,420 592,493"/>
+        </circle>
+        <circle class="flow-dot" r="3">
+          <animateMotion dur="3s" repeatCount="indefinite" begin="1.6s" path="M350,345 350,440 350,496"/>
+        </circle>
+        <circle class="flow-dot" r="3">
+          <animateMotion dur="3.4s" repeatCount="indefinite" begin="2s" path="M295,330 170,420 108,493"/>
+        </circle>
+        <circle class="flow-dot" r="3">
+          <animateMotion dur="2.6s" repeatCount="indefinite" begin="0.2s" path="M235,290 140,290 74,290"/>
+        </circle>
+        <circle class="flow-dot" r="3">
+          <animateMotion dur="3.6s" repeatCount="indefinite" begin="0.6s" path="M295,250 170,160 108,87"/>
+        </circle>
+      </svg>
+
+      <!-- Center hub -->
+      <div class="hub-center">
+        <div class="hub-plus"></div>
+      </div>
+
+      <!-- Nodes -->
+      <div class="node node-appt">
+        <mat-icon>calendar_month</mat-icon>
+        <span class="node-label">Appointments</span>
+      </div>
+
+      <div class="node node-bill">
+        <mat-icon>payments</mat-icon>
+        <span class="node-label">Billing</span>
+      </div>
+
+      <div class="node node-doc">
+        <mat-icon>stethoscope</mat-icon>
+        <span class="node-label">Doctors</span>
+      </div>
+
+      <div class="node node-pharm">
+        <mat-icon>local_pharmacy</mat-icon>
+        <span class="node-label">Pharmacy</span>
+      </div>
+
+      <div class="node node-rec">
+        <mat-icon>folder_shared</mat-icon>
+        <span class="node-label">Records</span>
+      </div>
+
+      <div class="node node-lab">
+        <mat-icon>biotech</mat-icon>
+        <span class="node-label">Laboratory</span>
+      </div>
+
+      <div class="node node-icu">
+        <mat-icon>monitor_heart</mat-icon>
+        <span class="node-label">ICU / Wards</span>
+      </div>
+
+      <div class="node node-emerg">
+        <mat-icon>emergency</mat-icon>
+        <span class="node-label">Emergency</span>
       </div>
     </div>
-  </div>
 
-  <div class="login-right" aria-hidden="true">
-    <div class="hero-tagline">Secure · Reliable · Care-first</div>
-    <div class="hero-lottie">
-      <ng-lottie
-        [options]="lottieOptions"
-        width="100%"
-        height="100%">
-      </ng-lottie>
+    <!-- ECG Heartbeat Line -->
+    <div class="ecg-wrap">
+      <svg class="ecg-svg" viewBox="0 0 1200 50" preserveAspectRatio="none">
+        <polyline
+          fill="none"
+          stroke="#00d4ff"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          opacity="0.5"
+          points="
+            0,25 60,25 70,22 80,28 90,25 130,25 135,25 140,5 145,45 150,10 155,25 190,25 200,20 210,25 240,25 300,25
+            300,25 360,25 370,22 380,28 390,25 430,25 435,25 440,5 445,45 450,10 455,25 490,25 500,20 510,25 540,25 600,25
+            600,25 660,25 670,22 680,28 690,25 730,25 735,25 740,5 745,45 750,10 755,25 790,25 800,20 810,25 840,25 900,25
+            900,25 960,25 970,22 980,28 990,25 1030,25 1035,25 1040,5 1045,45 1050,10 1055,25 1090,25 1100,20 1110,25 1140,25 1200,25
+          "/>
+      </svg>
     </div>
-  </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-num">{{ statHospitals }}</div>
+        <div class="stat-lbl">Hospitals</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">{{ statDoctors }}</div>
+        <div class="stat-lbl">Doctors</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">{{ statPatients }}</div>
+        <div class="stat-lbl">Patients</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">{{ statStaff }}</div>
+        <div class="stat-lbl">Staff</div>
+      </div>
+    </div>
+  </main>
 </div>

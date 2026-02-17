@@ -1,13 +1,11 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { AppButtonComponent, AppInputComponent, AppSelectboxComponent, IconComponent, CheckboxComponent, DialogboxService, PageComponent, BreadcrumbItem, TabComponent, TabsComponent } from '@lk/core';
+import { ColDef } from 'ag-grid-community';
+import { AppButtonComponent, AppInputComponent, IconComponent, CheckboxComponent, PageComponent, BreadcrumbItem, TabComponent, TabsComponent, GridComponent } from '@lk/core';
+import { AppCardComponent } from '../../../core/components/app-card/app-card.component';
+import { AppCardActionsDirective } from '../../../core/components/app-card/app-card-actions.directive';
 import { 
-  AdminPageHeaderComponent, 
-  AdminStatsCardComponent, 
   AdminTabsComponent,
-  type HeaderAction,
-  type StatCard,
   type TabItem
 } from '../../../components';
 
@@ -43,71 +41,36 @@ interface Staff {
   email: string;
   phone: string;
   specialization?: string;
-  shift: {
-    start: string;
-    end: string;
-    days: string[];
-  };
-  assignedDoctors: number[];
-  attendance: {
-    status: 'on-duty' | 'off-duty' | 'late' | 'absent';
-    inTime?: string;
-    outTime?: string;
-    totalHours?: number;
-    date: string;
-  };
-  attendanceHistory: any[];
-}
-
-interface Doctor {
-  id: number;
-  name: string;
-  specialization: string;
-  department: string;
 }
 
 @Component({
     selector: 'app-roles',
     imports: [
         CommonModule,
-        ReactiveFormsModule,
         AppButtonComponent,
         AppInputComponent,
-        AppSelectboxComponent,
         IconComponent,
         TabComponent,
         TabsComponent,
         CheckboxComponent,
-        AdminPageHeaderComponent,
-        AdminStatsCardComponent,
         AdminTabsComponent,
-        PageComponent
+        PageComponent,
+        GridComponent,
+        AppCardComponent,
+        AppCardActionsDirective
     ],
     templateUrl: './roles.component.html',
     styleUrl: './roles.component.scss'
 })
 export class RolesComponent implements OnInit {
   // State Management
-  activeTab: 'overview' | 'permissions' | 'assignments' = 'overview';
+  activeTab: 'overview' | 'permissions' = 'overview';
   selectedTabIndex = 0;
   selectedRole: Role | null = null;
 
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Roles & Staff', route: '/admin/roles', icon: 'badge', isActive: true }
   ];
-  @Output() actionClicked = new EventEmitter<string>(); 
-
-
-  // Page header configuration
-  headerActions: HeaderAction[] = [
-    {
-      text: 'Reports',
-      color: 'accent',
-      fontIcon: 'analytics',
-      action: 'reports'
-    }
-  ];
-
   // Tab configuration
   tabs: TabItem[] = [
     {
@@ -119,16 +82,9 @@ export class RolesComponent implements OnInit {
       id: 'permissions',
       label: 'Role Permissions',
       icon: 'security'
-    },
-    {
-      id: 'assignments',
-      label: 'Assignments',
-      icon: 'assignment_ind'
     }
   ];
 
-  // Stats configuration
-  statsCards: StatCard[] = [];
 
   // Data
   roles: Role[] = [
@@ -219,69 +175,32 @@ export class RolesComponent implements OnInit {
   ];
 
   staff: Staff[] = [
-    {
-      id: 1,
-      fullName: 'Dr. Sarah Johnson',
-      employeeId: 'DOC001',
-      role: 'Doctor',
-      profilePicture: 'assets/profiles/doctor1.jpg',
-      email: 'sarah.johnson@hospital.com',
-      phone: '+1-555-0101',
-      specialization: 'Cardiology',
-      shift: { start: '08:00', end: '16:00', days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] },
-      assignedDoctors: [],
-      attendance: { status: 'on-duty', inTime: '07:55', outTime: '', totalHours: 0, date: '2024-01-15' },
-      attendanceHistory: []
-    },
-    {
-      id: 2,
-      fullName: 'Emily Davis',
-      employeeId: 'NUR001',
-      role: 'Nurse',
-      profilePicture: 'assets/profiles/nurse1.jpg',
-      email: 'emily.davis@hospital.com',
-      phone: '+1-555-0102',
-      specialization: 'ICU',
-      shift: { start: '06:00', end: '18:00', days: ['Monday', 'Wednesday', 'Friday'] },
-      assignedDoctors: [1],
-      attendance: { status: 'on-duty', inTime: '05:58', outTime: '', totalHours: 0, date: '2024-01-15' },
-      attendanceHistory: []
-    },
-    {
-      id: 3,
-      fullName: 'Michael Chen',
-      employeeId: 'REC001',
-      role: 'Receptionist',
-      profilePicture: 'assets/profiles/receptionist1.jpg',
-      email: 'michael.chen@hospital.com',
-      phone: '+1-555-0103',
-      shift: { start: '07:00', end: '15:00', days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] },
-      assignedDoctors: [],
-      attendance: { status: 'late', inTime: '07:15', outTime: '', totalHours: 0, date: '2024-01-15' },
-      attendanceHistory: []
-    },
-    {
-      id: 4,
-      fullName: 'Lisa Rodriguez',
-      employeeId: 'LAB001',
-      role: 'Lab Technician',
-      profilePicture: 'assets/profiles/lab1.jpg',
-      email: 'lisa.rodriguez@hospital.com',
-      phone: '+1-555-0104',
-      specialization: 'Pathology',
-      shift: { start: '08:00', end: '16:00', days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] },
-      assignedDoctors: [],
-      attendance: { status: 'off-duty', inTime: '', outTime: '', totalHours: 0, date: '2024-01-15' },
-      attendanceHistory: []
-    }
+    { id: 1, fullName: 'Dr. Sarah Johnson', employeeId: 'DOC001', role: 'Doctor', profilePicture: '', email: 'sarah.johnson@hospital.com', phone: '+1-555-0101', specialization: 'Cardiology' },
+    { id: 2, fullName: 'Dr. Robert Wilson', employeeId: 'DOC002', role: 'Doctor', profilePicture: '', email: 'robert.wilson@hospital.com', phone: '+1-555-0110', specialization: 'Neurology' },
+    { id: 3, fullName: 'Dr. Priya Sharma', employeeId: 'DOC003', role: 'Doctor', profilePicture: '', email: 'priya.sharma@hospital.com', phone: '+1-555-0111', specialization: 'Pediatrics' },
+    { id: 4, fullName: 'Dr. James Miller', employeeId: 'DOC004', role: 'Doctor', profilePicture: '', email: 'james.miller@hospital.com', phone: '+1-555-0112', specialization: 'Orthopedics' },
+    { id: 5, fullName: 'Emily Davis', employeeId: 'NUR001', role: 'Nurse', profilePicture: '', email: 'emily.davis@hospital.com', phone: '+1-555-0102', specialization: 'ICU' },
+    { id: 6, fullName: 'Maria Lopez', employeeId: 'NUR002', role: 'Nurse', profilePicture: '', email: 'maria.lopez@hospital.com', phone: '+1-555-0113', specialization: 'Emergency' },
+    { id: 7, fullName: 'Anita Patel', employeeId: 'NUR003', role: 'Nurse', profilePicture: '', email: 'anita.patel@hospital.com', phone: '+1-555-0114', specialization: 'OT' },
+    { id: 8, fullName: 'Michael Chen', employeeId: 'REC001', role: 'Receptionist', profilePicture: '', email: 'michael.chen@hospital.com', phone: '+1-555-0103' },
+    { id: 9, fullName: 'Sophie Turner', employeeId: 'REC002', role: 'Receptionist', profilePicture: '', email: 'sophie.turner@hospital.com', phone: '+1-555-0115' },
+    { id: 10, fullName: 'Lisa Rodriguez', employeeId: 'LAB001', role: 'Lab Technician', profilePicture: '', email: 'lisa.rodriguez@hospital.com', phone: '+1-555-0104', specialization: 'Pathology' },
+    { id: 11, fullName: 'Raj Kumar', employeeId: 'LAB002', role: 'Lab Technician', profilePicture: '', email: 'raj.kumar@hospital.com', phone: '+1-555-0116', specialization: 'Radiology' },
+    { id: 12, fullName: 'David Park', employeeId: 'PHR001', role: 'Pharmacist', profilePicture: '', email: 'david.park@hospital.com', phone: '+1-555-0117' },
+    { id: 13, fullName: 'Aisha Khan', employeeId: 'PHR002', role: 'Pharmacist', profilePicture: '', email: 'aisha.khan@hospital.com', phone: '+1-555-0118' },
+    { id: 14, fullName: 'Admin User', employeeId: 'ADM001', role: 'Admin', profilePicture: '', email: 'admin@hospital.com', phone: '+1-555-0100' }
   ];
 
-  doctors: Doctor[] = [
-    { id: 1, name: 'Dr. Sarah Johnson', specialization: 'Cardiology', department: 'Cardiology' },
-    { id: 2, name: 'Dr. Robert Smith', specialization: 'Neurology', department: 'Neurology' },
-    { id: 3, name: 'Dr. Amanda Wilson', specialization: 'Pediatrics', department: 'Pediatrics' },
-    { id: 4, name: 'Dr. James Brown', specialization: 'Orthopedics', department: 'Orthopedics' }
-  ];
+  // Staff grid
+  staffColumnDefs: ColDef[] = [];
+  staffGridOptions: any = {};
+  activeRoleFilter = signal<string | null>(null);
+
+  get filteredStaff(): Staff[] {
+    const role = this.activeRoleFilter();
+    if (!role) return this.staff;
+    return this.staff.filter(s => s.role === role);
+  }
 
   // Options
   moduleOptions = [
@@ -294,20 +213,42 @@ export class RolesComponent implements OnInit {
 
   permissionLevels = ['read', 'write', 'update', 'delete'];
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly dialogService: DialogboxService
-  ) {}
+  constructor() {}
 
   ngOnInit() {
-    this.updateStatsCards();
+    this.initStaffGrid();
     if (this.roles.length > 0) {
       this.selectedRole = this.roles[0];
     }
   }
 
+  initStaffGrid(): void {
+    this.staffColumnDefs = [
+      { headerName: 'ID', field: 'employeeId', width: 110, sortable: true },
+      { headerName: 'Name', field: 'fullName', flex: 1, sortable: true, filter: true },
+      { headerName: 'Role', field: 'role', width: 140, sortable: true, filter: true },
+      { headerName: 'Specialization', field: 'specialization', width: 150, sortable: true,
+        valueGetter: (params: any) => params.data?.specialization || '—'
+      },
+      { headerName: 'Email', field: 'email', flex: 1, sortable: true },
+      { headerName: 'Phone', field: 'phone', width: 140 }
+    ];
+    this.staffGridOptions = {
+      menuActions: [
+        { title: 'View', icon: 'visibility', click: (_p: any) => {} },
+        { title: 'Edit', icon: 'edit', click: (_p: any) => {} },
+        { title: 'Delete', icon: 'delete', click: (_p: any) => {} }
+      ]
+    };
+  }
+
+  filterByRole(roleName: string): void {
+    const current = this.activeRoleFilter();
+    this.activeRoleFilter.set(current === roleName ? null : roleName);
+  }
+
   // Tab Management
-  setActiveTab(tab: 'overview' | 'permissions' | 'assignments') {
+  setActiveTab(tab: 'overview' | 'permissions') {
     this.activeTab = tab;
     if (tab === 'permissions' && !this.selectedRole && this.roles.length > 0) {
       this.selectedRole = this.roles[0];
@@ -317,29 +258,6 @@ export class RolesComponent implements OnInit {
   // Role Management Methods
   selectRole(role: Role) {
     this.selectedRole = role;
-  }
-
-  assignStaffToDoctor(staffId: number, doctorId: number) {
-    const s = this.staff.find(st => st.id === staffId);
-    if (s && !s.assignedDoctors.includes(doctorId)) {
-      s.assignedDoctors.push(doctorId);
-    }
-  }
-
-  get unassignedStaff(): Staff[] {
-    return this.staff.filter(s => s.assignedDoctors.length === 0);
-  }
-
-  get doctorOptions() {
-    return this.doctors.map(doctor => ({ label: doctor.name, value: doctor.id }));
-  }
-
-  getStaffCountForDoctor(doctorId: number): number {
-    return this.staff.filter(s => s.assignedDoctors.includes(doctorId)).length;
-  }
-
-  getStaffForDoctor(doctorId: number): Staff[] {
-    return this.staff.filter(s => s.assignedDoctors.includes(doctorId));
   }
 
   getStaffCountForRole(roleName: string): number {
@@ -367,107 +285,9 @@ export class RolesComponent implements OnInit {
     return this.roles.find(role => role.name === roleName);
   }
 
-  getDoctorById(doctorId: number): Doctor | undefined {
-    return this.doctors.find(doctor => doctor.id === doctorId);
-  }
-
-  getAttendanceStatusColor(status: string): string {
-    switch (status) {
-      case 'on-duty': return 'var(--attendance-on-duty-color)';
-      case 'off-duty': return 'var(--attendance-off-duty-color)';
-      case 'late': return 'var(--attendance-late-color)';
-      case 'absent': return 'var(--attendance-absent-color)';
-      default: return 'var(--attendance-off-duty-color)';
-    }
-  }
-
-  navigateToReports() {
-    console.log('Navigate to reports');
-  }
-
-  exportReports() {
-    console.log('Export reports');
-  }
-
-  // Assignment Methods
-  openBulkAssignDialog() {
-    console.log('Open bulk assign dialog');
-  }
-
-  openAssignmentDialog(doctor: any) {
-    console.log('Open assignment dialog for doctor:', doctor);
-  }
-
-  viewSchedule(staff: Staff) {
-    console.log('View schedule for:', staff);
-  }
-
-  removeAssignment(staffId: number, doctorId: number) {
-    const staff = this.staff.find(s => s.id === staffId);
-    if (staff) {
-      staff.assignedDoctors = staff.assignedDoctors.filter(id => id !== doctorId);
-    }
-  }
-
-  assignAllUnassigned() {
-    console.log('Assign all unassigned staff');
-  }
-
-  quickAssignStaff(staffId: number, doctorId: number) {
-    this.assignStaffToDoctor(staffId, doctorId);
-  }
-
-  getActiveStaffCount(): number {
-    return this.staff.filter(s => s.attendance.status === 'on-duty').length;
-  }
-
   // New methods for standardized components
-  updateStatsCards() {
-    this.statsCards = [
-      {
-        label: 'Total Roles',
-        value: this.roles.length,
-        icon: 'shield',
-        type: 'info',
-        valueColor: 'var(--admin-text-primary)'
-      },
-      {
-        label: 'Total Staff',
-        value: this.staff.length,
-        icon: 'groups',
-        type: 'info',
-        valueColor: 'var(--admin-text-primary)'
-      },
-      {
-        label: 'Active Today',
-        value: this.getActiveStaffCount(),
-        icon: 'check_circle',
-        type: 'success',
-        valueColor: 'var(--admin-text-primary)'
-      },
-      {
-        label: 'Unassigned',
-        value: this.getUnassignedStaffCount(),
-        icon: 'warning',
-        type: 'warning',
-        valueColor: 'var(--admin-text-primary)'
-      }
-    ];
-  }
-
-  getUnassignedStaffCount(): number {
-    return this.staff.filter(s => s.assignedDoctors.length === 0).length;
-  }
-
-  onHeaderAction(action: string) {
-    switch (action) {
-      case 'reports':
-        this.navigateToReports();
-        break;
-    }
-  }
 
   onTabChange(tabId: string) {
-    this.setActiveTab(tabId as 'overview' | 'permissions' | 'assignments');
+    this.setActiveTab(tabId as 'overview' | 'permissions');
   }
 } 

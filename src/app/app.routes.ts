@@ -34,7 +34,7 @@ import { MyScheduleComponent } from './pages/my-schedule/my-schedule.component';
 import { PatientBillingDashboardComponent } from './pages/billing/patient-billing-dashboard.component';
 import { InvoiceDetailComponent } from './pages/billing/invoice-detail.component';
 import { AuthGuard, LoginGuard } from "@lk/core";
-import { DoctorPermissionsComponent } from './pages/admin/doctor-permissions/doctor-permissions.component';
+
 import { BaseConfigurationComponent } from './pages/admin/base-configuration/base-configuration.component';
 import { HospitalComponent } from './pages/admin/hospital/hospital.component';
 
@@ -77,7 +77,7 @@ export const routes: Routes = [
   { path: 'admin/doctors/test', component: DoctorCreateTestComponent, canActivate: [AuthGuard] },
   { path: 'admin/roles', component: RolesComponent, canActivate: [AuthGuard] },
   { path: 'admin/plans', component: PlansComponent, canActivate: [AuthGuard] },
-  { path: 'admin/doctor-permissions', component: DoctorPermissionsComponent, canActivate: [AuthGuard] },
+
   { path: 'admin/hospital', component: HospitalComponent, canActivate: [AuthGuard], data: { breadcrumb: 'Hospital', breadcrumbIcon: 'apartment' } },
   {
     path: 'admin/base-configuration',

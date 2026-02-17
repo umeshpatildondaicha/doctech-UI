@@ -1,11 +1,12 @@
 import { Component, OnInit, AfterViewInit, PLATFORM_ID, Inject } from '@angular/core';
-import { CommonModule, NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { isPlatformBrowser } from '@angular/common';
-import { AuthService, AppButtonComponent, AppInputComponent, IconComponent, TabComponent, TabsComponent} from '@lk/core';
+import { AuthService, AppButtonComponent, IconComponent, BreadcrumbItem, PageComponent } from '@lk/core';
 import * as Highcharts from 'highcharts';
 import { HighchartsChartModule } from 'highcharts-angular';
-import { RouterLink } from '@angular/router';
 import { AdminStatsCardComponent, StatCard as OverviewStatCard } from '../../components/admin-stats-card/admin-stats-card.component';
+import { AppCardComponent } from '../../core/components/app-card/app-card.component';
+import { AppCardActionsDirective } from '../../core/components/app-card/app-card-actions.directive';
 
 interface AdminDashboardStatCard {
   title: string;
@@ -45,31 +46,26 @@ interface FinancialMetric {
   color: string;
 }
 
-type TabType = 'overview' | 'staff' | 'patients' | 'billing' | 'analytics';
-
 @Component({
     selector: 'app-admin-dashboard',
-    imports: [CommonModule, HighchartsChartModule,RouterLink, AppButtonComponent, AppInputComponent, IconComponent,AppInputComponent,TabComponent,TabsComponent,NgIf, AdminStatsCardComponent],
+    imports: [CommonModule, HighchartsChartModule, AppButtonComponent, IconComponent, AdminStatsCardComponent, PageComponent, AppCardComponent, AppCardActionsDirective],
     templateUrl: './admin-dashboard.component.html',
     styleUrl: './admin-dashboard.component.scss'
 })
 export class AdminDashboardComponent implements OnInit, AfterViewInit {
   Highcharts: typeof Highcharts = Highcharts;
   isBrowser = false;
-  activeTab: TabType = 'overview';
-  selectedTabIndex = 0;
+
+  breadcrumb: BreadcrumbItem[] = [
+    { label: 'Admin', route: '/admin-dashboard', icon: 'admin_panel_settings' },
+    { label: 'Dashboard', icon: 'dashboard', isActive: true }
+  ];
+
   // Chart configurations
   revenueChartOptions: Highcharts.Options = {};
   patientFlowChartOptions: Highcharts.Options = {};
   departmentChartOptions: Highcharts.Options = {};
 
-  // Current user info
-  currentUser = {
-    name: 'Dr. Sarah Administrator',
-    role: 'Hospital Administrator',
-    avatar: 'assets/avatars/admin.jpg',
-    lastLogin: '2024-01-15 08:30 AM'
-  };
 
   // Dashboard statistics
   statsCards: AdminDashboardStatCard[] = [
@@ -500,39 +496,11 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
     return `₹${value.toLocaleString()}`;
   }
 
-  // Tab Management (synced with app-tabs selectedIndex)
-  private readonly tabOrder: TabType[] = ['overview', 'staff', 'patients', 'billing', 'analytics'];
-
-  onTabChange(event: number | { index?: number }) {
-    const index = typeof event === 'number' ? event : (event?.index ?? 0);
-    this.selectedTabIndex = index;
-    this.activeTab = this.tabOrder[index] ?? 'overview';
-  }
-
   // Action methods
   logout() {
     this.authService.logout();
   }
 
-  navigateToStaffManagement() {
-    console.log('Navigate to staff management');
-  }
-
-  navigateToPatients() {
-    console.log('Navigate to patients');
-  }
-
-  navigateToBilling() {
-    console.log('Navigate to billing');
-  }
-
-  navigateToReports() {
-    console.log('Navigate to reports');
-  }
-
-  navigateToSettings() {
-    console.log('Navigate to settings');
-  }
 
   viewDepartmentDetails(department: Department) {
     console.log('View department details:', department);
@@ -542,10 +510,4 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
     console.log('View all activities');
   }
 
-  refreshDashboard() {
-    console.log('Refresh dashboard data');
-    if (this.isBrowser) {
-      this.initializeCharts();
-    }
-  }
 } 
