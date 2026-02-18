@@ -162,12 +162,13 @@
     <!-- Step 3: Working hours -->
     <mat-step [stepControl]="step3">
       <form [formGroup]="step3" class="avail-step">
-        <h3 class="avail-h">Set your working hours</h3>
-        <p class="avail-p">Define your daily schedule and add breaks. We'll estimate capacity automatically.</p>
+        <!-- <h3 class="avail-h">Set your working hours</h3>
+        <p class="avail-p">Define your daily schedule and add breaks. We'll estimate capacity automatically.</p> -->
 
         @if (setupType() === 'weekly') {
           <div class="weekdays">
             @for (d of weekdays; track d) {
+               
               <button type="button" class="day" [class.on]="(step3.value.weekdays ?? []).includes(d)" (click)="toggleWeekday(d)">
                 {{ d.slice(0, 3).toUpperCase() }}
               </button>
@@ -211,8 +212,37 @@
 
             <div class="break-head">
               <div class="break-title">Manage breaks</div>
-              <button mat-stroked-button type="button" (click)="addBreak()">+ Add another break</button>
+              <button mat-stroked-button type="button" (click)="openBreakForm()">+ Add another break</button>
             </div>
+            <div class="break-form-card" *ngIf="showBreakForm" [formGroup]="breakForm">
+
+              <input class="bf-label"
+                     formControlName="label"
+                     placeholder="Break Reason " />
+            
+              <input type="time"
+                     class="bf-time"
+                     formControlName="startTime" />
+            
+              <span>–</span>
+            
+              <input type="time"
+                     class="bf-time"
+                     formControlName="endTime" />
+            
+              <button mat-flat-button
+                      color="primary"
+                      (click)="saveBreak()">
+                Save
+              </button>
+            
+              <button mat-button
+                      (click)="cancelBreak()">
+                Cancel
+              </button>
+            
+            </div>
+            
 
             <div class="break-list">
               @for (b of breaksArray.controls; track $index) {

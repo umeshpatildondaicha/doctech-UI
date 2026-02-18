@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, computed, inject, signal, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, computed, inject, Signal, signal, ViewChild } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -12,6 +12,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatStepperModule, MatStepper } from '@angular/material/stepper';
 import { MatDialogRef } from '@angular/material/dialog';
 import { TimingsService } from '../../../services/timings.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 import type {
   BaseTimingUpsertRequest,
   DayOfWeek,
@@ -79,7 +80,7 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
 
   readonly step3 = this.fb.group({
     // For weekly
-    weekdays: this.fb.control<Weekday[] | null>(null),
+    weekdays: this.fb.control<Weekday[]>([]),
     // For override
     date: this.fb.control<Date | null>(null),
     // For leave
@@ -103,15 +104,19 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
 
   readonly step5 = this.fb.group({});
 
-  readonly setupType = computed(() => this.step1.value.setupType ?? null);
-  readonly schedulingType = computed(() => this.step2.value.schedulingType ?? null);
-  readonly totalSteps = computed(() => (this.setupType() === 'leave' ? 2 : 5));
+  readonly setupType = toSignal(this.step1.controls.setupType.valueChanges.pipe(
+    startWith(this.step1.controls.setupType.value)
+  ), { initialValue: this.step1.controls.setupType.value });
+  readonly schedulingType = toSignal(this.step2.controls.schedulingType.valueChanges.pipe(
+    startWith(this.step2.controls.schedulingType.value)
+  ), { initialValue: this.step2.controls.schedulingType.value });
+  readonly totalSteps = computed(() => (this.setupType() === 'leave' ? 1 : 5));
   readonly progressSteps = computed(() => Array.from({ length: this.totalSteps() }, (_, i) => i));
 
   /** Step labels for the horizontal stepper (reference "Add new dataset" style) */
   readonly stepLabels = computed(() => {
     if (this.setupType() === 'leave') {
-      return ['Type selection', 'Mark Leave'];
+      return ['Mark Leave'];
     }
     return [
       'Type selection',
@@ -120,7 +125,44 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
       'Advanced settings',
       'Review & confirm'
     ];
+
+
   });
+  showBreakForm = false;
+
+  breakForm = this.fb.group({
+    label: this.fb.control<string>('Break'),
+    startTime: this.fb.control<string>('', Validators.required),
+    endTime: this.fb.control<string>('', Validators.required)
+  });
+  openBreakForm(): void {
+    this.showBreakForm = true;
+    this.breakForm.reset({
+      label: '',
+      startTime: '',
+      endTime: ''
+    });
+  }
+  saveBreak(): void {
+    if (this.breakForm.invalid) return;
+
+    this.breaksArray.push(
+      this.fb.group({
+        label: this.breakForm.value.label,
+        startTime: this.breakForm.value.startTime,
+        endTime: this.breakForm.value.endTime
+      })
+
+    );
+
+    this.showBreakForm = false;
+    console.log(this.breaksArray.value);
+
+  }
+  cancelBreak(): void {
+    this.showBreakForm = false;
+  }
+
 
   /** Current step index (1-based) for "Step X of Y" and stepper state; kept in sync in updateFooterFromStep */
   readonly currentStepIndex = signal(1);
@@ -199,19 +241,52 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
   readonly bufferOptions = [0, 5, 10, 15, 20, 30];
 
   readonly overview = computed(() => {
+
+
     const setupType = this.setupType();
     const schedulingType = this.schedulingType();
+
+
     const start = this.step3.value.startTime || '';
     const end = this.step3.value.endTime || '';
+
+    this.step3Changes();
+    this.step4Changes();
+
     const slotDuration = Number(this.step4.value.slotDurationMinutes ?? 0);
     const maxPerSlot = Number(this.step4.value.maxAppointmentsPerSlot ?? 1);
+    const bufferMinutes = Number(this.step4.value.bufferMinutes ?? 0);
+    const emergency = !!this.step4.value.emergencyPriority;
 
     const shiftMinutes = this.diffMinutes(start, end);
+
     const breaks = this.breaksArray.value ?? [];
-    const breakMinutes = (breaks as any[]).reduce((acc, b) => acc + this.diffMinutes(b?.startTime, b?.endTime), 0);
+    const breakMinutes = (breaks as any[]).reduce(
+      (acc, b) => acc + this.diffMinutes(b?.startTime, b?.endTime),
+      0
+    );
+
     const netMinutes = Math.max(0, shiftMinutes - breakMinutes);
 
-    const slotsPerDay = schedulingType === 'slots' && slotDuration > 0 ? Math.floor(netMinutes / slotDuration) : null;
+    let effectiveSlot = 0;
+    let slotsPerDay: number | null = null;
+
+    // ✅ Only for fixed slots
+    if (schedulingType === 'slots' && slotDuration > 0) {
+
+      // Slot + buffer
+      effectiveSlot = slotDuration + bufferMinutes;
+
+      if (effectiveSlot > 0) {
+        slotsPerDay = Math.floor(netMinutes / effectiveSlot);
+      }
+
+      // Emergency reserve (reduce 1 slot)
+      if (emergency && slotsPerDay && slotsPerDay > 0) {
+        slotsPerDay = slotsPerDay - 1;
+      }
+    }
+
     const estimatedAppointments =
       schedulingType === 'slots' && slotsPerDay !== null
         ? Math.max(0, slotsPerDay) * Math.max(1, maxPerSlot)
@@ -227,13 +302,30 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
     };
   });
 
+
+
+
   get breaksArray(): FormArray {
     return this.step3.get('breaks') as FormArray;
   }
+  readonly step3Changes!: Signal<any>;
+  readonly step4Changes!: Signal<any>
 
   constructor() {
+    this.step3Changes = toSignal(
+      this.step3.valueChanges.pipe(startWith(this.step3.value))
+    );
+    this.step4Changes = toSignal(
+      this.step4.valueChanges.pipe(startWith(this.step4.value))
+    );
+    // this.step1.patchValue({
+    //   setupType: 'base'
+    // });
+    console.log("Step1 full value:", this.step1.value);
+
+
     this.step3.patchValue({ startTime: '09:00', endTime: '17:00' });
-    this.addBreak({ label: 'Lunch Break', startTime: '12:30', endTime: '13:30' });
+    // this.addBreak({ label: 'Lunch Break', startTime: '12:30', endTime: '13:30' });
   }
 
   ngAfterViewInit(): void {
@@ -375,6 +467,7 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
   // ---- UI helpers ----
 
   setSetupType(t: SetupType): void {
+    console.log("clicked", t)
     this.step1.patchValue({ setupType: t });
     this.apiError.set(null);
     this.applyStep3Validators(t);
@@ -406,31 +499,61 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
   };
 
   private applyStep3Validators(t: SetupType): void {
-    const setReq = (name: string, required: boolean) => {
-      const c = this.step3.get(name);
-      if (!c) return;
-      c.setValidators(required ? [Validators.required] : []);
-      c.updateValueAndValidity({ emitEvent: false });
-    };
 
-    // Reset required flags
-    setReq('startTime', t !== 'leave');
-    setReq('endTime', t !== 'leave');
-    setReq('weekdays', t === 'weekly');
-    setReq('date', t === 'override');
-    setReq('leaveStart', t === 'leave');
-    setReq('leaveEnd', t === 'leave');
+    const startTime = this.step3.get('startTime');
+    const endTime = this.step3.get('endTime');
+    const weekdays = this.step3.get('weekdays');
+    const date = this.step3.get('date');
+    const leaveStart = this.step3.get('leaveStart');
+    const leaveEnd = this.step3.get('leaveEnd');
 
-    if (t === 'leave') {
-      this.step3.addValidators(this.leaveDateRangeValidator);
+    // ✅ START / END TIME
+    if (t !== 'leave') {
+      startTime?.setValidators([Validators.required]);
+      endTime?.setValidators([Validators.required]);
     } else {
-      this.step3.removeValidators(this.leaveDateRangeValidator);
+      startTime?.clearValidators();
+      endTime?.clearValidators();
+      startTime?.setErrors(null);
+      endTime?.setErrors(null);
     }
-    this.step3.updateValueAndValidity({ emitEvent: false });
+
+    // ✅ WEEKLY
+    if (t === 'weekly') {
+      weekdays?.setValidators([Validators.required]);
+    } else {
+      weekdays?.clearValidators();
+      weekdays?.setErrors(null);
+      weekdays?.markAsPristine();
+      weekdays?.markAsUntouched();
+    }
+
+    // ✅ OVERRIDE
+    if (t === 'override') {
+      date?.setValidators([Validators.required]);
+    } else {
+      date?.clearValidators();
+      date?.setErrors(null);
+    }
+
+    // ✅ LEAVE
+    if (t === 'leave') {
+      leaveStart?.setValidators([Validators.required]);
+      leaveEnd?.setValidators([Validators.required]);
+    } else {
+      leaveStart?.clearValidators();
+      leaveEnd?.clearValidators();
+      leaveStart?.setErrors(null);
+      leaveEnd?.setErrors(null);
+    }
+
+    this.step3.updateValueAndValidity();
   }
 
+
+
   toggleWeekday(day: Weekday): void {
-    const current = new Set(this.step3.value.weekdays ?? []);
+    const current = new Set(this.step3.value.weekdays || []);
     if (current.has(day)) current.delete(day);
     else current.add(day);
     this.step3.patchValue({ weekdays: Array.from(current) });
@@ -465,36 +588,51 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
   }
 
   canFinish(): boolean {
-    const setupType = this.setupType();
+
+    const setupType = this.step1.get('setupType')?.value;
+    const schedulingType = this.step2.get('schedulingType')?.value;
+
+    const startTime = this.step3.get('startTime')?.value;
+    const endTime = this.step3.get('endTime')?.value;
+
     if (!setupType) return false;
+    if (!schedulingType) return false;
 
     if (setupType === 'leave') {
-      const a = this.step3.value.leaveStart;
-      const b = this.step3.value.leaveEnd;
-      if (!a || !b) return false;
-      return a.getTime() <= b.getTime();
+      const a = this.step3.get('leaveStart')?.value;
+      const b = this.step3.get('leaveEnd')?.value;
+      return !!a && !!b && a <= b;
     }
 
-    if (!this.step3.value.startTime || !this.step3.value.endTime) return false;
+    // For base / weekly / override
+    if (!startTime || !endTime) return false;
 
-    if (setupType === 'weekly') return (this.step3.value.weekdays?.length ?? 0) > 0;
-    if (setupType === 'override') return !!this.step3.value.date;
+    if (setupType === 'weekly') {
+      const days = this.step3.get('weekdays')?.value;
+      return !!days && days.length > 0;
+    }
+
+    if (setupType === 'override') {
+      return !!this.step3.get('date')?.value;
+    }
+
     return true;
   }
 
+
+
   getSetupTypeLabel(): string {
-    switch (this.setupType()) {
-      case 'base':
-        return 'Daily routine (base availability)';
-      case 'weekly':
-        return 'Weekly schedule';
-      case 'override':
-        return 'One special day (date override)';
-      case 'leave':
-        return 'Leave & absences';
-      default:
-        return '—';
+
+    const type = this.step1.get('setupType')?.value;
+
+    switch (type) {
+      case 'base': return 'Daily routine (base availability)';
+      case 'weekly': return 'Weekly schedule';
+      case 'override': return 'One special day (date override)';
+      case 'leave': return 'Leave & absences';
+      default: return '';
     }
+
   }
 
   getHoursLabel(): string {
@@ -580,9 +718,13 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
         startTime: this.step3.value.startTime!,
         endTime: this.step3.value.endTime!,
         breaks: this.serializeBreaks(),
-        schedulingType,
-        slotDurationMinutes: schedulingType === 'slots' ? Number(this.step4.value.slotDurationMinutes ?? 0) : undefined,
-        maxAppointmentsPerSlot: schedulingType === 'slots' ? Number(this.step4.value.maxAppointmentsPerSlot ?? 1) : undefined,
+        schedulingType: schedulingType,
+        slotDurationMinutes: schedulingType === 'slots'
+          ? Number(this.step4.value.slotDurationMinutes ?? 0)
+          : undefined,
+        maxAppointmentsPerSlot: schedulingType === 'slots'
+          ? Number(this.step4.value.maxAppointmentsPerSlot ?? 1)
+          : undefined,
         bufferTimeSeconds: Number(this.step4.value.bufferMinutes ?? 0) * 60,
         notes: notesFinal || undefined
       };
@@ -709,4 +851,3 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
     return h * 60 + m;
   }
 }
-

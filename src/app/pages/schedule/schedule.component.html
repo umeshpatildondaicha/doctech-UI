@@ -2,111 +2,89 @@
   <div class="schedule-page schedule-container" page-body>
 
     <!-- Schedule | Timings (core app-tabs) -->
-    <app-tabs
-      [selectedIndex]="scheduleTabIndex"
-      (selectedIndexChange)="onScheduleTabChange($event)"
+    <app-tabs [selectedIndex]="scheduleTabIndex" (selectedIndexChange)="onScheduleTabChange($event)"
       class="schedule-page-tabs">
       <app-tab label="Schedule">
-    <section class="schedule-section" aria-label="Appointments">
-      <!-- Select day (core app-card) -->
-      <app-card class="sched-days-card" [dense]="true" [divider]="true" title="Select day" [subtitle]="'Next ' + scheduleWindowDays + ' days'">
-        <div class="day-strip" role="list" aria-label="Select day for appointments">
-          @for (d of scheduleWeekStrip; track d.date.getTime()) {
-            <button
-              type="button"
-              class="day-cell"
-              [class.day-cell--active]="d.isSelected"
-              [class.day-cell--today]="isToday(d.date)"
-              (click)="selectScheduleDate(d.date)">
-              <span class="day-cell-weekday">{{ isToday(d.date) ? 'Today' : d.weekdayShort }}</span>
-              <span class="day-cell-date">{{ d.monthShort }} {{ d.dayNumber }}</span>
-            </button>
-          }
-        </div>
-      </app-card>
-
-      <!-- Appointments list: entity-toolbar + Book appointment -->
-      <app-card class="sched-list-card" [divider]="true" [dense]="false">
-        <div class="sched-list-header">
-          <app-entity-toolbar
-            [title]="''"
-            [subtitle]="''"
-            [showCounts]="false"
-            [newLabel]="'Book appointment'"
-            [showRefresh]="false"
-            [showFilter]="false"
-            [searchPlaceholder]="'Search appointments...'"
-            (newClick)="createAppointment()">
-          </app-entity-toolbar>
-        </div>
-        <div class="sched-list-body">
-          @if (scheduleApiError) {
-            <div class="sched-empty">
-              <p class="empty-title">Failed to load schedule</p>
-              <p class="empty-sub">{{ scheduleApiError }}</p>
+        <section class="schedule-section" aria-label="Appointments">
+          <!-- Select day (core app-card) -->
+          <app-card class="sched-days-card" [dense]="true" [divider]="true" title="Select day"
+            [subtitle]="'Next ' + scheduleWindowDays + ' days'">
+            <div class="day-strip" role="list" aria-label="Select day for appointments">
+              @for (d of scheduleWeekStrip; track d.date.getTime()) {
+              <button type="button" class="day-cell" [class.day-cell--active]="d.isSelected"
+                [class.day-cell--today]="isToday(d.date)" (click)="selectScheduleDate(d.date)">
+                <span class="day-cell-weekday">{{ isToday(d.date) ? 'Today' : d.weekdayShort }}</span>
+                <span class="day-cell-date">{{ d.monthShort }} {{ d.dayNumber }}</span>
+              </button>
+              }
             </div>
-          } @else {
-          <!-- Overview: core admin-stats-card (same as doctor dashboard) -->
+          </app-card>
 
-            <app-admin-stats-card
-              [stats]="overviewStatsCards"
-              [showTrends]="false">
-            </app-admin-stats-card>
-            @if (!isSlotBasedScheduling()) {
-            <div class="sched-availability">
-              <div class="avail-left">
-                <div class="avail-title">Daily capacity</div>
-                <div class="avail-sub">
-                  {{ scheduleAvailability.remainingToday ?? 0 }} remaining
-                  <span class="dot-sep">•</span>
-                  {{ (scheduleAvailability.bookedToday ?? 0) }}/{{ (scheduleAvailability.maxPerDay ?? 0) }} booked
+          <!-- Appointments list: entity-toolbar + Book appointment -->
+          <app-card class="sched-list-card" [divider]="true" [dense]="false">
+            <div class="sched-list-header">
+              <app-entity-toolbar [title]="''" [subtitle]="''" [showCounts]="false" [newLabel]="'Book appointment'"
+                [showRefresh]="false" [showFilter]="false" [searchPlaceholder]="'Search appointments...'"
+                (newClick)="createAppointment()">
+              </app-entity-toolbar>
+            </div>
+            <div class="sched-list-body">
+              @if (scheduleApiError) {
+              <div class="sched-empty">
+                <p class="empty-title">Failed to load schedule</p>
+                <p class="empty-sub">{{ scheduleApiError }}</p>
+              </div>
+              } @else {
+              <!-- Overview: core admin-stats-card (same as doctor dashboard) -->
+
+              <app-admin-stats-card [stats]="overviewStatsCards" [showTrends]="false">
+              </app-admin-stats-card>
+              @if (!isSlotBasedScheduling()) {
+              <div class="sched-availability">
+                <div class="avail-left">
+                  <div class="avail-title">Daily capacity</div>
+                  <div class="avail-sub">
+                    {{ scheduleAvailability.remainingToday ?? 0 }} remaining
+                    <span class="dot-sep">•</span>
+                    {{ (scheduleAvailability.bookedToday ?? 0) }}/{{ (scheduleAvailability.maxPerDay ?? 0) }} booked
+                  </div>
+                </div>
+                <div class="avail-right">
+                  <span class="cap-pill">{{ scheduleAvailability.remainingToday ?? 0 }} slots left</span>
+                  <app-button type="button" class="cap-add-btn" [text]="'Add patient'"
+                    [disabled]="(scheduleAvailability.remainingToday ?? 0) <= 0" (btnClick)="openNextAvailableSlot()">
+                  </app-button>
                 </div>
               </div>
-              <div class="avail-right">
-                <span class="cap-pill">{{ scheduleAvailability.remainingToday ?? 0 }} slots left</span>
-                <app-button
-                  type="button"
-                  class="cap-add-btn"
-                  [text]="'Add patient'"
-                  
-                  [disabled]="(scheduleAvailability.remainingToday ?? 0) <= 0"
-                  (btnClick)="openNextAvailableSlot()">
-                </app-button>
-              </div>
-            </div>
-            }
+              }
 
 
-          <!-- Available slots (separate section) -->
-          @if (isSlotBasedScheduling()) {
-            <div class="appointments-available-slots">
-              <div class="avail-cards-shell">
-                <div class="avail-cards-head">
-                  <div class="avail-cards-title">Available slots</div>
-                  <div class="avail-cards-sub">{{ scheduleSummary.available }} available</div>
-                </div>
-                @if (getAvailableSlotCards(12).length > 0) {
+              <!-- Available slots (separate section) -->
+              @if (isSlotBasedScheduling()) {
+              <div class="appointments-available-slots">
+                <div class="avail-cards-shell">
+                  <div class="avail-cards-head">
+                    <div class="avail-cards-title">Available slots</div>
+                    <div class="avail-cards-sub">{{ scheduleSummary.available }} available</div>
+                  </div>
+                  @if (getAvailableSlotCards(12).length > 0) {
                   <div class="avail-cards">
                     @for (c of getAvailableSlotCards(12); track c.slotId) {
-                      <button type="button" class="avail-slot-card" (click)="openQuickAddAt(c.start)">
-                        <div class="t">{{ c.startLabel }} – {{ c.endLabel }}</div>
-                        <div class="sub">Tap to add patient</div>
-                      </button>
+                    <button type="button" class="avail-slot-card" (click)="openQuickAddAt(c.start)">
+                      <div class="t">{{ c.startLabel }} – {{ c.endLabel }}</div>
+                      <div class="sub">Tap to add patient</div>
+                    </button>
                     }
                   </div>
-                } @else {
+                  } @else {
                   <div class="avail-empty">No available slots</div>
-                }
+                  }
+                </div>
               </div>
-            </div>
-          }
-          @if (getScheduleListAppointments().length > 0) {
-            @for (appointment of getScheduleListAppointments(); track appointment) {
-              <div
-                class="apt-row"
-                role="button"
-                tabindex="0"
-                (click)="viewAppointment(appointment)"
+              }
+              @if (getScheduleListAppointments().length > 0) {
+              @for (appointment of getScheduleListAppointments(); track appointment) {
+              <div class="apt-row" role="button" tabindex="0" (click)="viewAppointment(appointment)"
                 (keydown.enter)="viewAppointment(appointment)"
                 (keydown.space)="$event.preventDefault(); viewAppointment(appointment)">
                 <div class="apt-left">
@@ -118,7 +96,7 @@
                     <span class="apt-doctor">{{ appointment.doctorName }}</span>
                   </div>
                   @if (appointment.notes) {
-                    <div class="apt-sub">{{ appointment.notes }}</div>
+                  <div class="apt-sub">{{ appointment.notes }}</div>
                   }
                 </div>
                 <div class="apt-right">
@@ -127,312 +105,330 @@
                     {{ appointment.status }}
                   </span>
                   <span class="row-actions" (click)="$event.stopPropagation()">
-                    <app-button type="button" [fontIcon]="'visibility'" title="View" [appearance]="'icon'" (btnClick)="viewAppointment(appointment)"></app-button>
-                    <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'" (btnClick)="editAppointment(appointment)"></app-button>
-                    <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'" (btnClick)="deleteAppointment(appointment)"></app-button>
+                    <app-button type="button" [fontIcon]="'visibility'" title="View" [appearance]="'icon'"
+                      (btnClick)="viewAppointment(appointment)"></app-button>
+                    <app-button type="button" [fontIcon]="'edit'" title="Edit" [appearance]="'icon'"
+                      (btnClick)="editAppointment(appointment)"></app-button>
+                    <app-button type="button" [fontIcon]="'delete'" title="Delete" [appearance]="'icon'"
+                      (btnClick)="deleteAppointment(appointment)"></app-button>
                   </span>
                 </div>
               </div>
-            }
-          } @else {
-            <div class="sched-empty">
-              <div class="empty-ico" aria-hidden="true"><app-icon fontIcon="event_available" [size]="48"></app-icon></div>
-              <p class="empty-title">
-                @if (scheduleApiLoading) { Loading schedule... } @else { No booked appointments for this day }
-              </p>
-              <p class="empty-sub">
-                @if (!scheduleApiLoading) {
+              }
+              } @else {
+              <div class="sched-empty">
+                <div class="empty-ico" aria-hidden="true"><app-icon fontIcon="event_available" [size]="48"></app-icon>
+                </div>
+                <p class="empty-title">
+                  @if (scheduleApiLoading) { Loading schedule... } @else { No booked appointments for this day }
+                </p>
+                <p class="empty-sub">
+                  @if (!scheduleApiLoading) {
                   {{ scheduleSummary.available }} slot(s) available. Select another date or create a new appointment.
-                }
-              </p>
+                  }
+                </p>
+              </div>
+              }
+              }
             </div>
+          </app-card>
+          <!-- Settings Dialog -->
+          @if (showSettings) {
+          <div class="settings-overlay" (click)="toggleSettings()">
+            <div class="settings-dialog" (click)="$event.stopPropagation()">
+              <div class="dialog-header">
+                <h3>Schedule Settings</h3>
+                <app-icon fontIcon="close" (iconClick)="toggleSettings()"></app-icon>
+              </div>
+              <div class="dialog-content">
+                <div class="setting-group">
+                  <h4>General Settings</h4>
+                  <div class="setting-item">
+                    <label>Buffer Time (minutes)</label>
+                    <input type="number" [(ngModel)]="scheduleSettings.bufferTime" min="0" max="60">
+                  </div>
+                  <div class="setting-item">
+                    <label>Max Appointments Per Day</label>
+                    <input type="number" [(ngModel)]="scheduleSettings.maxAppointmentsPerDay" min="1" max="100">
+                  </div>
+                </div>
+                <div class="setting-group">
+                  <h4>Automation</h4>
+                  <div class="setting-item">
+                    <label>Auto Confirm Appointments</label>
+                    <mat-slide-toggle [(ngModel)]="scheduleSettings.autoConfirmAppointments"></mat-slide-toggle>
+                  </div>
+                  <div class="setting-item">
+                    <label>Send Reminders</label>
+                    <mat-slide-toggle [(ngModel)]="scheduleSettings.sendReminders"></mat-slide-toggle>
+                  </div>
+                </div>
+              </div>
+              <div class="dialog-footer">
+                <app-button appearance="basic" (btnClick)="toggleSettings()">Cancel</app-button>
+                <app-button appearance="raised" (btnClick)="updateScheduleSettings()">Save Settings</app-button>
+              </div>
+            </div>
+          </div>
           }
-          }
-        </div>
-      </app-card>
-      <!-- Settings Dialog -->
-    @if (showSettings) {
-      <div class="settings-overlay" (click)="toggleSettings()">
-        <div class="settings-dialog" (click)="$event.stopPropagation()">
-          <div class="dialog-header">
-            <h3>Schedule Settings</h3>
-            <app-icon fontIcon="close" (iconClick)="toggleSettings()"></app-icon>
-          </div>
-          <div class="dialog-content">
-            <div class="setting-group">
-              <h4>General Settings</h4>
-              <div class="setting-item">
-                <label>Buffer Time (minutes)</label>
-                <input type="number" [(ngModel)]="scheduleSettings.bufferTime" min="0" max="60">
-              </div>
-              <div class="setting-item">
-                <label>Max Appointments Per Day</label>
-                <input type="number" [(ngModel)]="scheduleSettings.maxAppointmentsPerDay" min="1" max="100">
-              </div>
-            </div>
-            <div class="setting-group">
-              <h4>Automation</h4>
-              <div class="setting-item">
-                <label>Auto Confirm Appointments</label>
-                <mat-slide-toggle [(ngModel)]="scheduleSettings.autoConfirmAppointments"></mat-slide-toggle>
-              </div>
-              <div class="setting-item">
-                <label>Send Reminders</label>
-                <mat-slide-toggle [(ngModel)]="scheduleSettings.sendReminders"></mat-slide-toggle>
-              </div>
-            </div>
-          </div>
-          <div class="dialog-footer">
-            <app-button appearance="basic" (btnClick)="toggleSettings()">Cancel</app-button>
-            <app-button appearance="raised" (btnClick)="updateScheduleSettings()">Save Settings</app-button>
-          </div>
-        </div>
-      </div>
-    }
-    </section>
+        </section>
       </app-tab>
       <app-tab label="Timings">
-    <section class="timings-section" aria-label="Doctor timings and availability">
-      <div class="timings-hero">
-        @if (timingsMode === 'view') {
-          <div class="timings-priority-nav" role="tablist" aria-label="Timing priorities">
-            <button type="button" class="priority-nav-btn" [class.active]="timingsTab === 'p4'" (click)="setTimingsTab('p4')"
-              [matTooltip]="priorityTooltipP4" matTooltipPosition="below">
-              <span class="priority-nav-icon p4"><app-icon fontIcon="today" [size]="18"></app-icon></span>
-              <span class="priority-nav-label">Daily</span>
-              <span class="priority-nav-badge">P4</span>
-            </button>
-            <button type="button" class="priority-nav-btn" [class.active]="timingsTab === 'p3'" (click)="setTimingsTab('p3')"
-              [matTooltip]="priorityTooltipP3" matTooltipPosition="below">
-              <span class="priority-nav-icon p3"><app-icon fontIcon="calendar_view_week" [size]="18"></app-icon></span>
-              <span class="priority-nav-label">Weekly</span>
-              <span class="priority-nav-badge">P3</span>
-            </button>
-            <button type="button" class="priority-nav-btn" [class.active]="timingsTab === 'p2'" (click)="setTimingsTab('p2')"
-              [matTooltip]="priorityTooltipP2" matTooltipPosition="below">
-              <span class="priority-nav-icon p2"><app-icon fontIcon="event" [size]="18"></app-icon></span>
-              <span class="priority-nav-label">Date override</span>
-              <span class="priority-nav-badge">P2</span>
-            </button>
-            <button type="button" class="priority-nav-btn" [class.active]="timingsTab === 'p1'" (click)="setTimingsTab('p1')"
-              [matTooltip]="priorityTooltipP1" matTooltipPosition="below">
-              <span class="priority-nav-icon p1"><app-icon fontIcon="event_busy" [size]="18"></app-icon></span>
-              <span class="priority-nav-label">Leave</span>
-              <span class="priority-nav-badge">P1</span>
-            </button>
+        <section class="timings-section" aria-label="Doctor timings and availability">
+          <div class="timings-hero">
+            @if (timingsMode === 'view') {
+            <div class="timings-priority-nav" role="tablist" aria-label="Timing priorities">
+              <button type="button" class="priority-nav-btn" [class.active]="timingsTab === 'p4'"
+                (click)="setTimingsTab('p4')" [matTooltip]="priorityTooltipP4" matTooltipPosition="below">
+                <span class="priority-nav-icon p4"><app-icon fontIcon="today" [size]="18"></app-icon></span>
+                <span class="priority-nav-label">Daily</span>
+                <span class="priority-nav-badge">P4</span>
+              </button>
+              <button type="button" class="priority-nav-btn" [class.active]="timingsTab === 'p3'"
+                (click)="setTimingsTab('p3')" [matTooltip]="priorityTooltipP3" matTooltipPosition="below">
+                <span class="priority-nav-icon p3"><app-icon fontIcon="calendar_view_week"
+                    [size]="18"></app-icon></span>
+                <span class="priority-nav-label">Weekly</span>
+                <span class="priority-nav-badge">P3</span>
+              </button>
+              <button type="button" class="priority-nav-btn" [class.active]="timingsTab === 'p2'"
+                (click)="setTimingsTab('p2')" [matTooltip]="priorityTooltipP2" matTooltipPosition="below">
+                <span class="priority-nav-icon p2"><app-icon fontIcon="event" [size]="18"></app-icon></span>
+                <span class="priority-nav-label">Date override</span>
+                <span class="priority-nav-badge">P2</span>
+              </button>
+              <button type="button" class="priority-nav-btn" [class.active]="timingsTab === 'p1'"
+                (click)="setTimingsTab('p1')" [matTooltip]="priorityTooltipP1" matTooltipPosition="below">
+                <span class="priority-nav-icon p1"><app-icon fontIcon="event_busy" [size]="18"></app-icon></span>
+                <span class="priority-nav-label">Leave</span>
+                <span class="priority-nav-badge">P1</span>
+              </button>
+            </div>
+            } @else {
+            <div class="timings-manage-hero-title">Configure availability</div>
+            }
+
+            <div class="timings-hero-actions">
+              @if (timingsMode === 'view') {
+              <app-button type="button" class="timings-configure-btn" appearance="raised" [text]="'Configure'"
+                [fontIcon]="'settings'" (btnClick)="setTimingsMode('manage')">
+              </app-button>
+              } @else {
+              <app-button type="button" class="timings-back-btn" appearance="basic" [text]="'Back'"
+                [fontIcon]="'arrow_back'" (btnClick)="setTimingsMode('view')">
+              </app-button>
+              }
+            </div>
           </div>
-        } @else {
-          <div class="timings-manage-hero-title">Configure availability</div>
-        }
 
-        <div class="timings-hero-actions">
           @if (timingsMode === 'view') {
-            <app-button
-              type="button"
-              class="timings-configure-btn"
-              appearance="raised"
-              [text]="'Configure'"
-              [fontIcon]="'settings'"
-              (btnClick)="setTimingsMode('manage')">
-            </app-button>
-          } @else {
-            <app-button
-              type="button"
-              class="timings-back-btn"
-              appearance="basic"
-              [text]="'Back'"
-              [fontIcon]="'arrow_back'"
-              (btnClick)="setTimingsMode('view')">
-            </app-button>
-          }
-        </div>
-      </div>
-
-      @if (timingsMode === 'view') {
-        <div class="timings-view">
-          <div class="timings-view-grid">
+          <div class="timings-view">
+            <div class="timings-view-grid">
               <div class="timings-config-pane">
                 <div class="timings-pane-header">
                   <h4>Shift configuration</h4>
                 </div>
                 @if (timingsTab === 'p4') {
-                  <div class="timings-config-body">
-                    <div class="timings-info-banner">
-                      <app-icon fontIcon="info" [size]="20"></app-icon>
-                      <span>Shift configuration is read-only. Changes are made in Manage mode.</span>
+                <div class="timings-config-body">
+                  <div class="timings-info-banner">
+                    <app-icon fontIcon="info" [size]="20"></app-icon>
+                    <span>Shift configuration is read-only. Changes are made in Manage mode.</span>
+                  </div>
+                  <div class="timings-field-grid">
+                    <div class="timings-field">
+                      <span class="timings-field-label">Start time</span>
+                      <span class="timings-field-value">{{ timingsDaily.start || '—' }}</span>
                     </div>
-                    <div class="timings-field-grid">
-                      <div class="timings-field">
-                        <span class="timings-field-label">Start time</span>
-                        <span class="timings-field-value">{{ timingsDaily.start || '—' }}</span>
-                      </div>
-                      <div class="timings-field">
-                        <span class="timings-field-label">End time</span>
-                        <span class="timings-field-value">{{ timingsDaily.end || '—' }}</span>
-                      </div>
-                      <div class="timings-field timings-field-full">
-                        <span class="timings-field-label">Slot duration</span>
-                        <span class="timings-field-value">{{ timingsDaily.slotDuration ? timingsDaily.slotDuration + ' min' : '—' }}</span>
-                      </div>
+                    <div class="timings-field">
+                      <span class="timings-field-label">End time</span>
+                      <span class="timings-field-value">{{ timingsDaily.end || '—' }}</span>
                     </div>
-                    <div class="timings-block">
-                      <h5 class="timings-block-title">Scheduled breaks</h5>
-                      <div class="timings-break-list">
-                        @for (b of timingsBreaks; track b) {
-                          <div class="timings-break-card">
-                            <span class="timings-break-icon"><app-icon fontIcon="free_breakfast" [size]="20"></app-icon></span>
-                            <div class="timings-break-info">
-                              <span class="timings-break-name">{{ b.label }}</span>
-                              <span class="timings-break-time">{{ b.start }} – {{ b.end }}</span>
-                            </div>
-                          </div>
-                        }
-                      </div>
+                    <div class="timings-field timings-field-full">
+                      <span class="timings-field-label">Slot duration</span>
+                      <span class="timings-field-value">{{ timingsDaily.slotDuration ? timingsDaily.slotDuration + '
+                        min' : '—' }}</span>
                     </div>
-                    <div class="timings-overview-box">
-                      <div class="timings-overview-title">
-                        <app-icon fontIcon="insights" [size]="20"></app-icon>
-                        <span>Daily overview</span>
+                  </div>
+                  <div class="timings-block">
+                    <h5 class="timings-block-title">Scheduled breaks</h5>
+                    <div class="timings-break-list">
+                      @for (b of timingsBreaks; track b) {
+                      <div class="timings-break-card">
+                        <span class="timings-break-icon"><app-icon fontIcon="free_breakfast"
+                            [size]="20"></app-icon></span>
+                        <div class="timings-break-info">
+                          <span class="timings-break-name">{{ b.label }}</span>
+                          <span class="timings-break-time">{{ b.start }} – {{ b.end }}</span>
+                        </div>
                       </div>
-                      <div class="timings-overview-stats">
-                        <div class="timings-overview-stat">
-                          <span class="timings-overview-num">{{ getDailyOverview().totalSlots }}</span>
-                          <span class="timings-overview-tag">Total slots</span>
-                        </div>
-                        <div class="timings-overview-stat">
-                          <span class="timings-overview-num">{{ getDailyOverview().first }}</span>
-                          <span class="timings-overview-tag">First appt</span>
-                        </div>
-                        <div class="timings-overview-stat">
-                          <span class="timings-overview-num">{{ getDailyOverview().last }}</span>
-                          <span class="timings-overview-tag">Last appt</span>
-                        </div>
+                      }
+                    </div>
+                  </div>
+                  <div class="timings-overview-box">
+                    <div class="timings-overview-title">
+                      <app-icon fontIcon="insights" [size]="20"></app-icon>
+                      <span>Daily overview</span>
+                    </div>
+                    <div class="timings-overview-stats">
+                      <div class="timings-overview-stat">
+                        <span class="timings-overview-num">{{ getDailyOverview().totalSlots }}</span>
+                        <span class="timings-overview-tag">Total slots</span>
+                      </div>
+                      <div class="timings-overview-stat">
+                        <span class="timings-overview-num">{{ getDailyOverview().first }}</span>
+                        <span class="timings-overview-tag">First appt</span>
+                      </div>
+                      <div class="timings-overview-stat">
+                        <span class="timings-overview-num">{{ getDailyOverview().last }}</span>
+                        <span class="timings-overview-tag">Last appt</span>
                       </div>
                     </div>
                   </div>
+                </div>
                 }
                 @if (timingsTab === 'p3') {
-                  <div class="timings-config-body">
-                    <div class="timings-info-banner">Weekly rules apply on the same weekday every week. View-only.</div>
-                    @if (getWeeklyDaysWithRules().length > 0) {
-                      <div class="timings-selector-layout">
-                        <ul class="timings-day-list">
-                          @for (day of getWeeklyDaysWithRules(); track day) {
-                            <li>
-                              <button type="button" class="timings-day-btn" [class.active]="day === selectedWeeklyDay" (click)="selectWeeklyDay(day)">
-                                {{ day }} · {{ timingsWeeklyRules[day]?.start || '—' }} – {{ timingsWeeklyRules[day]?.end || '—' }} ({{ timingsWeeklyRules[day]?.breaks?.length || 0 }} breaks)
-                              </button>
-                            </li>
-                          }
-                        </ul>
-                        @if (getSelectedWeeklyRule(); as sr) {
-                          <div class="timings-detail-card">
-                            <div class="timings-detail-header">
-                              <span class="timings-day-pill">{{ selectedWeeklyDay }}</span>
-                              <span class="timings-detail-muted">Weekly schedule</span>
-                            </div>
-                            <div class="timings-field-grid">
-                              <div class="timings-field"><span class="timings-field-label">Start</span><span class="timings-field-value">{{ sr.start || '—' }}</span></div>
-                              <div class="timings-field"><span class="timings-field-label">End</span><span class="timings-field-value">{{ sr.end || '—' }}</span></div>
-                              <div class="timings-field timings-field-full"><span class="timings-field-label">Breaks</span><span class="timings-field-value">{{ sr.breaks.length }}</span></div>
-                            </div>
-                            @if (sr.breaks.length > 0) {
-                              <div class="timings-break-chips">
-                                @for (b of sr.breaks; track b) {
-                                  <span class="timings-break-chip">{{ b.label }} · {{ b.start }}-{{ b.end }}</span>
-                                }
-                              </div>
-                            } @else {
-                              <p class="timings-empty-msg">No breaks configured.</p>
-                            }
-                            @if (getWeeklyOverview(selectedWeeklyDay); as wov) {
-                              <div class="timings-overview-box timings-overview-box-sm">
-                                <div class="timings-overview-title"><app-icon fontIcon="insights" [size]="18"></app-icon><span>Overview</span></div>
-                                <div class="timings-overview-stats">
-                                  <div class="timings-overview-stat"><span class="timings-overview-num">{{ wov.totalSlots }}</span><span class="timings-overview-tag">Slots</span></div>
-                                  <div class="timings-overview-stat"><span class="timings-overview-num">{{ wov.first }}</span><span class="timings-overview-tag">First</span></div>
-                                  <div class="timings-overview-stat"><span class="timings-overview-num">{{ wov.last }}</span><span class="timings-overview-tag">Last</span></div>
-                                </div>
-                              </div>
-                            }
-                          </div>
+                <div class="timings-config-body">
+                  <div class="timings-info-banner">Weekly rules apply on the same weekday every week. View-only.</div>
+                  @if (getWeeklyDaysWithRules().length > 0) {
+                  <div class="timings-selector-layout">
+                    <ul class="timings-day-list">
+                      @for (day of getWeeklyDaysWithRules(); track day) {
+                      <li>
+                        <button type="button" class="timings-day-btn" [class.active]="day === selectedWeeklyDay"
+                          (click)="selectWeeklyDay(day)">
+                          {{ day }} · {{ timingsWeeklyRules[day]?.start || '—' }} – {{ timingsWeeklyRules[day]?.end ||
+                          '—' }} ({{ timingsWeeklyRules[day]?.breaks?.length || 0 }} breaks)
+                        </button>
+                      </li>
+                      }
+                    </ul>
+                    @if (getSelectedWeeklyRule(); as sr) {
+                    <div class="timings-detail-card">
+                      <div class="timings-detail-header">
+                        <span class="timings-day-pill">{{ selectedWeeklyDay }}</span>
+                        <span class="timings-detail-muted">Weekly schedule</span>
+                      </div>
+                      <div class="timings-field-grid">
+                        <div class="timings-field"><span class="timings-field-label">Start</span><span
+                            class="timings-field-value">{{ sr.start || '—' }}</span></div>
+                        <div class="timings-field"><span class="timings-field-label">End</span><span
+                            class="timings-field-value">{{ sr.end || '—' }}</span></div>
+                        <div class="timings-field timings-field-full"><span
+                            class="timings-field-label">Breaks</span><span class="timings-field-value">{{
+                            sr.breaks.length }}</span></div>
+                      </div>
+                      @if (sr.breaks.length > 0) {
+                      <div class="timings-break-chips">
+                        @for (b of sr.breaks; track b) {
+                        <span class="timings-break-chip">{{ b.label }} · {{ b.start }}-{{ b.end }}</span>
                         }
                       </div>
-                    } @else {
-                      <p class="timings-empty-msg">No weekly rules configured.</p>
+                      } @else {
+                      <p class="timings-empty-msg">No breaks configured.</p>
+                      }
+                      @if (getWeeklyOverview(selectedWeeklyDay); as wov) {
+                      <div class="timings-overview-box timings-overview-box-sm">
+                        <div class="timings-overview-title"><app-icon fontIcon="insights"
+                            [size]="18"></app-icon><span>Overview</span></div>
+                        <div class="timings-overview-stats">
+                          <div class="timings-overview-stat"><span class="timings-overview-num">{{ wov.totalSlots
+                              }}</span><span class="timings-overview-tag">Slots</span></div>
+                          <div class="timings-overview-stat"><span class="timings-overview-num">{{ wov.first
+                              }}</span><span class="timings-overview-tag">First</span></div>
+                          <div class="timings-overview-stat"><span class="timings-overview-num">{{ wov.last
+                              }}</span><span class="timings-overview-tag">Last</span></div>
+                        </div>
+                      </div>
+                      }
+                    </div>
                     }
                   </div>
+                  } @else {
+                  <p class="timings-empty-msg">No weekly rules configured.</p>
+                  }
+                </div>
                 }
                 @if (timingsTab === 'p2') {
-                  <div class="timings-config-body">
-                    <div class="timings-info-banner">Date overrides apply on a specific date. View-only.</div>
-                    @if (timingsOverrides.length > 0) {
-                      <div class="timings-selector-layout">
-                        <ul class="timings-day-list">
-                          @for (o of timingsOverrides; track o) {
-                            <li>
-                              <button type="button" class="timings-day-btn" [class.active]="o.date === selectedOverrideDate" (click)="selectOverrideDate(o.date)">
-                                {{ o.date }} · {{ o.start }} – {{ o.end }} ({{ o.breaks.length }} breaks)
-                              </button>
-                            </li>
-                          }
-                        </ul>
-                        @if (getSelectedOverride(); as so) {
-                          <div class="timings-detail-card">
-                            <div class="timings-detail-header">
-                              <span class="timings-day-pill">{{ so.date }}</span>
-                              <span class="timings-detail-muted">Date override</span>
-                            </div>
-                            <div class="timings-field-grid">
-                              <div class="timings-field"><span class="timings-field-label">Start</span><span class="timings-field-value">{{ so.start || '—' }}</span></div>
-                              <div class="timings-field"><span class="timings-field-label">End</span><span class="timings-field-value">{{ so.end || '—' }}</span></div>
-                              <div class="timings-field timings-field-full"><span class="timings-field-label">Breaks</span><span class="timings-field-value">{{ so.breaks.length }}</span></div>
-                            </div>
-                            @if (so.breaks.length > 0) {
-                              <div class="timings-break-chips">
-                                @for (b of so.breaks; track b) {
-                                  <span class="timings-break-chip">{{ b.label }} · {{ b.start }}-{{ b.end }}</span>
-                                }
-                              </div>
-                            } @else {
-                              <p class="timings-empty-msg">No breaks configured.</p>
-                            }
-                            @if (getOverrideOverview(so); as dov) {
-                              <div class="timings-overview-box timings-overview-box-sm">
-                                <div class="timings-overview-title"><app-icon fontIcon="insights" [size]="18"></app-icon><span>Overview</span></div>
-                                <div class="timings-overview-stats">
-                                  <div class="timings-overview-stat"><span class="timings-overview-num">{{ dov.totalSlots }}</span><span class="timings-overview-tag">Slots</span></div>
-                                  <div class="timings-overview-stat"><span class="timings-overview-num">{{ dov.first }}</span><span class="timings-overview-tag">First</span></div>
-                                  <div class="timings-overview-stat"><span class="timings-overview-num">{{ dov.last }}</span><span class="timings-overview-tag">Last</span></div>
-                                </div>
-                              </div>
-                            }
-                          </div>
-                        } @else {
-                          <div class="timings-detail-card"><p class="timings-empty-msg">Select a date to view details.</p></div>
+                <div class="timings-config-body">
+                  <div class="timings-info-banner">Date overrides apply on a specific date. View-only.</div>
+                  @if (timingsOverrides.length > 0) {
+                  <div class="timings-selector-layout">
+                    <ul class="timings-day-list">
+                      @for (o of timingsOverrides; track o) {
+                      <li>
+                        <button type="button" class="timings-day-btn" [class.active]="o.date === selectedOverrideDate"
+                          (click)="selectOverrideDate(o.date)">
+                          {{ o.date }} · {{ o.start }} – {{ o.end }} ({{ o.breaks.length }} breaks)
+                        </button>
+                      </li>
+                      }
+                    </ul>
+                    @if (getSelectedOverride(); as so) {
+                    <div class="timings-detail-card">
+                      <div class="timings-detail-header">
+                        <span class="timings-day-pill">{{ so.date }}</span>
+                        <span class="timings-detail-muted">Date override</span>
+                      </div>
+                      <div class="timings-field-grid">
+                        <div class="timings-field"><span class="timings-field-label">Start</span><span
+                            class="timings-field-value">{{ so.start || '—' }}</span></div>
+                        <div class="timings-field"><span class="timings-field-label">End</span><span
+                            class="timings-field-value">{{ so.end || '—' }}</span></div>
+                        <div class="timings-field timings-field-full"><span
+                            class="timings-field-label">Breaks</span><span class="timings-field-value">{{
+                            so.breaks.length }}</span></div>
+                      </div>
+                      @if (so.breaks.length > 0) {
+                      <div class="timings-break-chips">
+                        @for (b of so.breaks; track b) {
+                        <span class="timings-break-chip">{{ b.label }} · {{ b.start }}-{{ b.end }}</span>
                         }
                       </div>
+                      } @else {
+                      <p class="timings-empty-msg">No breaks configured.</p>
+                      }
+                      @if (getOverrideOverview(so); as dov) {
+                      <div class="timings-overview-box timings-overview-box-sm">
+                        <div class="timings-overview-title"><app-icon fontIcon="insights"
+                            [size]="18"></app-icon><span>Overview</span></div>
+                        <div class="timings-overview-stats">
+                          <div class="timings-overview-stat"><span class="timings-overview-num">{{ dov.totalSlots
+                              }}</span><span class="timings-overview-tag">Slots</span></div>
+                          <div class="timings-overview-stat"><span class="timings-overview-num">{{ dov.first
+                              }}</span><span class="timings-overview-tag">First</span></div>
+                          <div class="timings-overview-stat"><span class="timings-overview-num">{{ dov.last
+                              }}</span><span class="timings-overview-tag">Last</span></div>
+                        </div>
+                      </div>
+                      }
+                    </div>
                     } @else {
-                      <p class="timings-empty-msg">No date overrides added yet.</p>
+                    <div class="timings-detail-card">
+                      <p class="timings-empty-msg">Select a date to view details.</p>
+                    </div>
                     }
                   </div>
+                  } @else {
+                  <p class="timings-empty-msg">No date overrides added yet.</p>
+                  }
+                </div>
                 }
                 @if (timingsTab === 'p1') {
-                  <div class="timings-config-body">
-                    <div class="timings-info-banner">Leave blocks availability (highest priority). View-only.</div>
-                    @if (timingsLeaveDates.length > 0) {
-                      <div class="timings-leave-list">
-                        @for (d of timingsLeaveDates; track d) {
-                          <div class="timings-leave-card">
-                            <span class="timings-day-pill">{{ d }}</span>
-                            <span class="timings-detail-muted">Full day leave</span>
-                          </div>
-                        }
-                      </div>
-                    } @else {
-                      <p class="timings-empty-msg">No leave dates added yet.</p>
+                <div class="timings-config-body">
+                  <div class="timings-info-banner">Leave blocks availability (highest priority). View-only.</div>
+                  @if (timingsLeaveDates.length > 0) {
+                  <div class="timings-leave-list">
+                    @for (d of timingsLeaveDates; track d) {
+                    <div class="timings-leave-card">
+                      <span class="timings-day-pill">{{ d }}</span>
+                      <span class="timings-detail-muted">Full day leave</span>
+                    </div>
                     }
                   </div>
+                  } @else {
+                  <p class="timings-empty-msg">No leave dates added yet.</p>
+                  }
+                </div>
                 }
               </div>
 
@@ -443,232 +439,247 @@
                 </div>
                 <div class="timings-forecast-list">
                   @for (f of filteredTimingsForecast; track f) {
-                    <div class="timings-forecast-row">
-                      <div class="timings-forecast-date">
-                        <span class="timings-forecast-month">{{ getForecastDateParts(f.date).month }}</span>
-                        <span class="timings-forecast-day">{{ getForecastDateParts(f.date).day }}</span>
-                      </div>
-                      <div class="timings-forecast-weekday">{{ getForecastDateParts(f.date).weekday }}</div>
-                      <span class="timings-forecast-pill" [class.p4]="f.priority==='p4'" [class.p3]="f.priority==='p3'" [class.p2]="f.priority==='p2'" [class.p1]="f.priority==='p1'">{{ f.label }}</span>
+                  <div class="timings-forecast-row">
+                    <div class="timings-forecast-date">
+                      <span class="timings-forecast-month">{{ getForecastDateParts(f.date).month }}</span>
+                      <span class="timings-forecast-day">{{ getForecastDateParts(f.date).day }}</span>
                     </div>
+                    <div class="timings-forecast-weekday">{{ getForecastDateParts(f.date).weekday }}</div>
+                    <span class="timings-forecast-pill" [class.p4]="f.priority==='p4'" [class.p3]="f.priority==='p3'"
+                      [class.p2]="f.priority==='p2'" [class.p1]="f.priority==='p1'">{{ f.label }}</span>
+                  </div>
                   }
                 </div>
               </div>
             </div>
           </div>
-        }
-        <!-- This Week Schedule (view-only) -->
-        @if (timingsMode === 'view') {
+          }
+          <!-- This Week Schedule (view-only) -->
+          @if (timingsMode === 'view') {
           <div class="week-schedule-card">
             <div class="week-row" aria-label="This week schedule">
               @for (d of thisWeekScheduleCards; track d) {
-                <div class="week-day" [class.empty]="!d.hasSchedule">
-                  <div class="day-top">
-                    <div class="day-top-left">
-                      <div class="day-title">{{ d.weekday }}</div>
-                      <div class="day-sub" [class.is-today]="d.isToday">{{ d.dateLabel }}</div>
-                    </div>
-                    @if (d.hasSchedule) {
-                      <span class="day-pill">Fixed</span>
-                    }
+              <div class="week-day" [class.empty]="!d.hasSchedule">
+                <div class="day-top">
+                  <div class="day-top-left">
+                    <div class="day-title">{{ d.weekday }}</div>
+                    <div class="day-sub" [class.is-today]="d.isToday">{{ d.dateLabel }}</div>
                   </div>
-                  <div class="day-divider"></div>
                   @if (d.hasSchedule) {
-                    <div class="day-body">
-                      <div class="info-row">
-                        <app-icon fontIcon="schedule" [size]="22"></app-icon>
-                        <span class="info-text strong">{{ d.start }} - {{ d.end }}</span>
-                      </div>
-                      <div class="info-row">
-                        <app-icon fontIcon="calendar_month" [size]="22"></app-icon>
-                        <span class="info-text muted">{{ d.patternLabel }}</span>
-                      </div>
-                      <div class="day-table">
-                        <div class="tr">
-                          <div class="k">Duration</div>
-                          <div class="v">{{ d.durationMin }} min</div>
-                        </div>
-                        <div class="tr">
-                          <div class="k">Slot</div>
-                          <div class="v">{{ d.totalSlots }} Total</div>
-                        </div>
-                      </div>
-                    </div>
-                    <app-button type="button" class="day-footer-btn" [text]="'Edit Details'"  [disabled]="true"></app-button>
-                  } @else {
-                    <div class="day-empty-body">
-                      <div class="plus-circle"><span class="plus">+</span></div>
-                      <div class="empty-text">Add Availability</div>
-                    </div>
+                  <span class="day-pill">Fixed</span>
                   }
                 </div>
+                <div class="day-divider"></div>
+                @if (d.hasSchedule) {
+                <div class="day-body">
+                  <div class="info-row">
+                    <app-icon fontIcon="schedule" [size]="22"></app-icon>
+                    <span class="info-text strong">{{ d.start }} - {{ d.end }}</span>
+                  </div>
+                  <div class="info-row">
+                    <app-icon fontIcon="calendar_month" [size]="22"></app-icon>
+                    <span class="info-text muted">{{ d.patternLabel }}</span>
+                  </div>
+                  <div class="day-table">
+                    <div class="tr">
+                      <div class="k">Duration</div>
+                      <div class="v">{{ d.durationMin }} min</div>
+                    </div>
+                    <div class="tr">
+                      <div class="k">Slot</div>
+                      <div class="v">{{ d.totalSlots }} Total</div>
+                    </div>
+                  </div>
+                </div>
+                <app-button type="button" class="day-footer-btn" [text]="'Edit Details'" [disabled]="true"></app-button>
+                } @else {
+                <div class="day-empty-body">
+                  <div class="plus-circle"><span class="plus">+</span></div>
+                  <div class="empty-text">Add Availability</div>
+                </div>
+                }
+              </div>
               }
             </div>
           </div>
           } @else {
-            <div class="timings-manage">
-              <div class="timings-priority-flow">
-                <div class="timings-flow-head">
-                  <span class="timings-flow-label" [matTooltip]="priorityRuleSummary" matTooltipPosition="below">Priority (higher overrides lower)</span>
-                  <button type="button" class="timings-flow-add-btn" mat-flat-button color="primary" (click)="openAvailabilitySetupWizard()">
-                    <app-icon fontIcon="add" [size]="18"></app-icon>
-                    Add timings
-                  </button>
-                </div>
-                <div class="timings-flow-steps">
-                  <div class="timings-flow-step p1" [matTooltip]="priorityTooltipP1" matTooltipPosition="below">
-                    <span class="timings-flow-dot"></span>
-                    <span>P1 Leave</span>
-                  </div>
-                  <span class="timings-flow-arrow" aria-hidden="true">→</span>
-                  <div class="timings-flow-step p2" [matTooltip]="priorityTooltipP2" matTooltipPosition="below">
-                    <span class="timings-flow-dot"></span>
-                    <span>P2 Date</span>
-                  </div>
-                  <span class="timings-flow-arrow" aria-hidden="true">→</span>
-                  <div class="timings-flow-step p3" [matTooltip]="priorityTooltipP3" matTooltipPosition="below">
-                    <span class="timings-flow-dot"></span>
-                    <span>P3 Weekly</span>
-                  </div>
-                  <span class="timings-flow-arrow" aria-hidden="true">→</span>
-                  <div class="timings-flow-step p4" [matTooltip]="priorityTooltipP4" matTooltipPosition="below">
-                    <span class="timings-flow-dot"></span>
-                    <span>P4 Daily</span>
-                  </div>
-                </div>
+          <div class="timings-manage">
+            <div class="timings-priority-flow">
+              <div class="timings-flow-head">
+                <span class="timings-flow-label" [matTooltip]="priorityRuleSummary" matTooltipPosition="below">Priority
+                  (higher overrides lower)</span>
+                <button type="button" class="timings-flow-add-btn" mat-flat-button color="primary"
+                  (click)="openAvailabilitySetupWizard()">
+                  <app-icon fontIcon="add" [size]="18"></app-icon>
+                  Add timings
+                </button>
               </div>
-
-              <div class="timings-manage-cards">
-                <div class="timings-manage-card timings-prio-p1">
-                  <div class="timings-manage-card-head">
-                    <div class="timings-manage-card-title">
-                      <app-icon fontIcon="event_busy" [size]="22"></app-icon>
-                      <span>Leave &amp; absences</span>
-                    </div>
-                    <div class="timings-manage-card-actions">
-                      <span class="timings-manage-count">{{ manageLeaves.length }}</span>
-                      <app-button type="button" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'" (click)="onAddLeave()"></app-button>
-                    </div>
-                  </div>
-                  @if (manageLeaves.length === 0) {
-                    <div class="timings-manage-empty">No leave rules. Add one to block dates.</div>
-                  } @else {
-                    <ul class="timings-manage-list" role="list">
-                      @for (item of manageLeaves; track item.rangeLabel + item.label) {
-                        <li class="timings-manage-list-row">
-                          <div class="timings-manage-list-main">
-                            <span class="timings-manage-list-title">{{ item.label }}</span>
-                            <span class="timings-manage-list-meta">{{ item.rangeLabel }} · {{ item.durationLabel }}</span>
-                          </div>
-                          <div class="timings-manage-list-actions">
-                            <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" title="Edit" (click)="onEditLeave(item)"></app-button>
-                            <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" title="Delete" (click)="onDeleteLeave(item)"></app-button>
-                          </div>
-                        </li>
-                      }
-                    </ul>
-                  }
+              <div class="timings-flow-steps">
+                <div class="timings-flow-step p1" [matTooltip]="priorityTooltipP1" matTooltipPosition="below">
+                  <span class="timings-flow-dot"></span>
+                  <span>P1 Leave</span>
                 </div>
-
-                <div class="timings-manage-card timings-prio-p2">
-                  <div class="timings-manage-card-head">
-                    <div class="timings-manage-card-title">
-                      <app-icon fontIcon="event" [size]="22"></app-icon>
-                      <span>Specific day overrides</span>
-                    </div>
-                    <div class="timings-manage-card-actions">
-                      <span class="timings-manage-count">{{ manageSpecificDays.length }}</span>
-                      <app-button type="button" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'" (click)="onAddSpecificDay()"></app-button>
-                    </div>
-                  </div>
-                  @if (manageSpecificDays.length === 0) {
-                    <div class="timings-manage-empty">No date overrides. Add one for a specific date.</div>
-                  } @else {
-                    <ul class="timings-manage-list" role="list">
-                      @for (item of manageSpecificDays; track item.dateLabel + item.label) {
-                        <li class="timings-manage-list-row">
-                          <div class="timings-manage-list-main">
-                            <span class="timings-manage-list-title">{{ item.label }}</span>
-                            <span class="timings-manage-list-meta">{{ item.dateLabel }} · {{ item.rangeLabel }}</span>
-                          </div>
-                          <div class="timings-manage-list-actions">
-                            <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" title="Edit" (click)="onEditSpecificDay(item)"></app-button>
-                            <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" title="Delete" (click)="onDeleteSpecificDay(item)"></app-button>
-                          </div>
-                        </li>
-                      }
-                    </ul>
-                  }
+                <span class="timings-flow-arrow" aria-hidden="true">→</span>
+                <div class="timings-flow-step p2" [matTooltip]="priorityTooltipP2" matTooltipPosition="below">
+                  <span class="timings-flow-dot"></span>
+                  <span>P2 Date</span>
                 </div>
-
-                <div class="timings-manage-card timings-prio-p3">
-                  <div class="timings-manage-card-head">
-                    <div class="timings-manage-card-title">
-                      <app-icon fontIcon="calendar_view_week" [size]="22"></app-icon>
-                      <span>Weekly routine</span>
-                    </div>
-                    <div class="timings-manage-card-actions">
-                      <span class="timings-manage-count">{{ manageWeeklyRoutines.length }}</span>
-                      <app-button type="button" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'" (click)="onAddWeeklyRoutine()"></app-button>
-                    </div>
-                  </div>
-                  @if (manageWeeklyRoutines.length === 0) {
-                    <div class="timings-manage-empty">No weekly rules. Add one for recurring weekdays.</div>
-                  } @else {
-                    <ul class="timings-manage-list" role="list">
-                      @for (item of manageWeeklyRoutines; track item.label + item.timeLabel) {
-                        <li class="timings-manage-list-row">
-                          <div class="timings-manage-list-main">
-                            <span class="timings-manage-list-title">{{ item.label }}</span>
-                            <span class="timings-manage-list-meta">{{ item.timeLabel }} · {{ getWeeklyDaysLabel(item.days) }}</span>
-                          </div>
-                          <div class="timings-manage-list-actions">
-                            <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" title="Edit" (click)="onEditWeeklyRoutine(item)"></app-button>
-                            <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" title="Delete" (click)="onDeleteWeeklyRoutine(item)"></app-button>
-                          </div>
-                        </li>
-                      }
-                    </ul>
-                  }
+                <span class="timings-flow-arrow" aria-hidden="true">→</span>
+                <div class="timings-flow-step p3" [matTooltip]="priorityTooltipP3" matTooltipPosition="below">
+                  <span class="timings-flow-dot"></span>
+                  <span>P3 Weekly</span>
                 </div>
-
-                <div class="timings-manage-card timings-prio-p4">
-                  <div class="timings-manage-card-head">
-                    <div class="timings-manage-card-title">
-                      <app-icon fontIcon="event_available" [size]="22"></app-icon>
-                      <span>Daily base availability</span>
-                    </div>
-                    <div class="timings-manage-card-actions">
-                      @if (manageBaseAvailability.length > 0) {
-                        <span class="timings-manage-badge">Default</span>
-                      }
-                      <span class="timings-manage-count">{{ manageBaseAvailability.length }}</span>
-                      <app-button type="button" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'" [disabled]="manageBaseAvailability.length > 0" (click)="openDailyBaseDialog()"></app-button>
-                    </div>
-                  </div>
-                  @if (manageBaseAvailability.length === 0) {
-                    <div class="timings-manage-empty">No base availability. Add one to set your default schedule.</div>
-                  } @else {
-                    <ul class="timings-manage-list" role="list">
-                      @for (item of manageBaseAvailability; track item.id) {
-                        <li class="timings-manage-list-row">
-                          <div class="timings-manage-list-main">
-                            <span class="timings-manage-list-title">{{ item.label }}</span>
-                            <span class="timings-manage-list-meta">{{ item.timeLabel }}{{ item.note ? ' · ' + item.note : '' }}</span>
-                          </div>
-                          <div class="timings-manage-list-actions">
-                            <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" title="Edit" (click)="openDailyBaseDialog(item)"></app-button>
-                            <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" title="Delete" (click)="onDeleteTiming(item)"></app-button>
-                          </div>
-                        </li>
-                      }
-                    </ul>
-                  }
+                <span class="timings-flow-arrow" aria-hidden="true">→</span>
+                <div class="timings-flow-step p4" [matTooltip]="priorityTooltipP4" matTooltipPosition="below">
+                  <span class="timings-flow-dot"></span>
+                  <span>P4 Daily</span>
                 </div>
               </div>
             </div>
+
+            <div class="timings-manage-cards">
+              <div class="timings-manage-card timings-prio-p1">
+                <div class="timings-manage-card-head">
+                  <div class="timings-manage-card-title">
+                    <app-icon fontIcon="event_busy" [size]="22"></app-icon>
+                    <span>Leave &amp; absences</span>
+                  </div>
+                  <div class="timings-manage-card-actions">
+                    <span class="timings-manage-count">{{ manageLeaves.length }}</span>
+                    <app-button type="button" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'"
+                      ></app-button>
+                  </div>
+                </div>
+                @if (manageLeaves.length === 0) {
+                <div class="timings-manage-empty">No leave rules. Add one to block dates.</div>
+                } @else {
+                <ul class="timings-manage-list" role="list">
+                  @for (item of manageLeaves; track item.rangeLabel + item.label) {
+                  <li class="timings-manage-list-row">
+                    <div class="timings-manage-list-main">
+                      <span class="timings-manage-list-title">{{ item.label }}</span>
+                      <span class="timings-manage-list-meta">{{ item.rangeLabel }} · {{ item.durationLabel }}</span>
+                    </div>
+                    <div class="timings-manage-list-actions">
+                      <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" title="Edit"></app-button>
+                      <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" title="Delete"></app-button>
+                    </div>
+                  </li>
+                  }
+                </ul>
+                }
+              </div>
+
+              <div class="timings-manage-card timings-prio-p2">
+                <div class="timings-manage-card-head">
+                  <div class="timings-manage-card-title">
+                    <app-icon fontIcon="event" [size]="22"></app-icon>
+                    <span>Specific day overrides</span>
+                  </div>
+                  <div class="timings-manage-card-actions">
+                    <span class="timings-manage-count">{{ manageSpecificDays.length }}</span>
+                    <app-button type="button" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'"
+                      (click)="onAddSpecificDay()"></app-button>
+                  </div>
+                </div>
+                @if (manageSpecificDays.length === 0) {
+                <div class="timings-manage-empty">No date overrides. Add one for a specific date.</div>
+                } @else {
+                <ul class="timings-manage-list" role="list">
+                  @for (item of manageSpecificDays; track item.dateLabel + item.label) {
+                  <li class="timings-manage-list-row">
+                    <div class="timings-manage-list-main">
+                      <span class="timings-manage-list-title">{{ item.label }}</span>
+                      <span class="timings-manage-list-meta">{{ item.dateLabel }} · {{ item.rangeLabel }}</span>
+                    </div>
+                    <div class="timings-manage-list-actions">
+                      <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" title="Edit"
+                        (click)="onEditSpecificDay(item)"></app-button>
+                      <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" title="Delete"
+                        (click)="onDeleteSpecificDay(item)"></app-button>
+                    </div>
+                  </li>
+                  }
+                </ul>
+                }
+              </div>
+
+              <div class="timings-manage-card timings-prio-p3">
+                <div class="timings-manage-card-head">
+                  <div class="timings-manage-card-title">
+                    <app-icon fontIcon="calendar_view_week" [size]="22"></app-icon>
+                    <span>Weekly routine</span>
+                  </div>
+                  <div class="timings-manage-card-actions">
+                    <span class="timings-manage-count">{{ manageWeeklyRoutines.length }}</span>
+                    <app-button type="button" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'"
+                      (click)="onAddWeeklyRoutine()"></app-button>
+                  </div>
+                </div>
+                @if (manageWeeklyRoutines.length === 0) {
+                <div class="timings-manage-empty">No weekly rules. Add one for recurring weekdays.</div>
+                } @else {
+                <ul class="timings-manage-list" role="list">
+                  @for (item of manageWeeklyRoutines; track item.label + item.timeLabel) {
+                  <li class="timings-manage-list-row">
+                    <div class="timings-manage-list-main">
+                      <span class="timings-manage-list-title">{{ item.label }}</span>
+                      <span class="timings-manage-list-meta">{{ item.timeLabel }} · {{ getWeeklyDaysLabel(item.days)
+                        }}</span>
+                    </div>
+                    <div class="timings-manage-list-actions">
+                      <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" title="Edit"
+                        (click)="onEditWeeklyRoutine(item)"></app-button>
+                      <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" title="Delete"
+                        (click)="onDeleteWeeklyRoutine(item)"></app-button>
+                    </div>
+                  </li>
+                  }
+                </ul>
+                }
+              </div>
+
+              <div class="timings-manage-card timings-prio-p4">
+                <div class="timings-manage-card-head">
+                  <div class="timings-manage-card-title">
+                    <app-icon fontIcon="event_available" [size]="22"></app-icon>
+                    <span>Daily base availability</span>
+                  </div>
+                  <div class="timings-manage-card-actions">
+                    @if (manageBaseAvailability.length > 0) {
+                    <span class="timings-manage-badge">Default</span>
+                    }
+                    <span class="timings-manage-count">{{ manageBaseAvailability.length }}</span>
+                    <app-button type="button" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'"
+                      [disabled]="manageBaseAvailability.length > 0" (click)="openDailyBaseDialog()"></app-button>
+                  </div>
+                </div>
+                @if (manageBaseAvailability.length === 0) {
+                <div class="timings-manage-empty">No base availability. Add one to set your default schedule.</div>
+                } @else {
+                <ul class="timings-manage-list" role="list">
+                  @for (item of manageBaseAvailability; track item.id) {
+                  <li class="timings-manage-list-row">
+                    <div class="timings-manage-list-main">
+                      <span class="timings-manage-list-title">{{ item.label }}</span>
+                      <span class="timings-manage-list-meta">{{ item.timeLabel }}{{ item.note ? ' · ' + item.note : ''
+                        }}</span>
+                    </div>
+                    <div class="timings-manage-list-actions">
+                      <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" title="Edit"
+                        (click)="openDailyBaseDialog(item)"></app-button>
+                      <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" title="Delete"
+                        (click)="onDeleteTiming(item)"></app-button>
+                    </div>
+                  </li>
+                  }
+                </ul>
+                }
+              </div>
+            </div>
+          </div>
           }
-    </section>
+        </section>
       </app-tab>
     </app-tabs>
 

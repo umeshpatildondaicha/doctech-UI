@@ -106,12 +106,12 @@ interface ManageWeeklyRoutineItem {
 }
 
 interface ManageBaseAvailabilityItem {
-  id:number;
+  id: number;
   label: string;
   timeLabel: string;
   note?: string;
-  raw :any
-  
+  raw: any
+
 }
 
 interface ScheduleStats {
@@ -266,45 +266,45 @@ interface DoctorSchedule {
 }
 
 @Component({
-    selector: 'app-schedule',
-    imports: [
-        CommonModule,
-        MatTabsModule,
-        MatCardModule,
-        MatIconModule,
-        MatButtonModule,
-        MatChipsModule,
-        MatMenuModule,
-        MatTooltipModule,
-        MatBadgeModule,
-        MatProgressBarModule,
-        MatProgressSpinnerModule,
-        MatSlideToggleModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        ReactiveFormsModule,
-        FormsModule,
-        AppButtonComponent,
-        AppInputComponent,
-        DividerComponent,
-        IconComponent,
-        CalendarComponent,
-        PageComponent,
-        PageBodyDirective,
-        AppCardComponent,
-        AppCardActionsDirective,
-        GridComponent,
-        TabsComponent,
-        TabComponent,
-        EntityToolbarComponent,
-        AdminStatsCardComponent,
-        NgIf
-    ],
-    templateUrl: './schedule.component.html',
-    styleUrls: ['./schedule.component.scss']
+  selector: 'app-schedule',
+  imports: [
+    CommonModule,
+    MatTabsModule,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+    MatChipsModule,
+    MatMenuModule,
+    MatTooltipModule,
+    MatBadgeModule,
+    MatProgressBarModule,
+    MatProgressSpinnerModule,
+    MatSlideToggleModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    ReactiveFormsModule,
+    FormsModule,
+    AppButtonComponent,
+    AppInputComponent,
+    DividerComponent,
+    IconComponent,
+    CalendarComponent,
+    PageComponent,
+    PageBodyDirective,
+    AppCardComponent,
+    AppCardActionsDirective,
+    GridComponent,
+    TabsComponent,
+    TabComponent,
+    EntityToolbarComponent,
+    AdminStatsCardComponent,
+    NgIf
+  ],
+  templateUrl: './schedule.component.html',
+  styleUrls: ['./schedule.component.scss']
 })
 export class ScheduleComponent implements OnInit {
   activeSection: 'schedule' | 'timings' = 'schedule';
@@ -316,21 +316,21 @@ export class ScheduleComponent implements OnInit {
   scheduleWindowDays = 15;
   readonly weekdays: Weekday[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   timingsMode: TimingsMode = 'view';
-  leaveFrom! :FormGroup;
+  leaveFrom!: FormGroup;
   doctorCode = 'DR1';
   manageLeavesDay: any[] = [];
   // ✅ P4 – Daily Base Availability (singleton)
-dailyBaseAvailability: {
-  id: string;        // UUID
-  startTime: string;
-  endTime: string;
-  notes?: string;
-} | null = null;
+  dailyBaseAvailability: {
+    id: string;        // UUID
+    startTime: string;
+    endTime: string;
+    notes?: string;
+  } | null = null;
 
-  manageWeeklyRoutine:any[]=[];
+  manageWeeklyRoutine: any[] = [];
   selectedTiming: any = null;
 
-  
+
 
   /** Priority tooltips: what each level is and overall rule (higher overrides lower) */
   readonly priorityRuleSummary = 'Priority: higher overrides lower (P1 > P2 > P3 > P4).';
@@ -384,8 +384,8 @@ dailyBaseAvailability: {
     pagination: false,
     suppressCellFocus: true,
     menuActions: [
-      { title: 'Edit', icon: 'edit', click: () => {} },
-      { title: 'Delete', icon: 'delete', click: () => {} }
+      { title: 'Edit', icon: 'edit', click: () => { } },
+      { title: 'Delete', icon: 'delete', click: () => { } }
     ]
   };
 
@@ -400,8 +400,8 @@ dailyBaseAvailability: {
     pagination: false,
     suppressCellFocus: true,
     menuActions: [
-      { title: 'Edit', icon: 'edit', click: () => {} },
-      { title: 'Delete', icon: 'delete', click: (p: { data?: ManageSpecificDayItem }) => {} }
+      { title: 'Edit', icon: 'edit', click: () => { } },
+      { title: 'Delete', icon: 'delete', click: (p: { data?: ManageSpecificDayItem }) => { } }
     ]
   };
 
@@ -416,8 +416,8 @@ dailyBaseAvailability: {
     pagination: false,
     suppressCellFocus: true,
     menuActions: [
-      { title: 'Edit', icon: 'edit', click: () => {} },
-      { title: 'Delete', icon: 'delete', click: () => {} }
+      { title: 'Edit', icon: 'edit', click: () => { } },
+      { title: 'Delete', icon: 'delete', click: () => { } }
     ]
   };
 
@@ -505,13 +505,13 @@ dailyBaseAvailability: {
     },
     breaks: []
   };
-  
+
   // Time slots for timeline view
   timeSlots: string[] = [];
-  
+
   // Form for filters
   filterForm!: FormGroup;
-  
+
   // UI State
   isLoading = false;
   showFilters = false;
@@ -520,7 +520,7 @@ dailyBaseAvailability: {
   isPatientQueuePaused = false;
   scheduleApiLoading = false;
   scheduleApiError: string | null = null;
-  
+
   // Schedule Settings
   scheduleSettings = {
     bufferTime: 15, // minutes between appointments
@@ -530,7 +530,7 @@ dailyBaseAvailability: {
     sendReminders: true,
     reminderTime: 24 // hours before appointment
   };
-  
+
   // Schedule Templates
   scheduleTemplates: ScheduleTemplate[] = [
     { id: 'consultation', name: 'Consultation', description: 'Regular patient consultation', duration: 30, color: '#4CAF50', icon: 'today' },
@@ -539,35 +539,35 @@ dailyBaseAvailability: {
     { id: 'surgery', name: 'Surgery', description: 'Surgical procedure', duration: 120, color: '#9C27B0', icon: 'local_hospital' },
     { id: 'admin', name: 'Admin Time', description: 'Administrative work', duration: 60, color: '#FF9800', icon: 'settings' }
   ];
-  
+
   // Schedule appointments (API)
   mockAppointments: Appointment[] = [];
 
   constructor(
     private readonly dialogService: DialogboxService,
     private readonly fb: FormBuilder,
-    private dialog :Dialog,
+    private dialog: Dialog,
     private readonly eventService: CoreEventService,
     private readonly router: Router,
     private readonly timingsService: TimingsService,
     private readonly authService: AuthService,
     private readonly appointmentService: AppointmentService,
-    private timingManageService :TimingManageService,
-  
+    private timingManageService: TimingManageService,
+
   ) {
     this.eventService.setBreadcrumb({
       label: 'Schedule',
       icon: 'schedule'
     });
-    
+
     this.initFilterForm();
   }
- createLeaveFrom(){
-   this.leaveFrom = this.fb.group({
-    specificDate:[null,Validators.required],
-    notes:['']
-   })
- }
+  createLeaveFrom() {
+    this.leaveFrom = this.fb.group({
+      specificDate: [null, Validators.required],
+      notes: ['']
+    })
+  }
 
 
 
@@ -584,71 +584,71 @@ dailyBaseAvailability: {
 
     this.recomputeScheduleSummary();
     this.recomputeScheduleAvailability();
-    this.loadLeaves();
+
     this.loadSpecificDays();
     this.loadBaseAvailability();
     this.loadWeeklyRoutine();
-  
+
   }
-  loadLeaves() {
-    this.timingManageService
-      .getAllTimings(this.doctorCode)
-      .subscribe({
-        next: (res: any[]) => {
-          // Leave entries filter 
-          this.manageLeaves = res.filter(
-            t => t.isLeave === true
-          );
-        },
-        error: err => {
-          console.error('Load leaves failed', err);
-        }
-      });
-  }
-  openLeavePopup() {
-    const dialogRef = this.dialog.open(LeaveDialogComponent, {
-      width: '420px',
-      hasBackdrop: true,
-      disableClose: true,
-      backdropClass: 'custom-backdrop'
-    });
-  
-    dialogRef.closed.subscribe(result => {
-      if (result === true) {
-        this.loadLeaves();
-      }
-    });
-  }
-  openEditLeave(item: any) {
-    const dialogRef = this.dialog.open(LeaveDialogComponent, {
-      width: '400px',
-      data: item   // 🔥 edit data pass
-    });
-  
-    dialogRef.closed.subscribe(result => {
-      if (result) {
-        this.loadLeaves();
-      }
-    });
-  }
-  
-  
-  onAddLeave() {
-    
-      const dialogRef = this.dialog.open(LeaveDialogComponent, {
-        width: '450px'
-      });
-    
-      dialogRef.closed.subscribe((result) => {
-        if (result === true) {
-         
-          this.loadLeaves(); // GET APIcall
-        }
-      });
-    
-    
-  }
- 
+  // loadLeaves() {
+  //   this.timingManageService
+  //     .getAllTimings(this.doctorCode)
+  //     .subscribe({
+  //       next: (res: any[]) => {
+  //         // Leave entries filter 
+  //         this.manageLeaves = res.filter(
+  //           t => t.isLeave === true
+  //         );
+  //       },
+  //       error: err => {
+  //         console.error('Load leaves failed', err);
+  //       }
+  //     });
+  // }
+  // openLeavePopup() {
+  //   const dialogRef = this.dialog.open(LeaveDialogComponent, {
+  //     width: '420px',
+  //     hasBackdrop: true,
+  //     disableClose: true,
+  //     backdropClass: 'custom-backdrop'
+  //   });
+
+  //   dialogRef.closed.subscribe(result => {
+  //     if (result === true) {
+  //       this.loadLeaves();
+  //     }
+  //   });
+  // }
+  // openEditLeave(item: any) {
+  //   const dialogRef = this.dialog.open(LeaveDialogComponent, {
+  //     width: '400px',
+  //     data: item   // 🔥 edit data pass
+  //   });
+
+  //   dialogRef.closed.subscribe(result => {
+  //     if (result) {
+  //       this.loadLeaves();
+  //     }
+  //   });
+  // }
+
+
+  // onAddLeave() {
+
+  //     const dialogRef = this.dialog.open(LeaveDialogComponent, {
+  //       width: '450px'
+  //     });
+
+  //     dialogRef.closed.subscribe((result) => {
+  //       if (result === true) {
+
+  //         this.loadLeaves(); // GET APIcall
+  //       }
+  //     });
+
+
+  // }
+
   formatDate(date: string): string {
     return new Date(date).toLocaleDateString('en-IN', {
       day: '2-digit',
@@ -661,7 +661,7 @@ dailyBaseAvailability: {
       width: '520px',
       data: { doctorCode: this.doctorCode }
     });
-  
+
     ref.closed.subscribe(result => {
       if (result === true) {
         this.loadSpecificDays();
@@ -675,8 +675,8 @@ dailyBaseAvailability: {
     }
     this.timingManageService.getAllTimings(this.doctorCode).subscribe({
       next: (res: any[]) => {
-        console.log("Total",res);
-        
+        console.log("Total", res);
+
         this.manageSpecificDays = res
           .filter(x =>
             x.specificDate &&
@@ -721,28 +721,29 @@ dailyBaseAvailability: {
       }
     });
   }
-  
-  
-  openDailyBaseDialog(existing ? :any) {
+
+
+  openDailyBaseDialog(existing?: any) {
     const ref = this.dialog.open(DailyBaseDialogComponent, {
       width: '480px',
-      data: { doctorCode: this.doctorCode ,existing
+      data: {
+        doctorCode: this.doctorCode, existing
 
       }
     });
-  
-   
+
+
     ref.closed.subscribe(result => {
-      if (result===true) {
+      if (result === true) {
         this.loadBaseAvailability();
       }
     });
   }
   loadBaseAvailability() {
     this.timingManageService.getAllTimings(this.doctorCode).subscribe(res => {
-  
+
       console.log('RAW API DATA 👉', res);
-  
+
       this.manageBaseAvailability = res
         .filter((x: any) =>
           !x.day &&
@@ -761,17 +762,17 @@ dailyBaseAvailability: {
         }));
     });
   }
-  
+
   loadWeeklyRoutine() {
     this.timingManageService.getAllTimings(this.doctorCode).subscribe({
-     
+
       next: (res: any[]) => {
-        console.log('API response',res);
+        console.log('API response', res);
         this.manageWeeklyRoutine = res
           .filter(x => x.day && x.isRecurring === true && x.isLeave === false)
-          .map((x:any) => ({
+          .map((x: any) => ({
             label: x.notes || 'Weekly Routine',
-            dayLabel: x.day.substring(0,3),
+            dayLabel: x.day.substring(0, 3),
             timeLabel: `${x.startTime} - ${x.endTime}`,
             raw: x
           }));
@@ -779,13 +780,13 @@ dailyBaseAvailability: {
       error: () => this.manageWeeklyRoutine = []
     });
   }
-  
+
   onAddWeeklyRoutine() {
     const ref = this.dialog.open(WeekroutinedialogComponent, {
       width: '520px',
       data: { doctorCode: this.doctorCode }
     });
-  
+
     ref.closed.subscribe(result => {
       if (result === true) {
         // Result is type `true`, so can't access result.startTime etc.
@@ -794,17 +795,17 @@ dailyBaseAvailability: {
       }
     });
   }
-  
-  
-  
+
+
+
   onDeleteTiming(item: ManageBaseAvailabilityItem) {
     console.log('DELETE CLICK ID 👉', item.id, typeof item.id);
-  
+
     if (item.id === undefined || item.id === null || isNaN(item.id)) {
       console.error('❌ ID INVALID / NaN', item);
       return;
     }
-  
+
     this.timingManageService
       .deleteTiming(this.doctorCode, item.id)
       .subscribe({
@@ -817,16 +818,16 @@ dailyBaseAvailability: {
         }
       });
   }
-  
+
   // onDeleteDailyBase() {
   //   if (!this.dailyBaseAvailability) {
   //     console.warn('No daily base to delete');
   //     return;
   //   }
-  
+
   //   const baseId = this.dailyBaseAvailability.id; // UUID string
   //   console.log('Deleting Daily Base UUID 👉', baseId);
-  
+
   //   this.timingManageService
   //     .deleteDailyBase(this.doctorCode, baseId)
   //     .subscribe({
@@ -838,10 +839,10 @@ dailyBaseAvailability: {
   //       error: err => console.error('❌ Daily Base delete failed', err)
   //     });
   // }
-  
-  
 
-  
+
+
+
 
   setSection(section: 'schedule' | 'timings'): void {
     this.activeSection = section;
@@ -1218,15 +1219,15 @@ dailyBaseAvailability: {
       end: b.endTime
     }));
     this.dailyBaseAvailability = base
-    ? {
+      ? {
         id: base.id,               // UUID string
         startTime: base.startTime ?? '',
         endTime: base.endTime ?? '',
         notes: base.notes ?? ''
       }
-    : null;
-  
-  console.log('STATE dailyBaseAvailability 👉', this.dailyBaseAvailability);
+      : null;
+
+    console.log('STATE dailyBaseAvailability 👉', this.dailyBaseAvailability);
     // Weekly (P3) -> per weekday record
     const dayMap: Record<string, Weekday> = {
       MONDAY: 'Monday',
@@ -1393,17 +1394,17 @@ dailyBaseAvailability: {
           .filter(Boolean) as Weekday[]
       })) as ManageWeeklyRoutineItem[];
 
-      this.manageBaseAvailability = base
-        ? [
-            {
-              id: Number(base.id), // 👈 Fix: ensure id is a number
-              label: 'Base Availability',
-              timeLabel: `${base.startTime} – ${base.endTime}`,
-              note: base.notes,
-              raw: base// 👈 MUST
-            } as ManageBaseAvailabilityItem
-          ]
-        : [];
+    this.manageBaseAvailability = base
+      ? [
+        {
+          id: Number(base.id), // 👈 Fix: ensure id is a number
+          label: 'Base Availability',
+          timeLabel: `${base.startTime} – ${base.endTime}`,
+          note: base.notes,
+          raw: base// 👈 MUST
+        } as ManageBaseAvailabilityItem
+      ]
+      : [];
   }
   private mapPriorityTypeToTab(priorityType: TimingsForecastDay['priorityType']): TimingPriorityTab {
     switch (priorityType) {
@@ -1620,7 +1621,7 @@ dailyBaseAvailability: {
   }
 
   onEditLeave(_item: ManageLeaveItem): void {
-    this.onAddLeave(); // Open same dialog; can pass _item for edit when backend supports it
+    // Open same dialog; can pass _item for edit when backend supports it
   }
 
   onDeleteLeave(_item: ManageLeaveItem): void {
@@ -1647,17 +1648,17 @@ dailyBaseAvailability: {
   addManageItem(scope: 'p1' | 'p2' | 'p3' | 'p4'): void {
 
     if (scope === 'p1') {
-      this.openLeavePopup();
+
     }
-  
+
     if (scope === 'p2') {
       this.onAddSpecificDay();
     }
-  
+
     if (scope === 'p3') {
       this.onAddWeeklyRoutine();
     }
-  
+
     if (scope === 'p4') {
       this.openDailyBaseDialog(); // 👈 फक्त dialog उघड
     }
@@ -1686,7 +1687,7 @@ dailyBaseAvailability: {
       }
     });
   }
-  
+
   // addManageItem(scope: 'p1' | 'p2' | 'p3' | 'p4'): void {
   //   // Hook this to dialogs / backend later
   //   if (scope === 'p1') this.manageLeaves = [...this.manageLeaves, { label: 'New Leave', rangeLabel: 'Dec 22 – Dec 22, 2024', durationLabel: '1 Day' }];
@@ -1935,13 +1936,13 @@ dailyBaseAvailability: {
     // Update doctor info with current data
     this.doctorInfo.totalAppointments = this.mockAppointments.length;
     this.doctorInfo.completedAppointments = this.mockAppointments.filter(apt => apt.status === 'COMPLETED').length;
-    
+
     if (this.doctorSchedule.schedulingType === 'slots') {
       this.doctorInfo.availableSlots = this.calculateAvailableSlots();
     } else {
       this.doctorInfo.availableSlots = this.calculateFlexibleAvailability();
     }
-    
+
     // Update flexible appointments remaining
     if (this.doctorSchedule.schedulingType === 'flexible') {
       this.scheduleStats.flexibleAppointmentsRemaining = this.calculateFlexibleAppointmentsRemaining();
@@ -1953,21 +1954,21 @@ dailyBaseAvailability: {
     const breakMinutes = this.getBreakMinutes();
     const availableMinutes = workingMinutes - breakMinutes;
     const slotDuration = this.doctorSchedule.slotDuration || 30;
-    
+
     return Math.floor(availableMinutes / slotDuration);
   }
 
   private calculateFlexibleAvailability(): number {
     const maxPerDay = this.doctorSchedule.maxAppointmentsPerDay || 20;
     const todayAppointments = this.getDoctorAppointmentsForSelectedDate().filter(apt => apt.status !== 'CANCELED').length;
-    
+
     return Math.max(0, maxPerDay - todayAppointments);
   }
 
   private calculateFlexibleAppointmentsRemaining(): number {
     const maxPerDay = this.doctorSchedule.maxAppointmentsPerDay || 20;
     const todayAppointments = this.getDoctorAppointmentsForSelectedDate().filter(apt => apt.status !== 'CANCELED').length;
-    
+
     return Math.max(0, maxPerDay - todayAppointments);
   }
 
@@ -1976,7 +1977,7 @@ dailyBaseAvailability: {
     const startMinute = parseInt(this.doctorSchedule.workingHours.start.split(':')[1]);
     const endHour = parseInt(this.doctorSchedule.workingHours.end.split(':')[0]);
     const endMinute = parseInt(this.doctorSchedule.workingHours.end.split(':')[1]);
-    
+
     return (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
   }
 
@@ -1987,10 +1988,10 @@ dailyBaseAvailability: {
       const startMinute = parseInt(breakItem.startTime.split(':')[1]);
       const endHour = parseInt(breakItem.endTime.split(':')[0]);
       const endMinute = parseInt(breakItem.endTime.split(':')[1]);
-      
+
       totalBreakMinutes += (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
     });
-    
+
     return totalBreakMinutes;
   }
 
@@ -1998,10 +1999,10 @@ dailyBaseAvailability: {
     const todaysAppointments = this.getDoctorAppointmentsForSelectedDate();
     return this.timeSlots.map(time => {
       const appointmentsInSlot = todaysAppointments.filter(apt => apt.slotTime === this.formatTimeForDisplay(time));
-      
+
       const conflicts = this.checkConflicts(time);
       const slotInfo = this.getSlotInfo(time);
-      
+
       return {
         time,
         appointments: appointmentsInSlot,
@@ -2023,27 +2024,27 @@ dailyBaseAvailability: {
       const timeMinutes = this.timeToMinutes(time);
       const startMinutes = this.timeToMinutes(this.doctorSchedule.workingHours.start);
       const endMinutes = this.timeToMinutes(this.doctorSchedule.workingHours.end);
-      
+
       // Check if time is within working hours and not during breaks
       if (timeMinutes >= startMinutes && timeMinutes < endMinutes && !this.isBreakTime(time)) {
         const appointmentsInSlot = this.getDoctorAppointmentsForSelectedDate().filter(apt => apt.slotTime === this.formatTimeForDisplay(time)).length;
-        
+
         const maxPerSlot = this.doctorSchedule.maxAppointmentsPerSlot || 1;
-        
+
         return {
           isAvailable: appointmentsInSlot < maxPerSlot,
           maxCapacity: maxPerSlot,
           currentCapacity: appointmentsInSlot
         };
       }
-      
+
       return { isAvailable: false };
     } else {
       // For flexible scheduling, check if we haven't reached daily limit
       const todayAppointments = this.getDoctorAppointmentsForSelectedDate().filter(apt => apt.status !== 'CANCELED').length;
-      
+
       const maxPerDay = this.doctorSchedule.maxAppointmentsPerDay || 20;
-      
+
       return {
         isAvailable: todayAppointments < maxPerDay,
         maxCapacity: maxPerDay,
@@ -2059,12 +2060,12 @@ dailyBaseAvailability: {
 
   private checkConflicts(time: string): AppointmentConflict[] {
     const conflicts: AppointmentConflict[] = [];
-    
+
     // Check if time is within working hours
     const timeHour = parseInt(time.split(':')[0]);
     const startHour = parseInt((this.doctorSchedule.workingHours.start || '0:0').split(':')[0]);
     const endHour = parseInt((this.doctorSchedule.workingHours.end || '0:0').split(':')[0]);
-    
+
     if (timeHour < startHour || timeHour >= endHour) {
       conflicts.push({
         type: 'working_hours',
@@ -2072,10 +2073,10 @@ dailyBaseAvailability: {
         severity: 'error'
       });
     }
-    
+
     // Check for overlapping appointments
     const existingAppointment = this.getDoctorAppointmentsForSelectedDate().find(apt => apt.slotTime === this.formatTimeForDisplay(time));
-    
+
     if (existingAppointment) {
       conflicts.push({
         type: 'overlap',
@@ -2083,7 +2084,7 @@ dailyBaseAvailability: {
         severity: 'error'
       });
     }
-    
+
     // Check capacity limits
     const slotInfo = this.getSlotInfo(time);
     if (!slotInfo.isAvailable && slotInfo.currentCapacity && slotInfo.maxCapacity) {
@@ -2093,12 +2094,12 @@ dailyBaseAvailability: {
         severity: 'error'
       });
     }
-    
+
     // Check buffer time conflicts
     const bufferTime = 15; // 15 minutes buffer
     const timeMinutes = parseInt(time.split(':')[1]);
     const timeTotalMinutes = timeHour * 60 + timeMinutes;
-    
+
     for (const apt of this.getDoctorAppointmentsForSelectedDate()) {
       const aptTime = this.parseTimeToMinutes(apt.slotTime || '');
       const timeDiff = Math.abs(timeTotalMinutes - aptTime);
@@ -2110,7 +2111,7 @@ dailyBaseAvailability: {
         });
       }
     }
-    
+
     return conflicts;
   }
 
@@ -2120,10 +2121,10 @@ dailyBaseAvailability: {
       let hour = parseInt(match[1]);
       const minute = parseInt(match[2]);
       const period = match[3];
-      
+
       if (period === 'PM' && hour !== 12) hour += 12;
       if (period === 'AM' && hour === 12) hour = 0;
-      
+
       return hour * 60 + minute;
     }
     return 0;
@@ -2138,7 +2139,7 @@ dailyBaseAvailability: {
   }
 
   private isBreakTime(time: string): boolean {
-    return this.doctorSchedule.breaks.some(breakItem => 
+    return this.doctorSchedule.breaks.some(breakItem =>
       time >= breakItem.startTime && time < breakItem.endTime
     );
   }
@@ -2353,7 +2354,7 @@ dailyBaseAvailability: {
 
     const dialogRef = this.dialogService.openDialog(AppointmentCreateComponent, {
       title: 'Create Appointment',
-      data: { 
+      data: {
         mode: 'create',
         schedulingType: this.doctorSchedule.schedulingType,
         availableSlots: this.doctorInfo.availableSlots
@@ -2468,11 +2469,11 @@ dailyBaseAvailability: {
 
   viewNextAppointment() {
     // Find the next appointment from the schedule
-    const nextAppointment = this.mockAppointments.find(apt => 
-      apt.status === 'SCHEDULED' && 
+    const nextAppointment = this.mockAppointments.find(apt =>
+      apt.status === 'SCHEDULED' &&
       new Date(apt.appointment_date_time) > new Date()
     );
-    
+
     if (nextAppointment) {
       this.viewAppointment(nextAppointment);
     }
@@ -2480,11 +2481,11 @@ dailyBaseAvailability: {
 
   callPatient() {
     // Find the next appointment to get patient phone
-    const nextAppointment = this.mockAppointments.find(apt => 
-      apt.status === 'SCHEDULED' && 
+    const nextAppointment = this.mockAppointments.find(apt =>
+      apt.status === 'SCHEDULED' &&
       new Date(apt.appointment_date_time) > new Date()
     );
-    
+
     if (nextAppointment) {
       // In a real app, this would initiate a call
       // For now, we'll just show an alert
@@ -2494,7 +2495,7 @@ dailyBaseAvailability: {
 
   togglePatientQueue() {
     this.isPatientQueuePaused = !this.isPatientQueuePaused;
-    
+
     if (this.isPatientQueuePaused) {
       // Show pause notification
       console.log('Patient queue paused - no new patients will be called');
@@ -2541,24 +2542,24 @@ dailyBaseAvailability: {
       status: 'all',
       searchTerm: ''
     });
-    
+
     // Restore original appointments if they were saved
     if (this.originalAppointments.length > 0) {
       this.mockAppointments = [...this.originalAppointments];
       this.loadDoctorSchedule();
     }
-    
+
     this.showFilters = false;
   }
 
   applyFilters() {
     const filters = this.filterForm.value;
-    
+
     // Store a copy of original appointments if not already stored
     if (!this.originalAppointments) {
       this.originalAppointments = [...this.mockAppointments];
     }
-    
+
     // Start with all appointments
     let filteredAppointments = [...this.originalAppointments];
 
@@ -2590,14 +2591,14 @@ dailyBaseAvailability: {
 
     // Update the display with filtered results
     this.mockAppointments = filteredAppointments;
-    
+
     // Reload the schedule to reflect filtered data
     this.loadDoctorSchedule();
-    
+
     // Close the filter dialog
     this.showFilters = false;
   }
-  
+
   private originalAppointments: Appointment[] = [];
 
   toggleDarkMode() {
@@ -2657,21 +2658,21 @@ dailyBaseAvailability: {
         time,
         appointments: isBooked && apiSlot.patientName
           ? ([
-              {
-                appointment_id: 1,
-                patient_id: 0,
-                appointment_date_time: `${this.scheduleSelectedDateIso || this.toIsoDateOnly(this.selectedDate)}T${time}:00`,
-                notes: (apiSlot.reason || '') as string,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-                doctor_id: 0,
-                slot_id: 0,
-                status: ((apiSlot.appointmentStatus || 'SCHEDULED') as any),
-                patientName: apiSlot.patientName,
-                doctorName: this.resolveDoctorRegistrationNumberForSchedule(),
-                slotTime: this.formatTimeForDisplay(time)
-              } as Appointment
-            ] as Appointment[])
+            {
+              appointment_id: 1,
+              patient_id: 0,
+              appointment_date_time: `${this.scheduleSelectedDateIso || this.toIsoDateOnly(this.selectedDate)}T${time}:00`,
+              notes: (apiSlot.reason || '') as string,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              doctor_id: 0,
+              slot_id: 0,
+              status: ((apiSlot.appointmentStatus || 'SCHEDULED') as any),
+              patientName: apiSlot.patientName,
+              doctorName: this.resolveDoctorRegistrationNumberForSchedule(),
+              slotTime: this.formatTimeForDisplay(time)
+            } as Appointment
+          ] as Appointment[])
           : [],
         isAvailable,
         isBreak,
@@ -2747,7 +2748,7 @@ dailyBaseAvailability: {
         doctorName: this.doctorInfo.doctorName,
         slotTime: this.formatTimeForDisplay(time)
       };
-      
+
       this.mockAppointments.push(newAppointment);
       this.loadDoctorSchedule();
       this.recomputeScheduleSummary();
@@ -2772,7 +2773,7 @@ dailyBaseAvailability: {
       const timeSlot = this.getTimeSlotForDoctor(time);
       return timeSlot.isAvailable && !timeSlot.isBreak;
     });
-    
+
     // Return first 3 available slots as suggestions
     return availableSlots.slice(0, 3);
   }

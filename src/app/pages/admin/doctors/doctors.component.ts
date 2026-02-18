@@ -225,6 +225,7 @@ export class DoctorsComponent implements OnInit, OnDestroy {
       }));
       this.updateStatsCards();
      })
+     console.log("pratikshaa", this.loadDoctorData());
   }
 
 
