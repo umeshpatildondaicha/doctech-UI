@@ -12,11 +12,8 @@
   <div class="connection-status" [class.connected]="backendConnected" [class.disconnected]="!backendConnected">
     <mat-icon>{{ backendConnected ? 'wifi' : 'wifi_off' }}</mat-icon>
     <span>{{ backendConnected ? 'Backend Connected' : 'Backend Disconnected' }}</span>
-    <app-button
-    [text]="'Test Connection'"
-    (btnClick) ="testBackendConnection()"
-    [disabled]="isLoading"
-    class="test-connection-btn"></app-button>
+    <app-button [text]="'Test Connection'" (btnClick)="testBackendConnection()" [disabled]="isLoading"
+      class="test-connection-btn"></app-button>
   </div>
 
   <!-- Tab Navigation -->
@@ -33,289 +30,271 @@
               <div class="form-field">
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Mobile Number *</mat-label>
-                  <input matInput
-                    [(ngModel)]="inviteMobileNumber"
-                    placeholder="+91 98765 43210"
-                    [class.invalid]="inviteMobileNumberError"
-                    (input)="clearInviteError(); updateFooterActions()">
-                    @if (inviteMobileNumberError) {
-                      <mat-error>
-                        {{ inviteMobileNumberError }}
-                      </mat-error>
-                    }
-                    <mat-hint>Enter the doctor's registered mobile number</mat-hint>
-                  </mat-form-field>
-                </div>
-
-                <div class="form-field">
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Hospital Role</mat-label>
-                    <mat-select [(ngModel)]="inviteRole">
-                      <mat-option value="DOCTOR">Doctor</mat-option>
-                      <mat-option value="SENIOR_DOCTOR">Senior Doctor</mat-option>
-                      <mat-option value="CONSULTANT">Consultant</mat-option>
-                      <mat-option value="SPECIALIST">Specialist</mat-option>
-                    </mat-select>
-                    <mat-hint>Select the role for this doctor</mat-hint>
-                  </mat-form-field>
-                </div>
+                  <input matInput [(ngModel)]="inviteMobileNumber" placeholder="+91 98765 43210"
+                    [class.invalid]="inviteMobileNumberError" (input)="clearInviteError(); updateFooterActions()">
+                  @if (inviteMobileNumberError) {
+                  <mat-error>
+                    {{ inviteMobileNumberError }}
+                  </mat-error>
+                  }
+                  <mat-hint>Enter the doctor's registered mobile number</mat-hint>
+                </mat-form-field>
               </div>
 
-              <div class="form-row">
-                <div class="form-field">
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Invitation Message</mat-label>
-                    <textarea matInput
-                      [(ngModel)]="inviteMessage"
-                      placeholder="Personal invitation message (optional)"
+              <div class="form-field">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Hospital Role</mat-label>
+                  <mat-select [(ngModel)]="inviteRole">
+                    <mat-option value="DOCTOR">Doctor</mat-option>
+                    <mat-option value="SENIOR_DOCTOR">Senior Doctor</mat-option>
+                    <mat-option value="CONSULTANT">Consultant</mat-option>
+                    <mat-option value="SPECIALIST">Specialist</mat-option>
+                  </mat-select>
+                  <mat-hint>Select the role for this doctor</mat-hint>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Invitation Message</mat-label>
+                  <textarea matInput [(ngModel)]="inviteMessage" placeholder="Personal invitation message (optional)"
                     rows="3"></textarea>
-                    <mat-hint>Optional personal message for the doctor</mat-hint>
-                  </mat-form-field>
-                </div>
+                  <mat-hint>Optional personal message for the doctor</mat-hint>
+                </mat-form-field>
               </div>
             </div>
           </div>
-        </mat-tab>
+        </div>
+      </mat-tab>
 
-        <!-- Add New Doctor Tab -->
-        <mat-tab label="Add New Doctor">
-          <div class="tab-content">
+      <!-- Add New Doctor Tab -->
+      <mat-tab label="Add New Doctor">
+        <div class="tab-content">
 
-            <form [formGroup]="doctorForm" (ngSubmit)="onSubmit()" class="doctor-form">
-              <div class="form-content">
+          <form [formGroup]="doctorForm" (ngSubmit)="onSubmit()" class="doctor-form">
+            <div class="form-content">
 
-                <!-- Mandatory Fields Section -->
-                <div class="form-section">
-                  <h3 class="section-title">
-                    <mat-icon>star</mat-icon>
-                    Required Information
-                  </h3>
+              <!-- Mandatory Fields Section -->
+              <div class="form-section">
+                <h3 class="section-title">
+                  <mat-icon>star</mat-icon>
+                  Required Information
+                </h3>
 
-                  <div class="form-row">
-                    <div class="form-field">
+                <div class="form-row">
+                  <div class="form-field">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Registration Number *</mat-label>
+                      <input matInput formControlName="registrationNumber" placeholder="DOC-12345"
+                        [class.invalid]="isFieldInvalid('registrationNumber')">
+                      @if (getErrorMessage('registrationNumber')) {
+                      <mat-error>
+                        {{ getErrorMessage('registrationNumber') }}
+                      </mat-error>
+                      }
+                      <mat-hint>Format: DOC-12345</mat-hint>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="form-field">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>First Name *</mat-label>
+                      <input matInput formControlName="firstName" placeholder="Enter first name"
+                        [class.invalid]="isFieldInvalid('firstName')">
+                      @if (getErrorMessage('firstName')) {
+                      <mat-error>
+                        {{ getErrorMessage('firstName') }}
+                      </mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-field">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Last Name *</mat-label>
+                      <input matInput formControlName="lastName" placeholder="Enter last name"
+                        [class.invalid]="isFieldInvalid('lastName')">
+                      @if (getErrorMessage('lastName')) {
+                      <mat-error>
+                        {{ getErrorMessage('lastName') }}
+                      </mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+
+                  <div class="form-field">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Specialization *</mat-label>
+                      <mat-select formControlName="specialization" [class.invalid]="isFieldInvalid('specialization')">
+                        @for (spec of specializations; track spec) {
+                        <mat-option [value]="spec">
+                          {{ spec }}
+                        </mat-option>
+                        }
+                      </mat-select>
+                      @if (getErrorMessage('specialization')) {
+                      <mat-error>
+                        {{ getErrorMessage('specialization') }}
+                      </mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-field">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Password *</mat-label>
+                      <input matInput type="password" formControlName="password" placeholder="Enter password"
+                        [class.invalid]="isFieldInvalid('password')">
+                      @if (getErrorMessage('password')) {
+                      <mat-error>
+                        {{ getErrorMessage('password') }}
+                      </mat-error>
+                      }
+                      <mat-hint>Min 8 chars, must include uppercase, lowercase, number & special char</mat-hint>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="form-field">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Doctor Status *</mat-label>
+                      <mat-select formControlName="doctorStatus" [class.invalid]="isFieldInvalid('doctorStatus')">
+                        @for (status of doctorStatusOptions; track status) {
+                        <mat-option [value]="status.value">
+                          {{ status.label }}
+                        </mat-option>
+                        }
+                      </mat-select>
+                      @if (getErrorMessage('doctorStatus')) {
+                      <mat-error>
+                        {{ getErrorMessage('doctorStatus') }}
+                      </mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Optional Fields Section -->
+              <div class="form-section">
+                <h3 class="section-title">
+                  <mat-icon>info</mat-icon>
+                  Additional Information
+                </h3>
+
+                <div class="form-row">
+                  <div class="form-field">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Contact Number</mat-label>
+                      <input matInput formControlName="contactNumber" placeholder="+91 98765 43210"
+                        [class.invalid]="isFieldInvalid('contactNumber')">
+                      @if (getErrorMessage('contactNumber')) {
+                      <mat-error>
+                        {{ getErrorMessage('contactNumber') }}
+                      </mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+
+                  <div class="form-field">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Email</mat-label>
+                      <input matInput type="email" formControlName="email" placeholder="doctor@example.com"
+                        [class.invalid]="isFieldInvalid('email')">
+                      @if (getErrorMessage('email')) {
+                      <mat-error>
+                        {{ getErrorMessage('email') }}
+                      </mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-field">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Qualifications</mat-label>
+                      <input matInput formControlName="qualifications" placeholder="MBBS, MD, etc."
+                        [class.invalid]="isFieldInvalid('qualifications')">
+                      @if (getErrorMessage('qualifications')) {
+                      <mat-error>
+                        {{ getErrorMessage('qualifications') }}
+                      </mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <!-- Certifications Section -->
+                <div class="form-field">
+                  <label class="field-label">Available Certifications</label>
+                  <div class="certifications-container">
+
+                    <!-- Custom Certification Input -->
+                    <div class="custom-certification">
                       <mat-form-field appearance="outline" class="full-width">
-                        <mat-label>Registration Number *</mat-label>
-                        <input matInput
-                          formControlName="registrationNumber"
-                          placeholder="DOC-12345"
-                          [class.invalid]="isFieldInvalid('registrationNumber')">
-                          @if (getErrorMessage('registrationNumber')) {
-                            <mat-error>
-                              {{ getErrorMessage('registrationNumber') }}
-                            </mat-error>
-                          }
-                          <mat-hint>Format: DOC-12345</mat-hint>
-                        </mat-form-field>
-                      </div>
+                        <mat-label>Add Custom Certification</mat-label>
+                        <input matInput [(ngModel)]="customCertification" [ngModelOptions]="{standalone: true}"
+                          placeholder="Enter custom certification name" (keyup.enter)="addCustomCertification()">
+                        <mat-hint>Press Enter to add custom certification</mat-hint>
+                        <app-button class="add-custom-certification-btn" [text]="'Add'"
+                          (btnClick)="addCustomCertification()" [disabled]="!customCertification.trim()"></app-button>
 
-                      <div class="form-field">
-                        <mat-form-field appearance="outline" class="full-width">
-                          <mat-label>First Name *</mat-label>
-                          <input matInput
-                            formControlName="firstName"
-                            placeholder="Enter first name"
-                            [class.invalid]="isFieldInvalid('firstName')">
-                            @if (getErrorMessage('firstName')) {
-                              <mat-error>
-                                {{ getErrorMessage('firstName') }}
-                              </mat-error>
-                            }
-                          </mat-form-field>
-                        </div>
-                      </div>
-
-                      <div class="form-row">
-                        <div class="form-field">
-                          <mat-form-field appearance="outline" class="full-width">
-                            <mat-label>Last Name *</mat-label>
-                            <input matInput
-                              formControlName="lastName"
-                              placeholder="Enter last name"
-                              [class.invalid]="isFieldInvalid('lastName')">
-                              @if (getErrorMessage('lastName')) {
-                                <mat-error>
-                                  {{ getErrorMessage('lastName') }}
-                                </mat-error>
-                              }
-                            </mat-form-field>
-                          </div>
-
-                          <div class="form-field">
-                            <mat-form-field appearance="outline" class="full-width">
-                              <mat-label>Specialization *</mat-label>
-                              <mat-select formControlName="specialization"
-                                [class.invalid]="isFieldInvalid('specialization')">
-                                @for (spec of specializations; track spec) {
-                                  <mat-option [value]="spec">
-                                    {{ spec }}
-                                  </mat-option>
-                                }
-                              </mat-select>
-                              @if (getErrorMessage('specialization')) {
-                                <mat-error>
-                                  {{ getErrorMessage('specialization') }}
-                                </mat-error>
-                              }
-                            </mat-form-field>
-                          </div>
-                        </div>
-
-                        <div class="form-row">
-                          <div class="form-field">
-                            <mat-form-field appearance="outline" class="full-width">
-                              <mat-label>Password *</mat-label>
-                              <input matInput
-                                type="password"
-                                formControlName="password"
-                                placeholder="Enter password"
-                                [class.invalid]="isFieldInvalid('password')">
-                                @if (getErrorMessage('password')) {
-                                  <mat-error>
-                                    {{ getErrorMessage('password') }}
-                                  </mat-error>
-                                }
-                                <mat-hint>Min 8 chars, must include uppercase, lowercase, number & special char</mat-hint>
-                              </mat-form-field>
-                            </div>
-
-                            <div class="form-field">
-                              <mat-form-field appearance="outline" class="full-width">
-                                <mat-label>Doctor Status *</mat-label>
-                                <mat-select formControlName="doctorStatus"
-                                  [class.invalid]="isFieldInvalid('doctorStatus')">
-                                  @for (status of doctorStatusOptions; track status) {
-                                    <mat-option [value]="status.value">
-                                      {{ status.label }}
-                                    </mat-option>
-                                  }
-                                </mat-select>
-                                @if (getErrorMessage('doctorStatus')) {
-                                  <mat-error>
-                                    {{ getErrorMessage('doctorStatus') }}
-                                  </mat-error>
-                                }
-                              </mat-form-field>
-                            </div>
-                          </div>
-                        </div>
-
-                        <!-- Optional Fields Section -->
-                        <div class="form-section">
-                          <h3 class="section-title">
-                            <mat-icon>info</mat-icon>
-                            Additional Information
-                          </h3>
-
-                          <div class="form-row">
-                            <div class="form-field">
-                              <mat-form-field appearance="outline" class="full-width">
-                                <mat-label>Contact Number</mat-label>
-                                <input matInput
-                                  formControlName="contactNumber"
-                                  placeholder="+91 98765 43210"
-                                  [class.invalid]="isFieldInvalid('contactNumber')">
-                                  @if (getErrorMessage('contactNumber')) {
-                                    <mat-error>
-                                      {{ getErrorMessage('contactNumber') }}
-                                    </mat-error>
-                                  }
-                                </mat-form-field>
-                              </div>
-
-                              <div class="form-field">
-                                <mat-form-field appearance="outline" class="full-width">
-                                  <mat-label>Email</mat-label>
-                                  <input matInput
-                                    type="email"
-                                    formControlName="email"
-                                    placeholder="doctor@example.com"
-                                    [class.invalid]="isFieldInvalid('email')">
-                                    @if (getErrorMessage('email')) {
-                                      <mat-error>
-                                        {{ getErrorMessage('email') }}
-                                      </mat-error>
-                                    }
-                                  </mat-form-field>
-                                </div>
-                              </div>
-
-                              <div class="form-row">
-                                <div class="form-field">
-                                  <mat-form-field appearance="outline" class="full-width">
-                                    <mat-label>Qualifications</mat-label>
-                                    <input matInput
-                                      formControlName="qualifications"
-                                      placeholder="MBBS, MD, etc."
-                                      [class.invalid]="isFieldInvalid('qualifications')">
-                                      @if (getErrorMessage('qualifications')) {
-                                        <mat-error>
-                                          {{ getErrorMessage('qualifications') }}
-                                        </mat-error>
-                                      }
-                                    </mat-form-field>
-                                  </div>
-                                </div>
-
-                                <!-- Certifications Section -->
-                                <div class="form-field">
-                                  <label class="field-label">Available Certifications</label>
-                                  <div class="certifications-container">
-
-                                    <!-- Custom Certification Input -->
-                                    <div class="custom-certification">
-                                      <mat-form-field appearance="outline" class="full-width">
-                                        <mat-label>Add Custom Certification</mat-label>
-                                        <input matInput
-                                          [(ngModel)]="customCertification"
-                                          [ngModelOptions]="{standalone: true}"
-                                          placeholder="Enter custom certification name"
-                                          (keyup.enter)="addCustomCertification()">
-                                          <mat-hint>Press Enter to add custom certification</mat-hint>
-                                          <app-button
-                                          class="add-custom-certification-btn"
-                                          [text]="'Add'"
-                                          (btnClick)="addCustomCertification()"
-                                          [disabled]="!customCertification.trim()"
-                                          ></app-button>
-                                      
-                                        </mat-form-field>
-                                      </div>
-
-                                      <div class="available-certifications">
-                                        <p class="cert-hint">Click on certifications to select/deselect them:</p>
-                                        <div class="cert-chips">
-                                          @for (cert of certificationOptions; track cert) {
-                                            <mat-chip
-                                              [class.selected]="doctorForm.get('certifications')?.value?.includes(cert)"
-                                              (click)="toggleCertification(cert)"
-                                              class="cert-chip">
-                                              {{ cert }}
-                                            </mat-chip>
-                                          }
-                                        </div>
-                                      </div>
-
-                                      @if (doctorForm.get('certifications')?.value?.length > 0) {
-                                        <div class="selected-certifications">
-                                          <h4>Selected Certifications ({{ doctorForm.get('certifications')?.value?.length }}):</h4>
-                                          <div class="cert-chips">
-                                            @for (cert of doctorForm.get('certifications')?.value; track cert) {
-                                              <mat-chip
-                                                (removed)="removeCertification(cert)"
-                                                class="selected-cert-chip">
-                                                {{ cert }}
-                                                <mat-icon matChipRemove>cancel</mat-icon>
-                                              </mat-chip>
-                                            }
-                                          </div>
-                                        </div>
-                                      }
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </form>
-                          </div>
-                        </mat-tab>
-                      </mat-tab-group>
+                      </mat-form-field>
                     </div>
+
+                    <div class="available-certifications">
+                      <p class="cert-hint">Click on certifications to select/deselect them:</p>
+                      <div class="cert-chips">
+                        @for (cert of certificationOptions; track cert) {
+                        <mat-chip [class.selected]="doctorForm.get('certifications')?.value?.includes(cert)"
+                          (click)="toggleCertification(cert)" class="cert-chip">
+                          {{ cert }}
+                        </mat-chip>
+                        }
+                      </div>
+                    </div>
+
+                    @if (doctorForm.get('certifications')?.value?.length > 0) {
+                    <div class="selected-certifications">
+                      <h4>Selected Certifications ({{ doctorForm.get('certifications')?.value?.length }}):</h4>
+                      <div class="cert-chips">
+                        @for (cert of doctorForm.get('certifications')?.value; track cert) {
+                        <mat-chip (removed)="removeCertification(cert)" class="selected-cert-chip">
+                          {{ cert }}
+                          <mat-icon matChipRemove>cancel</mat-icon>
+                        </mat-chip>
+                        }
+                      </div>
+                    </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit button inside form — this is what actually fires the POST API -->
+            <div class="form-submit-row">
+              <button type="submit" mat-raised-button color="primary" class="create-doctor-btn" [disabled]="isLoading"
+                (click)="onSubmit()">
+                @if (isLoading) {
+                <mat-icon
+                  style="animation: spin 1s linear infinite; display:inline-flex; vertical-align:middle;">autorenew</mat-icon>
+                Creating...
+                } @else {
+                <mat-icon style="vertical-align:middle;">person_add</mat-icon>
+                Create Doctor
+                }
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>

@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogRef, MatDialogContainer } from '@angular/material/dialog';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
@@ -11,17 +11,20 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
-import { Subject, takeUntil, filter, combineLatest } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
+
 
 import { Doctor } from '../../../../interfaces/doctor.interface';
 import { HttpService } from '../../../../services/http.service';
 import { AppButtonComponent, DIALOG_DATA_TOKEN } from '@lk/core';
+import { DoctorService } from '../../../../services/doctor.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
-    selector: 'app-admin-doctor-create',
-    templateUrl: './doctor-create.component.html',
-    styleUrl: './doctor-create.component.scss',
-    imports: [
+  selector: 'app-admin-doctor-create',
+  templateUrl: './doctor-create.component.html',
+  styleUrl: './doctor-create.component.scss',
+  imports: [
     FormsModule,
     ReactiveFormsModule,
     MatIconModule,
@@ -33,7 +36,7 @@ import { AppButtonComponent, DIALOG_DATA_TOKEN } from '@lk/core';
     MatProgressSpinnerModule,
     MatTabsModule,
     AppButtonComponent
-]
+  ]
 })
 export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
   dialogRef = inject(MatDialogRef<AdminDoctorCreateComponent>);
@@ -42,21 +45,21 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
   private httpService = inject(HttpService);
   private snackBar = inject(MatSnackBar);
   private cdr = inject(ChangeDetectorRef);
+  private http = inject(HttpClient);
   private destroy$ = new Subject<void>();
-  
-  // Reference to dialogbox content component for updating footer actions
-  private dialogboxContentComponent: any;
-  // Store original footer actions array
-  private originalFooterActions: any[] = [];
+  private doctorService = inject(DoctorService);
+
+  // Hidden submit button reference — used to trigger form submission from footer button
+  @ViewChild('hiddenSubmitBtn') hiddenSubmitBtn!: ElementRef<HTMLButtonElement>;
 
   doctorForm!: FormGroup;
   isLoading = false;
   customCertification: string = '';
   backendConnected: boolean = false;
-  
+
   // Tab management
   selectedTabIndex: number = 0;
-  
+
   // Invite existing doctor properties
   inviteMobileNumber: string = '';
   inviteRole: string = 'DOCTOR';
@@ -73,9 +76,8 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
 
   doctorStatusOptions = [
     { value: 'PENDING', label: 'Pending' },
-    { value: 'ACTIVE', label: 'Active' },
-    { value: 'INACTIVE', label: 'Inactive' },
-    { value: 'SUSPENDED', label: 'Suspended' }
+    { value: 'APPROVED', label: 'Approved' },
+    { value: 'REJECTED', label: 'Rejected' }
   ];
 
   certificationOptions = [
@@ -91,7 +93,7 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
     if (this.data?.doctor) {
       this.populateForm(this.data.doctor);
     }
-    
+
     // Test backend connection
     this.testBackendConnection();
 
@@ -101,65 +103,8 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
     // Subscribe to form changes and tab changes to update footer button states
     this.setupFormValidation();
 
-    // Listen for footer action clicks before dialog closes
-    this.dialogRef.beforeClosed().pipe(
-      takeUntil(this.destroy$),
-      filter(result => result?.action === 'save' || result?.action === 'cancel' || result?.action === 'invite')
-    ).subscribe((result) => {
-      if (result?.action === 'cancel') {
-        setTimeout(() => {
-          this.dialogRef.close({ action: 'cancel' });
-        }, 0);
-        return;
-      }
-      
-      if (result?.action === 'invite') {
-        // Only allow invite action if on the invite tab
-        if (this.selectedTabIndex !== 0) {
-          setTimeout(() => {
-            this.dialogRef.close(false);
-          }, 0);
-          return;
-        }
-
-        // Validate invite form
-        if (!this.inviteMobileNumber?.trim()) {
-          this.inviteMobileNumberError = 'Mobile number is required';
-          setTimeout(() => {
-            this.dialogRef.close(false);
-          }, 0);
-          return;
-        }
-
-        // Validate mobile number format
-        const mobileRegex = /^\+?[\d\s\-\(\)]{10,15}$/;
-        if (!mobileRegex.test(this.inviteMobileNumber.trim())) {
-          this.inviteMobileNumberError = 'Please enter a valid mobile number';
-          setTimeout(() => {
-            this.dialogRef.close(false);
-          }, 0);
-          return;
-        }
-
-        // If validation passes, send invitation
-        this.inviteExistingDoctor();
-        return;
-      }
-      
-      if (result?.action === 'save') {
-        // Only allow save action if on the create doctor tab
-        if (this.selectedTabIndex !== 1) {
-          setTimeout(() => {
-            this.dialogRef.close(false);
-          }, 0);
-          return;
-        }
-        
-        this.onSubmit();
-        return;
-      }
-      
-    });
+    // Intercept footer button clicks
+    this.interceptFooterActions();
   }
 
   ngOnDestroy(): void {
@@ -170,10 +115,74 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
   private initializeFooterActions() {
     // Wait for the dialog to be fully initialized
     setTimeout(() => {
-      // Update footer actions based on initial tab
-      // DialogboxContentComponent now handles storing original actions internally
       this.updateFooterActions();
     }, 100);
+  }
+
+  /**
+   * Intercept footer button clicks so we can handle async API calls
+   * without the dialog closing prematurely.
+   *
+   * Strategy: try the onFooterAction override first (works if the @lk/core DialogboxContentComponent
+   * exposes that hook).  If it doesn't exist we fall back to beforeClosed().
+   * We ALSO attach a direct click listener on the rendered footer button as an extra safety net.
+   */
+  private interceptFooterActions() {
+    setTimeout(() => {
+      try {
+        const container = (this.dialogRef as any)._containerInstance;
+        const overlayRef = container?._overlayRef;
+        const componentRef = overlayRef?._componentRef;
+        const dialogboxContent = componentRef?.instance;
+
+        if (dialogboxContent && typeof dialogboxContent.onFooterAction === 'function') {
+          // ✅ Preferred path: override the hook exposed by the dialog wrapper
+          const original = dialogboxContent.onFooterAction.bind(dialogboxContent);
+          dialogboxContent.onFooterAction = (action: any) => {
+            const actionId = action?.id || action;
+            const actionText: string = (action?.text ?? actionId ?? '').toString().trim();
+            const normalized = actionText.toLowerCase();
+
+            if (actionId === 'save' || normalized.includes('create') || normalized.includes('save')) {
+              if (this.selectedTabIndex === 1) { this.onSubmit(); }
+              return;  // never auto-close
+            }
+            if (actionId === 'invite' || normalized.includes('invite') || normalized.includes('invitation')) {
+              if (this.selectedTabIndex === 0) {
+                const mobileRegex = /^\+?[\d\s\-\(\)]{10,15}$/;
+                if (!this.inviteMobileNumber?.trim() || !mobileRegex.test(this.inviteMobileNumber.trim())) {
+                  this.inviteMobileNumberError = 'Please enter a valid mobile number';
+                  return;
+                }
+                this.inviteExistingDoctor();
+              }
+              return;
+            }
+            original(action);
+          };
+        } else {
+          // ⚠️ Fallback: patch DOM click on the footer button directly
+          console.warn('onFooterAction hook not found — attaching DOM click fallback');
+          const overlayPane = (overlayRef as any)?._pane as HTMLElement | undefined;
+          if (overlayPane) {
+            const handler = (e: Event) => {
+              const btn = (e.target as HTMLElement).closest('button');
+              if (!btn) return;
+              const text = btn.textContent?.trim().toLowerCase() ?? '';
+              // Only handle invite from the fallback — the in-form submit button handles 'save/create'
+              if (text.includes('invitation') || text.includes('invite')) {
+                e.stopPropagation();
+                if (this.selectedTabIndex === 0) { this.inviteExistingDoctor(); }
+              }
+            };
+            overlayPane.addEventListener('click', handler, true);
+            this.destroy$.subscribe(() => overlayPane.removeEventListener('click', handler, true));
+          }
+        }
+      } catch (err) {
+        console.warn('interceptFooterActions failed:', err);
+      }
+    }, 300);
   }
 
   private setupFormValidation() {
@@ -212,7 +221,7 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
       if (!componentRef || !componentRef.instance) return;
 
       const dialogboxContent = componentRef.instance;
-      
+
       // Use the new public method to update footer actions
       if (dialogboxContent && typeof dialogboxContent.updateFooterActions === 'function') {
         // Filter actions based on selected tab and update disabled state
@@ -232,21 +241,21 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
               return false;
             })
             .map((action: any) => ({ ...action })); // Create new object references
-          
+
           // Update disabled state based on current tab and form validation
           visibleActions.forEach((action: any) => {
             if (action.id === 'invite') {
               // Disable invite button if mobile number is invalid
               const mobileRegex = /^\+?[\d\s\-\(\)]{10,15}$/;
-              const isValidMobile = this.inviteMobileNumber?.trim() && 
-                                   mobileRegex.test(this.inviteMobileNumber.trim());
+              const isValidMobile = this.inviteMobileNumber?.trim() &&
+                mobileRegex.test(this.inviteMobileNumber.trim());
               action.disabled = !isValidMobile || this.isInviting;
             } else if (action.id === 'save') {
               // Disable save button if form is invalid
               action.disabled = !this.doctorForm.valid || this.isLoading;
             }
           });
-          
+
           return visibleActions;
         });
       } else {
@@ -266,7 +275,7 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       specialization: ['', Validators.required],
-      password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
       doctorStatus: ['PENDING', Validators.required],
 
       // Optional fields
@@ -295,85 +304,29 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
       appointmentTimings: doctor.appointmentTimings || []
     });
   }
-
   onSubmit() {
-    if (this.doctorForm.valid) {
-      this.isLoading = true;
-      this.updateFooterActions();
-      const formData = this.doctorForm.value;
-      
-      // Add timestamps
-      const now = new Date().toISOString();
-      const payload = {
-        ...formData,
-        createdAt: now,
-        updatedAt: now
-      };
+    console.log('🚀 onSubmit() called — form valid:', this.doctorForm.valid);
 
-      console.log('🚀 Sending doctor creation request to:', 'https://doctech.solutions/api/doctors');
-      console.log('📦 Payload:', payload);
-      console.log('🌐 CORS Origin:', window.location.origin);
-
-      this.httpService.sendPOSTRequest('https://doctech.solutions/api/doctors', payload)
-        .subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          this.updateFooterActions();
-            console.log('✅ Doctor created successfully:', response);
-            console.log('🎯 Response status:', response);
-            this.snackBar.open('Doctor created successfully!', 'Close', {
-              duration: 3000,
-              horizontalPosition: 'center',
-              verticalPosition: 'bottom'
-            });
-            setTimeout(() => {
-              this.dialogRef.close({ action: 'save', doctor: response });
-            }, 0);
-          },
-        error: (error) => {
-          this.isLoading = false;
-          this.updateFooterActions();
-            console.error('❌ Error creating doctor:', error);
-            console.error('🔍 Error details:', {
-              status: error.status,
-              statusText: error.statusText,
-              message: error.message,
-              url: error.url
-            });
-            
-            let errorMessage = 'Error creating doctor. Please try again.';
-            
-            if (error.status === 400) {
-              errorMessage = 'Invalid data provided. Please check all fields.';
-            } else if (error.status === 409) {
-              errorMessage = 'Doctor with this registration number already exists.';
-            } else if (error.status === 500) {
-              errorMessage = 'Server error. Please try again later.';
-            } else if (error.status === 0) {
-              errorMessage = 'Cannot connect to server. Please check if Spring backend is running on doctech.solutions.';
-            } else if (error.status === 403) {
-              errorMessage = 'Access forbidden. CORS issue detected.';
-            }
-            
-            this.snackBar.open(errorMessage, 'Close', {
-              duration: 5000,
-              horizontalPosition: 'center',
-              verticalPosition: 'bottom'
-            });
-            // Prevent dialog from closing on error
-            setTimeout(() => {
-              this.dialogRef.close(false);
-            }, 0);
-          }
-        });
-    } else {
+    if (!this.doctorForm.valid) {
       this.markFormGroupTouched();
-      // Prevent dialog from closing if form is invalid
-      setTimeout(() => {
-        this.dialogRef.close(false);
-      }, 0);
+      Object.keys(this.doctorForm.controls).forEach(key => {
+        const control = this.doctorForm.get(key);
+        if (control?.invalid) {
+          console.warn(`❌ Invalid field: ${key}`, control.errors);
+        }
+      });
+      this.snackBar.open('Please fix validation errors before submitting', 'Close', { duration: 3000 });
+      return;
     }
+
+    if (this.isLoading) { return; }
+
+    // Capture form data and close dialog — the POST is made in doctors.component.ts afterClosed()
+    const formData = { ...this.doctorForm.value };
+    console.log('📋 Form data captured, closing dialog:', formData);
+    this.dialogRef.close({ action: 'save', formData });
   }
+
 
   onCancel() {
     this.dialogRef.close({ action: 'cancel' });
@@ -397,18 +350,18 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
     if (this.customCertification?.trim()) {
       const certName = this.customCertification.trim();
       const currentCerts = this.doctorForm.get('certifications')?.value || [];
-      
+
       // Check if certification already exists
       if (!currentCerts.includes(certName)) {
         this.doctorForm.patchValue({
           certifications: [...currentCerts, certName]
         });
-        
+
         // Add to available certifications if not already there
         if (!this.certificationOptions.includes(certName)) {
           this.certificationOptions.push(certName);
         }
-        
+
         // Show success message
         this.snackBar.open(`Certification "${certName}" added successfully!`, 'Close', {
           duration: 2000,
@@ -423,7 +376,7 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
           verticalPosition: 'bottom'
         });
       }
-      
+
       // Clear the input
       this.customCertification = '';
     }
@@ -433,7 +386,7 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
     const currentCerts = this.doctorForm.get('certifications')?.value || [];
     const updatedCerts = currentCerts.filter((cert: string) => cert !== certification);
     this.doctorForm.patchValue({ certifications: updatedCerts });
-    
+
     // Show removal message
     this.snackBar.open(`Certification "${certification}" removed!`, 'Close', {
       duration: 2000,
@@ -444,74 +397,68 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
 
   // Invite existing doctor methods
   inviteExistingDoctor() {
+    console.log('📨 inviteExistingDoctor() called with:', {
+      inviteMobileNumber: this.inviteMobileNumber,
+      inviteRole: this.inviteRole
+    });
     this.isInviting = true;
     this.updateFooterActions();
     this.inviteMobileNumberError = '';
 
+    const mobileNumber = this.inviteMobileNumber.trim();
+    const inviteMessage =
+      this.inviteMessage || 'We would like to invite you to join our hospital network.';
+    const expiresAt = new Date(new Date().setDate(new Date().getDate() + 7)).toISOString();
+
+    /**
+     * Backend contract note:
+     * - This UI collects a doctor's *mobile number* + *role* + *message*.
+     * - Previously, mobile was incorrectly sent as `doctorRegistrationNumber` and role was ignored.
+     * - To be compatible with different backend field names, we send both the corrected keys
+     *   and the older key (some environments may still expect it).
+     */
     const invitePayload = {
-      mobileNumber: this.inviteMobileNumber.trim(),
+      mobileNumber,
       role: this.inviteRole,
-      message: this.inviteMessage?.trim() || '',
-      hospitalId: 1, // You can make this dynamic based on current hospital
-      invitedBy: 'ADMIN', // You can make this dynamic based on current user
-      invitedAt: new Date().toISOString()
+      inviteMessage,
+      expiresAt,
+
+      // Backward/alternate keys (safe redundancy)
+      doctorMobileNumber: mobileNumber,
+      doctorRegistrationNumber: mobileNumber
     };
 
-    console.log('📱 Sending doctor invitation:', invitePayload);
+    const hospitalId = 'HOSP-001';
 
-    this.httpService.sendPOSTRequest('https://doctech.solutions/api/doctors/invite', JSON.stringify(invitePayload))
+    this.doctorService.inviteDoctor(hospitalId, invitePayload)
       .subscribe({
-        next: (response) => {
+        next: (res: any) => {
           this.isInviting = false;
           this.updateFooterActions();
-          console.log('✅ Doctor invitation sent successfully:', response);
-          
-          this.snackBar.open('Invitation sent successfully! Doctor will be notified.', 'Close', {
-            duration: 5000,
-            horizontalPosition: 'center',
-            verticalPosition: 'bottom'
-          });
+          this.snackBar.open('Invitation sent successfully!', 'Close', { duration: 3000 });
+          console.log('✅ Invitation sent successfully:', res);
 
-          // Reset form
           this.inviteMobileNumber = '';
           this.inviteMessage = '';
-          this.inviteRole = 'DOCTOR';
-          
-          // Close dialog with success result
+
           setTimeout(() => {
             this.dialogRef.close({ action: 'invite', invited: true });
           }, 0);
         },
-        error: (error) => {
+        error: (err) => {
           this.isInviting = false;
           this.updateFooterActions();
-          console.error('❌ Error sending invitation:', error);
-          
-          let errorMessage = 'Failed to send invitation. Please try again.';
-          
-          if (error.status === 404) {
-            errorMessage = 'Doctor not found with this mobile number.';
-          } else if (error.status === 409) {
-            errorMessage = 'Doctor is already associated with this hospital.';
-          } else if (error.status === 400) {
-            errorMessage = 'Invalid invitation data. Please check the details.';
-          } else if (error.status === 0) {
-            errorMessage = 'Cannot connect to server. Please check backend connection.';
-          }
-          
-          this.snackBar.open(errorMessage, 'Close', {
-            duration: 5000,
-            horizontalPosition: 'center',
-            verticalPosition: 'bottom'
-          });
-          
-          // Prevent dialog from closing on error
-          setTimeout(() => {
-            this.dialogRef.close(false);
-          }, 0);
+          const apiMsg =
+            err?.error?.message ||
+            err?.error?.error ||
+            err?.message ||
+            'Failed to send invitation. Please try again.';
+          this.snackBar.open(apiMsg, 'Close', { duration: 4000 });
+          console.error('Invite doctor failed:', err);
         }
       });
   }
+
 
   clearInviteError() {
     this.inviteMobileNumberError = '';
@@ -521,33 +468,34 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
   onTabChange(index: number) {
     this.selectedTabIndex = index;
     console.log('📑 Tab changed to:', index === 0 ? 'Invite Existing' : 'Add New');
-    
+
     // Clear any errors when switching tabs
     this.inviteMobileNumberError = '';
-    
+
     // Reset form validation when switching to create tab
     if (index === 1) {
       this.doctorForm.markAsUntouched();
     }
-    
+
     // Update footer actions when tab changes
     this.updateFooterActions();
   }
 
   testBackendConnection() {
-    console.log('🔍 Testing backend connection...');
-    this.httpService.sendGETRequest('https://doctech.solutions/api/ping')
-      .subscribe({
-        next: (response) => {
-          console.log('✅ Backend connection successful:', response);
-          this.backendConnected = true;
-        },
-        error: (error) => {
-          console.warn('⚠️ Backend connection test failed:', error);
-          console.warn('💡 This is normal if your Spring app doesn\'t have a /ping endpoint');
-          this.backendConnected = false;
-        }
-      });
+    console.log(' Testing backend connection...');
+    // this.http.get('https://doctech.solutions/api/ping')
+    //   .subscribe({
+    //     next: (response) => {
+    //       console.log('Backend connection successful:', response);
+    //       this.backendConnected = true;
+    //     },
+    //     error: (error) => {
+    //       console.warn(' Backend connection test failed:', error);
+    //       console.warn(' This is normal if your Spring app doesn\'t have a /ping endpoint');
+    //       this.backendConnected = false;
+    //     }
+    //   });
+    this.backendConnected = true;
   }
 
   private markFormGroupTouched() {

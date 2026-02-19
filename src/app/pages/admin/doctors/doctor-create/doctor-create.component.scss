@@ -3,7 +3,7 @@
   overflow-y: auto;
   gap: var(--spacing-md);
   display: flex;
-    flex-direction: column;
+  flex-direction: column;
 
 
   .warning-message {
@@ -76,7 +76,7 @@
       font-size: var(--font-size-sm);
       padding: var(--spacing-xs) var(--spacing-sm);
       min-width: auto;
-      
+
       mat-icon {
         font-size: var(--font-size-sm);
         width: var(--font-size-sm);
@@ -139,6 +139,22 @@
 
   // Invite form styling
   .invite-form {
+
+    .invite-actions {
+      margin-top: var(--spacing-xl);
+      display: flex;
+      gap: var(--spacing-md);
+
+      button {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+
+        mat-spinner {
+          margin-right: var(--spacing-xs);
+        }
+      }
+    }
 
     .form-row {
       display: grid;
@@ -324,22 +340,22 @@
             background-color: var(--admin-light-bg);
             border-radius: var(--small-border-radius);
             border: var(--primary-border);
-            
+
             .full-width {
               width: 100%;
             }
-            
+
             .mat-form-field {
               margin-bottom: 0;
             }
-            
+
             .mat-icon-button {
               color: var(--primary-color);
-              
+
               &:hover {
                 background-color: var(--admin-hover-bg);
               }
-              
+
               &:disabled {
                 color: var(--admin-text-muted);
               }
@@ -420,6 +436,35 @@
 
     }
   }
+
+  // Submit button inside the form
+  .form-submit-row {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--spacing-xl) 0 var(--spacing-md) 0;
+    border-top: var(--primary-border);
+    margin-top: var(--spacing-lg);
+
+    .create-doctor-btn {
+      min-width: 160px;
+      height: 44px;
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 // Responsive Design
@@ -476,6 +521,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

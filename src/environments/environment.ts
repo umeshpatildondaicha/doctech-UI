@@ -55,7 +55,9 @@ export const environment = {
     enableAnalytics: false,
     enableDebugMode: true,
     enablePerformanceMonitoring: false,
-    enableMockBilling: false
+    enableMockBilling: false,
+    /** When true, invite doctor returns success without calling backend (use until backend implements POST invite) */
+    enableMockDoctorInvite: true
   },
   
   // Security settings

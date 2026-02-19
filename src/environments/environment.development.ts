@@ -56,7 +56,8 @@ export const environment = {
     enableAnalytics: false,
     enableDebugMode: true,
     enablePerformanceMonitoring: false,
-    enableMockBilling: true
+    enableMockBilling: true,
+    enableMockDoctorInvite: true
   },
   
   // Security settings

@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { HttpService } from './http.service';
+import { environment } from '../../environments/environment';
+import { HttpClient } from '@angular/common/http';
 
 // Doctor Profile Interfaces
 export interface DoctorProfileResponse {
@@ -67,7 +69,7 @@ export interface Affiliation {
   endDate?: string;
   description: string;
 }
- export interface DoctorListItem{
+export interface DoctorListItem {
   registrationNumber: string;
   publicDoctorCode: string;
   firstName: string;
@@ -78,16 +80,20 @@ export interface Affiliation {
   doctorStatus: string;
   createdAt: string;
   createdByHospitalId: string;
- }
- export interface DoctorListResponse{
-  doctorDetails :DoctorListItem[];
- }
+}
+export interface DoctorListResponse {
+  doctorDetails: DoctorListItem[];
+}
 @Injectable({
   providedIn: 'root'
 })
 export class DoctorService {
 
-  constructor(private httpService: HttpService) { }
+  private baseUrl = `${environment.apiUrl}`;
+
+  constructor(private httpService: HttpService,
+    private http: HttpClient
+  ) { }
 
   /**
    * Get doctor profile by registration number
@@ -157,13 +163,24 @@ export class DoctorService {
   /**
    * Get list of doctors
    */
-  getDoctors(page=0,size=10) {
-    const url =`/api/doctors?page=${page}&size=${size}`;
-    return this.httpService.sendGETRequest(url);
+  // getDoctors(page=0,size=10) {
+  //   const url =`/api/doctors?page=${page}&size=${size}`;
+  //   return this.httpService.sendGETRequest(url);
+  // }
+  getDoctorByHospital(hospitalId: string) {
+    return this.http.get(`${environment.apiUrl}/api/doctors?hospitalId=${hospitalId}`);
   }
 
-  createDoctor(payload:any){
-    return this.httpService.sendPOSTRequest('https://doctech.solutions/api/doctors',payload);
+  createDoctor(hospitalId: string, payload: any) {
+    console.log("SERVICE HIT", payload);
+    return this.http.post(
+      `${environment.apiUrl}/api/doctors/create-by-hospital/${hospitalId}`,
+      payload
+    );
   }
-  
+
+  inviteDoctor(hospitalId: string, payload: any) {
+    return this.http.post(`${environment.apiUrl}/api/doctors/invite-to-hospital/${hospitalId}`, payload);
+  }
+
 }

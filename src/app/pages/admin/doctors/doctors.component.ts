@@ -11,7 +11,7 @@ import { IconComponent } from "@lk/core";
 import { StatusCellRendererComponent } from "@lk/core";
 import { DialogboxService } from "@lk/core";
 import { PageComponent, CoreEventService, BreadcrumbItem } from "@lk/core";
-import { 
+import {
   AdminStatsCardComponent,
   type HeaderAction,
   type StatCard
@@ -50,23 +50,24 @@ interface DoctorStats {
 }
 
 @Component({
-    selector: 'app-doctors',
-    imports: [
+  selector: 'app-doctors',
+  imports: [
     FormsModule,
     MatIconModule,
     GridComponent,
     IconComponent,
     AdminStatsCardComponent,
     PageComponent
-],
-    templateUrl: './doctors.component.html',
-    styleUrl: './doctors.component.scss'
+  ],
+  templateUrl: './doctors.component.html',
+  styleUrl: './doctors.component.scss'
 })
 export class DoctorsComponent implements OnInit, OnDestroy {
   // Grid configuration
   columnDefs: ColDef[] = [];
   gridOptions: any = {};
   rowData: any[] = [];
+  hospitalId = 'HOSP-001';
 
   // Page header configuration
   headerActions: HeaderAction[] = [
@@ -90,16 +91,16 @@ export class DoctorsComponent implements OnInit, OnDestroy {
 
   constructor(
     private dialogService: DialogboxService,
-    private doctorService:DoctorService,
+    private doctorService: DoctorService,
     private snackBar: MatSnackBar,
     private router: Router,
     private eventService: CoreEventService
-  ) {}
+  ) { }
 
   ngOnInit() {
     // Set breadcrumb in topbar using CoreEventService
     this.eventService.setBreadcrumb(this.breadcrumb);
-    
+
     this.initializeGrid();
     this.loadDoctorData();
     this.updateStatsCards();
@@ -207,25 +208,30 @@ export class DoctorsComponent implements OnInit, OnDestroy {
       ]
     };
   }
-
   loadDoctorData() {
-    // Sample data
-     this.doctorService.getDoctors(0,10).subscribe((res:any)=>{
-      this.rowData =res.doctorDetails.map((d:any)=>({
-        id:d.registrationNumber,
-        name:`${d.firstName}  ${d.lastName}`,
-        specialization:d.specialization,
-        phone:d.contactNumber,
-        qualifications:d.qualifications,
-        email:d.email,
-        status:d.doctorStatus,
-        availability:this.mapDoctorStatusToAvailability(d.doctorStatus),
-        joinedDate:d.createdAt
-
-      }));
-      this.updateStatsCards();
-     })
-     console.log("pratikshaa", this.loadDoctorData());
+    this.doctorService.getDoctorByHospital(this.hospitalId)
+      .subscribe({
+        next: (res: any) => {
+          const list = res?.doctorDetails || res?.content || res || [];
+          this.rowData = list.map((d: any) => ({
+            id: d.registrationNumber,
+            name: `${d.firstName} ${d.lastName}`,
+            specialization: d.specialization,
+            phone: d.contactNumber,
+            email: d.email,
+            qualifications: d.qualifications,
+            status: d.doctorStatus === 'APPROVED' ? 'Active' : d.doctorStatus === 'REJECTED' ? 'Inactive' : 'Pending',
+            availability: this.mapDoctorStatusToAvailability(d.doctorStatus),
+            joinedDate: d.createdAt
+          }));
+          this.updateStatsCards();
+          console.log(' Doctors loaded successfully, count:', this.rowData.length);
+        },
+        error: (err) => {
+          console.error(' Failed to load doctors:', err);
+          this.showSnackBar('Failed to load doctor list: ' + (err?.message || 'Network error'));
+        }
+      });
   }
 
 
@@ -261,16 +267,30 @@ export class DoctorsComponent implements OnInit, OnDestroy {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result && result.action === 'save' && result.doctor) {
-        // Refresh the doctor list after successful creation
+      console.log('Dialog closed with result:', result);
+
+      if (result?.action === 'save' && result?.formData) {
+        // The dialog passed us the validated form data — now make the actual POST API call
+        const hospitalId = 'HOSP-001';
+        console.log('📡 Calling POST createDoctor with:', result.formData);
+
+        this.doctorService.createDoctor(hospitalId, result.formData).subscribe({
+          next: (response) => {
+            console.log(' Doctor created successfully:', response);
+            this.showSnackBar('Doctor created successfully!');
+            this.loadDoctorData();  // refresh grid
+          },
+          error: (err) => {
+            console.error(' Create doctor failed:', err);
+            const msg = err?.error?.message || err?.message || 'Server error';
+            this.showSnackBar('Failed to create doctor: ' + msg);
+          }
+        });
+      }
+
+      if (result?.action === 'invite') {
         this.loadDoctorData();
-        this.updateStatsCards();
-        this.showSnackBar('Doctor created successfully!');
-      } else if (result && result.action === 'invite' && result.invited) {
-        // Refresh the doctor list after successful invitation
-        this.loadDoctorData();
-        this.updateStatsCards();
-        this.showSnackBar('Invitation sent successfully!');
+        this.showSnackBar('Invitation sent successfully');
       }
     });
   }
@@ -355,7 +375,7 @@ export class DoctorsComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialogService.openDialog(DoctorScheduleDialogComponent, {
       title: `Schedule - ${doctor.name}`,
       width: '65%',
-      height:'90%',
+      height: '90%',
       data: {
         doctor: doctor
       },
