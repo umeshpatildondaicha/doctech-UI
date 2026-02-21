@@ -502,7 +502,8 @@
               }
             </div>
           </div>
-          } @else {
+          }
+          @if (timingsMode !== 'view') {
           <div class="timings-manage">
             <div class="timings-priority-flow">
               <div class="timings-flow-head">
@@ -546,8 +547,8 @@
                   </div>
                   <div class="timings-manage-card-actions">
                     <span class="timings-manage-count">{{ manageLeaves.length }}</span>
-                    <app-button type="button" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'"
-                      ></app-button>
+                    <!-- <app-button type="button" [fontIcon]="'add'" [color]="'primary'"
+                      ></app-button> -->
                   </div>
                 </div>
                 @if (manageLeaves.length === 0) {
@@ -561,8 +562,10 @@
                       <span class="timings-manage-list-meta">{{ item.rangeLabel }} · {{ item.durationLabel }}</span>
                     </div>
                     <div class="timings-manage-list-actions">
-                      <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" title="Edit"></app-button>
-                      <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" title="Delete"></app-button>
+                      <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" title="Edit"
+                        (btnClick)="onEditLeave(item)"></app-button>
+                      <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" title="Delete"
+                        (btnClick)="onDeleteLeave(item)"></app-button>
                     </div>
                   </li>
                   }
@@ -578,8 +581,8 @@
                   </div>
                   <div class="timings-manage-card-actions">
                     <span class="timings-manage-count">{{ manageSpecificDays.length }}</span>
-                    <app-button type="button" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'"
-                      (click)="onAddSpecificDay()"></app-button>
+                    <!-- <app-button type="button" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'"
+                      (click)="onAddSpecificDay()"></app-button> -->
                   </div>
                 </div>
                 @if (manageSpecificDays.length === 0) {
@@ -594,9 +597,9 @@
                     </div>
                     <div class="timings-manage-list-actions">
                       <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" title="Edit"
-                        (click)="onEditSpecificDay(item)"></app-button>
+                        (btnClick)="onEditSpecificDay(item)"></app-button>
                       <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" title="Delete"
-                        (click)="onDeleteSpecificDay(item)"></app-button>
+                        (btnClick)="onDeleteSpecificDay(item)"></app-button>
                     </div>
                   </li>
                   }
@@ -612,8 +615,6 @@
                   </div>
                   <div class="timings-manage-card-actions">
                     <span class="timings-manage-count">{{ manageWeeklyRoutines.length }}</span>
-                    <app-button type="button" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'"
-                      (click)="onAddWeeklyRoutine()"></app-button>
                   </div>
                 </div>
                 @if (manageWeeklyRoutines.length === 0) {
@@ -629,9 +630,9 @@
                     </div>
                     <div class="timings-manage-list-actions">
                       <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" title="Edit"
-                        (click)="onEditWeeklyRoutine(item)"></app-button>
+                        (btnClick)="onEditWeeklyRoutine(item)"></app-button>
                       <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" title="Delete"
-                        (click)="onDeleteWeeklyRoutine(item)"></app-button>
+                        (btnClick)="onDeleteWeeklyRoutine(item)"></app-button>
                     </div>
                   </li>
                   }
@@ -651,7 +652,7 @@
                     }
                     <span class="timings-manage-count">{{ manageBaseAvailability.length }}</span>
                     <app-button type="button" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'"
-                      [disabled]="manageBaseAvailability.length > 0" (click)="openDailyBaseDialog()"></app-button>
+                      [disabled]="manageBaseAvailability.length > 0" (btnClick)="openDailyBaseDialog()"></app-button>
                   </div>
                 </div>
                 @if (manageBaseAvailability.length === 0) {
@@ -667,9 +668,9 @@
                     </div>
                     <div class="timings-manage-list-actions">
                       <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" title="Edit"
-                        (click)="openDailyBaseDialog(item)"></app-button>
+                        (btnClick)="openDailyBaseDialog(item)"></app-button>
                       <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" title="Delete"
-                        (click)="onDeleteTiming(item)"></app-button>
+                        (btnClick)="onDeleteTiming(item)"></app-button>
                     </div>
                   </li>
                   }
@@ -678,6 +679,7 @@
               </div>
             </div>
           </div>
+
           }
         </section>
       </app-tab>

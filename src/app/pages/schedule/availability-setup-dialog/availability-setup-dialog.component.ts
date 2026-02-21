@@ -30,8 +30,62 @@ type Weekday = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Sat
 
 type SetupType = 'base' | 'weekly' | 'override' | 'leave';
 
+export interface EditLeaveData {
+  recordId: number;
+  startDate: string;  // "YYYY-MM-DD"
+  endDate: string;
+  reason?: string;
+}
+
+export interface EditOverrideData {
+  recordId: number;
+  date: string;       // "YYYY-MM-DD"
+  startTime?: string;
+  endTime?: string;
+  breaks?: TimingBreak[];
+  notes?: string;
+  schedulingType?: SchedulingType;
+  slotDurationMinutes?: number;
+  maxAppointmentsPerSlot?: number;
+  bufferMinutes?: number;
+}
+
+export type WeekdayExport = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
+
+export interface EditWeeklyData {
+  ruleId: string;     // UUID (TimingRule.id)
+  weekdays?: WeekdayExport[];
+  startTime?: string;
+  endTime?: string;
+  breaks?: TimingBreak[];
+  notes?: string;
+  schedulingType?: SchedulingType;
+  slotDurationMinutes?: number;
+  maxAppointmentsPerSlot?: number;
+  bufferMinutes?: number;
+}
+
+export interface EditBaseData {
+  startTime?: string;
+  endTime?: string;
+  breaks?: TimingBreak[];
+  notes?: string;
+  schedulingType?: SchedulingType;
+  slotDurationMinutes?: number;
+  maxAppointmentsPerSlot?: number;
+  bufferMinutes?: number;
+}
+
 export interface AvailabilitySetupDialogData {
   doctorId: string;
+  /** When set, dialog opens in edit-leave mode with form pre-filled; save calls updateLeave instead of createLeave */
+  editLeave?: EditLeaveData;
+  /** When set, dialog opens in edit-override mode with form pre-filled; save calls updateOverride instead of createOverride */
+  editOverride?: EditOverrideData;
+  /** When set, dialog opens in edit-weekly mode with form pre-filled; save calls updateWeekly instead of createWeekly */
+  editWeekly?: EditWeeklyData;
+  /** When set, dialog opens in edit-base (P4) mode with form pre-filled; save calls upsertBase */
+  editBase?: EditBaseData;
 }
 
 @Component({
@@ -179,27 +233,39 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
 
   /** Calendar month to show for leave; defaults to leaveStart or current month */
   leaveCalendarStart(): Date {
-    const start = this.step3.value.leaveStart;
+    const start = this.normalizeToLocalDate(this.step3.value.leaveStart);
     if (start) return new Date(start.getFullYear(), start.getMonth(), 1);
     return new Date();
   }
 
   /** Handle date click on leave calendar: first click = start, second = end, third = new start */
-  onLeaveDateSelected(d: Date | null): void {
-    if (!d) return;
-    const day = this.dateToDay(d);
-    const start = this.step3.value.leaveStart ? this.dateToDay(this.step3.value.leaveStart) : null;
-    const end = this.step3.value.leaveEnd ? this.dateToDay(this.step3.value.leaveEnd) : null;
+  onLeaveDateSelected(d: Date | string | null): void {
+    const date = this.normalizeToLocalDate(d);
+    if (!date) return;
+    const day = this.dateToDay(date);
+    const start = this.step3.value.leaveStart ? this.dateToDay(this.normalizeToLocalDate(this.step3.value.leaveStart)!) : null;
+    const end = this.step3.value.leaveEnd ? this.dateToDay(this.normalizeToLocalDate(this.step3.value.leaveEnd)!) : null;
     if (start === null) {
-      this.step3.patchValue({ leaveStart: d, leaveEnd: d });
+      this.step3.patchValue({ leaveStart: date, leaveEnd: date });
     } else if (end === null) {
-      if (day < start) this.step3.patchValue({ leaveStart: d, leaveEnd: this.step3.value.leaveStart });
-      else this.step3.patchValue({ leaveEnd: d });
+      if (day < start) this.step3.patchValue({ leaveStart: date, leaveEnd: this.step3.value.leaveStart });
+      else this.step3.patchValue({ leaveEnd: date });
     } else {
-      this.step3.patchValue({ leaveStart: d, leaveEnd: null });
+      this.step3.patchValue({ leaveStart: date, leaveEnd: null });
     }
     this.step3.updateValueAndValidity();
     setTimeout(() => this.updateFooterFromStep(), 0);
+  }
+
+  /** Normalize Date or ISO string to a Date at local midnight (avoids timezone wrong year/day) */
+  private normalizeToLocalDate(d: Date | string | null | undefined): Date | null {
+    if (d == null) return null;
+    if (typeof d === 'string') {
+      const [y, m, day] = d.split(/[-T]/).map(Number);
+      if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(day)) return null;
+      return new Date(y, m - 1, day);
+    }
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
   }
 
   private dateToDay(d: Date): number {
@@ -210,8 +276,8 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
    *  Arrow function so the reference is stable (avoids .bind(this) in template). */
   readonly leaveDateClass = (date: Date): string | string[] => {
     const day = this.dateToDay(date);
-    const start = this.step3.value.leaveStart ? this.dateToDay(this.step3.value.leaveStart) : null;
-    const end = this.step3.value.leaveEnd ? this.dateToDay(this.step3.value.leaveEnd) : null;
+    const start = this.step3.value.leaveStart ? this.dateToDay(this.normalizeToLocalDate(this.step3.value.leaveStart)!) : null;
+    const end = this.step3.value.leaveEnd ? this.dateToDay(this.normalizeToLocalDate(this.step3.value.leaveEnd)!) : null;
     if (start === null) return [];
     if (day === start && (end === null || day === end)) return 'leave-range leave-range-single';
     if (day === start) return 'leave-range leave-range-start';
@@ -222,16 +288,16 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
 
   /** Summary text for leave selection e.g. "Selected: Oct 15 - Oct 17 (3 days)" */
   leaveSelectionSummary(): string {
-    const a = this.step3.value.leaveStart;
-    const b = this.step3.value.leaveEnd;
+    const a = this.normalizeToLocalDate(this.step3.value.leaveStart);
+    const b = this.normalizeToLocalDate(this.step3.value.leaveEnd);
     if (!a) return 'Select start and end date';
     if (!b) return this.formatDateShort(a) + ' — select end date';
     const start = this.dateToDay(a);
     const end = this.dateToDay(b);
     if (start > end) return 'Select start and end date';
     const days = Math.round((end - start) / (24 * 60 * 60 * 1000)) + 1;
-    if (days === 1) return 'Selected: ' + this.formatDateShort(a) + ' (1 day)';
-    return `Selected: ${this.formatDateShort(a)} - ${this.formatDateShort(b)} (${days} days)`;
+    if (days === 1) return 'Selected: ' + this.formatDateShort(a!) + ' (1 day)';
+    return `Selected: ${this.formatDateShort(a!)} - ${this.formatDateShort(b!)} (${days} days)`;
   }
 
   private formatDateShort(d: Date): string {
@@ -325,7 +391,102 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
 
 
     this.step3.patchValue({ startTime: '09:00', endTime: '17:00' });
-    // this.addBreak({ label: 'Lunch Break', startTime: '12:30', endTime: '13:30' });
+
+    // Edit leave mode: pre-fill leave form and show leave screen
+    const editLeave = this.data?.editLeave;
+    if (editLeave?.recordId != null && editLeave?.startDate && editLeave?.endDate) {
+      this.step1.patchValue({ setupType: 'leave' });
+      this.showLeaveScreen.set(true);
+      this.applyStep3Validators('leave');
+      const startDate = this.parseIsoToLocalDate(editLeave.startDate);
+      const endDate = this.parseIsoToLocalDate(editLeave.endDate);
+      if (startDate && endDate) {
+        this.step3.patchValue({
+          leaveStart: startDate,
+          leaveEnd: endDate,
+          leaveReason: editLeave.reason ?? ''
+        });
+      }
+      return;
+    }
+
+    // Edit override mode: pre-fill override form
+    const editOverride = this.data?.editOverride;
+    if (editOverride?.recordId != null && editOverride?.date) {
+      this.step1.patchValue({ setupType: 'override' });
+      this.applyStep3Validators('override');
+      this.step2.patchValue({ schedulingType: editOverride.schedulingType ?? 'slots' });
+      const overrideDate = this.parseIsoToLocalDate(editOverride.date);
+      this.step3.patchValue({
+        date: overrideDate,
+        startTime: editOverride.startTime ?? '09:00',
+        endTime: editOverride.endTime ?? '17:00'
+      });
+      while (this.breaksArray.length) this.breaksArray.removeAt(0);
+      for (const b of editOverride.breaks ?? []) {
+        this.addBreak({ label: b.label ?? 'Break', startTime: b.startTime, endTime: b.endTime });
+      }
+      this.step4.patchValue({
+        bufferMinutes: editOverride.bufferMinutes ?? 10,
+        slotDurationMinutes: editOverride.slotDurationMinutes ?? 30,
+        maxAppointmentsPerSlot: editOverride.maxAppointmentsPerSlot ?? 1,
+        notes: editOverride.notes ?? ''
+      });
+      return;
+    }
+
+    // Edit weekly mode: pre-fill weekly form
+    const editWeekly = this.data?.editWeekly;
+    if (editWeekly?.ruleId) {
+      this.step1.patchValue({ setupType: 'weekly' });
+      this.applyStep3Validators('weekly');
+      this.step2.patchValue({ schedulingType: editWeekly.schedulingType ?? 'slots' });
+      const weekdays = (editWeekly.weekdays ?? []) as Weekday[];
+      this.step3.patchValue({
+        weekdays,
+        startTime: editWeekly.startTime ?? '09:00',
+        endTime: editWeekly.endTime ?? '17:00'
+      });
+      while (this.breaksArray.length) this.breaksArray.removeAt(0);
+      for (const b of editWeekly.breaks ?? []) {
+        this.addBreak({ label: b.label ?? 'Break', startTime: b.startTime, endTime: b.endTime });
+      }
+      this.step4.patchValue({
+        bufferMinutes: editWeekly.bufferMinutes ?? 10,
+        slotDurationMinutes: editWeekly.slotDurationMinutes ?? 30,
+        maxAppointmentsPerSlot: editWeekly.maxAppointmentsPerSlot ?? 1,
+        notes: editWeekly.notes ?? ''
+      });
+      return;
+    }
+
+    // Edit base (P4) mode: pre-fill daily base form
+    const editBase = this.data?.editBase;
+    if (editBase) {
+      this.step1.patchValue({ setupType: 'base' });
+      this.applyStep3Validators('base');
+      this.step2.patchValue({ schedulingType: editBase.schedulingType ?? 'slots' });
+      this.step3.patchValue({
+        startTime: editBase.startTime ?? '09:00',
+        endTime: editBase.endTime ?? '17:00'
+      });
+      while (this.breaksArray.length) this.breaksArray.removeAt(0);
+      for (const b of editBase.breaks ?? []) {
+        this.addBreak({ label: b.label ?? 'Break', startTime: b.startTime, endTime: b.endTime });
+      }
+      this.step4.patchValue({
+        bufferMinutes: editBase.bufferMinutes ?? 10,
+        slotDurationMinutes: editBase.slotDurationMinutes ?? 30,
+        maxAppointmentsPerSlot: editBase.maxAppointmentsPerSlot ?? 1,
+        notes: editBase.notes ?? ''
+      });
+    }
+  }
+
+  private parseIsoToLocalDate(iso: string): Date | null {
+    const parts = String(iso).trim().split(/[-T]/).map(Number);
+    if (parts.length < 3 || !Number.isFinite(parts[0]) || !Number.isFinite(parts[1]) || !Number.isFinite(parts[2])) return null;
+    return new Date(parts[0], parts[1] - 1, parts[2]);
   }
 
   ngAfterViewInit(): void {
@@ -335,6 +496,14 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
         setTimeout(() => this.updateFooterFromStep(), 0);
       });
     }
+    // When on leave screen or working-hours step, update footer when step3 changes so Next/Confirm enables
+    this.step3.valueChanges.subscribe(() => {
+      if (this.setupType() === 'leave' && this.showLeaveScreen()) {
+        setTimeout(() => this.updateFooterFromStep(), 0);
+      } else if (this.stepper?.selectedIndex === 2) {
+        setTimeout(() => this.updateFooterFromStep(), 0);
+      }
+    });
     setTimeout(() => this.updateFooterFromStep(), 0);
   }
 
@@ -390,15 +559,20 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
 
   /** Update core dialog footer button labels, visibility, and disabled state */
   private updateFooterFromStep(): void {
-    const host = (this.dialogRef as any)?.componentInstance;
+    // Get the dialog wrapper host (has footer API), not the content component
+    const container = (this.dialogRef as any)?._containerInstance;
+    const overlayRef = container?._overlayRef;
+    const componentRef = overlayRef?._componentRef;
+    const host = componentRef?.instance ?? (this.dialogRef as any)?.componentInstance;
     const onLeaveScreen = this.setupType() === 'leave' && this.showLeaveScreen();
     const idx = this.stepper?.selectedIndex ?? 0;
     const stepOneBased = onLeaveScreen ? 2 : idx + 1;
     this.currentStepIndex.set(Math.min(Math.max(stepOneBased, 1), this.totalSteps()));
 
-    if (!host?.updateFooterActions || !host?.setFooterActionDisabled) return;
+    if (!host?.updateFooterActions) return;
 
-    const isFirst = !onLeaveScreen && idx === 0 && !this.showLeaveScreen();
+    const isEditLeave = !!(this.data?.editLeave && onLeaveScreen);
+    const isFirst = isEditLeave || (!onLeaveScreen && idx === 0 && !this.showLeaveScreen());
     const isLast = onLeaveScreen || (this.stepper ? idx >= this.stepper.steps.length - 1 : false);
 
     // Update dialog title + footer center text (Step X of Y)
@@ -423,7 +597,9 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
       primaryText = this.setupType() === 'leave' ? 'Confirm Leave' : 'Save Availability';
     }
 
-    // Build footer actions: filter out Back on first step, update primary text
+    const applyDisabled = this.saving() || !this.canAdvance();
+
+    // Build footer actions: filter out Back on first step, update primary text and disabled state
     host.updateFooterActions((actions: any[]) => {
       // Ensure back action exists in list
       const hasBack = actions.some((a: any) => a.id === 'back');
@@ -434,7 +610,12 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
       ];
       const normalized = list
         .filter((a: any) => !(a.id === 'back' && isFirst))
-        .map((a: any) => (a.id === 'apply' ? { ...a, text: primaryText } : a));
+        .map((a: any) => {
+          if (a.id === 'apply') {
+            return { ...a, text: primaryText, disabled: applyDisabled };
+          }
+          return a;
+        });
 
       // Force footer ordering for this wizard:
       // Previous (leftmost), Cancel, ...others..., Next (rightmost)
@@ -446,7 +627,9 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
       return apply ? [...rest, apply] : rest;
     });
 
-    host.setFooterActionDisabled('apply', this.saving() || !this.canAdvance());
+    if (typeof host.setFooterActionDisabled === 'function') {
+      host.setFooterActionDisabled('apply', applyDisabled);
+    }
   }
 
   /** Whether the primary footer button (Next/Confirm) can be used on the current step */
@@ -459,9 +642,20 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
     const idx = this.stepper?.selectedIndex ?? 0;
     if (idx === 0) return this.canGoStep2();
     if (idx === 1) return this.canGoStep3();
-    if (idx === 2) return this.step3.valid;
+    if (idx === 2) return this.canAdvanceFromStep3();
     if (idx === 3) return true; // step 4 (advanced) is always optional
     return this.canFinish();
+  }
+
+  /** Step 3 (Working hours): allow Next when type-specific required fields are set (avoids breaks/date quirks invalidating the whole step) */
+  private canAdvanceFromStep3(): boolean {
+    const t = this.setupType();
+    const startTime = this.step3.get('startTime')?.value;
+    const endTime = this.step3.get('endTime')?.value;
+    if (!startTime || !endTime) return false;
+    if (t === 'override') return !!this.step3.get('date')?.value;
+    if (t === 'weekly') return !!((this.step3.get('weekdays')?.value as any[])?.length);
+    return true; // base
   }
 
   // ---- UI helpers ----
@@ -492,8 +686,8 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
   }
 
   private readonly leaveDateRangeValidator = (control: AbstractControl): ValidationErrors | null => {
-    const start = control.get('leaveStart')?.value as Date | null;
-    const end = control.get('leaveEnd')?.value as Date | null;
+    const start = this.normalizeToLocalDate(control.get('leaveStart')?.value);
+    const end = this.normalizeToLocalDate(control.get('leaveEnd')?.value);
     if (!start || !end) return null;
     return start.getTime() <= end.getTime() ? null : { leaveDateRange: true };
   };
@@ -596,13 +790,16 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
     const endTime = this.step3.get('endTime')?.value;
 
     if (!setupType) return false;
-    if (!schedulingType) return false;
 
+    // Leave path: only need both dates (no scheduling type step)
     if (setupType === 'leave') {
-      const a = this.step3.get('leaveStart')?.value;
-      const b = this.step3.get('leaveEnd')?.value;
-      return !!a && !!b && a <= b;
+      const a = this.normalizeToLocalDate(this.step3.get('leaveStart')?.value);
+      const b = this.normalizeToLocalDate(this.step3.get('leaveEnd')?.value);
+      if (!a || !b) return false;
+      return a.getTime() <= b.getTime();
     }
+
+    if (!schedulingType) return false;
 
     // For base / weekly / override
     if (!startTime || !endTime) return false;
@@ -676,8 +873,8 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
       return d ? this.formatDateLong(d) : '—';
     }
 
-    const a = this.step3.value.leaveStart;
-    const b = this.step3.value.leaveEnd;
+    const a = this.normalizeToLocalDate(this.step3.value.leaveStart);
+    const b = this.normalizeToLocalDate(this.step3.value.leaveEnd);
     if (!a || !b) return '—';
     const left = this.formatDateLong(a);
     const right = this.formatDateLong(b);
@@ -708,7 +905,12 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
           reason: (this.step3.value.leaveReason || '').trim() || undefined
         };
 
-        await firstValueFrom(this.timingsService.createLeave(doctorId, body));
+        const editLeave = this.data?.editLeave;
+        if (editLeave?.recordId != null) {
+          await firstValueFrom(this.timingsService.updateLeave(doctorId, editLeave.recordId, body));
+        } else {
+          await firstValueFrom(this.timingsService.createLeave(doctorId, body));
+        }
         this.dialogRef.close(true);
         return;
       }
@@ -733,15 +935,27 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
       if (setupType === 'base') {
         req$ = this.timingsService.upsertBase(doctorId, baseBody);
       } else if (setupType === 'override') {
-        req$ = this.timingsService.createOverride(doctorId, {
+        const overrideBody: OverrideTimingUpsertRequest = {
           ...(baseBody as OverrideTimingUpsertRequest),
           date: this.toIsoDateOnly(this.step3.value.date!)
-        });
+        };
+        const editOverride = this.data?.editOverride;
+        if (editOverride?.recordId != null) {
+          req$ = this.timingsService.updateOverride(doctorId, editOverride.recordId, overrideBody);
+        } else {
+          req$ = this.timingsService.createOverride(doctorId, overrideBody);
+        }
       } else {
-        req$ = this.timingsService.createWeekly(doctorId, {
+        const weeklyBody: WeeklyTimingUpsertRequest = {
           ...(baseBody as WeeklyTimingUpsertRequest),
           weekdays: this.mapWeekdaysToEnum(this.step3.value.weekdays ?? [])
-        });
+        };
+        const editWeekly = this.data?.editWeekly;
+        if (editWeekly?.ruleId) {
+          req$ = this.timingsService.updateWeekly(doctorId, editWeekly.ruleId, weeklyBody);
+        } else {
+          req$ = this.timingsService.createWeekly(doctorId, weeklyBody);
+        }
       }
 
       await firstValueFrom(req$);
@@ -780,10 +994,12 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
     return (days ?? []).map((d) => map[d]).filter(Boolean);
   }
 
-  private toIsoDateOnly(d: Date): string {
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
+  private toIsoDateOnly(d: Date | string): string {
+    const date = this.normalizeToLocalDate(d);
+    if (!date) return '';
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
   }
 

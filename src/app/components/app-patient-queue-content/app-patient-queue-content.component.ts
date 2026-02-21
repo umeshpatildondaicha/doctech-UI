@@ -52,14 +52,31 @@ export class AppPatientQueueContentComponent implements OnInit {
   displayWaitingCount = this.queueService.waitingCount;
 
   ngOnInit(): void {
-    const doctorCode = this.authService.getDoctorRegistrationNumber() ?? 'DR1';
+    // Queue API requires doctor authentication; skip request if user is not logged in as doctor
+    if (!this.authService.isDoctor()) {
+      this.applyQueueData([]);
+      return;
+    }
+    const doctorCode = this.authService.getDoctorRegistrationNumber();
+    if (!doctorCode) {
+      this.applyQueueData([]);
+      return;
+    }
     this.appointmentService.getDoctorQueue(doctorCode).subscribe({
       next: (data: unknown) => {
         const items = this.normalizeQueueResponse(data);
         this.applyQueueData(items);
       },
       error: (err: unknown) => {
+        const status = (err as any)?.status;
+        const message = (err as any)?.error?.message ?? (err as any)?.message;
+        if (status === 403 || message === 'Doctor authentication required') {
+          // Backend requires doctor role; show empty queue without spamming console
+          this.applyQueueData([]);
+          return;
+        }
         console.error('[AppPatientQueueContent] Doctor queue API error:', err);
+        this.applyQueueData([]);
       },
     });
   }

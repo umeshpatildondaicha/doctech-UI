@@ -30,7 +30,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { TimingsService } from '../../services/timings.service';
 import { AuthService } from '../../services/auth.service';
-import type { AppointmentTiming, DoctorTimingsResponse, TimingsForecastDay } from '../../interfaces/timings.interface';
+import type { AppointmentTiming, DoctorTimingsResponse, TimingsForecastDay, TimingRule } from '../../interfaces/timings.interface';
 import { AppointmentService } from '../../services/appointment.service';
 import { TimingManageService } from '../../services/timing-manage.service';
 import { Dialog, DIALOG_DATA } from '@angular/cdk/dialog';
@@ -90,12 +90,21 @@ interface ManageLeaveItem {
   label: string;
   rangeLabel: string;     // "Dec 15 – Dec 20, 2024"
   durationLabel: string;  // "6 Days"
+  /** Required for edit/delete API (from TimingRule.recordId) */
+  recordId: number;
+  startDate: string;      // "YYYY-MM-DD"
+  endDate: string;        // "YYYY-MM-DD"
 }
 
 interface ManageSpecificDayItem {
   label: string;
   dateLabel: string;      // "Nov 30"
   rangeLabel: string;     // "Dec 15 – Dec 20, 2024"
+  /** Required for edit/delete API (from TimingRule.recordId or id) */
+  recordId: number;
+  date: string;           // "YYYY-MM-DD"
+  /** Full override data for edit dialog */
+  raw: TimingRule;
 }
 
 interface ManageWeeklyRoutineItem {
@@ -103,6 +112,10 @@ interface ManageWeeklyRoutineItem {
   timeLabel: string;      // "09:00 AM – 01:00 PM"
   days: Weekday[];
   partiallyOverridden?: boolean;
+  /** UUID for PATCH/DELETE (TimingRule.id) */
+  ruleId: string;
+  /** Full rule for edit dialog */
+  raw: TimingRule;
 }
 
 interface ManageBaseAvailabilityItem {
@@ -432,8 +445,8 @@ export class ScheduleComponent implements OnInit {
     pagination: false,
     suppressCellFocus: true,
     menuActions: [
-      { title: 'Edit', icon: 'edit', click: (p: { data?: ManageBaseAvailabilityItem }) => this.openDailyBaseDialog(p?.data ?? null) },
-      { title: 'Delete', icon: 'delete', click: (p: { data?: ManageBaseAvailabilityItem }) => p?.data && this.onDeleteTiming(p.data) }
+      { title: 'Edit', icon: 'edit', click: (p: { data?: ManageBaseAvailabilityItem })=>{}},
+      { title: 'Delete', icon: 'delete', click: (p: { data?: ManageBaseAvailabilityItem }) => {}}
     ]
   };
 
@@ -586,39 +599,9 @@ export class ScheduleComponent implements OnInit {
     this.recomputeScheduleAvailability();
 
     this.loadSpecificDays();
-    this.loadBaseAvailability();
     this.loadWeeklyRoutine();
 
   }
-  // loadLeaves() {
-  //   this.timingManageService
-  //     .getAllTimings(this.doctorCode)
-  //     .subscribe({
-  //       next: (res: any[]) => {
-  //         // Leave entries filter 
-  //         this.manageLeaves = res.filter(
-  //           t => t.isLeave === true
-  //         );
-  //       },
-  //       error: err => {
-  //         console.error('Load leaves failed', err);
-  //       }
-  //     });
-  // }
-  // openLeavePopup() {
-  //   const dialogRef = this.dialog.open(LeaveDialogComponent, {
-  //     width: '420px',
-  //     hasBackdrop: true,
-  //     disableClose: true,
-  //     backdropClass: 'custom-backdrop'
-  //   });
-
-  //   dialogRef.closed.subscribe(result => {
-  //     if (result === true) {
-  //       this.loadLeaves();
-  //     }
-  //   });
-  // }
   // openEditLeave(item: any) {
   //   const dialogRef = this.dialog.open(LeaveDialogComponent, {
   //     width: '400px',
@@ -656,18 +639,7 @@ export class ScheduleComponent implements OnInit {
       year: 'numeric'
     });
   }
-  onAddSpecificDay() {
-    const ref = this.dialog.open(SpecificdaydialogComponent, {
-      width: '520px',
-      data: { doctorCode: this.doctorCode }
-    });
 
-    ref.closed.subscribe(result => {
-      if (result === true) {
-        this.loadSpecificDays();
-      }
-    });
-  }
   loadSpecificDays() {
     if (!this.doctorCode) {
       console.warn('DoctorCode missing - skipping loadSpecificDays');
@@ -681,16 +653,23 @@ export class ScheduleComponent implements OnInit {
           .filter(x =>
             x.specificDate &&
             x.isLeave === false &&
-            x.isRecurring === false
+            x.isRecurring === false &&
+            (x.id != null || x.recordId != null)
           )
-          .map(x => ({
-            label: x.notes || 'Specific Day',
-            dateLabel: this.formatDate(x.specificDate),
-            rangeLabel: x.startTime && x.endTime
-              ? `${x.startTime} - ${x.endTime}`
-              : 'Capacity mode (no slots)',
-            raw: x
-          }));
+          .map(x => {
+            const recordId = Number(x.recordId ?? x.id);
+            const dateStr = this.toIsoDateOnlyFromAny(x.specificDate);
+            return {
+              label: x.notes || 'Specific Day',
+              dateLabel: this.formatDate(x.specificDate),
+              rangeLabel: x.startTime && x.endTime
+                ? `${x.startTime} - ${x.endTime}`
+                : 'Capacity mode (no slots)',
+              recordId,
+              date: dateStr,
+              raw: { ...x, recordId, date: dateStr } as TimingRule
+            } as ManageSpecificDayItem;
+          });
       },
       error: () => this.manageSpecificDays = []
     });
@@ -708,60 +687,60 @@ export class ScheduleComponent implements OnInit {
   //         label: 'Base Availability',
   //         timeLabel: `${x.startTime} – ${x.endTime}`,
   //         note: x.notes,
-  //         raw: x   // 🔴 THIS IS MUST
+  //         raw: x   //  THIS IS MUST
   //       }));
   //   });
   // }
-  onEditBaseAvailability(item: any) {
-    this.dialog.open(DailyBaseDialogComponent, {
-      width: '520px',
-      data: {
-        doctorCode: this.doctorCode,
-        existing: item.raw   // 👈 RAW backend object
-      }
-    });
-  }
+  // onEditBaseAvailability(item: any) {
+  //   this.dialog.open(DailyBaseDialogComponent, {
+  //     width: '520px',
+  //     data: {
+  //       doctorCode: this.doctorCode,
+  //       existing: item.raw   // 👈 RAW backend object
+  //     }
+  //   });
+  // }
 
 
-  openDailyBaseDialog(existing?: any) {
-    const ref = this.dialog.open(DailyBaseDialogComponent, {
-      width: '480px',
-      data: {
-        doctorCode: this.doctorCode, existing
+  // openDailyBaseDialog(existing?: any) {
+  //   const ref = this.dialog.open(DailyBaseDialogComponent, {
+  //     width: '480px',
+  //     data: {
+  //       doctorCode: this.doctorCode, existing
 
-      }
-    });
+  //     }
+  //   });
 
 
-    ref.closed.subscribe(result => {
-      if (result === true) {
-        this.loadBaseAvailability();
-      }
-    });
-  }
-  loadBaseAvailability() {
-    this.timingManageService.getAllTimings(this.doctorCode).subscribe(res => {
+  //   ref.closed.subscribe(result => {
+  //     if (result === true) {
+  //       this.loadBaseAvailability();
+  //     }
+  //   });
+  // }
+  // loadBaseAvailability() {
+  //   this.timingManageService.getAllTimings(this.doctorCode).subscribe(res => {
 
-      console.log('RAW API DATA 👉', res);
+  //     console.log('RAW API DATA 👉', res);
 
-      this.manageBaseAvailability = res
-        .filter((x: any) =>
-          !x.day &&
-          !x.specificDate &&
-          x.isRecurring === false &&
-          x.isLeave === false &&
-          x.startTime &&
-          x.endTime
-        )
-        .map((x: any) => ({
-          id: x.recordId ?? x.id,   // ✅ NUMERIC ID (e.g. 2)
-          label: 'Base Availability',
-          timeLabel: `${x.startTime} – ${x.endTime}`,
-          note: x.notes,
-          raw: x
-        }));
-    });
-  }
+  //     this.manageBaseAvailability = res
+  //       .filter((x: any) =>
+  //         !x.day &&
+  //         !x.specificDate &&
+  //         x.isRecurring === false &&
+  //         x.isLeave === false &&
+  //         x.startTime &&
+  //         x.endTime
+  //       )
+  //       .map((x: any) => ({
+  //         id: x.recordId ?? x.id,   // ✅ NUMERIC ID (e.g. 2)
+  //         label: 'Base Availability',
+  //         timeLabel: `${x.startTime} – ${x.endTime}`,
+  //         note: x.notes,
+  //         raw: x
+  //       }));
+  //   });
+  // }
 
   loadWeeklyRoutine() {
     this.timingManageService.getAllTimings(this.doctorCode).subscribe({
@@ -781,42 +760,76 @@ export class ScheduleComponent implements OnInit {
     });
   }
 
-  onAddWeeklyRoutine() {
-    const ref = this.dialog.open(WeekroutinedialogComponent, {
-      width: '520px',
-      data: { doctorCode: this.doctorCode }
-    });
+  // onAddWeeklyRoutine() {
+  //   const ref = this.dialog.open(WeekroutinedialogComponent, {
+  //     width: '520px',
+  //     data: { doctorCode: this.doctorCode }
+  //   });
 
-    ref.closed.subscribe(result => {
+  //   ref.closed.subscribe(result => {
+  //     if (result === true) {
+  //       // Result is type `true`, so can't access result.startTime etc.
+  //       this.loadBaseAvailability();
+  //       this.loadWeeklyRoutine();
+  //     }
+  //   });
+  // }
+
+
+
+  /** Open availability dialog for daily base: add (no item) or edit (with item). Uses timings API. */
+  openDailyBaseDialog(existing?: ManageBaseAvailabilityItem | null): void {
+    const doctorId = this.resolveDoctorIdForTimings();
+    const isEdit = !!existing?.raw;
+    const footerActions: DialogFooterAction[] = [
+      { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
+      { id: 'back', text: 'Previous', color: 'secondary', appearance: 'stroked' },
+      { id: 'apply', text: isEdit ? 'Update Base Availability' : 'Next', color: 'primary', appearance: 'raised' }
+    ];
+    const ref = this.dialogService.openDialog(AvailabilitySetupDialogComponent, {
+      title: isEdit ? 'Edit Daily Base Availability' : 'Availability Setup',
+      hideHeader: false,
+      width: '980px',
+      maxWidth: '96vw',
+      maxHeight: '90vh',
+      footerActions,
+      data: {
+        doctorId,
+        ...(isEdit && existing?.raw && {
+          editBase: {
+            startTime: (existing.raw as TimingRule).startTime ?? '09:00',
+            endTime: (existing.raw as TimingRule).endTime ?? '17:00',
+            breaks: (existing.raw as TimingRule).breaks ?? [],
+            notes: (existing.raw as TimingRule).notes,
+            schedulingType: (existing.raw as TimingRule).schedulingType ?? 'slots',
+            slotDurationMinutes: (existing.raw as TimingRule).slotDurationMinutes ?? 30,
+            maxAppointmentsPerSlot: (existing.raw as TimingRule).maxAppointmentsPerSlot ?? 1,
+            bufferMinutes: (existing.raw as TimingRule).bufferTimeSeconds != null
+              ? Math.round((existing.raw as TimingRule).bufferTimeSeconds! / 60) : 10
+          }
+        })
+      }
+    });
+    ref.afterClosed().subscribe((result) => {
       if (result === true) {
-        // Result is type `true`, so can't access result.startTime etc.
-        this.loadBaseAvailability();
-        this.loadWeeklyRoutine();
+        this.loadTimingsFromApi({ fallbackToDemo: false });
       }
     });
   }
 
-
-
-  onDeleteTiming(item: ManageBaseAvailabilityItem) {
-    console.log('DELETE CLICK ID 👉', item.id, typeof item.id);
-
-    if (item.id === undefined || item.id === null || isNaN(item.id)) {
-      console.error('❌ ID INVALID / NaN', item);
-      return;
-    }
-
-    this.timingManageService
-      .deleteTiming(this.doctorCode, item.id)
-      .subscribe({
-        next: () => {
-          console.log('✅ Deleted successfully');
-          this.loadBaseAvailability(); // refresh list
-        },
-        error: err => {
-          console.error('❌ Delete failed', err);
-        }
-      });
+  /** Delete daily base availability (P4) via timings API; refreshes from getDoctorTimings */
+  onDeleteTiming(item: ManageBaseAvailabilityItem): void {
+    if (!confirm(`Remove daily base availability (${item.timeLabel})?`)) return;
+    const doctorId = this.resolveDoctorIdForTimings();
+    this.timingsService.deleteBase(doctorId).subscribe({
+      next: () => {
+        this.loadTimingsFromApi({ fallbackToDemo: false });
+      },
+      error: (err) => {
+        console.error('Delete base availability failed', err);
+        this.scheduleApiError = err?.error?.message || err?.message || 'Failed to delete base availability.';
+      }
+    });
   }
 
   // onDeleteDailyBase() {
@@ -1148,9 +1161,26 @@ export class ScheduleComponent implements OnInit {
     return `${yyyy}-${mm}-${dd}`;
   }
 
+  /** Normalize string or Date to YYYY-MM-DD for ManageSpecificDayItem.date */
+  private toIsoDateOnlyFromAny(val: string | Date | null | undefined): string {
+    if (val == null) return '';
+    if (typeof val === 'string') {
+      const trimmed = val.trim().slice(0, 10);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+      const d = this.parseIsoDateOnly(trimmed);
+      return Number.isNaN(d.getTime()) ? '' : this.toIsoDateOnly(d);
+    }
+    return this.toIsoDateOnly(val as Date);
+  }
+
   private parseIsoDateOnly(date: string): Date {
-    // Avoid timezone shifting by anchoring to local midnight.
-    return new Date(`${date}T00:00:00`);
+    // Parse as local date only (avoid UTC interpretation and wrong year/day in some browsers).
+    const parts = String(date).trim().split(/[-T]/);
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    const d = parseInt(parts[2], 10);
+    if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return new Date(NaN);
+    return new Date(y, m, d);
   }
 
   private loadTimingsFromApi(opts: { fallbackToDemo: boolean }): void {
@@ -1227,7 +1257,7 @@ export class ScheduleComponent implements OnInit {
       }
       : null;
 
-    console.log('STATE dailyBaseAvailability 👉', this.dailyBaseAvailability);
+    console.log('STATE dailyBaseAvailability ', this.dailyBaseAvailability);
     // Weekly (P3) -> per weekday record
     const dayMap: Record<string, Weekday> = {
       MONDAY: 'Monday',
@@ -1348,16 +1378,29 @@ export class ScheduleComponent implements OnInit {
     };
     const dayMapBack: Record<string, Weekday> = {
       MONDAY: 'Monday',
+      MON: 'Monday',
       TUESDAY: 'Tuesday',
+      TUE: 'Tuesday',
       WEDNESDAY: 'Wednesday',
+      WED: 'Wednesday',
       THURSDAY: 'Thursday',
+      THU: 'Thursday',
       FRIDAY: 'Friday',
+      FRI: 'Friday',
       SATURDAY: 'Saturday',
-      SUNDAY: 'Sunday'
+      SAT: 'Saturday',
+      SUNDAY: 'Sunday',
+      SUN: 'Sunday'
+    };
+    /** Normalize "HH:mm:ss" or "HH:mm" to "HH:mm" for display */
+    const toTimeDisplay = (t: string | null | undefined): string => {
+      if (!t || typeof t !== 'string') return '—';
+      const part = t.trim().slice(0, 5);
+      return /^\d{1,2}:\d{2}$/.test(part) ? part : t.trim().slice(0, 8) || '—';
     };
 
     this.manageLeaves = (raw.leaves ?? [])
-      .filter((l) => !!l.startDate && !!l.endDate)
+      .filter((l) => !!l.startDate && !!l.endDate && (l.recordId != null || (l as any).id != null))
       .map((l) => {
         const startDate = l.startDate as string;
         const endDate = l.endDate as string;
@@ -1365,34 +1408,48 @@ export class ScheduleComponent implements OnInit {
         const rangeLabel = startDate === endDate
           ? formatDateLong(startDate)
           : `${formatDateLong(startDate)} – ${formatDateLong(endDate)}`;
+        const recordId = Number(l.recordId ?? (l as any).id);
         return {
           label: (l.reason || 'Leave').toString(),
           rangeLabel,
-          durationLabel: days === 1 ? '1 Day' : `${days} Days`
+          durationLabel: days === 1 ? '1 Day' : `${days} Days`,
+          recordId,
+          startDate,
+          endDate
         } as ManageLeaveItem;
       });
 
     this.manageSpecificDays = (raw.dateOverrides ?? [])
-      .filter((o) => !!o.date)
+      .filter((o) => !!o.date && (o.recordId != null || (o as any).id != null))
       .map((o) => {
         const date = o.date as string;
+        const recordId = Number(o.recordId ?? (o as any).id);
         return {
           label: (o.notes || 'Override').toString(),
           dateLabel: formatDateShort(date),
-          rangeLabel: formatDateLong(date)
+          rangeLabel: formatDateLong(date),
+          recordId,
+          date,
+          raw: o as TimingRule
         } as ManageSpecificDayItem;
       })
       .sort((a, b) => a.rangeLabel.localeCompare(b.rangeLabel));
 
     this.manageWeeklyRoutines = (raw.weeklyRules ?? [])
-      .filter((w) => !!w.startTime && !!w.endTime && (w.weekdays?.length ?? 0) > 0)
-      .map((w) => ({
-        label: (w.notes || 'Weekly Routine').toString(),
-        timeLabel: `${w.startTime} – ${w.endTime}`,
-        days: (w.weekdays ?? [])
-          .map((d) => dayMapBack[d as unknown as string])
-          .filter(Boolean) as Weekday[]
-      })) as ManageWeeklyRoutineItem[];
+      .filter((w) => !!w.id && !!w.startTime && !!w.endTime && (w.weekdays?.length ?? 0) > 0)
+      .map((w) => {
+        const dayKeys = (w.weekdays ?? []) as string[];
+        const days = dayKeys
+          .map((d) => dayMapBack[String(d).toUpperCase()] ?? dayMapBack[d as unknown as string])
+          .filter(Boolean) as Weekday[];
+        return {
+          label: (w.notes || 'Weekly Routine').toString().trim() || 'Weekly Routine',
+          timeLabel: `${toTimeDisplay(w.startTime)} – ${toTimeDisplay(w.endTime)}`,
+          days,
+          ruleId: w.id,
+          raw: w as TimingRule
+        } as ManageWeeklyRoutineItem;
+      });
 
     this.manageBaseAvailability = base
       ? [
@@ -1620,28 +1677,153 @@ export class ScheduleComponent implements OnInit {
     return (days as Weekday[]).map(d => this.getWeekdayAbbr(d)).join(', ');
   }
 
-  onEditLeave(_item: ManageLeaveItem): void {
-    // Open same dialog; can pass _item for edit when backend supports it
+  onEditLeave(item: ManageLeaveItem): void {
+    const doctorId = this.resolveDoctorIdForTimings();
+    const footerActions: DialogFooterAction[] = [
+      { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
+      { id: 'back', text: 'Previous', color: 'secondary', appearance: 'stroked' },
+      { id: 'apply', text: 'Update Leave', color: 'primary', appearance: 'raised' }
+    ];
+    const ref = this.dialogService.openDialog(AvailabilitySetupDialogComponent, {
+      title: 'Edit Leave',
+      hideHeader: false,
+      width: '980px',
+      maxWidth: '96vw',
+      maxHeight: '90vh',
+      footerActions,
+      data: {
+        doctorId,
+        editLeave: {
+          recordId: item.recordId,
+          startDate: item.startDate,
+          endDate: item.endDate,
+          reason: item.label
+        }
+      }
+    });
+    ref.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.loadTimingsFromApi({ fallbackToDemo: false });
+      }
+    });
   }
 
-  onDeleteLeave(_item: ManageLeaveItem): void {
-    // TODO: wire to delete API when available
+  onDeleteLeave(item: ManageLeaveItem): void {
+    if (!confirm(`Delete this leave (${item.rangeLabel})?`)) return;
+    const doctorId = this.resolveDoctorIdForTimings();
+    this.timingsService.deleteLeave(doctorId, item.recordId).subscribe({
+      next: () => {
+        this.loadTimingsFromApi({ fallbackToDemo: false });
+      },
+      error: (err) => {
+        console.error('Delete leave failed', err);
+        this.scheduleApiError = err?.error?.message || err?.message || 'Failed to delete leave.';
+      }
+    });
   }
 
   onEditSpecificDay(item: ManageSpecificDayItem): void {
-    this.onAddSpecificDay(); // TODO: open edit dialog with item.raw when supported
+    const doctorId = this.resolveDoctorIdForTimings();
+    const o = item.raw ;
+    const footerActions: DialogFooterAction[] = [
+      { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
+      { id: 'back', text: 'Previous', color: 'secondary', appearance: 'stroked' },
+      { id: 'apply', text: 'Update Override', color: 'primary', appearance: 'raised' }
+    ];
+    const ref = this.dialogService.openDialog(AvailabilitySetupDialogComponent, {
+      title: 'Edit Specific Day Override',
+      hideHeader: false,
+      width: '980px',
+      maxWidth: '96vw',
+      maxHeight: '90vh',
+      footerActions,
+      data: {
+        doctorId,
+        editOverride: {
+          recordId: item.raw.recordId,
+          date: item.raw.date,
+          startTime: o.startTime ?? '09:00',
+          endTime: o.endTime ?? '17:00',
+          breaks: o.breaks ?? [],
+          notes: o.notes,
+          schedulingType: o.schedulingType ?? 'slots',
+          slotDurationMinutes: o.slotDurationMinutes ?? 30,
+          maxAppointmentsPerSlot: o.maxAppointmentsPerSlot ?? 1,
+          bufferMinutes: o.bufferTimeSeconds != null ? Math.round(o.bufferTimeSeconds / 60) : 10
+        }
+      }
+    });
+    ref.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.loadTimingsFromApi({ fallbackToDemo: false });
+      }
+    });
   }
 
-  onDeleteSpecificDay(_item: ManageSpecificDayItem): void {
-    // TODO: wire to delete API when available
+  onDeleteSpecificDay(item: ManageSpecificDayItem): void {
+    if (!confirm(`Delete this override (${item.rangeLabel})?`)) return;
+    const doctorId = this.resolveDoctorIdForTimings();
+    this.timingsService.deleteOverride(doctorId, item.recordId).subscribe({
+      next: () => {
+        this.loadTimingsFromApi({ fallbackToDemo: false });
+      },
+      error: (err) => {
+        console.error('Delete override failed', err);
+        this.scheduleApiError = err?.error?.message || err?.message || 'Failed to delete override.';
+      }
+    });
   }
 
-  onEditWeeklyRoutine(_item: ManageWeeklyRoutineItem): void {
-    this.onAddWeeklyRoutine(); // TODO: open edit dialog with item when supported
+  onEditWeeklyRoutine(item: ManageWeeklyRoutineItem): void {
+    const doctorId = this.resolveDoctorIdForTimings();
+    const o = item.raw;
+    const footerActions: DialogFooterAction[] = [
+      { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
+      { id: 'back', text: 'Previous', color: 'secondary', appearance: 'stroked' },
+      { id: 'apply', text: 'Update Weekly Routine', color: 'primary', appearance: 'raised' }
+    ];
+    const ref = this.dialogService.openDialog(AvailabilitySetupDialogComponent, {
+      title: 'Edit Weekly Routine',
+      hideHeader: false,
+      width: '980px',
+      maxWidth: '96vw',
+      maxHeight: '90vh',
+      footerActions,
+      data: {
+        doctorId,
+        editWeekly: {
+          ruleId: item.ruleId,
+          weekdays: item.days,
+          startTime: o.startTime ?? '09:00',
+          endTime: o.endTime ?? '17:00',
+          breaks: o.breaks ?? [],
+          notes: o.notes,
+          schedulingType: o.schedulingType ?? 'slots',
+          slotDurationMinutes: o.slotDurationMinutes ?? 30,
+          maxAppointmentsPerSlot: o.maxAppointmentsPerSlot ?? 1,
+          bufferMinutes: o.bufferTimeSeconds != null ? Math.round(o.bufferTimeSeconds / 60) : 10
+        }
+      }
+    });
+    ref.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.loadTimingsFromApi({ fallbackToDemo: false });
+      }
+    });
   }
 
-  onDeleteWeeklyRoutine(_item: ManageWeeklyRoutineItem): void {
-    // TODO: wire to delete API when available
+  onDeleteWeeklyRoutine(item: ManageWeeklyRoutineItem): void {
+    if (!confirm(`Delete this weekly routine (${item.timeLabel})?`)) return;
+    const doctorId = this.resolveDoctorIdForTimings();
+    this.timingsService.deleteWeekly(doctorId, item.ruleId).subscribe({
+      next: () => {
+        this.loadTimingsFromApi({ fallbackToDemo: false });
+      },
+      error: (err) => {
+        console.error('Delete weekly routine failed', err);
+        this.scheduleApiError = err?.error?.message || err?.message || 'Failed to delete weekly routine.';
+      }
+    });
   }
 
   // ---- Manage UI actions (mock) ----
@@ -1652,15 +1834,15 @@ export class ScheduleComponent implements OnInit {
     }
 
     if (scope === 'p2') {
-      this.onAddSpecificDay();
+      
     }
 
     if (scope === 'p3') {
-      this.onAddWeeklyRoutine();
+      
     }
 
     if (scope === 'p4') {
-      this.openDailyBaseDialog(); // 👈 फक्त dialog उघड
+      this.openDailyBaseDialog();
     }
   }
 

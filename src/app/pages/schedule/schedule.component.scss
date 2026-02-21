@@ -1084,6 +1084,20 @@ $transition: var(--transition-fast);
   font-weight: var(--font-weight-bold);
   color: $text-primary;
 }
+.timings-manage-cards{
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(420px,1fr));
+  gap: var(--spacing-xl);
+}
+.timings-manage-list-row{
+  min-width:0;
+}
+
+.timings-manage-list-main{
+  flex:1;
+  min-width:0;
+}
+
 
 .timings-overview-tag {
   font-size: var(--font-size-xs);

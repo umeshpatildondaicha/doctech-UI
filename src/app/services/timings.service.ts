@@ -34,7 +34,8 @@ export class TimingsService {
     return this.http.get<TimingsForecastDay[]>(`${this.doctorsBaseUrl}/${doctorId}/timings/week`, { params });
   }
 
-  // ---- P4 Base ----
+  // ---- P4 Base (Daily base availability) ----
+  // Delete: DELETE ${doctorsBaseUrl}/${doctorId}/timings/base
 
   getBase(doctorId: string): Observable<TimingRule | null> {
     return this.http.get<TimingRule | null>(`${this.doctorsBaseUrl}/${doctorId}/timings/base`);
@@ -44,7 +45,14 @@ export class TimingsService {
     return this.http.put<TimingRule>(`${this.doctorsBaseUrl}/${doctorId}/timings/base`, body);
   }
 
-  // ---- P3 Weekly ----
+  /** Delete daily base availability: DELETE /api/doctors/:doctorId/timings/base */
+  deleteBase(doctorId: string): Observable<void> {
+    return this.http.delete<void>(`${this.doctorsBaseUrl}/${doctorId}/timings/base`);
+  }
+
+  // ---- P3 Weekly (Weekly routine) ----
+  // Edit: PATCH ${doctorsBaseUrl}/${doctorId}/timings/weekly/${weeklyRuleId}
+  // Delete: DELETE ${doctorsBaseUrl}/${doctorId}/timings/weekly/${weeklyRuleId}
 
   listWeekly(doctorId: string): Observable<TimingRule[]> {
     return this.http.get<TimingRule[]>(`${this.doctorsBaseUrl}/${doctorId}/timings/weekly`);
@@ -54,15 +62,20 @@ export class TimingsService {
     return this.http.post<TimingRule>(`${this.doctorsBaseUrl}/${doctorId}/timings/weekly`, body);
   }
 
+  /** Edit weekly routine: PATCH /api/doctors/:doctorId/timings/weekly/:weeklyRuleId */
   updateWeekly(doctorId: string, weeklyRuleId: string, body: WeeklyTimingUpsertRequest): Observable<TimingRule> {
     return this.http.patch<TimingRule>(`${this.doctorsBaseUrl}/${doctorId}/timings/weekly/${weeklyRuleId}`, body);
   }
 
+  /** Delete weekly routine: DELETE /api/doctors/:doctorId/timings/weekly/:weeklyRuleId */
   deleteWeekly(doctorId: string, weeklyRuleId: string): Observable<void> {
     return this.http.delete<void>(`${this.doctorsBaseUrl}/${doctorId}/timings/weekly/${weeklyRuleId}`);
   }
 
-  // ---- P2 Overrides ----
+  // ---- P2 Overrides (Specific day overrides) ----
+  // API base: GET/POST ${doctorsBaseUrl}/${doctorId}/timings/overrides
+  // Edit: PATCH ${doctorsBaseUrl}/${doctorId}/timings/overrides/${overrideId}
+  // Delete: DELETE ${doctorsBaseUrl}/${doctorId}/timings/overrides/${overrideId}
 
   listOverrides(doctorId: string, from: string, to: string): Observable<TimingRule[]> {
     const params = new HttpParams().set('from', from).set('to', to);
@@ -73,10 +86,12 @@ export class TimingsService {
     return this.http.post<TimingRule>(`${this.doctorsBaseUrl}/${doctorId}/timings/overrides`, body);
   }
 
+  /** Edit specific day override: PATCH /api/doctors/:doctorId/timings/overrides/:overrideId */
   updateOverride(doctorId: string, overrideId: number, body: OverrideTimingUpsertRequest): Observable<TimingRule> {
     return this.http.patch<TimingRule>(`${this.doctorsBaseUrl}/${doctorId}/timings/overrides/${overrideId}`, body);
   }
 
+  /** Delete specific day override: DELETE /api/doctors/:doctorId/timings/overrides/:overrideId */
   deleteOverride(doctorId: string, overrideId: number): Observable<void> {
     return this.http.delete<void>(`${this.doctorsBaseUrl}/${doctorId}/timings/overrides/${overrideId}`);
   }

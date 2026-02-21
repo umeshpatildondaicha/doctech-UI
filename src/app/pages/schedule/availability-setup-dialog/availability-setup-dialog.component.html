@@ -60,6 +60,14 @@
             <textarea matInput formControlName="leaveReason" rows="3" placeholder="e.g. Personal time, Medical, Conference..."></textarea>
           </mat-form-field>
         </div>
+
+        <!-- <div class="leave-actions">
+          <button mat-raised-button color="primary" type="button"
+            [disabled]="saving() || !canFinish()"
+            (click)="apply()">
+            {{ saving() ? 'Saving…' : 'Confirm Leave' }}
+          </button>
+        </div> -->
       </div>
     </form>
     </div>
