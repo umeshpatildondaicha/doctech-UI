@@ -9,49 +9,42 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { BreadcrumbItem, PageComponent } from '@lk/core';
+import { BreadcrumbItem, PageComponent, DialogboxService } from '@lk/core';
 
 type NodeId = string;
 type EdgeId = string;
-
 type NodeType = 'hospital' | 'department' | 'subdepartment' | 'doctor' | 'staff';
 
-interface Hospital {
-  id: string;
-  name: string;
-}
+// Optional hierarchy: departments and sub-departments are optional.
+// Valid parent types for each node type:
+//   doctor → hospital | department | subdepartment  (dept & sub-dept are optional)
+//   subdepartment → department                      (sub-dept is optional)
+//   staff → doctor
+const VALID_PARENT_TYPES: Partial<Record<NodeType, NodeType[]>> = {
+  department:    ['hospital'],
+  subdepartment: ['department'],
+  doctor:        ['hospital', 'department', 'subdepartment'],
+  staff:         ['doctor'],
+};
 
-interface Department {
-  id: string;
-  name: string;
-  code: string;
-  headName: string;
-  active: boolean;
-}
-
-interface SubDepartment {
-  id: string;
-  name: string;
-}
-
-interface Doctor {
-  id: string;
-  name: string;
-  specialization?: string;
-  avatar?: string;
-  online?: boolean;
-}
-
-interface StaffMember {
-  id: string;
-  name: string;
-  role?: string;
-}
+interface Hospital     { id: string; name: string; }
+interface Department   { id: string; name: string; code: string; headName: string; active: boolean; }
+interface SubDepartment{ id: string; name: string; }
+interface Doctor       { id: string; name: string; specialization?: string; online?: boolean; }
+interface StaffMember  { id: string; name: string; role?: string; }
 
 interface Feature {
   id: string;
   name: string;
   icon: string;
+  service: string;
+  serviceColor: string;
+}
+
+interface ServiceGroup {
+  service: string;
+  color: string;
+  features: Feature[];
 }
 
 interface FlowNode {
@@ -64,11 +57,7 @@ interface FlowNode {
   y: number;
 }
 
-interface FlowEdge {
-  id: EdgeId;
-  from: NodeId;
-  to: NodeId;
-}
+interface FlowEdge { id: EdgeId; from: NodeId; to: NodeId; }
 
 interface DragState {
   nodeId: NodeId;
@@ -93,70 +82,130 @@ interface DragState {
     MatCheckboxModule,
     MatMenuModule,
     MatSelectModule,
-    MatTooltipModule
+    MatTooltipModule,
   ],
   templateUrl: './hospital.component.html',
-  styleUrl: './hospital.component.scss'
+  styleUrl: './hospital.component.scss',
 })
 export class HospitalComponent implements OnInit {
   @ViewChild('canvasEl', { static: true }) canvasRef!: ElementRef<HTMLElement>;
 
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Admin', route: '/admin-dashboard', icon: 'admin_panel_settings' },
-    { label: 'Hospital', route: '/admin/hospital', icon: 'apartment', isActive: true }
+    { label: 'Hospital', route: '/admin/hospital', icon: 'apartment', isActive: true },
   ];
 
-  // Seed data
+  // ── Seed data ────────────────────────────────────────────────────────────────
   readonly hospitals = signal<Hospital[]>([{ id: 'h1', name: 'Shree Clinic Hospital' }]);
 
   readonly departments = signal<Department[]>([
-    { id: 'dep1', name: 'Cardiology Dept', code: 'DEPT-CRD-01', headName: 'Dr. Aris Thorne', active: true },
-    { id: 'dep2', name: 'General Medicine Dept', code: 'DEPT-GEN-01', headName: 'Dr. Amit Deshmukh', active: true },
-    { id: 'dep3', name: 'Pediatrics Dept', code: 'DEPT-PED-01', headName: 'Dr. Neha Rao', active: true },
-    { id: 'dep4', name: 'Orthopedics Dept', code: 'DEPT-ORT-01', headName: 'Dr. Sameer Kulkarni', active: false }
+    { id: 'dep1', name: 'Cardiology',       code: 'DEPT-CRD-01', headName: 'Dr. Aris Thorne',     active: true },
+    { id: 'dep2', name: 'General Medicine', code: 'DEPT-GEN-01', headName: 'Dr. Amit Deshmukh',   active: true },
+    { id: 'dep3', name: 'Pediatrics',       code: 'DEPT-PED-01', headName: 'Dr. Neha Rao',         active: true },
+    { id: 'dep4', name: 'Orthopedics',      code: 'DEPT-ORT-01', headName: 'Dr. Sameer Kulkarni', active: false },
   ]);
 
   readonly subDepartments = signal<SubDepartment[]>([
-    { id: 'sub1', name: 'Surgery Sub-Dept' },
-    { id: 'sub2', name: 'Diagnostics Sub-Dept' },
-    { id: 'sub3', name: 'Rehab Sub-Dept' }
+    { id: 'sub1', name: 'Surgery'     },
+    { id: 'sub2', name: 'Diagnostics' },
+    { id: 'sub3', name: 'Rehab'       },
   ]);
 
   readonly doctors = signal<Doctor[]>([
-    { id: 'd1', name: 'Dr. Amit Deshmukh', specialization: 'General Medicine', online: true },
-    { id: 'd2', name: 'Dr. Neha Rao', specialization: 'Pediatrics', online: true },
-    { id: 'd3', name: 'Dr. Sameer Kulkarni', specialization: 'Orthopedics', online: false }
+    { id: 'd1', name: 'Dr. Amit Deshmukh',   specialization: 'General Medicine', online: true  },
+    { id: 'd2', name: 'Dr. Neha Rao',         specialization: 'Pediatrics',       online: true  },
+    { id: 'd3', name: 'Dr. Sameer Kulkarni', specialization: 'Orthopedics',      online: false },
   ]);
 
   readonly staff = signal<StaffMember[]>([
-    { id: 's1', name: 'Aarav Kulkarni', role: 'Reception' },
-    { id: 's2', name: 'Meera Iyer', role: 'Nurse' },
-    { id: 's3', name: 'Kabir Sharma', role: 'Lab Tech' },
-    { id: 's4', name: 'Anaya Singh', role: 'Billing' },
-    { id: 's5', name: 'Rohan Patel', role: 'Pharmacist' }
+    { id: 's1', name: 'Aarav Kulkarni', role: 'Reception'  },
+    { id: 's2', name: 'Meera Iyer',     role: 'Nurse'      },
+    { id: 's3', name: 'Kabir Sharma',   role: 'Lab Tech'   },
+    { id: 's4', name: 'Anaya Singh',    role: 'Billing'    },
+    { id: 's5', name: 'Rohan Patel',    role: 'Pharmacist' },
   ]);
 
-  // Available features
+  // ── Features (mirrors Plans page services) ────────────────────────────────
   readonly allFeatures = signal<Feature[]>([
-    { id: 'feat_appointments', name: 'Appointments', icon: 'event' },
-    { id: 'feat_billing', name: 'Billing', icon: 'receipt_long' },
-    { id: 'feat_lab_reports', name: 'Lab Reports', icon: 'biotech' },
-    { id: 'feat_pharmacy', name: 'Pharmacy', icon: 'medication' },
-    { id: 'feat_telemedicine', name: 'Telemedicine', icon: 'videocam' },
-    { id: 'feat_emr', name: 'EMR', icon: 'description' },
-    { id: 'feat_insurance', name: 'Insurance', icon: 'health_and_safety' },
-    { id: 'feat_inventory', name: 'Inventory', icon: 'inventory_2' }
+    // Basic Service (Blue)
+    { id: 'appointments',  name: 'Appointment Scheduling', icon: 'event',          service: 'Basic Service',    serviceColor: '#2563eb' },
+    { id: 'chat',          name: 'Doctor–Patient Chat',    icon: 'chat',           service: 'Basic Service',    serviceColor: '#2563eb' },
+    { id: 'prescriptions', name: 'Digital Prescriptions',  icon: 'description',    service: 'Basic Service',    serviceColor: '#2563eb' },
+    { id: 'patient-mgmt',  name: 'Patient Management',     icon: 'people',         service: 'Basic Service',    serviceColor: '#2563eb' },
+    { id: 'reports',       name: 'Analytics & Reports',    icon: 'bar_chart',      service: 'Basic Service',    serviceColor: '#2563eb' },
+    { id: 'notifications', name: 'Smart Notifications',    icon: 'notifications',  service: 'Basic Service',    serviceColor: '#2563eb' },
+    // Physiotherapy (Green)
+    { id: 'exercise-plans',    name: 'Exercise Plan Creator',    icon: 'fitness_center', service: 'Physiotherapy', serviceColor: '#059669' },
+    { id: 'diet-basic',        name: 'Basic Diet Guidance',      icon: 'restaurant',     service: 'Physiotherapy', serviceColor: '#059669' },
+    { id: 'progress-tracking', name: 'Progress Tracking',        icon: 'trending_up',    service: 'Physiotherapy', serviceColor: '#059669' },
+    { id: 'assessment',        name: 'Patient Assessment Forms', icon: 'assignment',     service: 'Physiotherapy', serviceColor: '#059669' },
+    { id: 'video-library',     name: 'Exercise Video Library',   icon: 'play_circle',    service: 'Physiotherapy', serviceColor: '#059669' },
+    // Nutrition Service (Amber)
+    { id: 'diet-planning',      name: 'Advanced Diet Planning',   icon: 'menu_book',     service: 'Nutrition Service', serviceColor: '#d97706' },
+    { id: 'custom-forms',       name: 'Custom Assessment Forms',  icon: 'dynamic_form',  service: 'Nutrition Service', serviceColor: '#d97706' },
+    { id: 'meal-builder',       name: 'Meal Plan Builder',        icon: 'kitchen',       service: 'Nutrition Service', serviceColor: '#d97706' },
+    { id: 'nutrition-analysis', name: 'Nutritional Analysis',     icon: 'analytics',     service: 'Nutrition Service', serviceColor: '#d97706' },
+    { id: 'food-database',      name: 'Food Database Access',     icon: 'library_books', service: 'Nutrition Service', serviceColor: '#d97706' },
+    // Mental Wellness (Purple)
+    { id: 'mental-assessment',     name: 'Mental Health Assessments',  icon: 'psychology_alt',      service: 'Mental Wellness', serviceColor: '#7c3aed' },
+    { id: 'therapy-schedule',      name: 'Therapy Session Scheduling', icon: 'calendar_today',      service: 'Mental Wellness', serviceColor: '#7c3aed' },
+    { id: 'mood-tracking',         name: 'Mood & Emotion Tracking',    icon: 'sentiment_satisfied', service: 'Mental Wellness', serviceColor: '#7c3aed' },
+    { id: 'custom-questionnaires', name: 'Custom Questionnaires',      icon: 'quiz',                service: 'Mental Wellness', serviceColor: '#7c3aed' },
   ]);
 
-  // Feature IDs enabled for the hospital
   readonly hospitalFeatureIds = signal<string[]>([
-    'feat_appointments', 'feat_billing', 'feat_lab_reports', 'feat_pharmacy'
+    'appointments', 'chat', 'prescriptions', 'patient-mgmt', 'reports',
+    'exercise-plans', 'diet-basic', 'progress-tracking', 'assessment',
   ]);
 
-  // Feature IDs per doctor (keyed by doctor entityId)
   readonly doctorFeatureMap = signal<Record<string, string[]>>({});
 
   readonly hospitalFeatureCount = computed(() => this.hospitalFeatureIds().length);
+
+  // ── Org stats ────────────────────────────────────────────────────────────────
+  readonly statDepts   = computed(() => this.nodes().filter(n => n.type === 'department').length);
+  readonly statSubDepts= computed(() => this.nodes().filter(n => n.type === 'subdepartment').length);
+  readonly statDoctors = computed(() => this.nodes().filter(n => n.type === 'doctor').length);
+  readonly statStaff   = computed(() => this.nodes().filter(n => n.type === 'staff').length);
+  readonly statOnline  = computed(() =>
+    this.nodes().filter(n =>
+      n.type === 'doctor' && (this.doctors().find(d => d.id === n.entityId)?.online ?? false)
+    ).length
+  );
+
+  // ── Service group collapse state ─────────────────────────────────────────────
+  readonly collapsedServices = signal<Set<string>>(new Set());
+
+  toggleServiceGroup(key: string): void {
+    const s = new Set(this.collapsedServices());
+    if (s.has(key)) s.delete(key); else s.add(key);
+    this.collapsedServices.set(s);
+  }
+
+  isServiceCollapsed(key: string): boolean {
+    return this.collapsedServices().has(key);
+  }
+
+  // ── Feature helpers ───────────────────────────────────────────────────────────
+  allFeaturesByService(): ServiceGroup[] {
+    const map = new Map<string, ServiceGroup>();
+    for (const f of this.allFeatures()) {
+      if (!map.has(f.service)) map.set(f.service, { service: f.service, color: f.serviceColor, features: [] });
+      map.get(f.service)!.features.push(f);
+    }
+    return Array.from(map.values());
+  }
+
+  hospitalFeaturesByService(): ServiceGroup[] {
+    const ids = new Set(this.hospitalFeatureIds());
+    const map = new Map<string, ServiceGroup>();
+    for (const f of this.allFeatures()) {
+      if (!ids.has(f.id)) continue;
+      if (!map.has(f.service)) map.set(f.service, { service: f.service, color: f.serviceColor, features: [] });
+      map.get(f.service)!.features.push(f);
+    }
+    return Array.from(map.values());
+  }
 
   hospitalFeatures(): Feature[] {
     const ids = new Set(this.hospitalFeatureIds());
@@ -167,11 +216,6 @@ export class HospitalComponent implements OnInit {
     return this.doctorFeatureMap()[entityId]?.length ?? 0;
   }
 
-  doctorFeatures(entityId: string): Feature[] {
-    const ids = new Set(this.doctorFeatureMap()[entityId] ?? []);
-    return this.allFeatures().filter(f => ids.has(f.id));
-  }
-
   isHospitalFeatureEnabled(featureId: string): boolean {
     return this.hospitalFeatureIds().includes(featureId);
   }
@@ -180,15 +224,50 @@ export class HospitalComponent implements OnInit {
     return (this.doctorFeatureMap()[entityId] ?? []).includes(featureId);
   }
 
+  areAllHospitalServiceFeaturesEnabled(grp: ServiceGroup): boolean {
+    return grp.features.every(f => this.isHospitalFeatureEnabled(f.id));
+  }
+
+  areAllDoctorServiceFeaturesEnabled(grp: ServiceGroup, entityId: string): boolean {
+    return grp.features.every(f => this.isDoctorFeatureEnabled(entityId, f.id));
+  }
+
+  toggleAllHospitalServiceFeatures(grp: ServiceGroup): void {
+    const allOn = this.areAllHospitalServiceFeaturesEnabled(grp);
+    const ids = new Set(grp.features.map(f => f.id));
+    if (allOn) {
+      this.hospitalFeatureIds.set(this.hospitalFeatureIds().filter(id => !ids.has(id)));
+      const map = { ...this.doctorFeatureMap() };
+      for (const key of Object.keys(map)) map[key] = map[key].filter(id => !ids.has(id));
+      this.doctorFeatureMap.set(map);
+    } else {
+      const toAdd = grp.features.map(f => f.id).filter(id => !this.hospitalFeatureIds().includes(id));
+      this.hospitalFeatureIds.set([...this.hospitalFeatureIds(), ...toAdd]);
+    }
+    this.save();
+  }
+
+  toggleAllDoctorServiceFeatures(grp: ServiceGroup, entityId: string): void {
+    const allOn = this.areAllDoctorServiceFeaturesEnabled(grp, entityId);
+    const map = { ...this.doctorFeatureMap() };
+    const current = map[entityId] ?? [];
+    const ids = new Set(grp.features.map(f => f.id));
+    if (allOn) {
+      map[entityId] = current.filter(id => !ids.has(id));
+    } else {
+      const toAdd = grp.features.map(f => f.id).filter(id => !current.includes(id));
+      map[entityId] = [...current, ...toAdd];
+    }
+    this.doctorFeatureMap.set(map);
+    this.save();
+  }
+
   toggleHospitalFeature(featureId: string): void {
     const current = this.hospitalFeatureIds();
     if (current.includes(featureId)) {
       this.hospitalFeatureIds.set(current.filter(id => id !== featureId));
-      // Also remove from all doctors who had this feature
       const map = { ...this.doctorFeatureMap() };
-      for (const key of Object.keys(map)) {
-        map[key] = map[key].filter(id => id !== featureId);
-      }
+      for (const key of Object.keys(map)) map[key] = map[key].filter(id => id !== featureId);
       this.doctorFeatureMap.set(map);
     } else {
       this.hospitalFeatureIds.set([...current, featureId]);
@@ -199,283 +278,289 @@ export class HospitalComponent implements OnInit {
   toggleDoctorFeature(entityId: string, featureId: string): void {
     const map = { ...this.doctorFeatureMap() };
     const current = map[entityId] ?? [];
-    if (current.includes(featureId)) {
-      map[entityId] = current.filter(id => id !== featureId);
-    } else {
-      map[entityId] = [...current, featureId];
-    }
+    map[entityId] = current.includes(featureId)
+      ? current.filter(id => id !== featureId)
+      : [...current, featureId];
     this.doctorFeatureMap.set(map);
     this.save();
   }
 
+  // ── Flow state ────────────────────────────────────────────────────────────────
   readonly nodes = signal<FlowNode[]>([]);
   readonly edges = signal<FlowEdge[]>([]);
 
-  // Zoom
-  readonly zoom = signal(1);
-  private readonly ZOOM_MIN = 0.25;
-  private readonly ZOOM_MAX = 2;
+  readonly zoom        = signal(1);
+  readonly panX        = signal(0);
+  readonly panY        = signal(0);
+  readonly isDragging  = signal(false);
+  readonly isPanning   = signal(false);
+  readonly linkMode    = signal(false);
+  readonly linkSourceId= signal<NodeId | null>(null);
+  readonly selectedEdgeId   = signal<EdgeId | null>(null);
+  readonly selectedNodeId   = signal<NodeId | null>(null);
+  readonly showConfigPanel  = signal(true);
+  readonly showNodePicker   = signal(false);
+  readonly showAddStaffForm = signal(false);
+  readonly showAddDoctorForm= signal(false);
+
+  readonly lastSavedAt = signal<Date | null>(null);
+
+  private readonly ZOOM_MIN  = 0.25;
+  private readonly ZOOM_MAX  = 2;
   private readonly ZOOM_STEP = 0.1;
-  readonly zoomPercent = computed(() => Math.round(this.zoom() * 100));
-
-  // Layout constants
-  readonly NODE_WIDTH = 280;
-  readonly NODE_HEIGHT = 72;
-  private readonly ROW_GAP = 100;
-  private readonly COL_GAP = 300;
+  readonly NODE_WIDTH        = 280;
+  readonly NODE_HEIGHT       = 72;
+  private readonly ROW_GAP   = 100;
+  private readonly COL_GAP   = 320;
   private readonly CANVAS_PADDING = 80;
-
-  nodeHeight(_type: NodeType): number {
-    return this.NODE_HEIGHT;
-  }
-
   private readonly MAX_NODE_HEIGHT = 72;
 
-  // SVG canvas size (auto-grows to fit all nodes)
+  private dragState: DragState | null = null;
+  private panState: { startX: number; startY: number; startPanX: number; startPanY: number } | null = null;
+  private draggedPickerItem: { id: string; type: NodeType } | null = null;
+
+  readonly pickerCategory = signal<'all' | NodeType>('all');
+  pickerSearch = '';
+
+  newStaffName  = '';
+  newStaffRole  = '';
+  newDoctorName = '';
+  newDoctorSpec = '';
+
+  readonly zoomPercent = computed(() => Math.round(this.zoom() * 100));
+
   readonly canvasWidth = computed(() => {
     const ns = this.nodes();
     if (ns.length === 0) return 4000;
-    const maxX = Math.max(...ns.map(n => n.x + this.NODE_WIDTH));
-    return Math.max(4000, maxX + this.CANVAS_PADDING * 4);
+    return Math.max(4000, Math.max(...ns.map(n => n.x + this.NODE_WIDTH)) + this.CANVAS_PADDING * 4);
   });
 
   readonly canvasHeight = computed(() => {
     const ns = this.nodes();
     if (ns.length === 0) return 4000;
-    const maxY = Math.max(...ns.map(n => n.y + this.MAX_NODE_HEIGHT));
-    return Math.max(4000, maxY + this.CANVAS_PADDING * 4);
+    return Math.max(4000, Math.max(...ns.map(n => n.y + this.MAX_NODE_HEIGHT)) + this.CANVAS_PADDING * 4);
   });
 
-  // Pan + Zoom (no scrollbars)
-  readonly panX = signal(0);
-  readonly panY = signal(0);
   readonly canvasTransform = computed(
     () => `translate(${this.panX()}px, ${this.panY()}px) scale(${this.zoom()})`
   );
 
-  // Drag state (node drag vs canvas pan)
-  private dragState: DragState | null = null;
-  readonly isDragging = signal(false);
-  private panState: { startX: number; startY: number; startPanX: number; startPanY: number } | null = null;
-  readonly isPanning = signal(false);
-
-  // Node picker panel (replaces individual add buttons)
-  readonly showNodePicker = signal(false);
-  readonly pickerCategory = signal<'all' | 'department' | 'subdepartment' | 'doctor' | 'staff'>('all');
-  pickerSearch = '';
-
-  readonly pickerItems = computed(() => {
-    const q = this.pickerSearch.toLowerCase().trim();
-    const cat = this.pickerCategory();
-    const items: { id: string; name: string; type: NodeType; icon: string; sub?: string }[] = [];
-
-    if (cat === 'all' || cat === 'department') {
-      for (const d of this.departments()) {
-        items.push({ id: d.id, name: d.name, type: 'department', icon: 'assets/flow-icons/dept.svg', sub: d.code });
-      }
-    }
-    if (cat === 'all' || cat === 'subdepartment') {
-      for (const s of this.subDepartments()) {
-        items.push({ id: s.id, name: s.name, type: 'subdepartment', icon: 'assets/flow-icons/sub-dept.svg' });
-      }
-    }
-    if (cat === 'all' || cat === 'doctor') {
-      for (const d of this.doctors()) {
-        items.push({ id: d.id, name: d.name, type: 'doctor', icon: 'assets/flow-icons/drmale.svg', sub: d.specialization });
-      }
-    }
-    if (cat === 'all' || cat === 'staff') {
-      for (const s of this.staff()) {
-        items.push({ id: s.id, name: s.name, type: 'staff', icon: 'assets/flow-icons/staff.svg', sub: s.role });
-      }
-    }
-
-    if (!q) return items;
-    return items.filter(i => i.name.toLowerCase().includes(q) || (i.sub?.toLowerCase().includes(q) ?? false));
-  });
-
-  // Add new staff form
-  readonly showAddStaffForm = signal(false);
-  newStaffName = '';
-  newStaffRole = '';
-
-  // Linking mode (manual edge creation)
-  readonly linkMode = signal(false);
-  readonly linkSourceId = signal<NodeId | null>(null);
-
-  // Selected edge (for deletion on canvas)
-  readonly selectedEdgeId = signal<EdgeId | null>(null);
-
-  // Selection
-  readonly selectedNodeId = signal<NodeId | null>(null);
-  readonly showConfigPanel = signal(true);
-
   readonly selectedNode = computed(() => {
     const id = this.selectedNodeId();
-    return id ? this.nodes().find((n) => n.id === id) ?? null : null;
+    return id ? (this.nodes().find(n => n.id === id) ?? null) : null;
   });
 
-  readonly hospitalRoot = computed(() => this.nodes().find((n) => n.type === 'hospital') ?? null);
-
-  readonly connectedDepartments = computed(() => {
-    const root = this.hospitalRoot();
-    if (!root) return [];
-    const childIds = new Set(this.edges().filter((e) => e.from === root.id).map((e) => e.to));
-    return this.nodes().filter((n) => n.type === 'department' && childIds.has(n.id));
-  });
-
-  readonly connectedDoctorsForSelectedDept = computed(() => {
-    const node = this.selectedNode();
-    if (!node || node.type !== 'department') return [];
-    const childIds = new Set(this.edges().filter((e) => e.from === node.id).map((e) => e.to));
-    return this.nodes().filter((n) => n.type === 'doctor' && childIds.has(n.id));
-  });
-
-  readonly connectedStaffForSelectedDoctor = computed(() => {
-    const node = this.selectedNode();
-    if (!node || node.type !== 'doctor') return [];
-    const staffIds = new Set(this.edges().filter((e) => e.from === node.id).map((e) => e.to));
-    return this.nodes().filter((n) => n.type === 'staff' && staffIds.has(n.id));
-  });
+  readonly hospitalRoot = computed(() => this.nodes().find(n => n.type === 'hospital') ?? null);
 
   readonly selectedNodeChildren = computed(() => {
     const node = this.selectedNode();
     if (!node) return [];
-    const childIds = new Set(this.edges().filter((e) => e.from === node.id).map((e) => e.to));
-    return this.nodes().filter((n) => childIds.has(n.id));
+    const childIds = new Set(this.edges().filter(e => e.from === node.id).map(e => e.to));
+    return this.nodes().filter(n => childIds.has(n.id));
   });
 
-  childTypeLabel(parentType: NodeType): string {
-    switch (parentType) {
-      case 'hospital': return 'Departments';
-      case 'department': return 'Sub-departments';
-      case 'subdepartment': return 'Doctors';
-      case 'doctor': return 'Staff';
-      default: return 'Children';
-    }
-  }
+  readonly connectedDepartments = computed(() => {
+    const root = this.hospitalRoot();
+    if (!root) return [];
+    const childIds = new Set(this.edges().filter(e => e.from === root.id).map(e => e.to));
+    return this.nodes().filter(n => n.type === 'department' && childIds.has(n.id));
+  });
 
-  nodeLabel(n: FlowNode): string {
-    switch (n.type) {
-      case 'hospital': return 'Hospital';
-      case 'department': return 'Department';
-      case 'subdepartment': return 'Sub-dept';
-      case 'doctor': return 'Doctor';
-      case 'staff': return 'Staff';
-    }
-  }
+  readonly pickerItems = computed(() => {
+    const q = this.pickerSearch.toLowerCase().trim();
+    const cat = this.pickerCategory();
+    const items: { id: string; name: string; type: NodeType; sub?: string }[] = [];
+    if (cat === 'all' || cat === 'department')    this.departments().forEach(d => items.push({ id: d.id, name: d.name, type: 'department', sub: d.code }));
+    if (cat === 'all' || cat === 'subdepartment') this.subDepartments().forEach(s => items.push({ id: s.id, name: s.name, type: 'subdepartment' }));
+    if (cat === 'all' || cat === 'doctor')        this.doctors().forEach(d => items.push({ id: d.id, name: d.name, type: 'doctor', sub: d.specialization }));
+    if (cat === 'all' || cat === 'staff')         this.staff().forEach(s => items.push({ id: s.id, name: s.name, type: 'staff', sub: s.role }));
+    if (!q) return items;
+    return items.filter(i => i.name.toLowerCase().includes(q) || (i.sub?.toLowerCase().includes(q) ?? false));
+  });
 
-  nodeMeta(n: FlowNode): string {
-    const count = this.edges().filter((e) => e.from === n.id).length;
-    switch (n.type) {
-      case 'hospital': return `${count} Dept${count !== 1 ? 's' : ''}`;
-      case 'department': return `${count} Sub-dept${count !== 1 ? 's' : ''}`;
-      case 'subdepartment': {
-        const staffCount = this.descendantCountByType(n.id, 'staff');
-        return `${staffCount} Staff Member${staffCount !== 1 ? 's' : ''}`;
-      }
-      case 'doctor': return `${count} Staff`;
-      case 'staff': return n.subtitle ?? '—';
-    }
-  }
-
-  departmentInfo(node: FlowNode): Department | null {
-    if (node.type !== 'department') return null;
-    return this.departments().find((d) => d.id === node.entityId) ?? null;
-  }
-
-  doctorInfo(node: FlowNode): Doctor | null {
-    if (node.type !== 'doctor') return null;
-    return this.doctors().find((d) => d.id === node.entityId) ?? null;
-  }
-
-  private descendantCountByType(startId: NodeId, type: NodeType): number {
-    const edges = this.edges();
-    const nodes = this.nodes();
-    const nodeById = new Map(nodes.map((n) => [n.id, n]));
-    const seen = new Set<NodeId>();
-    const q: NodeId[] = [startId];
-    let count = 0;
-    while (q.length) {
-      const cur = q.shift()!;
-      if (seen.has(cur)) continue;
-      seen.add(cur);
-      for (const e of edges) {
-        if (e.from !== cur) continue;
-        const child = nodeById.get(e.to);
-        if (!child) continue;
-        if (child.type === type) count += 1;
-        q.push(child.id);
-      }
-    }
-    return count;
-  }
-
-  getInitials(name: string): string {
-    return name
-      .replace(/^Dr\.\s*/i, '')
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map(w => w[0].toUpperCase())
-      .join('');
-  }
-
-  nodeIcon(type: NodeType): string {
+  // ── Node helpers ──────────────────────────────────────────────────────────────
+  nodeMatIcon(type: NodeType): string {
     switch (type) {
-      case 'hospital': return 'assets/flow-icons/hospital.svg';
-      case 'department': return 'assets/flow-icons/dept.svg';
-      case 'subdepartment': return 'assets/flow-icons/sub-dept.svg';
-      case 'doctor': return 'assets/flow-icons/drmale.svg';
-      case 'staff': return 'assets/flow-icons/staff.svg';
+      case 'hospital':     return 'local_hospital';
+      case 'department':   return 'business';
+      case 'subdepartment':return 'account_tree';
+      case 'doctor':       return 'stethoscope';
+      case 'staff':        return 'badge';
     }
   }
 
   nodeColor(type: NodeType): string {
     switch (type) {
-      case 'hospital': return '#6ee7b7';
-      case 'department': return '#93c5fd';
-      case 'subdepartment': return '#c4b5fd';
-      case 'doctor': return '#67e8f9';
-      case 'staff': return '#fdba74';
+      case 'hospital':     return '#0d9488';
+      case 'department':   return '#2563eb';
+      case 'subdepartment':return '#7c3aed';
+      case 'doctor':       return '#0891b2';
+      case 'staff':        return '#d97706';
     }
   }
 
-  ngOnInit(): void {
-    this.load();
+  nodeHeight(_type: NodeType): number { return this.NODE_HEIGHT; }
 
-    const hasHospital = this.nodes().some((n) => n.type === 'hospital');
-    if (!hasHospital) {
-      const h = this.hospitals()[0];
-      const root: FlowNode = {
-        id: 'hospital_root',
-        type: 'hospital',
-        entityId: h?.id ?? 'h1',
-        title: h?.name ?? 'Hospital',
-        subtitle: 'Root',
-        x: 0,
-        y: 0
-      };
-      this.nodes.set([root, ...this.nodes()]);
-      this.recomputeLayout();
+  nodeLabel(n: FlowNode): string {
+    switch (n.type) {
+      case 'hospital':     return 'Hospital';
+      case 'department':   return 'Department';
+      case 'subdepartment':return 'Sub-dept';
+      case 'doctor':       return 'Doctor';
+      case 'staff':        return 'Staff';
     }
-    this.save();
   }
 
-  // --- Zoom at pointer ---
-  zoomIn(): void {
-    this.zoom.set(this.clampZoom(this.zoom() + this.ZOOM_STEP));
+  nodeMeta(n: FlowNode): string {
+    const count = this.edges().filter(e => e.from === n.id).length;
+    switch (n.type) {
+      case 'hospital':      return `${count} Dept${count === 1 ? '' : 's'}`;
+      case 'department':    return `${count} child${count === 1 ? '' : 'ren'}`;
+      case 'subdepartment': return `${this.descendantCountByType(n.id, 'staff')} Staff`;
+      case 'doctor':        return `${count} Staff`;
+      case 'staff':         return n.subtitle ?? '—';
+    }
   }
 
-  zoomOut(): void {
-    this.zoom.set(this.clampZoom(this.zoom() - this.ZOOM_STEP));
+  departmentInfo(node: FlowNode): Department | null {
+    if (node.type !== 'department') return null;
+    return this.departments().find(d => d.id === node.entityId) ?? null;
   }
 
-  zoomReset(): void {
-    this.zoom.set(1);
-    this.panX.set(0);
-    this.panY.set(0);
+  doctorInfo(node: FlowNode): Doctor | null {
+    if (node.type !== 'doctor') return null;
+    return this.doctors().find(d => d.id === node.entityId) ?? null;
   }
+
+  getInitials(name: string): string {
+    return name.replace(/^Dr\.\s*/i, '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+  }
+
+  configPanelTitle(): string {
+    const n = this.selectedNode();
+    if (!n) return 'Org Overview';
+    switch (n.type) {
+      case 'hospital':     return 'Hospital Settings';
+      case 'department':   return 'Department Details';
+      case 'subdepartment':return 'Sub-Dept Details';
+      case 'doctor':       return 'Doctor Profile';
+      case 'staff':        return 'Staff Profile';
+    }
+  }
+
+  childTypeLabel(parentType: NodeType): string {
+    switch (parentType) {
+      case 'hospital':     return 'Departments & Doctors';
+      case 'department':   return 'Sub-Depts & Doctors';
+      case 'subdepartment':return 'Doctors';
+      case 'doctor':       return 'Staff Members';
+      default:             return 'Children';
+    }
+  }
+
+  // ── Optional hierarchy – picker ───────────────────────────────────────────────
+  pickerItemDisabled(itemType: NodeType): boolean {
+    const sel = this.selectedNode();
+    switch (itemType) {
+      case 'department':    return false;  // always allowed – auto-connects to hospital root
+      case 'subdepartment': return sel?.type !== 'department';
+      case 'doctor':        return !sel || !(VALID_PARENT_TYPES['doctor'] as NodeType[]).includes(sel.type);
+      case 'staff':         return sel?.type !== 'doctor';
+      default:              return true;
+    }
+  }
+
+  pickerItemHint(itemType: NodeType): string {
+    switch (itemType) {
+      case 'subdepartment': return 'Select a Department node first';
+      case 'doctor':        return 'Select Hospital, Dept or Sub-dept node first';
+      case 'staff':         return 'Select a Doctor node first';
+      default:              return '';
+    }
+  }
+
+  setPickerCategory(cat: 'all' | NodeType): void {
+    this.pickerCategory.set(cat);
+  }
+
+  // ── Quick add child from node button ─────────────────────────────────────────
+  quickAddChild(node: FlowNode, ev: Event): void {
+    ev.stopPropagation();
+    this.selectedNodeId.set(node.id);
+    this.showNodePicker.set(true);
+    this.pickerSearch = '';
+    switch (node.type) {
+      case 'hospital':     this.setPickerCategory('department');    break;
+      case 'department':   this.setPickerCategory('doctor');        break;
+      case 'subdepartment':this.setPickerCategory('doctor');        break;
+      case 'doctor':       this.setPickerCategory('staff');         break;
+    }
+  }
+
+  quickAddLabel(type: NodeType): string {
+    switch (type) {
+      case 'hospital':     return 'Add Department or Doctor';
+      case 'department':   return 'Add Sub-Dept or Doctor';
+      case 'subdepartment':return 'Add Doctor';
+      case 'doctor':       return 'Add Staff';
+      default:             return 'Add';
+    }
+  }
+
+  // ── Delete selected node ──────────────────────────────────────────────────────
+  deleteSelectedNode(): void {
+    const id = this.selectedNodeId();
+    if (id) this.removeNode(id);
+  }
+
+  // ── Keyboard shortcuts ────────────────────────────────────────────────────────
+  @HostListener('document:keydown', ['$event'])
+  onKeyDown(ev: KeyboardEvent): void {
+    const tag = (ev.target as HTMLElement).tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+    if (ev.key === 'Escape') {
+      if (this.linkMode()) this.cancelLinkMode();
+      else { this.selectedNodeId.set(null); this.selectedEdgeId.set(null); }
+      ev.preventDefault();
+      return;
+    }
+
+    if (ev.key === 'Delete' || ev.key === 'Backspace') {
+      const selEdge = this.selectedEdgeId();
+      if (selEdge) { this.removeEdgeById(selEdge); ev.preventDefault(); return; }
+      const selNode = this.selectedNodeId();
+      if (selNode) {
+        const node = this.nodes().find(n => n.id === selNode);
+        if (node?.type !== 'hospital') { this.removeNode(selNode); ev.preventDefault(); }
+      }
+    }
+  }
+
+  // ── Fit to screen ─────────────────────────────────────────────────────────────
+  fitToScreen(): void {
+    const ns = this.nodes();
+    if (ns.length === 0) return;
+    const el = this.canvasRef?.nativeElement;
+    if (!el) return;
+    const pad = 64;
+    const minX = Math.min(...ns.map(n => n.x));
+    const minY = Math.min(...ns.map(n => n.y));
+    const maxX = Math.max(...ns.map(n => n.x + this.NODE_WIDTH));
+    const maxY = Math.max(...ns.map(n => n.y + this.NODE_HEIGHT));
+    const contentW = maxX - minX + pad * 2;
+    const contentH = maxY - minY + pad * 2;
+    const rect = el.getBoundingClientRect();
+    const newZoom = this.clampZoom(Math.min(rect.width / contentW, rect.height / contentH, 1));
+    this.zoom.set(newZoom);
+    this.panX.set((rect.width  - contentW * newZoom) / 2 + (pad - minX) * newZoom);
+    this.panY.set((rect.height - contentH * newZoom) / 2 + (pad - minY) * newZoom);
+  }
+
+  // ── Zoom ──────────────────────────────────────────────────────────────────────
+  zoomIn():    void { this.zoom.set(this.clampZoom(this.zoom() + this.ZOOM_STEP)); }
+  zoomOut():   void { this.zoom.set(this.clampZoom(this.zoom() - this.ZOOM_STEP)); }
+  zoomReset(): void { this.zoom.set(1); this.panX.set(0); this.panY.set(0); }
 
   private clampZoom(v: number): number {
     return Math.min(this.ZOOM_MAX, Math.max(this.ZOOM_MIN, Math.round(v * 100) / 100));
@@ -483,173 +568,69 @@ export class HospitalComponent implements OnInit {
 
   onCanvasWheel(ev: WheelEvent): void {
     ev.preventDefault();
+    const el = this.canvasRef?.nativeElement;
+    if (!el) return;
 
     if (ev.ctrlKey || ev.metaKey) {
-      // Zoom at pointer
-      const el = this.canvasRef?.nativeElement;
-      if (!el) return;
-
       const oldZoom = this.zoom();
       const dir = ev.deltaY > 0 ? -1 : 1;
       const newZoom = this.clampZoom(oldZoom + dir * this.ZOOM_STEP);
       if (newZoom === oldZoom) return;
-
       const rect = el.getBoundingClientRect();
-      const mx = ev.clientX - rect.left;
-      const my = ev.clientY - rect.top;
-
-      // Point in canvas coords under cursor: (mx - panX) / oldZoom
-      // After zoom, keep that same canvas point under cursor:
-      // mx - newPanX = canvasPoint * newZoom  =>  newPanX = mx - canvasPoint * newZoom
-      const cx = (mx - this.panX()) / oldZoom;
-      const cy = (my - this.panY()) / oldZoom;
-      this.panX.set(mx - cx * newZoom);
-      this.panY.set(my - cy * newZoom);
+      const cx = (ev.clientX - rect.left - this.panX()) / oldZoom;
+      const cy = (ev.clientY - rect.top  - this.panY()) / oldZoom;
+      this.panX.set(ev.clientX - rect.left  - cx * newZoom);
+      this.panY.set(ev.clientY - rect.top   - cy * newZoom);
       this.zoom.set(newZoom);
     } else {
-      // Normal scroll → pan the canvas
       this.panX.set(this.panX() - ev.deltaX);
       this.panY.set(this.panY() - ev.deltaY);
     }
   }
 
-  // --- Node dragging ---
+  // ── Node drag ─────────────────────────────────────────────────────────────────
   onNodeMouseDown(ev: MouseEvent, node: FlowNode): void {
-    if ((ev.target as HTMLElement).closest('.node-x, .node-action')) return;
+    if ((ev.target as HTMLElement).closest('.n-add, .node-action')) return;
     ev.preventDefault();
-    this.dragState = {
-      nodeId: node.id,
-      startMouseX: ev.clientX,
-      startMouseY: ev.clientY,
-      startNodeX: node.x,
-      startNodeY: node.y,
-      moved: false
-    };
+    this.dragState = { nodeId: node.id, startMouseX: ev.clientX, startMouseY: ev.clientY, startNodeX: node.x, startNodeY: node.y, moved: false };
   }
 
-  // Canvas panning (drag on empty space)
   onCanvasMouseDown(ev: MouseEvent): void {
-    // Only start pan if click is directly on the canvas background (not on a node)
     if ((ev.target as HTMLElement).closest('.node')) return;
     ev.preventDefault();
-    this.panState = {
-      startX: ev.clientX,
-      startY: ev.clientY,
-      startPanX: this.panX(),
-      startPanY: this.panY()
-    };
+    this.panState = { startX: ev.clientX, startY: ev.clientY, startPanX: this.panX(), startPanY: this.panY() };
   }
 
   @HostListener('document:mousemove', ['$event'])
   onDocMouseMove(ev: MouseEvent): void {
-    // Canvas panning
     if (this.panState) {
       const dx = ev.clientX - this.panState.startX;
       const dy = ev.clientY - this.panState.startY;
-      if (!this.isPanning() && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
-        this.isPanning.set(true);
-      }
-      if (this.isPanning()) {
-        this.panX.set(this.panState.startPanX + dx);
-        this.panY.set(this.panState.startPanY + dy);
-      }
+      if (!this.isPanning() && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) this.isPanning.set(true);
+      if (this.isPanning()) { this.panX.set(this.panState.startPanX + dx); this.panY.set(this.panState.startPanY + dy); }
       return;
     }
-
-    // Node dragging
     if (!this.dragState) return;
     const dx = (ev.clientX - this.dragState.startMouseX) / this.zoom();
     const dy = (ev.clientY - this.dragState.startMouseY) / this.zoom();
-
-    if (!this.dragState.moved && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
-      this.dragState.moved = true;
-      this.isDragging.set(true);
-    }
-
+    if (!this.dragState.moved && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) { this.dragState.moved = true; this.isDragging.set(true); }
     if (this.dragState.moved) {
       const newX = Math.max(0, this.dragState.startNodeX + dx);
       const newY = Math.max(0, this.dragState.startNodeY + dy);
-      this.nodes.set(
-        this.nodes().map(n => n.id === this.dragState!.nodeId ? { ...n, x: newX, y: newY } : n)
-      );
+      this.nodes.set(this.nodes().map(n => n.id === this.dragState!.nodeId ? { ...n, x: newX, y: newY } : n));
       this.edges.set([...this.edges()]);
     }
   }
 
   @HostListener('document:mouseup')
   onDocMouseUp(): void {
-    if (this.dragState?.moved) {
-      this.save();
-    }
+    if (this.dragState?.moved) this.save();
     this.dragState = null;
-    this.panState = null;
-    setTimeout(() => {
-      this.isDragging.set(false);
-      this.isPanning.set(false);
-    });
+    this.panState  = null;
+    setTimeout(() => { this.isDragging.set(false); this.isPanning.set(false); });
   }
 
-  // --- Node picker ---
-  toggleNodePicker(): void {
-    this.showNodePicker.set(!this.showNodePicker());
-    if (this.showNodePicker()) {
-      this.pickerSearch = '';
-      this.pickerCategory.set('all');
-    }
-  }
-
-  setPickerCategory(cat: 'all' | 'department' | 'subdepartment' | 'doctor' | 'staff'): void {
-    this.pickerCategory.set(cat);
-  }
-
-  addFromPicker(item: { id: string; type: NodeType }): void {
-    const sel = this.selectedNode();
-    switch (item.type) {
-      case 'department':
-        this.addDepartmentNode(item.id);
-        break;
-      case 'subdepartment':
-        if (sel?.type === 'department') {
-          this.addSubDepartmentNode(item.id);
-        }
-        break;
-      case 'doctor':
-        if (sel?.type === 'subdepartment') {
-          this.addDoctorNode(item.id);
-        }
-        break;
-      case 'staff':
-        if (sel?.type === 'doctor') {
-          this.addStaffNode(item.id);
-        }
-        break;
-    }
-  }
-
-  pickerItemDisabled(itemType: NodeType): boolean {
-    const sel = this.selectedNode();
-    switch (itemType) {
-      case 'department': return false;
-      case 'subdepartment': return sel?.type !== 'department';
-      case 'doctor': return sel?.type !== 'subdepartment';
-      case 'staff': return sel?.type !== 'doctor';
-      default: return true;
-    }
-  }
-
-  pickerItemHint(itemType: NodeType): string {
-    switch (itemType) {
-      case 'department': return '';
-      case 'subdepartment': return 'Select a department first';
-      case 'doctor': return 'Select a sub-department first';
-      case 'staff': return 'Select a doctor first';
-      default: return '';
-    }
-  }
-
-  // --- Drag from picker to canvas ---
-  private draggedPickerItem: { id: string; type: NodeType } | null = null;
-
+  // ── Picker drag-and-drop ─────────────────────────────────────────────────────
   onPickerDragStart(ev: DragEvent, item: { id: string; type: NodeType; name: string }): void {
     this.draggedPickerItem = { id: item.id, type: item.type };
     ev.dataTransfer!.effectAllowed = 'copy';
@@ -657,99 +638,110 @@ export class HospitalComponent implements OnInit {
   }
 
   onCanvasDragOver(ev: DragEvent): void {
-    if (this.draggedPickerItem) {
-      ev.preventDefault();
-      ev.dataTransfer!.dropEffect = 'copy';
-    }
+    if (this.draggedPickerItem) { ev.preventDefault(); ev.dataTransfer!.dropEffect = 'copy'; }
   }
 
   onCanvasDrop(ev: DragEvent): void {
     ev.preventDefault();
     if (!this.draggedPickerItem) return;
-
     const el = this.canvasRef?.nativeElement;
     if (!el) return;
-
     const rect = el.getBoundingClientRect();
-    const canvasX = (ev.clientX - rect.left - this.panX()) / this.zoom();
-    const canvasY = (ev.clientY - rect.top - this.panY()) / this.zoom();
-
-    this.dropNodeAtPosition(this.draggedPickerItem, canvasX, canvasY);
+    this.dropNodeAtPosition(this.draggedPickerItem, (ev.clientX - rect.left - this.panX()) / this.zoom(), (ev.clientY - rect.top - this.panY()) / this.zoom());
     this.draggedPickerItem = null;
   }
 
-  private dropNodeAtPosition(item: { id: string; type: NodeType }, x: number, y: number): void {
+  private buildDroppedNode(item: { id: string; type: NodeType }, x: number, y: number): FlowNode | null {
+    const uid = `${item.type}_${item.id}_${Math.random().toString(16).slice(2)}`;
     switch (item.type) {
       case 'department': {
-        const dept = this.departments().find(d => d.id === item.id);
-        if (!dept) return;
-        const nodeId = `dept_${item.id}_${Math.random().toString(16).slice(2)}`;
-        const node: FlowNode = { id: nodeId, type: 'department', entityId: item.id, title: dept.name, subtitle: 'Department', x, y };
-        this.nodes.set([...this.nodes(), node]);
-        const root = this.hospitalRoot();
-        if (root) this.addEdge(root.id, nodeId);
-        this.selectedNodeId.set(nodeId);
-        break;
+        const e = this.departments().find(d => d.id === item.id);
+        return e ? { id: uid, type: 'department', entityId: item.id, title: e.name, subtitle: e.code, x, y } : null;
       }
       case 'subdepartment': {
-        const sub = this.subDepartments().find(s => s.id === item.id);
-        if (!sub) return;
-        const nodeId = `sub_${item.id}_${Math.random().toString(16).slice(2)}`;
-        const node: FlowNode = { id: nodeId, type: 'subdepartment', entityId: item.id, title: sub.name.toUpperCase(), subtitle: 'Sub-department', x, y };
-        this.nodes.set([...this.nodes(), node]);
-        const sel = this.selectedNode();
-        if (sel?.type === 'department') this.addEdge(sel.id, nodeId);
-        this.selectedNodeId.set(nodeId);
-        break;
+        const e = this.subDepartments().find(s => s.id === item.id);
+        return e ? { id: uid, type: 'subdepartment', entityId: item.id, title: e.name, subtitle: 'Sub-department', x, y } : null;
       }
       case 'doctor': {
-        const doc = this.doctors().find(d => d.id === item.id);
-        if (!doc) return;
-        const nodeId = `doctor_${item.id}_${Math.random().toString(16).slice(2)}`;
-        const node: FlowNode = { id: nodeId, type: 'doctor', entityId: item.id, title: doc.name, subtitle: doc.specialization, x, y };
-        this.nodes.set([...this.nodes(), node]);
-        const sel = this.selectedNode();
-        if (sel?.type === 'subdepartment') this.addEdge(sel.id, nodeId);
-        this.selectedNodeId.set(nodeId);
-        break;
+        const e = this.doctors().find(d => d.id === item.id);
+        return e ? { id: uid, type: 'doctor', entityId: item.id, title: e.name, subtitle: e.specialization, x, y } : null;
       }
       case 'staff': {
-        const s = this.staff().find(st => st.id === item.id);
-        if (!s) return;
-        const nodeId = `staff_${item.id}_${Math.random().toString(16).slice(2)}`;
-        const node: FlowNode = { id: nodeId, type: 'staff', entityId: item.id, title: s.name, subtitle: s.role, x, y };
-        this.nodes.set([...this.nodes(), node]);
-        const sel = this.selectedNode();
-        if (sel?.type === 'doctor') this.addEdge(sel.id, nodeId);
-        this.selectedNodeId.set(nodeId);
-        break;
+        const e = this.staff().find(s => s.id === item.id);
+        return e ? { id: uid, type: 'staff', entityId: item.id, title: e.name, subtitle: e.role, x, y } : null;
       }
+      default: return null;
     }
+  }
+
+  private resolveDropParentId(nodeType: NodeType, sel: FlowNode | null): NodeId | undefined {
+    switch (nodeType) {
+      case 'department':    return this.hospitalRoot()?.id;
+      case 'subdepartment': return sel?.type === 'department' ? sel.id : undefined;
+      case 'doctor':        return sel && (VALID_PARENT_TYPES['doctor'] as NodeType[]).includes(sel.type) ? sel.id : undefined;
+      case 'staff':         return sel?.type === 'doctor' ? sel.id : undefined;
+      default:              return undefined;
+    }
+  }
+
+  private dropNodeAtPosition(item: { id: string; type: NodeType }, x: number, y: number): void {
+    const node = this.buildDroppedNode(item, x, y);
+    if (!node) return;
+    const parentId = this.resolveDropParentId(item.type, this.selectedNode());
+    this.nodes.set([...this.nodes(), node]);
+    if (parentId) this.addEdge(parentId, node.id);
+    this.selectedNodeId.set(node.id);
     this.save();
   }
 
-  // --- Add new staff ---
+  // ── Add from picker (click) ───────────────────────────────────────────────────
+  addFromPicker(item: { id: string; type: NodeType }): void {
+    const sel = this.selectedNode();
+    switch (item.type) {
+      case 'department':    this.addDepartmentNode(item.id); break;
+      case 'subdepartment': if (sel?.type === 'department')  this.addSubDepartmentNode(item.id); break;
+      case 'doctor':        if (sel && (VALID_PARENT_TYPES['doctor'] as NodeType[]).includes(sel.type)) this.addDoctorNode(item.id); break;
+      case 'staff':         if (sel?.type === 'doctor')      this.addStaffNode(item.id); break;
+    }
+  }
+
+  toggleNodePicker(): void {
+    this.showNodePicker.set(!this.showNodePicker());
+    if (this.showNodePicker()) { this.pickerSearch = ''; this.pickerCategory.set('all'); }
+  }
+
+  // ── Add Staff / Doctor forms ──────────────────────────────────────────────────
   toggleAddStaffForm(): void {
     this.showAddStaffForm.set(!this.showAddStaffForm());
-    if (this.showAddStaffForm()) {
-      this.newStaffName = '';
-      this.newStaffRole = '';
-    }
+    if (this.showAddStaffForm()) { this.newStaffName = ''; this.newStaffRole = ''; }
   }
 
   createNewStaff(): void {
     const name = this.newStaffName.trim();
     if (!name) return;
     const id = `s_${Date.now()}_${Math.random().toString(16).slice(2, 6)}`;
-    const role = this.newStaffRole.trim() || 'General';
-    const newMember: StaffMember = { id, name, role };
-    this.staff.set([...this.staff(), newMember]);
+    this.staff.set([...this.staff(), { id, name, role: this.newStaffRole.trim() || 'General' }]);
     this.showAddStaffForm.set(false);
     this.newStaffName = '';
     this.newStaffRole = '';
   }
 
-  // --- Link mode ---
+  toggleAddDoctorForm(): void {
+    this.showAddDoctorForm.set(!this.showAddDoctorForm());
+    if (this.showAddDoctorForm()) { this.newDoctorName = ''; this.newDoctorSpec = ''; }
+  }
+
+  createNewDoctor(): void {
+    const name = this.newDoctorName.trim();
+    if (!name) return;
+    const id = `d_${Date.now()}_${Math.random().toString(16).slice(2, 6)}`;
+    this.doctors.set([...this.doctors(), { id, name, specialization: this.newDoctorSpec.trim() || 'General', online: false }]);
+    this.showAddDoctorForm.set(false);
+    this.newDoctorName = '';
+    this.newDoctorSpec = '';
+  }
+
+  // ── Link mode ─────────────────────────────────────────────────────────────────
   toggleLinkMode(): void {
     const entering = !this.linkMode();
     this.linkMode.set(entering);
@@ -757,83 +749,60 @@ export class HospitalComponent implements OnInit {
     if (entering) this.selectedEdgeId.set(null);
   }
 
-  cancelLinkMode(): void {
-    this.linkMode.set(false);
-    this.linkSourceId.set(null);
-  }
+  cancelLinkMode(): void { this.linkMode.set(false); this.linkSourceId.set(null); }
 
-  // --- Edge selection / removal on canvas ---
   selectEdge(edgeId: EdgeId): void {
     this.selectedEdgeId.set(this.selectedEdgeId() === edgeId ? null : edgeId);
   }
 
   removeEdgeById(edgeId: EdgeId): void {
-    this.edges.set(this.edges().filter((e) => e.id !== edgeId));
+    this.edges.set(this.edges().filter(e => e.id !== edgeId));
     this.selectedEdgeId.set(null);
     this.save();
   }
 
   edgeMidpoint(e: FlowEdge): { x: number; y: number } | null {
-    const fromNode = this.nodes().find((n) => n.id === e.from);
-    const toNode = this.nodes().find((n) => n.id === e.to);
-    if (!fromNode || !toNode) return null;
-    const fromH = this.nodeHeight(fromNode.type);
-    const toH = this.nodeHeight(toNode.type);
+    const from = this.nodes().find(n => n.id === e.from);
+    const to   = this.nodes().find(n => n.id === e.to);
+    if (!from || !to) return null;
     return {
-      x: (fromNode.x + this.NODE_WIDTH / 2 + toNode.x + this.NODE_WIDTH / 2) / 2,
-      y: (fromNode.y + fromH + toNode.y) / 2
+      x: (from.x + this.NODE_WIDTH / 2 + to.x + this.NODE_WIDTH / 2) / 2,
+      y: (from.y + this.NODE_HEIGHT + to.y) / 2,
     };
   }
 
-  // --- Selection ---
+  // ── Selection ─────────────────────────────────────────────────────────────────
   selectNode(id: NodeId | null): void {
     if (this.isDragging()) return;
-
-    // If in link mode, handle source/target selection
     if (this.linkMode() && id) {
-      if (!this.linkSourceId()) {
-        this.linkSourceId.set(id);
-        return;
-      }
-      const sourceId = this.linkSourceId()!;
-      if (sourceId !== id) {
-        const exists = this.edges().some(
-          (e) => (e.from === sourceId && e.to === id) || (e.from === id && e.to === sourceId)
-        );
-        if (!exists) {
-          this.addEdge(sourceId, id);
-          this.save();
-        }
+      if (!this.linkSourceId()) { this.linkSourceId.set(id); return; }
+      const src = this.linkSourceId()!;
+      if (src !== id && !this.edges().some(e => (e.from === src && e.to === id) || (e.from === id && e.to === src))) {
+        this.addEdge(src, id);
+        this.save();
       }
       this.linkMode.set(false);
       this.linkSourceId.set(null);
       return;
     }
-
     this.selectedEdgeId.set(null);
     this.selectedNodeId.set(id);
     if (id) this.showConfigPanel.set(true);
   }
 
-  toggleConfigPanel(): void {
-    this.showConfigPanel.set(!this.showConfigPanel());
-  }
+  toggleConfigPanel(): void { this.showConfigPanel.set(!this.showConfigPanel()); }
 
-  // --- Creation helpers ---
+  // ── Node creation helpers ─────────────────────────────────────────────────────
   addDepartmentNode(deptId: string): void {
-    const dept = this.departments().find((d) => d.id === deptId);
+    const dept = this.departments().find(d => d.id === deptId);
     if (!dept) return;
-    const id = `dept_${deptId}_${Math.random().toString(16).slice(2)}`;
+    const id   = `dept_${deptId}_${Math.random().toString(16).slice(2)}`;
     const root = this.hospitalRoot();
     const existingDepts = this.connectedDepartments().length;
     const node: FlowNode = {
-      id,
-      type: 'department',
-      entityId: deptId,
-      title: dept.name,
-      subtitle: 'Department',
+      id, type: 'department', entityId: deptId, title: dept.name, subtitle: dept.code,
       x: (root?.x ?? this.CANVAS_PADDING) + existingDepts * this.COL_GAP,
-      y: (root?.y ?? this.CANVAS_PADDING) + this.MAX_NODE_HEIGHT + this.ROW_GAP
+      y: (root?.y ?? this.CANVAS_PADDING) + this.MAX_NODE_HEIGHT + this.ROW_GAP,
     };
     this.nodes.set([...this.nodes(), node]);
     if (root) this.addEdge(root.id, node.id);
@@ -842,21 +811,15 @@ export class HospitalComponent implements OnInit {
   }
 
   addSubDepartmentNode(subId: string): void {
-    const sub = this.subDepartments().find((s) => s.id === subId);
-    if (!sub) return;
+    const sub    = this.subDepartments().find(s => s.id === subId);
     const parent = this.selectedNode();
-    if (!parent || parent.type !== 'department') return;
-
-    const existingChildren = this.edges().filter((e) => e.from === parent.id).length;
+    if (!sub || parent?.type !== 'department') return;
+    const existingChildren = this.edges().filter(e => e.from === parent.id).length;
     const id = `sub_${subId}_${Math.random().toString(16).slice(2)}`;
     const node: FlowNode = {
-      id,
-      type: 'subdepartment',
-      entityId: subId,
-      title: sub.name.toUpperCase(),
-      subtitle: 'Sub-department',
+      id, type: 'subdepartment', entityId: subId, title: sub.name, subtitle: 'Sub-department',
       x: parent.x + (existingChildren - 0.5) * this.COL_GAP * 0.6,
-      y: parent.y + this.MAX_NODE_HEIGHT + this.ROW_GAP
+      y: parent.y + this.MAX_NODE_HEIGHT + this.ROW_GAP,
     };
     this.nodes.set([...this.nodes(), node]);
     this.addEdge(parent.id, node.id);
@@ -865,21 +828,16 @@ export class HospitalComponent implements OnInit {
   }
 
   addDoctorNode(doctorId: string): void {
-    const doc = this.doctors().find((d) => d.id === doctorId);
-    if (!doc) return;
+    const doc    = this.doctors().find(d => d.id === doctorId);
     const parent = this.selectedNode();
-    if (!parent || parent.type !== 'subdepartment') return;
-
+    const validParents = VALID_PARENT_TYPES['doctor'] as NodeType[];
+    if (!doc || !parent || !validParents.includes(parent.type)) return;
     const existingChildren = this.edges().filter(e => e.from === parent.id).length;
     const id = `doctor_${doctorId}_${Math.random().toString(16).slice(2)}`;
     const node: FlowNode = {
-      id,
-      type: 'doctor',
-      entityId: doctorId,
-      title: doc.name,
-      subtitle: doc.specialization,
+      id, type: 'doctor', entityId: doctorId, title: doc.name, subtitle: doc.specialization,
       x: parent.x + (existingChildren - 0.5) * this.COL_GAP * 0.5,
-      y: parent.y + this.MAX_NODE_HEIGHT + this.ROW_GAP
+      y: parent.y + this.MAX_NODE_HEIGHT + this.ROW_GAP,
     };
     this.nodes.set([...this.nodes(), node]);
     this.addEdge(parent.id, node.id);
@@ -888,21 +846,15 @@ export class HospitalComponent implements OnInit {
   }
 
   addStaffNode(staffId: string): void {
-    const s = this.staff().find((st) => st.id === staffId);
-    if (!s) return;
+    const s      = this.staff().find(st => st.id === staffId);
     const parent = this.selectedNode();
-    if (!parent || parent.type !== 'doctor') return;
-
+    if (!s || parent?.type !== 'doctor') return;
     const existingChildren = this.edges().filter(e => e.from === parent.id).length;
     const id = `staff_${staffId}_${Math.random().toString(16).slice(2)}`;
     const node: FlowNode = {
-      id,
-      type: 'staff',
-      entityId: staffId,
-      title: s.name,
-      subtitle: s.role,
+      id, type: 'staff', entityId: staffId, title: s.name, subtitle: s.role,
       x: parent.x + (existingChildren - 0.5) * this.COL_GAP * 0.5,
-      y: parent.y + this.MAX_NODE_HEIGHT + this.ROW_GAP
+      y: parent.y + this.MAX_NODE_HEIGHT + this.ROW_GAP,
     };
     this.nodes.set([...this.nodes(), node]);
     this.addEdge(parent.id, node.id);
@@ -911,198 +863,199 @@ export class HospitalComponent implements OnInit {
   }
 
   removeNode(nodeId: NodeId): void {
-    const node = this.nodes().find((n) => n.id === nodeId);
+    const node = this.nodes().find(n => n.id === nodeId);
     if (!node || node.type === 'hospital') return;
-
     const toRemove = new Set<NodeId>();
     const queue = [nodeId];
-    while (queue.length > 0) {
-      const current = queue.shift()!;
-      toRemove.add(current);
-      const childIds = this.edges()
-        .filter((e) => e.from === current)
-        .map((e) => e.to);
-      for (const cid of childIds) {
-        if (!toRemove.has(cid)) queue.push(cid);
-      }
+    while (queue.length) {
+      const cur = queue.shift()!;
+      toRemove.add(cur);
+      this.edges().filter(e => e.from === cur).forEach(e => { if (!toRemove.has(e.to)) queue.push(e.to); });
     }
-
-    this.nodes.set(this.nodes().filter((n) => !toRemove.has(n.id)));
-    this.edges.set(this.edges().filter((e) => !toRemove.has(e.from) && !toRemove.has(e.to)));
+    this.nodes.set(this.nodes().filter(n => !toRemove.has(n.id)));
+    this.edges.set(this.edges().filter(e => !toRemove.has(e.from) && !toRemove.has(e.to)));
     if (toRemove.has(this.selectedNodeId() ?? '')) this.selectedNodeId.set(null);
     this.save();
   }
 
   removeConnection(from: NodeId, to: NodeId): void {
-    this.edges.set(this.edges().filter((e) => !(e.from === from && e.to === to)));
+    this.edges.set(this.edges().filter(e => !(e.from === from && e.to === to)));
     this.save();
   }
 
   addEdge(from: NodeId, to: NodeId): void {
-    const exists = this.edges().some((e) => e.from === from && e.to === to);
-    if (exists) return;
+    if (this.edges().some(e => e.from === from && e.to === to)) return;
     const id = `e_${from}_${to}_${Math.random().toString(16).slice(2)}`;
     this.edges.set([...this.edges(), { id, from, to }]);
   }
 
-  // --- Auto-arrange (on demand) ---
-  autoArrange(): void {
-    this.recomputeLayout();
-    this.save();
+  // ── Auto-arrange ──────────────────────────────────────────────────────────────
+  autoArrange(): void { this.recomputeLayout(); this.save(); }
+
+  private buildChildrenMap(edges: FlowEdge[]): Map<NodeId, NodeId[]> {
+    const map = new Map<NodeId, NodeId[]>();
+    for (const e of edges) {
+      const list = map.get(e.from) ?? [];
+      list.push(e.to);
+      map.set(e.from, list);
+    }
+    return map;
+  }
+
+  private computeSubtreeWidths(rootId: NodeId, childrenMap: Map<NodeId, NodeId[]>): Map<NodeId, number> {
+    const cache = new Map<NodeId, number>();
+    const compute = (nid: NodeId): number => {
+      if (cache.has(nid)) return cache.get(nid)!;
+      const children = childrenMap.get(nid) ?? [];
+      const total = children.length === 0 ? 1 : children.reduce((s, c) => s + compute(c), 0);
+      cache.set(nid, total);
+      return total;
+    };
+    compute(rootId);
+    return cache;
+  }
+
+  private assignPositions(rootId: NodeId, childrenMap: Map<NodeId, NodeId[]>, widthCache: Map<NodeId, number>): Map<NodeId, { x: number; y: number }> {
+    const posMap = new Map<NodeId, { x: number; y: number }>();
+    const assign = (nid: NodeId, row: number, leftSlot: number): void => {
+      const w = widthCache.get(nid) ?? 1;
+      posMap.set(nid, {
+        x: this.CANVAS_PADDING + (leftSlot + w / 2 - 0.5) * this.COL_GAP,
+        y: this.CANVAS_PADDING + row * (this.MAX_NODE_HEIGHT + this.ROW_GAP),
+      });
+      let childLeft = leftSlot;
+      for (const cid of (childrenMap.get(nid) ?? [])) {
+        assign(cid, row + 1, childLeft);
+        childLeft += widthCache.get(cid) ?? 1;
+      }
+    };
+    assign(rootId, 0, 0);
+    return posMap;
   }
 
   private recomputeLayout(): void {
     const nodes = this.nodes();
-    const edges = this.edges();
     if (nodes.length === 0) return;
-
-    const childrenMap = new Map<NodeId, NodeId[]>();
-    for (const e of edges) {
-      const list = childrenMap.get(e.from) ?? [];
-      list.push(e.to);
-      childrenMap.set(e.from, list);
-    }
-
-    const root = nodes.find((n) => n.type === 'hospital');
+    const root = nodes.find(n => n.type === 'hospital');
     if (!root) return;
-
-    const widthCache = new Map<NodeId, number>();
-    const computeWidth = (nodeId: NodeId): number => {
-      if (widthCache.has(nodeId)) return widthCache.get(nodeId)!;
-      const children = childrenMap.get(nodeId) ?? [];
-      if (children.length === 0) {
-        widthCache.set(nodeId, 1);
-        return 1;
-      }
-      const total = children.reduce((sum, cid) => sum + computeWidth(cid), 0);
-      widthCache.set(nodeId, total);
-      return total;
-    };
-
-    computeWidth(root.id);
-
-    const posMap = new Map<NodeId, { x: number; y: number }>();
-    const assignPositions = (nodeId: NodeId, row: number, leftSlot: number): void => {
-      const subtreeWidth = widthCache.get(nodeId) ?? 1;
-      const centerSlot = leftSlot + subtreeWidth / 2;
-      const x = this.CANVAS_PADDING + (centerSlot - 0.5) * this.COL_GAP;
-      const y = this.CANVAS_PADDING + row * (this.MAX_NODE_HEIGHT + this.ROW_GAP);
-      posMap.set(nodeId, { x, y });
-
-      const children = childrenMap.get(nodeId) ?? [];
-      let childLeft = leftSlot;
-      for (const cid of children) {
-        assignPositions(cid, row + 1, childLeft);
-        childLeft += widthCache.get(cid) ?? 1;
-      }
-    };
-
-    assignPositions(root.id, 0, 0);
-
-    const positioned = new Set(posMap.keys());
+    const childrenMap = this.buildChildrenMap(this.edges());
+    const widthCache  = this.computeSubtreeWidths(root.id, childrenMap);
+    const posMap      = this.assignPositions(root.id, childrenMap, widthCache);
+    const positioned  = new Set(posMap.keys());
     let orphanX = this.CANVAS_PADDING;
-    const orphanRow = 5;
     for (const n of nodes) {
       if (!positioned.has(n.id)) {
-        const y = this.CANVAS_PADDING + orphanRow * (this.MAX_NODE_HEIGHT + this.ROW_GAP);
-        posMap.set(n.id, { x: orphanX, y });
+        posMap.set(n.id, { x: orphanX, y: this.CANVAS_PADDING + 5 * (this.MAX_NODE_HEIGHT + this.ROW_GAP) });
         orphanX += this.COL_GAP;
       }
     }
-
-    this.nodes.set(
-      nodes.map((n) => {
-        const pos = posMap.get(n.id);
-        return pos ? { ...n, x: pos.x, y: pos.y } : n;
-      })
-    );
-
-    // Force edges to re-render with the new node positions.
-    // Angular's @for tracks edges by id; unless the signal ref changes,
-    // template expressions like edgePath(e) won't be re-evaluated.
+    this.nodes.set(nodes.map(n => { const p = posMap.get(n.id); return p ? { ...n, ...p } : n; }));
     this.edges.set([...this.edges()]);
   }
 
-  // --- Geometry for edges (adaptive routing) ---
+  // ── Edge geometry ─────────────────────────────────────────────────────────────
   edgePath(e: FlowEdge): string {
-    const fromNode = this.nodes().find((n) => n.id === e.from);
-    const toNode = this.nodes().find((n) => n.id === e.to);
-    if (!fromNode || !toNode) return '';
-
-    const fromH = this.nodeHeight(fromNode.type);
-    const toH = this.nodeHeight(toNode.type);
-    const vertGap = toNode.y - (fromNode.y + fromH);
-
+    const from = this.nodes().find(n => n.id === e.from);
+    const to   = this.nodes().find(n => n.id === e.to);
+    if (!from || !to) return '';
+    const vertGap = to.y - (from.y + this.NODE_HEIGHT);
     if (vertGap > 30) {
-      // Enough vertical space: route bottom → top (vertical bezier)
-      const fx = fromNode.x + this.NODE_WIDTH / 2;
-      const fy = fromNode.y + fromH;
-      const tx = toNode.x + this.NODE_WIDTH / 2;
-      const ty = toNode.y;
+      const fx = from.x + this.NODE_WIDTH / 2, fy = from.y + this.NODE_HEIGHT;
+      const tx = to.x   + this.NODE_WIDTH / 2, ty = to.y;
       const dy = vertGap * 0.45;
       return `M ${fx} ${fy} C ${fx} ${fy + dy}, ${tx} ${ty - dy}, ${tx} ${ty}`;
     }
-
-    // Nodes are on the same row or overlapping: route right → left (horizontal bezier)
-    const toIsRight = toNode.x >= fromNode.x;
-    const fx = toIsRight ? fromNode.x + this.NODE_WIDTH : fromNode.x;
-    const fy = fromNode.y + fromH / 2;
-    const tx = toIsRight ? toNode.x : toNode.x + this.NODE_WIDTH;
-    const ty = toNode.y + toH / 2;
-    const hDist = Math.abs(tx - fx);
-    const dx = Math.max(50, hDist * 0.4);
-    const cx1 = toIsRight ? fx + dx : fx - dx;
-    const cx2 = toIsRight ? tx - dx : tx + dx;
-    return `M ${fx} ${fy} C ${cx1} ${fy}, ${cx2} ${ty}, ${tx} ${ty}`;
+    const toRight = to.x >= from.x;
+    const fx = toRight ? from.x + this.NODE_WIDTH : from.x;
+    const fy = from.y + this.NODE_HEIGHT / 2;
+    const tx = toRight ? to.x : to.x + this.NODE_WIDTH;
+    const ty = to.y + this.NODE_HEIGHT / 2;
+    const dx = Math.max(50, Math.abs(tx - fx) * 0.4);
+    return `M ${fx} ${fy} C ${toRight ? fx + dx : fx - dx} ${fy}, ${toRight ? tx - dx : tx + dx} ${ty}, ${tx} ${ty}`;
   }
 
-  // --- Persistence ---
-  private storageKey = 'adminHospitalFlow';
+  // ── Persistence ───────────────────────────────────────────────────────────────
+  private readonly storageKey = 'adminHospitalFlow';
 
   save(): void {
-    const payload = {
-      nodes: this.nodes(),
-      edges: this.edges(),
-      hospitalFeatureIds: this.hospitalFeatureIds(),
-      doctorFeatureMap: this.doctorFeatureMap()
-    };
-    localStorage.setItem(this.storageKey, JSON.stringify(payload));
+    localStorage.setItem(this.storageKey, JSON.stringify({
+      nodes: this.nodes(), edges: this.edges(),
+      hospitalFeatureIds: this.hospitalFeatureIds(), doctorFeatureMap: this.doctorFeatureMap(),
+    }));
+    this.lastSavedAt.set(new Date());
   }
 
   load(): void {
     try {
       const raw = localStorage.getItem(this.storageKey);
       if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed?.nodes)) this.nodes.set(parsed.nodes);
-      if (Array.isArray(parsed?.edges)) this.edges.set(parsed.edges);
-      if (Array.isArray(parsed?.hospitalFeatureIds)) this.hospitalFeatureIds.set(parsed.hospitalFeatureIds);
-      if (parsed?.doctorFeatureMap && typeof parsed.doctorFeatureMap === 'object') {
-        this.doctorFeatureMap.set(parsed.doctorFeatureMap);
-      }
-    } catch {
-      // ignore
-    }
+      const p = JSON.parse(raw);
+      if (Array.isArray(p?.nodes))  this.nodes.set(p.nodes);
+      if (Array.isArray(p?.edges))  this.edges.set(p.edges);
+      if (Array.isArray(p?.hospitalFeatureIds))            this.hospitalFeatureIds.set(p.hospitalFeatureIds);
+      if (p?.doctorFeatureMap && typeof p.doctorFeatureMap === 'object') this.doctorFeatureMap.set(p.doctorFeatureMap);
+    } catch { /* ignore */ }
+  }
+
+  resetWithConfirm(): void {
+    const dialogRef = this.dialogService.openConfirmationDialog({
+      title: 'Reset Flow',
+      message: 'This will remove all departments, doctors, and staff from the canvas. This action cannot be undone.',
+      confirmText: 'Reset',
+      cancelText: 'Cancel',
+      icon: 'delete_forever',
+      showConfirm: true,
+      showCancel: true,
+    });
+    dialogRef.afterClosed().subscribe((result: unknown) => {
+      const confirmed = result === 'confirm' || (result as { action?: string })?.action === 'confirm' || result === true;
+      if (confirmed) this.reset();
+    });
   }
 
   reset(): void {
     const h = this.hospitals()[0];
-    this.nodes.set([
-      {
-        id: 'hospital_root',
-        type: 'hospital',
-        entityId: h?.id ?? 'h1',
-        title: h?.name ?? 'Hospital',
-        subtitle: 'Root',
-        x: 0,
-        y: 0
-      }
-    ]);
+    this.nodes.set([{ id: 'hospital_root', type: 'hospital', entityId: h?.id ?? 'h1', title: h?.name ?? 'Hospital', subtitle: 'Root', x: 0, y: 0 }]);
     this.edges.set([]);
-    this.hospitalFeatureIds.set(['feat_appointments', 'feat_billing', 'feat_lab_reports', 'feat_pharmacy']);
+    this.hospitalFeatureIds.set(['appointments', 'chat', 'prescriptions', 'patient-mgmt', 'reports', 'exercise-plans', 'diet-basic', 'progress-tracking', 'assessment']);
     this.doctorFeatureMap.set({});
     this.selectedNodeId.set('hospital_root');
     localStorage.removeItem(this.storageKey);
     this.recomputeLayout();
+    this.lastSavedAt.set(null);
   }
+
+  // ── Lifecycle ─────────────────────────────────────────────────────────────────
+  ngOnInit(): void {
+    this.load();
+    if (!this.nodes().some(n => n.type === 'hospital')) {
+      const h = this.hospitals()[0];
+      this.nodes.set([{ id: 'hospital_root', type: 'hospital', entityId: h?.id ?? 'h1', title: h?.name ?? 'Hospital', subtitle: 'Root', x: 0, y: 0 }, ...this.nodes()]);
+      this.recomputeLayout();
+    }
+    this.save();
+  }
+
+  // ── Private helpers ───────────────────────────────────────────────────────────
+  private descendantCountByType(startId: NodeId, type: NodeType): number {
+    const nodeById = new Map(this.nodes().map(n => [n.id, n]));
+    const seen = new Set<NodeId>();
+    const q = [startId];
+    let count = 0;
+    while (q.length) {
+      const cur = q.shift()!;
+      if (seen.has(cur)) continue;
+      seen.add(cur);
+      for (const e of this.edges()) {
+        if (e.from !== cur) continue;
+        const child = nodeById.get(e.to);
+        if (!child) continue;
+        if (child.type === type) count++;
+        q.push(child.id);
+      }
+    }
+    return count;
+  }
+
+  constructor(private readonly dialogService: DialogboxService) {}
 }

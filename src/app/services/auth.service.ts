@@ -189,23 +189,14 @@ export class AuthService {
       withCredentials: false
     };
 
-    console.log('Login request:', {
-      url: `${environment.apiUrl}/api/auth/login`,
-      email: loginRequest.email,
-      rememberMe
-    });
-
     return this.http.post<any>(`${environment.apiUrl}/api/auth/login`, loginRequest, httpOptions).pipe(
       tap((response: any) => {
-        console.log('Login response received');
-        // Validate response has required data
         if (!response) {
           throw new Error('Empty response from server');
         }
         this.handleSuccessfulLogin(response, rememberMe);
       }),
       map((): boolean => {
-        // Verify authentication was successful
         const isAuth = this.isAuthenticated();
         if (!isAuth) {
           throw new Error('Authentication failed - user not authenticated after login');
@@ -231,7 +222,6 @@ export class AuthService {
           
           // Check if it's a connection error and try mock login
           if (error.status === 0 || error.status === 502 || error.status === 503) {
-            console.log('Backend server unavailable, attempting mock login...');
             return this.handleMockLogin(loginRequest, rememberMe);
           }
           
@@ -262,8 +252,6 @@ export class AuthService {
    * Handle successful login response
    */
   private handleSuccessfulLogin(response: any, rememberMe: boolean): void {
-    console.log('Processing login response:', response);
-    
     try {
       // Extract data from response - handle multiple response structures
       const data = response.data || response;
@@ -276,7 +264,6 @@ export class AuthService {
 
       // Extract refresh token - check multiple possible locations
       const refreshToken = data.refreshToken || data.refresh_token || response.refreshToken || response.refresh_token;
-      console.log('Refresh token found:', !!refreshToken);
 
       // Extract expiresIn
       const expiresIn = data.expiresIn || data.expires_in || response.expiresIn || 3600;
@@ -321,10 +308,6 @@ export class AuthService {
         isAuthenticated: true,
         userType: user.userType || 'HOSPITAL'
       };
-
-      console.log('Login successful - User:', user.email, 'Type:', currentUser.userType);
-      console.log('Token expires at:', new Date(tokenExpiresAt).toISOString());
-      console.log('Refresh token stored:', !!refreshToken);
 
       // Store authentication data FIRST (before state update)
       this.storeAuthData(token, refreshToken, user, rememberMe);
@@ -419,7 +402,6 @@ export class AuthService {
         loginRequest.password === expectedCredentials.password) {
       
       const resolvedType = inferredType || loginRequest.userType || UserType.HOSPITAL;
-      console.log('Mock login successful for:', resolvedType);
       
       // Create mock response
       const getUserInfo = (userType: string) => {
@@ -490,22 +472,17 @@ export class AuthService {
    * Navigate user to appropriate dashboard after successful login
    */
           private navigateAfterLogin(userType: string): void {
-          console.log('Navigating for user type:', userType);
           switch (userType) {
             case 'HOSPITAL':
-              console.log('Navigating to admin dashboard');
               this.router.navigate(['/admin-dashboard']);
               break;
             case 'DOCTOR':
-              console.log('Navigating to doctor dashboard');
               this.router.navigate(['/dashboard']);
               break;
             case 'PATIENT':
-              console.log('Navigating to patient dashboard');
               this.router.navigate(['/patient-dashboard']);
               break;
             default:
-              console.log('Default navigation to dashboard');
               this.router.navigate(['/dashboard']);
           }
         }
@@ -540,11 +517,8 @@ export class AuthService {
       return of(false);
     }
 
-    console.log('Attempting to refresh token...');
-
     return this.http.post<any>(`${environment.apiUrl}/api/auth/refresh`, { refreshToken }).pipe(
       tap((response: any) => {
-        console.log('Token refresh successful');
         // Use the same login handler to process the refresh response
         this.handleSuccessfulLogin(response, this.getRememberMeStatus());
       }),
@@ -553,7 +527,6 @@ export class AuthService {
         console.error('Token refresh failed:', error);
         // Only logout if it's a real auth error, not a network error
         if (error.status === 401 || error.status === 403) {
-          console.log('Refresh token invalid, logging out');
           this.logout();
         }
         return of(false);
@@ -647,7 +620,6 @@ export class AuthService {
   private updateAuthState(newState: Partial<AuthState>): void {
     const currentState = this._authState.value;
     const updatedState = { ...currentState, ...newState };
-    console.log('Updating auth state:', { currentState, newState, updatedState });
     this._authState.next(updatedState);
   }
 
@@ -678,25 +650,16 @@ export class AuthService {
       // Store refresh token if available
       if (tokenToStore) {
         storage.setItem(this.REFRESH_TOKEN_KEY, tokenToStore);
-        console.log('Refresh token stored in', rememberMe ? 'localStorage' : 'sessionStorage');
       } else {
         // Remove refresh token if not provided and not preserving existing
         storage.removeItem(this.REFRESH_TOKEN_KEY);
-        console.warn('No refresh token provided or found');
       }
-      
+
       // Store user data
       storage.setItem(this.USER_KEY, JSON.stringify(user));
-      
+
       // Store remember me preference
       storage.setItem(this.REMEMBER_ME_KEY, rememberMe ? 'true' : 'false');
-      
-      console.log('Auth data stored successfully:', {
-        hasToken: !!token,
-        hasRefreshToken: !!tokenToStore,
-        rememberMe,
-        storage: rememberMe ? 'localStorage' : 'sessionStorage'
-      });
     } catch (error) {
       console.error('Error storing auth data:', error);
       throw error;

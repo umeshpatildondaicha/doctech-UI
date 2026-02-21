@@ -1,0 +1,112 @@
+<app-page [breadcrumb]="breadcrumb" [isFooter]="false">
+  <div class="admin-billing" page-body>
+
+    @if (isDemoData) {
+      <div class="demo-pill">Demo data (backend not connected)</div>
+    }
+
+    <!-- Summary Stats -->
+    <app-admin-stats-card [stats]="statCards"></app-admin-stats-card>
+
+    <!-- Main grid area -->
+    <div class="grid-wrapper">
+
+      <!-- Toolbar -->
+      <div class="toolbar-row">
+        <app-entity-toolbar
+          [title]="'Hospital Billing'"
+          [showCounts]="true"
+          [currentCount]="patientRows.length"
+          [totalCount]="patientRows.length"
+          [newLabel]="'Create Invoice'"
+          [showRefresh]="true"
+          [showFilter]="false"
+          [searchPlaceholder]="'Search by patient, doctor, invoice...'"
+          [searchSuggestions]="searchHints"
+          (search)="onSearch($event)"
+          (newClick)="createInvoice()"
+          (refreshClick)="refresh()">
+        </app-entity-toolbar>
+        <app-button
+          [fontIcon]="'download'"
+          [text]="'Export CSV'"
+          [appearance]="'stroked'"
+          title="Export all invoices as CSV"
+          (btnClick)="exportCsv()">
+        </app-button>
+      </div>
+
+      <!-- Tabs: By Patient | By Doctor | All Invoices -->
+      <mat-tab-group class="billing-tabs" animationDuration="150ms">
+
+        <!-- Tab 1: By Patient -->
+        <mat-tab label="By Patient">
+          <app-grid
+            class="billing-grid"
+            [rowData]="patientRows"
+            [columnDefs]="patientColumnDefs"
+            [gridOptions]="patientGridOptions"
+            [showHeader]="false"
+            [showAddButton]="false"
+            [height]="'100%'"
+            [width]="'100%'"
+            (rowClicked)="onPatientRowClick($event)">
+          </app-grid>
+        </mat-tab>
+
+        <!-- Tab 2: By Doctor -->
+        <mat-tab label="By Doctor">
+          <div class="tab-hint">
+            Revenue breakdown across all doctors. Click a row to view that doctor's patients.
+          </div>
+          <app-grid
+            class="billing-grid billing-grid--doctor"
+            [rowData]="doctorRows"
+            [columnDefs]="doctorColumnDefs"
+            [gridOptions]="doctorGridOptions"
+            [showHeader]="false"
+            [showAddButton]="false"
+            [height]="'100%'"
+            [width]="'100%'">
+          </app-grid>
+        </mat-tab>
+
+        <!-- Tab 3: All Invoices -->
+        <mat-tab label="All Invoices">
+          <app-grid
+            class="billing-grid"
+            [rowData]="allInvoices"
+            [columnDefs]="invoiceColumnDefs"
+            [gridOptions]="invoiceGridOptions"
+            [showHeader]="false"
+            [showAddButton]="false"
+            [height]="'100%'"
+            [width]="'100%'"
+            (rowClicked)="onInvoiceRowClick($event)">
+          </app-grid>
+        </mat-tab>
+
+      </mat-tab-group>
+    </div>
+
+    <!-- Empty state -->
+    @if (!loading && patientRows.length === 0) {
+      <app-card class="empty-state" [dense]="true">
+        <div class="empty-state-body">
+          <app-icon fontIcon="receipt_long" [size]="22" class="empty-ico"></app-icon>
+          <div class="empty-text">
+            <div class="empty-title">No billing records found</div>
+            <div class="empty-sub">Create an invoice for a patient to see hospital billing data here.</div>
+          </div>
+          <span class="spacer"></span>
+          <app-button
+            [appearance]="'raised'"
+            [text]="'Create Invoice'"
+            (btnClick)="createInvoice()">
+          </app-button>
+        </div>
+      </app-card>
+    }
+
+  </div>
+</app-page>

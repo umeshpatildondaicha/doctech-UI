@@ -1,0 +1,205 @@
+<!-- Backdrop for overlay sidebar -->
+<button
+  type="button"
+  class="sidebar-backdrop"
+  [class.show]="(isMobile || isTablet) && !collapsed"
+  (click)="onBackdropClick()"
+  aria-label="Close sidebar">
+</button>
+
+<nav [class]="getSidebarClasses() + (hoverOpen ? ' hover-open' : '')">
+  <div class="sidebar-header">
+    <button type="button" class="app-grid-btn" aria-label="App menu">
+      <span class="dots">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </span>
+    </button>
+    <span class="sidebar-header-separator" aria-hidden="true"></span>
+    <h2 class="sidebar-header-title">{{ appTitle || 'Workflow orchestrator' }}</h2>
+  </div>
+
+  <ng-template #menuBlock let-showLabels="showLabels" let-isExpandedView="isExpandedView">
+
+    <!-- Main Navigation -->
+    <div class="sidebar-section">
+      <ul class="sidebar-nav">
+        @for (item of getMenuItemsBySection('main'); track item.route) {
+          <li>
+            <button type="button"
+                    class="nav-item"
+                    [class.active]="item.route && isActive(item.route)"
+                    (click)="item.route && navigateTo(item.route)"
+                    (keydown.enter)="item.route && navigateTo(item.route)"
+                    (keydown.space)="item.route && navigateTo(item.route)">
+              <div class="nav-item-inner">
+                <span class="nav-item-icon">
+                  @if (item.iconSrc) {
+                    <img [src]="item.iconSrc" alt="" class="nav-icon-img" />
+                  } @else {
+                    <app-icon fontSet="material-icons-outlined"
+                      [fontIcon]="item.icon || 'label'"
+                      [size]="getIconSize(isExpandedView)"
+                      [color]="item.route && isActive(item.route) ? '#ffffff' : ''">
+                    </app-icon>
+                  }
+                </span>
+                @if (showLabels) {
+                  <span class="label">{{ item.label }}</span>
+                }
+              </div>
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+
+    @if (getMenuItemsBySection('management').length > 0) {
+      <div class="sidebar-section">
+        <ul class="sidebar-nav">
+          @for (item of getMenuItemsBySection('management'); track item.route) {
+            <li>
+              <button type="button"
+                      class="nav-item"
+                      [class.active]="item.route && isActive(item.route)"
+                      (click)="item.route && navigateTo(item.route)"
+                      (keydown.enter)="item.route && navigateTo(item.route)"
+                      (keydown.space)="item.route && navigateTo(item.route)">
+                <div class="nav-item-inner">
+                  <span class="nav-item-icon">
+                    @if (item.iconSrc) {
+                      <img [src]="item.iconSrc" alt="" class="nav-icon-img" />
+                    } @else {
+                      <app-icon fontSet="material-icons-outlined"
+                        [fontIcon]="item.icon || 'label'"
+                        [size]="getIconSize(isExpandedView)"
+                        [color]="item.route && isActive(item.route) ? '#ffffff' : ''">
+                      </app-icon>
+                    }
+                  </span>
+                  @if (showLabels) {
+                    <span class="label">{{ item.label }}</span>
+                  }
+                </div>
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    @if (getMenuItemsBySection('services').length > 0) {
+      <div class="sidebar-section">
+        <ul class="sidebar-nav">
+          @for (item of getMenuItemsBySection('services'); track item.route) {
+            <li>
+              <button type="button"
+                      class="nav-item"
+                      [class.active]="item.route && isActive(item.route)"
+                      (click)="item.route && navigateTo(item.route)"
+                      (keydown.enter)="item.route && navigateTo(item.route)"
+                      (keydown.space)="item.route && navigateTo(item.route)">
+                <div class="nav-item-inner">
+                  <span class="nav-item-icon">
+                    @if (item.iconSrc) {
+                      <img [src]="item.iconSrc" alt="" class="nav-icon-img" />
+                    } @else {
+                      <app-icon fontSet="material-icons-outlined"
+                        [fontIcon]="item.icon || 'label'"
+                        [size]="getIconSize(isExpandedView)"
+                        [color]="item.route && isActive(item.route) ? '#ffffff' : ''">
+                      </app-icon>
+                    }
+                  </span>
+                  @if (showLabels) {
+                    <span class="label">{{ item.label }}</span>
+                  }
+                </div>
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    @if (getMenuItemsBySection('administration').length > 0) {
+      <div class="sidebar-section">
+        <ul class="sidebar-nav">
+          @for (item of getMenuItemsBySection('administration'); track item.route) {
+            <li>
+              <button type="button"
+                      class="nav-item"
+                      [class.active]="item.route && isActive(item.route)"
+                      (click)="item.route && navigateTo(item.route)"
+                      (keydown.enter)="item.route && navigateTo(item.route)"
+                      (keydown.space)="item.route && navigateTo(item.route)">
+                <div class="nav-item-inner">
+                  <span class="nav-item-icon">
+                    @if (item.iconSrc) {
+                      <img [src]="item.iconSrc" alt="" class="nav-icon-img" />
+                    } @else {
+                      <app-icon fontSet="material-icons-outlined"
+                        [fontIcon]="item.icon || 'label'"
+                        [size]="getIconSize(isExpandedView)"
+                        [color]="item.route && isActive(item.route) ? '#ffffff' : ''">
+                      </app-icon>
+                    }
+                  </span>
+                  @if (showLabels) {
+                    <span class="label">{{ item.label }}</span>
+                  }
+                </div>
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    <div class="sidebar-footer">
+      <ul class="sidebar-tools">
+        @for (item of getMenuItemsBySection('tools'); track item.route) {
+          <li>
+            <button type="button"
+                    class="nav-item"
+                    [class.active]="item.route && isActive(item.route)"
+                    (click)="item.route && navigateTo(item.route)"
+                    (keydown.enter)="item.route && navigateTo(item.route)"
+                    (keydown.space)="item.route && navigateTo(item.route)">
+              <div class="nav-item-inner">
+                <span class="nav-item-icon">
+                  @if (item.iconSrc) {
+                    <img [src]="item.iconSrc" alt="" class="nav-icon-img" />
+                  } @else {
+                    <app-icon fontSet="material-icons-outlined"
+                      [fontIcon]="item.icon || 'label'"
+                      [size]="getIconSize(isExpandedView)"
+                      [color]="item.route && isActive(item.route) ? '#ffffff' : ''">
+                    </app-icon>
+                  }
+                </span>
+                @if (showLabels) {
+                  <span class="label">{{ item.label }}</span>
+                }
+              </div>
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+  </ng-template>
+
+  <div class="sidebar-content"
+       [class.hover-expanded]="collapsed && (hoverOpen || hoverClosing)"
+       [class.sidebar-closing]="hoverClosing">
+    <div class="sidebar-menu-area"
+         (mouseenter)="collapsed && onMenuAreaMouseEnter()"
+         (mouseleave)="collapsed && onMenuAreaMouseLeave()">
+      <ng-container *ngTemplateOutlet="menuBlock; context: {
+        showLabels: !collapsed || (collapsed && (hoverOpen || hoverClosing)),
+        isExpandedView: !collapsed || (collapsed && (hoverOpen || hoverClosing))
+      }"></ng-container>
+    </div>
+  </div>
+</nav>

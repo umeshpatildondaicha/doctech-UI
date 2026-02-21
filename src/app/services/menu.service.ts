@@ -8,11 +8,12 @@ import { SidebarMenuItem } from '../interfaces/sidebarmenu.interface';
 export class MenuService {
   private menuSubject = new BehaviorSubject<SidebarMenuItem[]>([]);
 
-  // Doctor menu items
+  // Doctor menu items (custom SVG icons for left listing)
   private doctorMenu: SidebarMenuItem[] = [
     { 
       label: 'Dashboard', 
       icon: 'dashboard', 
+      iconSrc: 'assets/icons/dashboard.svg',
       route: '/dashboard', 
       section: 'main',
       userTypes: ['doctor']
@@ -20,6 +21,7 @@ export class MenuService {
     { 
       label: 'Appointments', 
       icon: 'event', 
+      iconSrc: 'assets/icons/appointment.svg',
       route: '/appointment', 
       section: 'main',
       userTypes: ['doctor']
@@ -27,6 +29,7 @@ export class MenuService {
     { 
       label: 'Schedule', 
       icon: 'schedule', 
+      iconSrc: 'assets/icons/schedule.svg',
       route: '/schedule', 
       section: 'main',
       userTypes: ['doctor']
@@ -34,6 +37,7 @@ export class MenuService {
     { 
       label: 'Patients', 
       icon: 'groups', 
+      iconSrc: 'assets/icons/patients.svg',
       route: '/patient', 
       section: 'main',
       userTypes: ['doctor']
@@ -41,6 +45,7 @@ export class MenuService {
     { 
       label: 'Chat', 
       icon: 'chat', 
+      iconSrc: 'assets/icons/chat.svg',
       route: '/chat', 
       section: 'main',
       userTypes: ['doctor']
@@ -48,6 +53,7 @@ export class MenuService {
     { 
       label: 'Blogs', 
       icon: 'rss_feed', 
+      iconSrc: 'assets/icons/blogs.svg',
       route: '/blogs', 
       section: 'main',
       userTypes: ['doctor']
@@ -55,6 +61,7 @@ export class MenuService {
     { 
       label: 'Exercises', 
       icon: 'fitness_center', 
+      iconSrc: 'assets/icons/exercise.svg',
       route: '/exercises', 
       section: 'main',
       userTypes: ['doctor']
@@ -62,6 +69,7 @@ export class MenuService {
     { 
       label: 'Diet Plans', 
       icon: 'track_changes', 
+      iconSrc: 'assets/icons/diet.svg',
       route: '/diet', 
       section: 'main',
       userTypes: ['doctor']
@@ -69,6 +77,7 @@ export class MenuService {
     { 
       label: 'Billing', 
       icon: 'credit_card', 
+      iconSrc: 'assets/icons/bills.svg',
       route: '/billing', 
       section: 'main',
       userTypes: ['doctor']
@@ -76,6 +85,7 @@ export class MenuService {
     {
       label: 'Base Configuration',
       icon: 'settings',
+      iconSrc: 'assets/icons/settings.svg',
       route: '/admin/base-configuration',
       section: 'main',
       userTypes: ['doctor']
@@ -91,10 +101,17 @@ export class MenuService {
       section: 'main',
       userTypes: ['admin']
     },
-    { 
-      label: 'Doctors Management', 
-      icon: 'local_hospital', 
-      route: '/admin/doctors', 
+    {
+      label: 'Billing',
+      icon: 'credit_card',
+      route: '/admin/billing',
+      section: 'main',
+      userTypes: ['admin']
+    },
+    {
+      label: 'Doctors Management',
+      icon: 'local_hospital',
+      route: '/admin/doctors',
       section: 'management',
       userTypes: ['admin']
     },

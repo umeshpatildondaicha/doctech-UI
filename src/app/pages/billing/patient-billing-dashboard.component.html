@@ -101,8 +101,8 @@
     [fontIcon]="'payments'"
     [text]="'Record Payment'"
     title="Record payment for highest balance invoice"
-    [disabled]="!getTopOutstandingInvoice()"
-    (btnClick)="recordPayment(getTopOutstandingInvoice()!)">
+    [disabled]="!topOutstandingInvoice"
+    (btnClick)="topOutstandingInvoice && recordPayment(topOutstandingInvoice)">
   </app-button>
   
     <span class="spacer"></span>
@@ -264,8 +264,8 @@
                 [text]="'Record First Payment'"
                 [color]="'primary'"
                 [appearance]="'stroked'"
-                (btnClick)="getTopOutstandingInvoice()?recordPayment(getTopOutstandingInvoice()!):null"
-                [disabled]="!getTopOutstandingInvoice()"></app-button>
+                (btnClick)="topOutstandingInvoice && recordPayment(topOutstandingInvoice)"
+                [disabled]="!topOutstandingInvoice"></app-button>
                 <!-- <button mat-stroked-button color="primary" (click)="getTopOutstandingInvoice() ? recordPayment(getTopOutstandingInvoice()!) : null" [disabled]="!getTopOutstandingInvoice()">
                   <mat-icon>add</mat-icon>
                   Record First Payment

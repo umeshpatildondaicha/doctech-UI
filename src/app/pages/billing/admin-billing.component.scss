@@ -1,0 +1,263 @@
+.admin-billing {
+  background: var(--page-background-color);
+  min-height: 100%;
+  padding: var(--spacing-lg);
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.demo-pill {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: 999px;
+  background: var(--status-warning-bg);
+  border: 1px solid var(--status-warning-border);
+  color: var(--status-warning-color);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+// Grid card container
+.grid-wrapper {
+  background: var(--surface-color);
+  border-radius: var(--card-border-radius);
+  border: var(--primary-border);
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  height: clamp(480px, calc(100vh - 480px), 800px);
+  margin-top: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+// Toolbar row: entity-toolbar + export button side by side
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--surface-color);
+  flex-shrink: 0;
+
+  app-entity-toolbar {
+    flex: 1;
+    min-width: 0;
+
+    ::ng-deep .entity-toolbar {
+      border-bottom: none;
+    }
+  }
+
+  app-button {
+    flex-shrink: 0;
+    margin-right: var(--spacing-md);
+  }
+}
+
+// Tab group fills remaining wrapper height
+.billing-tabs {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  ::ng-deep {
+    .mat-mdc-tab-header {
+      background: var(--status-neutral-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 var(--spacing-md);
+      flex-shrink: 0;
+    }
+
+    .mat-mdc-tab-body-wrapper {
+      flex: 1;
+      min-height: 0;
+    }
+
+    .mat-mdc-tab-body {
+      height: 100%;
+    }
+
+    .mat-mdc-tab-body-content {
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}
+
+.tab-hint {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  background: var(--status-info-bg);
+  border-bottom: 1px solid var(--status-info-border);
+  flex-shrink: 0;
+}
+
+.billing-grid {
+  flex: 1;
+  min-height: 0;
+  width: 100% !important;
+  display: block !important;
+
+  ::ng-deep {
+    .ag-root-wrapper {
+      height: 100% !important;
+      width: 100% !important;
+      border: none;
+    }
+
+    .ag-root-wrapper-body {
+      height: 100% !important;
+      width: 100% !important;
+    }
+
+    .ag-header {
+      background: var(--status-neutral-bg) !important;
+      border-bottom: 1px solid var(--border-color) !important;
+      font-weight: var(--font-weight-medium);
+      font-size: var(--font-size-base);
+      color: var(--text-primary);
+    }
+
+    .ag-header-cell {
+      padding: 0 var(--spacing-lg) !important;
+      border-right: 1px solid var(--border-color) !important;
+    }
+
+    .ag-header-cell:last-child {
+      border-right: none !important;
+    }
+
+    .ag-header-cell-label {
+      color: var(--text-primary);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .ag-row {
+      border-bottom: 1px solid var(--border-color) !important;
+      background: var(--surface-color) !important;
+      font-size: var(--font-size-base);
+      cursor: pointer;
+
+      &:hover {
+        background: var(--page-background-color) !important;
+      }
+    }
+
+    .ag-cell {
+      padding: var(--spacing-sm) var(--spacing-lg) !important;
+      border-right: 1px solid var(--border-color) !important;
+      display: flex;
+      align-items: center;
+      color: var(--text-primary);
+    }
+
+    .ag-cell:last-child {
+      border-right: none !important;
+    }
+
+    .ag-paging-panel {
+      border-top: 1px solid var(--border-color) !important;
+      padding: var(--spacing-md) var(--spacing-lg) !important;
+      background: var(--status-neutral-bg) !important;
+      font-size: var(--font-size-base);
+      color: var(--text-muted);
+    }
+
+    // Two-line cell
+    .cell-two-line {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      .primary {
+        color: var(--text-primary);
+        font-size: var(--font-size-base);
+        line-height: 1.4;
+      }
+
+      .secondary {
+        color: var(--text-muted);
+        font-size: var(--font-size-sm);
+        line-height: 1.4;
+        margin-top: 2px;
+      }
+    }
+
+    // Status pills
+    .status-pill {
+      display: inline-block;
+      padding: var(--spacing-xs) var(--spacing-md);
+      border-radius: 999px;
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-medium);
+      text-transform: capitalize;
+      line-height: 1.4;
+
+      &.paid        { background: var(--status-success-bg); color: var(--status-success-color); }
+      &.issued      { background: var(--status-info-bg);    color: var(--status-info-color);    }
+      &.draft       { background: var(--status-neutral-bg); color: var(--status-neutral-color); }
+      &.partially_paid { background: var(--status-warning-bg); color: var(--status-warning-color); }
+      &.void        { background: var(--status-danger-bg);  color: var(--status-danger-color);  }
+    }
+  }
+}
+
+// Empty state
+.empty-state {
+  margin-top: var(--spacing-md);
+  border: var(--primary-border);
+  border-radius: var(--card-border-radius);
+  background: var(--surface-color);
+}
+
+.empty-state-body {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+}
+
+.empty-ico {
+  color: var(--text-tertiary);
+}
+
+.empty-text {
+  min-width: 0;
+}
+
+.empty-title {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+}
+
+.empty-sub {
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-base);
+  color: var(--text-muted);
+}
+
+.spacer {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .admin-billing {
+    padding: var(--spacing-md);
+  }
+
+  .grid-wrapper {
+    height: clamp(400px, calc(100vh - 560px), 700px);
+  }
+
+  .empty-state-body {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
