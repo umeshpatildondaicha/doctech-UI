@@ -125,7 +125,14 @@ export class AppointmentCreateComponent implements OnInit {
   ];
 
   dialogRef = inject(MatDialogRef<AppointmentCreateComponent>);
-  data = inject<{ mode: Mode, appointment?: Appointment }>(DIALOG_DATA_TOKEN);
+  data = inject<{
+    mode: Mode;
+    appointment?: Appointment;
+    doctorId?: number;
+    selectedDate?: Date | string;
+    schedulingType?: string;
+    availableSlots?: number;
+  }>(DIALOG_DATA_TOKEN);
   private dialogService = inject(DialogboxService);
   
   ngOnInit() {
@@ -171,13 +178,10 @@ export class AppointmentCreateComponent implements OnInit {
           this.appointmentForm.get(key)?.markAsTouched();
         });
         
-        // If form is valid, we'll close with form data
-        // Note: The dialog is already closing, so we update the close result
+        // If form is valid, close with form data so schedule can create the appointment
         if (this.appointmentForm.valid && this.selectedPatient) {
-          // Use a small delay to ensure form validation completes
           setTimeout(() => {
-            // Close with form data - this will override the action-only close
-            this.dialogRef.close(this.appointmentForm.value);
+            this.dialogRef.close(this.getClosePayload());
           }, 10);
         }
         // If invalid, dialog closes with action='submit' and validation errors are shown
@@ -190,12 +194,14 @@ export class AppointmentCreateComponent implements OnInit {
   ) {
     this.mode = this.data?.mode || 'create';
     this.submitButtonText = this.getSubmitButtonText();
+    const isCreateFromSchedule = this.mode === 'create' && (this.data?.doctorId != null || this.data?.selectedDate != null);
+    const initialDate = this.getInitialAppointmentDateTime();
     this.appointmentForm = this.fb.group({
       patient_id: [this.data?.appointment?.patient_id || '', Validators.required],
-      appointment_date_time: [this.data?.appointment?.appointment_date_time || '', Validators.required],
+      appointment_date_time: [this.data?.appointment?.appointment_date_time || initialDate, Validators.required],
       notes: [this.data?.appointment?.notes || ''],
-      doctor_id: [this.data?.appointment?.doctor_id || '', Validators.required],
-      slot_id: [this.data?.appointment?.slot_id || '', Validators.required],
+      doctor_id: [this.data?.appointment?.doctor_id ?? this.data?.doctorId ?? '', isCreateFromSchedule ? null : Validators.required],
+      slot_id: [this.data?.appointment?.slot_id ?? (isCreateFromSchedule ? 0 : ''), isCreateFromSchedule ? null : Validators.required],
       status: [this.data?.appointment?.status || 'scheduled', Validators.required]
     });
     if (this.isViewMode) {
@@ -203,6 +209,19 @@ export class AppointmentCreateComponent implements OnInit {
     }
     
     this.generateCalendarEvents();
+  }
+
+  private getInitialAppointmentDateTime(): string {
+    const fromAppointment = this.data?.appointment?.appointment_date_time;
+    if (fromAppointment) return fromAppointment;
+    const sel = this.data?.selectedDate;
+    if (sel == null) return '';
+    const d = typeof sel === 'string' ? new Date(sel.trim().slice(0, 10)) : sel;
+    if (isNaN(d.getTime())) return '';
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}T09:00:00`;
   }
 
   get isViewMode() {
@@ -318,6 +337,7 @@ export class AppointmentCreateComponent implements OnInit {
   }
 
   onSubmit() {
+    console.log("submit clicked");
     if (this.isViewMode) {
       this.dialogRef.close();
       return;
@@ -332,8 +352,13 @@ export class AppointmentCreateComponent implements OnInit {
     }
     
     if (this.appointmentForm.valid) {
-      this.dialogRef.close(this.appointmentForm.value);
+      this.dialogRef.close(this.getClosePayload());
     }
+  }
+
+  private getClosePayload(): Record<string, unknown> {
+    const value = this.appointmentForm.value as Record<string, unknown>;
+    return { ...value, patientName: this.selectedPatient?.fullName ?? value['patientName'] };
   }
 
   onCancel() {

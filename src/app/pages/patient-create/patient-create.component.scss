@@ -1,64 +1,77 @@
-.patient-create-dialog {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  max-height: 80vh;
+.patient-create-dialog{
+  width:100%;
 }
 
-
-// Dark theme support
-@media (prefers-color-scheme: dark) {
-  .patient-create-dialog {
-    .dialog-header,
-    .dialog-footer {
-      background-color: var(--surface-color);
-      border-color: var(--border-color);
-    }
-
-    .dialog-content {
-      .form {
-        .nutrition-section {
-          border-top-color: var(--border-color);
-        }
-      }
-    }
-  }
+/* dialog content */
+.dialog-content{
+  padding:26px 32px;
+  background:#f3f6fb;
+  max-height:72vh;
+  overflow-y:auto;
 }
 
-// View mode styles
-.patient-create-dialog.view-mode {
-  .form-field {
-    ::ng-deep .mat-mdc-form-field {
-      .mat-mdc-text-field-wrapper {
-        background-color: #f5f5f5;
-        border-color: #e0e0e0;
-      }
-      
-      .mat-mdc-form-field-focus-overlay {
-        background-color: transparent;
-      }
-    }
-  }
+/* form card */
+.form{
+  background:#fff;
+  padding:28px;
+  border-radius:18px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.08);
+  display:flex;
+  flex-direction:column;
+  gap:24px;
 }
 
-// Footer button spacing
-.footer-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  
-  .edit-btn {
-    margin-right: auto;
-  }
+/* section title */
+.section-title{
+  font-size:18px;
+  font-weight:600;
+  color:#111827;
+  border-bottom:1px solid #eef1f5;
+  padding-bottom:10px;
 }
 
-
+/* GRID */
 .combine-form-wrapper{
-  margin-top: 1em;
-  display: flex;
-  flex-direction: row;
-  gap: 1em;
-  align-items: center;
-  justify-content: start;
-  flex-wrap: wrap;
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:20px;
+}
+
+/* force custom inputs */
+.combine-form-wrapper app-input,
+.combine-form-wrapper app-selectbox{
+  width:100%;
+  display:block;
+}
+
+/* address full width */
+.form-row:last-child{
+  display:block;
+}
+
+.form-row:last-child app-input{
+  width:100%;
+  display:block;
+}
+
+/* premium input style */
+::ng-deep app-input input,
+::ng-deep app-selectbox{
+  border-radius:12px !important;
+}
+
+/* scrollbar */
+.dialog-content::-webkit-scrollbar{
+  width:6px;
+}
+.dialog-content::-webkit-scrollbar-thumb{
+  background:#cbd5e1;
+  border-radius:6px;
+}
+
+/* responsive */
+@media(max-width:768px){
+  .combine-form-wrapper{
+    grid-template-columns:1fr;
+  }
 }

@@ -1,25 +1,5 @@
-<div class="avail-dialog">
-  <!-- Dialog: stepper at top, scrollable content, step indicator at bottom -->
-
-  @if (setupType() === 'leave' && showLeaveScreen()) {
-    <nav class="avail-stepper-header" aria-label="Availability setup steps">
-      @for (label of stepLabels(); track $index) {
-        @let stepNum = $index + 1;
-        <div class="avail-stepper-step" [class.completed]="isStepCompleted(stepNum)" [class.active]="isStepActive(stepNum)">
-          <span class="avail-stepper-circle">
-            @if (isStepCompleted(stepNum)) {
-              <mat-icon>check</mat-icon>
-            } @else {
-              <span class="avail-stepper-num">{{ stepNum }}</span>
-            }
-          </span>
-          <span class="avail-stepper-label">{{ label }}</span>
-          @if (stepNum < totalSteps()) {
-            <span class="avail-stepper-connector" [class.on]="isStepCompleted(stepNum)"></span>
-          }
-        </div>
-      }
-    </nav>
+<div class="avail-dialog" [class.avail-dialog--leave-only]="setupType() === 'leave' && showLeaveScreen()">
+     @if (setupType() === 'leave' && showLeaveScreen()) {
     <div class="avail-content">
     @if (apiError(); as err) {
       <div class="avail-alert avail-alert--error"><mat-icon>error</mat-icon><span>{{ err }}</span></div>
@@ -31,7 +11,7 @@
 
         <div class="leave-section">
           <h4 class="leave-section-title">SELECT DATES</h4>
-          <div class="leave-calendar-wrap">
+          <div class="leave-calendar-wrap" [class.leave-calendar-wrap--full]="leaveCalendarLayout === 'full'">
             <mat-calendar
               [startAt]="leaveCalendarStart()"
               [selected]="step3.value.leaveStart ?? null"
@@ -61,13 +41,6 @@
           </mat-form-field>
         </div>
 
-        <!-- <div class="leave-actions">
-          <button mat-raised-button color="primary" type="button"
-            [disabled]="saving() || !canFinish()"
-            (click)="apply()">
-            {{ saving() ? 'Saving…' : 'Confirm Leave' }}
-          </button>
-        </div> -->
       </div>
     </form>
     </div>
@@ -311,6 +284,18 @@
           <div class="adv-block">
             <div class="adv-title">Emergency priority</div>
             <mat-slide-toggle formControlName="emergencyPriority">Enable emergency slot priority</mat-slide-toggle>
+            @if (schedulingType() === 'flexible' && step4Changes()?.emergencyPriority) {
+              <div class="adv-row adv-emergency-fields">
+                <mat-form-field appearance="outline" class="f">
+                  <mat-label>Max appointments per day</mat-label>
+                  <input matInput type="number" min="1" formControlName="maxAppointmentsPerDay" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="f">
+                  <mat-label>Total estimated appointments</mat-label>
+                  <input matInput type="number" min="0" formControlName="totalEstimatedAppointments" />
+                </mat-form-field>
+              </div>
+            }
           </div>
 
           @if (schedulingType() === 'slots') {
@@ -327,10 +312,10 @@
             </div>
           }
 
-          <mat-form-field appearance="outline" class="full">
+          <!-- <mat-form-field appearance="outline" class="full">
             <mat-label>Notes (optional)</mat-label>
             <input matInput formControlName="notes" placeholder="Any notes to remember for this rule…" />
-          </mat-form-field>
+          </mat-form-field> -->
         </div>
       </form>
     </mat-step>
@@ -422,6 +407,16 @@
                 <div class="rs-field">
                   <div class="rs-label">MAX PATIENTS / SLOT</div>
                   <div class="rs-value-box rs-value-unit">{{ step4.value.maxAppointmentsPerSlot ?? '—' }}</div>
+                </div>
+              }
+              @if (schedulingType() === 'flexible' && step4.value.emergencyPriority) {
+                <div class="rs-field">
+                  <div class="rs-label">MAX APPOINTMENTS PER DAY</div>
+                  <div class="rs-value-box rs-value-unit">{{ step4.value.maxAppointmentsPerDay ?? '—' }}</div>
+                </div>
+                <div class="rs-field">
+                  <div class="rs-label">TOTAL ESTIMATED APPOINTMENTS</div>
+                  <div class="rs-value-box rs-value-unit">{{ step4.value.totalEstimatedAppointments ?? '—' }}</div>
                 </div>
               }
               <div class="rs-capacity">

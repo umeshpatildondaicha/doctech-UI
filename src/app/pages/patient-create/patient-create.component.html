@@ -32,15 +32,11 @@
         <app-input label="City" formControlName="city" [required]="true">
         </app-input>
 
-
-
         <app-selectbox label="Blood Group" formControlName="bloodGroup" [options]="bloodGroups"
           placeholder="Select blood group" [required]="true" [displayExpr]="'label'"
           [errorMessage]="getErrorMessage('bloodGroup')" class="form-field">
         </app-selectbox>
       </div>
-
-
       <div class="form-row">
         <app-input label="Address" formControlName="address" placeholder="Enter address" [required]="true"
           [multiline]="true" [rows]="3" [errorMessage]="getErrorMessage('address')" class="form-field">

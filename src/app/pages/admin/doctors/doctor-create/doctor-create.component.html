@@ -1,20 +1,4 @@
 <div class="doctor-create-dialog">
-  <!-- Warning Message -->
-  <div class="warning-message">
-    <mat-icon>warning</mat-icon>
-    <div class="warning-content">
-      <strong>Important:</strong> Please add doctor information properly. Verify all details before submission.
-      Whatever happens with the doctor will be your responsibility, not the platform's mistake.
-    </div>
-  </div>
-
-  <!-- Backend Connection Status -->
-  <div class="connection-status" [class.connected]="backendConnected" [class.disconnected]="!backendConnected">
-    <mat-icon>{{ backendConnected ? 'wifi' : 'wifi_off' }}</mat-icon>
-    <span>{{ backendConnected ? 'Backend Connected' : 'Backend Disconnected' }}</span>
-    <app-button [text]="'Test Connection'" (btnClick)="testBackendConnection()" [disabled]="isLoading"
-      class="test-connection-btn"></app-button>
-  </div>
 
   <!-- Tab Navigation -->
   <div class="tab-navigation">
@@ -298,3 +282,4 @@
       </mat-tab>
     </mat-tab-group>
   </div>
+</div>

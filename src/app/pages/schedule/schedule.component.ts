@@ -34,7 +34,7 @@ import type { AppointmentTiming, DoctorTimingsResponse, TimingsForecastDay, Timi
 import { AppointmentService } from '../../services/appointment.service';
 import { TimingManageService } from '../../services/timing-manage.service';
 import { Dialog, DIALOG_DATA } from '@angular/cdk/dialog';
-import { LeaveDialogComponent } from './leave-dialog/leave-dialog.component';
+
 import { SpecificdaydialogComponent } from './specificdaydialog/specificdaydialog.component';
 import { DailyBaseDialogComponent } from './daily-base-dialog/daily-base-dialog.component';
 import { WeekroutinedialogComponent } from './weekroutinedialog/weekroutinedialog.component';
@@ -602,35 +602,7 @@ export class ScheduleComponent implements OnInit {
     this.loadWeeklyRoutine();
 
   }
-  // openEditLeave(item: any) {
-  //   const dialogRef = this.dialog.open(LeaveDialogComponent, {
-  //     width: '400px',
-  //     data: item   // 🔥 edit data pass
-  //   });
-
-  //   dialogRef.closed.subscribe(result => {
-  //     if (result) {
-  //       this.loadLeaves();
-  //     }
-  //   });
-  // }
-
-
-  // onAddLeave() {
-
-  //     const dialogRef = this.dialog.open(LeaveDialogComponent, {
-  //       width: '450px'
-  //     });
-
-  //     dialogRef.closed.subscribe((result) => {
-  //       if (result === true) {
-
-  //         this.loadLeaves(); // GET APIcall
-  //       }
-  //     });
-
-
-  // }
+ 
 
   formatDate(date: string): string {
     return new Date(date).toLocaleDateString('en-IN', {
@@ -674,73 +646,13 @@ export class ScheduleComponent implements OnInit {
       error: () => this.manageSpecificDays = []
     });
   }
-  // loadDailyBase() {
-  //   this.timingManageService.getAllTimings(this.doctorCode).subscribe(res => {
-  //     this.manageBaseAvailability = res
-  //       .filter((x:any) =>
-  //         !x.day &&
-  //         !x.specificDate &&
-  //         x.isRecurring === false &&
-  //         x.isLeave === false
-  //       )
-  //       .map((x:any) => ({
-  //         label: 'Base Availability',
-  //         timeLabel: `${x.startTime} – ${x.endTime}`,
-  //         note: x.notes,
-  //         raw: x   //  THIS IS MUST
-  //       }));
-  //   });
-  // }
-  // onEditBaseAvailability(item: any) {
-  //   this.dialog.open(DailyBaseDialogComponent, {
-  //     width: '520px',
-  //     data: {
-  //       doctorCode: this.doctorCode,
-  //       existing: item.raw   // 👈 RAW backend object
-  //     }
-  //   });
-  // }
 
 
-  // openDailyBaseDialog(existing?: any) {
-  //   const ref = this.dialog.open(DailyBaseDialogComponent, {
-  //     width: '480px',
-  //     data: {
-  //       doctorCode: this.doctorCode, existing
-
-  //     }
-  //   });
 
 
-  //   ref.closed.subscribe(result => {
-  //     if (result === true) {
-  //       this.loadBaseAvailability();
-  //     }
-  //   });
-  // }
-  // loadBaseAvailability() {
-  //   this.timingManageService.getAllTimings(this.doctorCode).subscribe(res => {
 
-  //     console.log('RAW API DATA 👉', res);
 
-  //     this.manageBaseAvailability = res
-  //       .filter((x: any) =>
-  //         !x.day &&
-  //         !x.specificDate &&
-  //         x.isRecurring === false &&
-  //         x.isLeave === false &&
-  //         x.startTime &&
-  //         x.endTime
-  //       )
-  //       .map((x: any) => ({
-  //         id: x.recordId ?? x.id,   // ✅ NUMERIC ID (e.g. 2)
-  //         label: 'Base Availability',
-  //         timeLabel: `${x.startTime} – ${x.endTime}`,
-  //         note: x.notes,
-  //         raw: x
-  //       }));
-  //   });
-  // }
+  
 
   loadWeeklyRoutine() {
     this.timingManageService.getAllTimings(this.doctorCode).subscribe({
@@ -1687,7 +1599,7 @@ export class ScheduleComponent implements OnInit {
     const ref = this.dialogService.openDialog(AvailabilitySetupDialogComponent, {
       title: 'Edit Leave',
       hideHeader: false,
-      width: '980px',
+      width: '560px',
       maxWidth: '96vw',
       maxHeight: '90vh',
       footerActions,
@@ -2539,17 +2451,18 @@ export class ScheduleComponent implements OnInit {
       data: {
         mode: 'create',
         schedulingType: this.doctorSchedule.schedulingType,
-        availableSlots: this.doctorInfo.availableSlots
+        availableSlots: this.doctorInfo.availableSlots,
+        doctorId: this.doctorInfo.doctorId,
+        selectedDate: this.selectedDate
       },
       width: '60%',
       footerActions: footerActions
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      // If result has form data (not just action), it means form was submitted successfully
-      if (result && (result.patient_id || result.appointment_date_time || (!result.action && result !== null))) {
-        // Handle new appointment creation
-        this.loadDoctorSchedule();
+      // Create appointment when dialog returns form data (patient + date/time), not on cancel or submit-without-data
+      if (result && result.action !== 'cancel' && result.appointment_date_time && (result.patient_id != null || result.patientName)) {
+        this.createAppointmentFromDialogResult(result);
       }
     });
   }
@@ -2936,6 +2849,36 @@ export class ScheduleComponent implements OnInit {
       this.recomputeScheduleSummary();
       this.recomputeScheduleAvailability();
     }
+  }
+
+  /** Create appointment from Book-appointment dialog result (form data with patient_id, appointment_date_time, etc.) */
+  private createAppointmentFromDialogResult(result: { patient_id?: string | number; patientName?: string; appointment_date_time: string; notes?: string; doctor_id?: number }): void {
+    const patientId = this.patientIdToNumber(String(result.patient_id ?? '0'));
+    const patientName = result.patientName || `Patient ${patientId}`;
+    const dateTime = result.appointment_date_time;
+    const isoDate = typeof dateTime === 'string' && dateTime.includes('T') ? dateTime.slice(0, 10) : dateTime;
+    const timePart = typeof dateTime === 'string' && dateTime.includes('T') ? dateTime.slice(11, 16) : '09:00'; // HH:mm
+    const slotTimeDisplay = timePart.length === 5 ? this.formatTimeForDisplay(timePart) : '';
+
+    const newAppointment: Appointment = {
+      appointment_id: this.mockAppointments.length + 1,
+      patient_id: patientId,
+      appointment_date_time: dateTime.includes('T') ? dateTime : `${isoDate}T${timePart}:00`,
+      notes: result.notes || 'Appointment created from schedule',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      doctor_id: result.doctor_id ?? this.doctorInfo.doctorId,
+      slot_id: 0,
+      status: 'SCHEDULED',
+      patientName,
+      doctorName: this.doctorInfo.doctorName,
+      slotTime: slotTimeDisplay
+    };
+
+    this.mockAppointments.push(newAppointment);
+    this.loadDoctorSchedule();
+    this.recomputeScheduleSummary();
+    this.recomputeScheduleAvailability();
   }
 
   toggleSettings() {

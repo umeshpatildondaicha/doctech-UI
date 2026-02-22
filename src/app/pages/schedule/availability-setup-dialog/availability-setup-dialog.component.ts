@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, computed, inject, Signal, signal, ViewChild } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -47,6 +47,7 @@ export interface EditOverrideData {
   schedulingType?: SchedulingType;
   slotDurationMinutes?: number;
   maxAppointmentsPerSlot?: number;
+  maxAppointmentsPerDay?: number;
   bufferMinutes?: number;
 }
 
@@ -62,6 +63,7 @@ export interface EditWeeklyData {
   schedulingType?: SchedulingType;
   slotDurationMinutes?: number;
   maxAppointmentsPerSlot?: number;
+  maxAppointmentsPerDay?: number;
   bufferMinutes?: number;
 }
 
@@ -73,18 +75,15 @@ export interface EditBaseData {
   schedulingType?: SchedulingType;
   slotDurationMinutes?: number;
   maxAppointmentsPerSlot?: number;
+  maxAppointmentsPerDay?: number;
   bufferMinutes?: number;
 }
 
 export interface AvailabilitySetupDialogData {
   doctorId: string;
-  /** When set, dialog opens in edit-leave mode with form pre-filled; save calls updateLeave instead of createLeave */
   editLeave?: EditLeaveData;
-  /** When set, dialog opens in edit-override mode with form pre-filled; save calls updateOverride instead of createOverride */
   editOverride?: EditOverrideData;
-  /** When set, dialog opens in edit-weekly mode with form pre-filled; save calls updateWeekly instead of createWeekly */
   editWeekly?: EditWeeklyData;
-  /** When set, dialog opens in edit-base (P4) mode with form pre-filled; save calls upsertBase */
   editBase?: EditBaseData;
 }
 
@@ -93,6 +92,7 @@ export interface AvailabilitySetupDialogData {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     MatStepperModule,
     MatButtonModule,
@@ -121,6 +121,13 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
 
   /** When true, show leave screen instead of stepper (avoids scheduling step ever showing for leave) */
   readonly showLeaveScreen = signal(false);
+
+  /** Calendar width in Mark Leave: 'compact' = narrow/no full width, 'full' = full width. Change via select in UI. */
+  leaveCalendarLayout: 'compact' | 'full' = 'compact';
+  readonly leaveCalendarLayoutOptions: { value: 'compact' | 'full'; label: string }[] = [
+    { value: 'compact', label: 'Compact (no full width)' },
+    { value: 'full', label: 'Full width' }
+  ];
 
   readonly weekdays: Weekday[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -153,6 +160,8 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
     emergencyPriority: this.fb.control<boolean>(false),
     slotDurationMinutes: this.fb.control<number>(30),
     maxAppointmentsPerSlot: this.fb.control<number>(1),
+    maxAppointmentsPerDay: this.fb.control<number>(10),
+    totalEstimatedAppointments: this.fb.control<number>(10),
     notes: this.fb.control<string>('')
   });
 
@@ -353,10 +362,14 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
       }
     }
 
-    const estimatedAppointments =
-      schedulingType === 'slots' && slotsPerDay !== null
-        ? Math.max(0, slotsPerDay) * Math.max(1, maxPerSlot)
-        : null;
+    let estimatedAppointments: number | null = null;
+    if (schedulingType === 'slots' && slotsPerDay !== null) {
+      estimatedAppointments = Math.max(0, slotsPerDay) * Math.max(1, maxPerSlot);
+    } else if (schedulingType === 'flexible') {
+      const totalEst = Number(this.step4.value.totalEstimatedAppointments);
+      const maxPerDay = Number(this.step4.value.maxAppointmentsPerDay);
+      estimatedAppointments = (totalEst > 0 ? totalEst : maxPerDay > 0 ? maxPerDay : null);
+    }
 
     return {
       showTimeline: setupType !== 'leave',
@@ -430,6 +443,8 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
         bufferMinutes: editOverride.bufferMinutes ?? 10,
         slotDurationMinutes: editOverride.slotDurationMinutes ?? 30,
         maxAppointmentsPerSlot: editOverride.maxAppointmentsPerSlot ?? 1,
+        maxAppointmentsPerDay: editOverride.maxAppointmentsPerDay ?? 10,
+        totalEstimatedAppointments: editOverride.maxAppointmentsPerDay ?? 10,
         notes: editOverride.notes ?? ''
       });
       return;
@@ -455,6 +470,8 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
         bufferMinutes: editWeekly.bufferMinutes ?? 10,
         slotDurationMinutes: editWeekly.slotDurationMinutes ?? 30,
         maxAppointmentsPerSlot: editWeekly.maxAppointmentsPerSlot ?? 1,
+        maxAppointmentsPerDay: editWeekly.maxAppointmentsPerDay ?? 10,
+        totalEstimatedAppointments: editWeekly.maxAppointmentsPerDay ?? 10,
         notes: editWeekly.notes ?? ''
       });
       return;
@@ -478,6 +495,8 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
         bufferMinutes: editBase.bufferMinutes ?? 10,
         slotDurationMinutes: editBase.slotDurationMinutes ?? 30,
         maxAppointmentsPerSlot: editBase.maxAppointmentsPerSlot ?? 1,
+        maxAppointmentsPerDay: editBase.maxAppointmentsPerDay ?? 10,
+        totalEstimatedAppointments: editBase.maxAppointmentsPerDay ?? 10,
         notes: editBase.notes ?? ''
       });
     }
@@ -894,7 +913,10 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
 
     const notes = (this.step4.value.notes || '').trim();
     const emergency = !!this.step4.value.emergencyPriority;
-    const notesFinal = emergency ? [notes, 'Emergency priority enabled'].filter(Boolean).join(' · ') : notes;
+    const estimatedPart = this.schedulingType() === 'flexible' && this.step4.value.totalEstimatedAppointments != null
+      ? `Estimated appointments: ${this.step4.value.totalEstimatedAppointments}`
+      : '';
+    const notesFinal = [notes, emergency ? 'Emergency priority enabled' : '', estimatedPart].filter(Boolean).join(' · ');
 
     try {
       if (setupType === 'leave') {
@@ -926,6 +948,9 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
           : undefined,
         maxAppointmentsPerSlot: schedulingType === 'slots'
           ? Number(this.step4.value.maxAppointmentsPerSlot ?? 1)
+          : undefined,
+        maxAppointmentsPerDay: schedulingType === 'flexible'
+          ? Number(this.step4.value.maxAppointmentsPerDay ?? 10)
           : undefined,
         bufferTimeSeconds: Number(this.step4.value.bufferMinutes ?? 0) * 60,
         notes: notesFinal || undefined
