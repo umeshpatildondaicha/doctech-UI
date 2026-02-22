@@ -1,4 +1,5 @@
-import { Component, OnChanges, OnInit, Input, SimpleChanges } from '@angular/core';
+import { Component, OnChanges, OnInit, OnDestroy, Input, SimpleChanges } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -46,7 +47,7 @@ const FORCE_DEMO_PATIENT_BILLING = false;
     templateUrl: './patient-billing-dashboard.component.html',
     styleUrl: './patient-billing-dashboard.component.scss'
 })
-export class PatientBillingDashboardComponent implements OnInit, OnChanges {
+export class PatientBillingDashboardComponent implements OnInit, OnChanges, OnDestroy {
   @Input() patientId: string = '';
   @Input() patientName: string = '';
   @Input() embedded: boolean = false; // True when embedded in patient profile
@@ -78,6 +79,15 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges {
     overdue: 0,
     invoicesCount: 0
   };
+
+  /**
+   * Cached reference to the invoice with the highest outstanding balance.
+   * Updated whenever invoices are reloaded — avoids repeated function calls in the template
+   * which would fire on every change-detection cycle.
+   */
+  topOutstandingInvoice: Invoice | undefined;
+
+  private readonly destroy$ = new Subject<void>();
 
   // UI State
   activeStatus: StatusFilter = 'ALL';
@@ -676,6 +686,18 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges {
       }, 0),
       invoicesCount: this.invoices.length
     };
+    // Cache the top outstanding invoice once — used in template to avoid
+    // repeated function calls on every change-detection cycle.
+    this.topOutstandingInvoice = [...this.invoices]
+      .sort((a, b) => (
+        (b.balanceDue ?? Math.max((b.total || 0) - (b.amountPaid || 0), 0)) -
+        (a.balanceDue ?? Math.max((a.total || 0) - (a.amountPaid || 0), 0))
+      ))[0];
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   applyStatusFilter(status: StatusFilter): void {
@@ -696,11 +718,6 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges {
       }
     });
     this.visibleInvoices = filtered;
-  }
-
-  getTopOutstandingInvoice(): Invoice | undefined {
-    return [...this.invoices]
-      .sort((a, b) => ((b.balanceDue || (b.total || 0) - (b.amountPaid || 0)) - (a.balanceDue || (a.total || 0) - (a.amountPaid || 0))))[0];
   }
 
   createNewInvoice(): void {

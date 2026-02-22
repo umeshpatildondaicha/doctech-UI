@@ -1,22 +1,83 @@
 <app-page [breadcrumb]="breadcrumb" [isFooter]="false">
   <div page-body class="hospital-page">
+
+    <!-- ═══ STATS BAR ═══════════════════════════════════════════════════════ -->
+    <div class="hp-stats-bar">
+      <div class="hps-item">
+        <mat-icon class="hps-ico hps-ico--blue">business</mat-icon>
+        <span class="hps-val">{{ statDepts() }}</span>
+        <span class="hps-lbl">Departments</span>
+      </div>
+      <div class="hps-sep"></div>
+      <div class="hps-item">
+        <mat-icon class="hps-ico hps-ico--purple">account_tree</mat-icon>
+        <span class="hps-val">{{ statSubDepts() }}</span>
+        <span class="hps-lbl">Sub-Depts</span>
+      </div>
+      <div class="hps-sep"></div>
+      <div class="hps-item">
+        <mat-icon class="hps-ico hps-ico--cyan">stethoscope</mat-icon>
+        <span class="hps-val">{{ statDoctors() }}</span>
+        <span class="hps-lbl">Doctors</span>
+      </div>
+      <div class="hps-sep"></div>
+      <div class="hps-item">
+        <mat-icon class="hps-ico hps-ico--green">circle</mat-icon>
+        <span class="hps-val">{{ statOnline() }}/{{ statDoctors() }}</span>
+        <span class="hps-lbl">Online</span>
+      </div>
+      <div class="hps-sep"></div>
+      <div class="hps-item">
+        <mat-icon class="hps-ico hps-ico--amber">badge</mat-icon>
+        <span class="hps-val">{{ statStaff() }}</span>
+        <span class="hps-lbl">Staff</span>
+      </div>
+      <div class="hps-sep"></div>
+      <div class="hps-item">
+        <mat-icon class="hps-ico hps-ico--teal">widgets</mat-icon>
+        <span class="hps-val">{{ hospitalFeatureCount() }}</span>
+        <span class="hps-lbl">Features</span>
+      </div>
+
+      <div class="hps-spacer"></div>
+
+      <!-- Autosave indicator -->
+      <div class="hps-save-info">
+        @if (lastSavedAt()) {
+          <mat-icon>cloud_done</mat-icon>
+          <span>Saved {{ lastSavedAt() | date:'h:mm a' }}</span>
+        } @else {
+          <mat-icon>cloud_off</mat-icon>
+          <span>Not saved</span>
+        }
+      </div>
+
+      <!-- Hierarchy hint -->
+      <div class="hps-hint" matTooltip="Departments and Sub-departments are optional. Doctors can connect directly to the Hospital or any Department." matTooltipPosition="below">
+        <mat-icon>info_outline</mat-icon>
+        <span>Dept &amp; Sub-Dept are optional</span>
+      </div>
+    </div>
+
+    <!-- ═══ CANVAS AREA ══════════════════════════════════════════════════════ -->
     <div class="hp-layout">
       <main class="hp-canvas-wrap">
-        <!-- Floating action bar -->
-        <div class="topbar topbar--sm" aria-label="Flow actions">
+
+        <!-- Floating toolbar (top-left) -->
+        <div class="topbar" aria-label="Flow actions">
           <button mat-icon-button class="tb-btn tb-plus" type="button"
             [class.tb-active]="showNodePicker()"
             (click)="toggleNodePicker()"
-            matTooltip="Add node" matTooltipPosition="below">
+            matTooltip="Add node (A)" matTooltipPosition="below">
             <mat-icon>add</mat-icon>
           </button>
 
-          <span class="tb-sep" aria-hidden="true"></span>
+          <span class="tb-sep"></span>
 
           <button mat-icon-button class="tb-btn" type="button"
             [class.tb-active]="linkMode()"
             (click)="toggleLinkMode()"
-            matTooltip="Link nodes" matTooltipPosition="below">
+            matTooltip="Link nodes (L)" matTooltipPosition="below">
             <mat-icon>{{ linkMode() ? 'link' : 'add_link' }}</mat-icon>
           </button>
 
@@ -25,30 +86,52 @@
             <mat-icon>auto_fix_high</mat-icon>
           </button>
 
-          <span class="tb-sep" aria-hidden="true"></span>
-
-          <button mat-icon-button class="tb-btn" type="button" (click)="load()"
-            matTooltip="Reload" matTooltipPosition="below">
-            <mat-icon>refresh</mat-icon>
+          <button mat-icon-button class="tb-btn" type="button" (click)="fitToScreen()"
+            matTooltip="Fit to screen" matTooltipPosition="below">
+            <mat-icon>fit_screen</mat-icon>
           </button>
+
+          <span class="tb-sep"></span>
+
           <button mat-icon-button class="tb-btn" type="button" (click)="save()"
             matTooltip="Save" matTooltipPosition="below">
             <mat-icon>save</mat-icon>
           </button>
-          <button mat-icon-button class="tb-btn" type="button" (click)="reset()"
-            matTooltip="Reset" matTooltipPosition="below">
-            <mat-icon>delete</mat-icon>
+
+          <button mat-icon-button class="tb-btn tb-btn--danger" type="button"
+            (click)="resetWithConfirm()"
+            matTooltip="Reset canvas" matTooltipPosition="below">
+            <mat-icon>delete_forever</mat-icon>
           </button>
         </div>
 
-        <!-- Node picker panel -->
+        <!-- ── Node picker panel ─────────────────────────────────────────── -->
         @if (showNodePicker()) {
           <aside class="node-picker" aria-label="Add node panel">
             <div class="np-head">
-              <span class="np-title">Components</span>
+              <span class="np-title">Add to Canvas</span>
               <button type="button" class="np-close" (click)="toggleNodePicker()">
                 <mat-icon>close</mat-icon>
               </button>
+            </div>
+
+            <!-- Context hint -->
+            @if (selectedNode(); as sel) {
+              <div class="np-context-hint">
+                <mat-icon>info_outline</mat-icon>
+                Selected: <strong>{{ sel.title }}</strong> ({{ nodeLabel(sel) }})
+              </div>
+            } @else {
+              <div class="np-context-hint np-context-hint--warn">
+                <mat-icon>lightbulb</mat-icon>
+                Select a node on the canvas first, then click an item to connect it.
+              </div>
+            }
+
+            <!-- Optional hierarchy note -->
+            <div class="np-hierarchy-note">
+              <mat-icon>account_tree</mat-icon>
+              <span>Sub-Dept is optional — Doctors can connect directly to Hospital or Dept.</span>
             </div>
 
             <div class="np-search">
@@ -57,11 +140,11 @@
             </div>
 
             <div class="np-tabs">
-              <button type="button" class="np-tab" [class.active]="pickerCategory() === 'all'" (click)="setPickerCategory('all')">All</button>
-              <button type="button" class="np-tab" [class.active]="pickerCategory() === 'department'" (click)="setPickerCategory('department')">Depts</button>
-              <button type="button" class="np-tab" [class.active]="pickerCategory() === 'subdepartment'" (click)="setPickerCategory('subdepartment')">Sub-depts</button>
-              <button type="button" class="np-tab" [class.active]="pickerCategory() === 'doctor'" (click)="setPickerCategory('doctor')">Doctors</button>
-              <button type="button" class="np-tab" [class.active]="pickerCategory() === 'staff'" (click)="setPickerCategory('staff')">Staff</button>
+              <button type="button" class="np-tab" [class.active]="pickerCategory() === 'all'"          (click)="setPickerCategory('all')">All</button>
+              <button type="button" class="np-tab" [class.active]="pickerCategory() === 'department'"   (click)="setPickerCategory('department')">Depts</button>
+              <button type="button" class="np-tab" [class.active]="pickerCategory() === 'subdepartment'"(click)="setPickerCategory('subdepartment')">Sub-Depts</button>
+              <button type="button" class="np-tab" [class.active]="pickerCategory() === 'doctor'"       (click)="setPickerCategory('doctor')">Doctors</button>
+              <button type="button" class="np-tab" [class.active]="pickerCategory() === 'staff'"        (click)="setPickerCategory('staff')">Staff</button>
             </div>
 
             <div class="np-list">
@@ -72,20 +155,22 @@
                   [class.disabled]="pickerItemDisabled(item.type)"
                   [disabled]="pickerItemDisabled(item.type)"
                   (click)="addFromPicker(item)"
-                  [title]="pickerItemDisabled(item.type) ? pickerItemHint(item.type) : 'Drag or click to add ' + item.name"
+                  [title]="pickerItemDisabled(item.type) ? pickerItemHint(item.type) : 'Click to add ' + item.name"
                   draggable="true"
                   (dragstart)="onPickerDragStart($event, item)"
                 >
                   <div class="np-item-ico" [attr.data-type]="item.type">
-                    <img [src]="item.icon" class="np-ico-img" alt="" />
+                    <mat-icon [style.color]="nodeColor(item.type)">{{ nodeMatIcon(item.type) }}</mat-icon>
                   </div>
                   <div class="np-item-info">
                     <div class="np-item-name">{{ item.name }}</div>
-                    @if (item.sub) {
-                      <div class="np-item-sub">{{ item.sub }}</div>
-                    }
+                    @if (item.sub) { <div class="np-item-sub">{{ item.sub }}</div> }
                   </div>
-                  <mat-icon class="np-item-grip">drag_indicator</mat-icon>
+                  @if (pickerItemDisabled(item.type)) {
+                    <mat-icon class="np-item-lock" matTooltip="{{ pickerItemHint(item.type) }}">lock</mat-icon>
+                  } @else {
+                    <mat-icon class="np-item-grip">drag_indicator</mat-icon>
+                  }
                 </button>
               }
               @if (pickerItems().length === 0) {
@@ -94,15 +179,19 @@
             </div>
 
             <div class="np-footer">
-              <button type="button" class="np-new-staff" (click)="toggleAddStaffForm(); toggleNodePicker()">
+              <button type="button" class="np-new-btn np-new-btn--doctor" (click)="toggleAddDoctorForm(); toggleNodePicker()">
                 <mat-icon>person_add</mat-icon>
+                <span>Create new doctor</span>
+              </button>
+              <button type="button" class="np-new-btn np-new-btn--staff" (click)="toggleAddStaffForm(); toggleNodePicker()">
+                <mat-icon>badge</mat-icon>
                 <span>Create new staff</span>
               </button>
             </div>
           </aside>
         }
 
-        <!-- Canvas (pan + zoom, no scrollbars) -->
+        <!-- ── Canvas ────────────────────────────────────────────────────── -->
         <div
           #canvasEl
           class="hp-canvas"
@@ -113,6 +202,15 @@
           (drop)="onCanvasDrop($event)"
           aria-label="Flow canvas"
         >
+          <!-- Empty state -->
+          @if (nodes().length <= 1) {
+            <div class="canvas-empty-state">
+              <mat-icon>add_circle_outline</mat-icon>
+              <p>Click <strong>+</strong> in the toolbar to add departments or doctors</p>
+              <p class="ces-hint">Departments and Sub-Departments are optional — Doctors can be placed directly.</p>
+            </div>
+          }
+
           <div
             class="canvas-inner"
             [style.width.px]="canvasWidth()"
@@ -120,114 +218,121 @@
             [style.transform]="canvasTransform()"
             [style.transformOrigin]="'0 0'"
           >
-              <!-- SVG edges with flowing animation -->
-              <svg class="edges" [attr.width]="canvasWidth()" [attr.height]="canvasHeight()">
-                <defs>
-                  <!-- Source connector (small rounded rect) -->
-                  <marker id="conn-src" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="userSpaceOnUse">
-                    <rect x="1" y="1" width="6" height="6" rx="1.5" fill="rgba(160,174,192,0.75)" />
-                  </marker>
-                  <marker id="conn-src-sel" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="userSpaceOnUse">
-                    <rect x="1" y="1" width="6" height="6" rx="1.5" fill="rgba(239,68,68,0.75)" />
-                  </marker>
-                  <!-- Destination connector (small rounded rect) -->
-                  <marker id="conn-dst" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="userSpaceOnUse">
-                    <rect x="1" y="1" width="6" height="6" rx="1.5" fill="rgba(160,174,192,0.75)" />
-                  </marker>
-                  <marker id="conn-dst-sel" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="userSpaceOnUse">
-                    <rect x="1" y="1" width="6" height="6" rx="1.5" fill="rgba(239,68,68,0.75)" />
-                  </marker>
-                </defs>
-                @for (e of edges(); track e.id) {
-                  <!-- Invisible wide hit-area for clicking -->
-                  <path
-                    class="edge-hit"
-                    [attr.d]="edgePath(e)"
-                    (click)="selectEdge(e.id); $event.stopPropagation()"
-                  ></path>
-                  <!-- Glow/shadow layer -->
-                  <path
-                    class="edge edge-glow"
-                    [attr.d]="edgePath(e)"
-                    [class.sel]="selectedEdgeId() === e.id"
-                  ></path>
-                  <!-- Main dashed line with rectangle connectors at both ends -->
-                  <path
-                    class="edge edge-bg"
-                    [attr.d]="edgePath(e)"
-                    [class.sel]="selectedEdgeId() === e.id"
-                    [attr.marker-start]="selectedEdgeId() === e.id ? 'url(#conn-src-sel)' : 'url(#conn-src)'"
-                    [attr.marker-end]="selectedEdgeId() === e.id ? 'url(#conn-dst-sel)' : 'url(#conn-dst)'"
-                  ></path>
-                  <!-- Animated flow highlight -->
-                  <path
-                    class="edge edge-flow"
-                    [attr.d]="edgePath(e)"
-                    [class.sel]="selectedEdgeId() === e.id"
-                  ></path>
-                }
-              </svg>
+            <!-- SVG edges -->
+            <svg class="edges" [attr.width]="canvasWidth()" [attr.height]="canvasHeight()">
+              <defs>
+                <marker id="conn-src"     markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="userSpaceOnUse"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="rgba(160,174,192,0.75)" /></marker>
+                <marker id="conn-src-sel" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="userSpaceOnUse"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="rgba(239,68,68,0.75)" /></marker>
+                <marker id="conn-dst"     markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="userSpaceOnUse"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="rgba(160,174,192,0.75)" /></marker>
+                <marker id="conn-dst-sel" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="userSpaceOnUse"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="rgba(239,68,68,0.75)" /></marker>
+              </defs>
+              @for (e of edges(); track e.id) {
+                <path class="edge-hit" [attr.d]="edgePath(e)" (click)="selectEdge(e.id); $event.stopPropagation()" (keydown.enter)="selectEdge(e.id)"></path>
+                <path class="edge edge-glow" [attr.d]="edgePath(e)" [class.sel]="selectedEdgeId() === e.id"></path>
+                <path class="edge edge-bg"   [attr.d]="edgePath(e)" [class.sel]="selectedEdgeId() === e.id"
+                  [attr.marker-start]="selectedEdgeId() === e.id ? 'url(#conn-src-sel)' : 'url(#conn-src)'"
+                  [attr.marker-end]  ="selectedEdgeId() === e.id ? 'url(#conn-dst-sel)' : 'url(#conn-dst)'"
+                ></path>
+                <path class="edge edge-flow" [attr.d]="edgePath(e)" [class.sel]="selectedEdgeId() === e.id"></path>
+              }
+            </svg>
 
-              <!-- Delete button at selected edge midpoint -->
-              @if (selectedEdgeId(); as eid) {
-                @for (e of edges(); track e.id) {
-                  @if (e.id === eid) {
-                    @if (edgeMidpoint(e); as mid) {
-                      <button
-                        type="button"
-                        class="edge-del-btn"
-                        [style.left.px]="mid.x"
-                        [style.top.px]="mid.y"
-                        (click)="removeEdgeById(e.id); $event.stopPropagation()"
-                        title="Remove link"
-                      >
-                        <mat-icon>close</mat-icon>
-                      </button>
+            <!-- Edge delete button at midpoint -->
+            @if (selectedEdgeId(); as eid) {
+              @for (e of edges(); track e.id) {
+                @if (e.id === eid) {
+                  @if (edgeMidpoint(e); as mid) {
+                    <button type="button" class="edge-del-btn"
+                      [style.left.px]="mid.x" [style.top.px]="mid.y"
+                      (click)="removeEdgeById(e.id); $event.stopPropagation()"
+                      title="Remove link">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  }
+                }
+              }
+            }
+
+            <!-- Nodes -->
+            @for (n of nodes(); track n.id) {
+              <button
+                type="button"
+                class="node"
+                [class.node--hospital]    ="n.type === 'hospital'"
+                [class.node--department]  ="n.type === 'department'"
+                [class.node--subdepartment]="n.type === 'subdepartment'"
+                [class.node--doctor]      ="n.type === 'doctor'"
+                [class.node--staff]       ="n.type === 'staff'"
+                [class.sel]="selectedNodeId() === n.id"
+                [class.link-source]="linkSourceId() === n.id"
+                [class.link-mode]="linkMode()"
+                [class.dragging]="isDragging()"
+                [style.left.px]="n.x"
+                [style.top.px]="n.y"
+                (mousedown)="onNodeMouseDown($event, n)"
+                (click)="selectNode(n.id)"
+                [attr.aria-label]="n.title"
+              >
+                <!-- Left type stripe is handled via CSS border-left -->
+
+                <!-- Icon area -->
+                <div class="n-ico">
+                  <mat-icon>{{ nodeMatIcon(n.type) }}</mat-icon>
+                </div>
+
+                <!-- Text -->
+                <div class="n-text">
+                  <div class="n-title">{{ n.title }}</div>
+                  <div class="n-sub-row">
+                    <!-- Online dot for doctors -->
+                    @if (n.type === 'doctor') {
+                      @if (doctorInfo(n); as doc) {
+                        <span class="n-online-dot" [class.n-online-dot--on]="doc.online" [matTooltip]="doc.online ? 'Online' : 'Offline'"></span>
+                      }
                     }
-                  }
-                }
-              }
+                    <!-- Active/inactive badge for departments -->
+                    @if (n.type === 'department') {
+                      @if (departmentInfo(n); as dept) {
+                        <span class="n-dept-badge" [class.n-dept-badge--active]="dept.active" [class.n-dept-badge--inactive]="!dept.active">
+                          {{ dept.active ? 'Active' : 'Inactive' }}
+                        </span>
+                      }
+                    }
+                    <span class="n-sub">{{ n.subtitle || nodeLabel(n) }}</span>
+                  </div>
+                </div>
 
-              <!-- Nodes (unified design) -->
-              @for (n of nodes(); track n.id) {
-                <button
-                  type="button"
-                  class="node"
-                  [class.sel]="selectedNodeId() === n.id"
-                  [class.link-source]="linkSourceId() === n.id"
-                  [class.link-mode]="linkMode()"
-                  [class.dragging]="isDragging()"
-                  [style.left.px]="n.x"
-                  [style.top.px]="n.y"
-                  [style.height.px]="nodeHeight(n.type)"
-                  (mousedown)="onNodeMouseDown($event, n)"
-                  (click)="selectNode(n.id)"
-                  [attr.aria-label]="n.title"
-                  [title]="n.title"
-                >
-                  <div class="n-ico" [style.background]="nodeColor(n.type)">
-                    <img [src]="nodeIcon(n.type)" class="n-ico-img" alt="" />
-                  </div>
-                  <div class="n-text">
-                    <div class="n-title">{{ n.title }}</div>
-                    <div class="n-sub">{{ n.subtitle || nodeLabel(n) }}</div>
-                  </div>
-                  @if (n.type === 'hospital') {
-                    <span class="feat-badge" [matTooltip]="hospitalFeatureCount() + ' features enabled'" matTooltipPosition="above">
-                      <mat-icon class="feat-badge-ico">widgets</mat-icon>
-                      <span>{{ hospitalFeatureCount() }}</span>
-                    </span>
-                  } @else if (n.type === 'doctor') {
-                    <span class="feat-badge feat-badge--doc" [matTooltip]="doctorFeatureCount(n.entityId) + ' / ' + hospitalFeatureCount() + ' features'" matTooltipPosition="above">
-                      <mat-icon class="feat-badge-ico">widgets</mat-icon>
-                      <span>{{ doctorFeatureCount(n.entityId) }}/{{ hospitalFeatureCount() }}</span>
-                    </span>
-                  } @else {
-                    <span class="n-dot" [style.background]="nodeColor(n.type)"></span>
-                  }
-                </button>
-              }
-            </div>
+                <!-- Right badge: features -->
+                @if (n.type === 'hospital') {
+                  <span class="feat-badge feat-badge--hospital" [matTooltip]="hospitalFeatureCount() + ' features enabled'">
+                    <mat-icon class="feat-badge-ico">widgets</mat-icon>
+                    <span>{{ hospitalFeatureCount() }}</span>
+                  </span>
+                } @else if (n.type === 'doctor') {
+                  <span class="feat-badge feat-badge--doc" [matTooltip]="doctorFeatureCount(n.entityId) + ' / ' + hospitalFeatureCount() + ' features'">
+                    <mat-icon class="feat-badge-ico">widgets</mat-icon>
+                    <span>{{ doctorFeatureCount(n.entityId) }}/{{ hospitalFeatureCount() }}</span>
+                  </span>
+                } @else {
+                  <span class="n-type-dot" [style.background]="nodeColor(n.type)"></span>
+                }
+
+                <!-- Quick-add child button (visible on hover) -->
+                @if (n.type !== 'staff') {
+                  <button
+                    type="button"
+                    class="n-add"
+                    [style.background]="nodeColor(n.type)"
+                    (click)="quickAddChild(n, $event)"
+                    [matTooltip]="quickAddLabel(n.type)"
+                    matTooltipPosition="right"
+                  >
+                    <mat-icon>add</mat-icon>
+                  </button>
+                }
+              </button>
+            }
+          </div>
         </div>
 
         <!-- Link mode banner -->
@@ -246,22 +351,68 @@
           </div>
         }
 
-        <!-- Add new staff form -->
-        @if (showAddStaffForm()) {
-          <div class="add-staff-panel">
-            <div class="asp-head">
-              <mat-icon>person_add</mat-icon>
-              <span>Add New Staff</span>
-              <button mat-icon-button type="button" class="asp-close" (click)="toggleAddStaffForm()">
+        <!-- Keyboard shortcuts hint -->
+        <div class="kb-hint">
+          <span><kbd>Del</kbd> remove node</span>
+          <span><kbd>Esc</kbd> deselect</span>
+          <span><kbd>Scroll</kbd> pan</span>
+          <span><kbd>Ctrl+Scroll</kbd> zoom</span>
+        </div>
+
+        <!-- ── Add Doctor form ──────────────────────────────────────────── -->
+        @if (showAddDoctorForm()) {
+          <div class="add-person-panel">
+            <div class="app-head app-head--doctor">
+              <mat-icon>stethoscope</mat-icon>
+              <span>Create New Doctor</span>
+              <button mat-icon-button type="button" class="app-close" (click)="toggleAddDoctorForm()">
                 <mat-icon>close</mat-icon>
               </button>
             </div>
-            <div class="asp-body">
-              <mat-form-field appearance="outline" class="asp-field">
+            <div class="app-body">
+              <mat-form-field appearance="outline" class="app-field">
+                <mat-label>Full Name</mat-label>
+                <input matInput [(ngModel)]="newDoctorName" placeholder="e.g. Dr. Priya Sharma" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="app-field">
+                <mat-label>Specialization</mat-label>
+                <mat-select [(ngModel)]="newDoctorSpec">
+                  <mat-option value="General Medicine">General Medicine</mat-option>
+                  <mat-option value="Cardiology">Cardiology</mat-option>
+                  <mat-option value="Pediatrics">Pediatrics</mat-option>
+                  <mat-option value="Orthopedics">Orthopedics</mat-option>
+                  <mat-option value="Physiotherapy">Physiotherapy</mat-option>
+                  <mat-option value="Nutrition">Nutrition</mat-option>
+                  <mat-option value="Mental Health">Mental Health</mat-option>
+                  <mat-option value="General">General</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="app-footer">
+              <button mat-button type="button" (click)="toggleAddDoctorForm()">Cancel</button>
+              <button mat-flat-button color="primary" type="button" [disabled]="!newDoctorName.trim()" (click)="createNewDoctor()">
+                Add Doctor
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- ── Add Staff form ───────────────────────────────────────────── -->
+        @if (showAddStaffForm()) {
+          <div class="add-person-panel">
+            <div class="app-head app-head--staff">
+              <mat-icon>badge</mat-icon>
+              <span>Create New Staff</span>
+              <button mat-icon-button type="button" class="app-close" (click)="toggleAddStaffForm()">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <div class="app-body">
+              <mat-form-field appearance="outline" class="app-field">
                 <mat-label>Full Name</mat-label>
                 <input matInput [(ngModel)]="newStaffName" placeholder="e.g. John Doe" />
               </mat-form-field>
-              <mat-form-field appearance="outline" class="asp-field">
+              <mat-form-field appearance="outline" class="app-field">
                 <mat-label>Role</mat-label>
                 <mat-select [(ngModel)]="newStaffRole">
                   <mat-option value="Nurse">Nurse</mat-option>
@@ -273,7 +424,7 @@
                 </mat-select>
               </mat-form-field>
             </div>
-            <div class="asp-footer">
+            <div class="app-footer">
               <button mat-button type="button" (click)="toggleAddStaffForm()">Cancel</button>
               <button mat-flat-button color="primary" type="button" [disabled]="!newStaffName.trim()" (click)="createNewStaff()">
                 Add Staff
@@ -282,89 +433,106 @@
           </div>
         }
 
-        <!-- Bottom-right zoom -->
-        <div class="zoom-fab zoom-fab--sm" aria-label="Canvas zoom controls">
-          <button mat-icon-button class="zm-btn" type="button" (click)="zoomOut()"
-            matTooltip="Zoom out" matTooltipPosition="above">
-            <mat-icon>remove</mat-icon>
-          </button>
+        <!-- Zoom FAB -->
+        <div class="zoom-fab" aria-label="Canvas zoom controls">
+          <button mat-icon-button class="zm-btn" type="button" (click)="zoomOut()" matTooltip="Zoom out" matTooltipPosition="above"><mat-icon>remove</mat-icon></button>
           <div class="zoom-pct">{{ zoomPercent() }}%</div>
-          <button mat-icon-button class="zm-btn" type="button" (click)="zoomIn()"
-            matTooltip="Zoom in" matTooltipPosition="above">
-            <mat-icon>add</mat-icon>
-          </button>
+          <button mat-icon-button class="zm-btn" type="button" (click)="zoomIn()"  matTooltip="Zoom in"  matTooltipPosition="above"><mat-icon>add</mat-icon></button>
+          <span class="zoom-sep"></span>
+          <button mat-icon-button class="zm-btn" type="button" (click)="fitToScreen()" matTooltip="Fit screen" matTooltipPosition="above"><mat-icon>fit_screen</mat-icon></button>
         </div>
 
-        <!-- Floating right configuration panel -->
+        <!-- ── Config Drawer ─────────────────────────────────────────────── -->
         @if (showConfigPanel()) {
           <aside class="config-drawer" aria-label="Configuration panel">
             <div class="cd-head">
-              <div class="cd-title">Configuration</div>
-              <button mat-icon-button type="button" (click)="toggleConfigPanel()" aria-label="Close configuration panel">
-                <mat-icon>close</mat-icon>
-              </button>
+              <div class="cd-title">{{ configPanelTitle() }}</div>
+              <div class="cd-head-actions">
+                <!-- Delete node button (not for hospital) -->
+                @if (selectedNode(); as n) {
+                  @if (n.type !== 'hospital') {
+                    <button mat-icon-button type="button" class="cd-delete-btn" (click)="deleteSelectedNode()" matTooltip="Delete node" matTooltipPosition="below">
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                  }
+                }
+                <button mat-icon-button type="button" (click)="toggleConfigPanel()" aria-label="Close">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
             </div>
+
             <div class="cd-body">
               @if (selectedNode(); as n) {
+
                 <!-- Profile card for doctor/staff -->
                 @if (n.type === 'doctor' || n.type === 'staff') {
-                  <div class="profile-card">
+                  <div class="profile-card" [style.border-left-color]="nodeColor(n.type)">
                     <div class="profile-avatar" [class.avatar-doctor]="n.type === 'doctor'" [class.avatar-staff]="n.type === 'staff'">
                       {{ getInitials(n.title) }}
                     </div>
                     <div class="profile-info">
                       <div class="profile-name">{{ n.title }}</div>
-                      <div class="profile-type"><span class="pill pill--{{ n.type }}">{{ n.type }}</span></div>
+                      <div class="profile-meta">
+                        <span class="pill pill--{{ n.type }}">{{ n.type }}</span>
+                        @if (n.type === 'doctor') {
+                          @if (doctorInfo(n); as doc) {
+                            <span class="online-chip" [class.online-chip--on]="doc.online">
+                              <span class="online-dot"></span>
+                              {{ doc.online ? 'Online' : 'Offline' }}
+                            </span>
+                          }
+                        }
+                      </div>
                       @if (n.subtitle) { <div class="profile-sub">{{ n.subtitle }}</div> }
                     </div>
                   </div>
                 } @else {
                   <div class="cfg-section cfg-section--first">
                     <div class="cfg-k">Selected</div>
-                    <div class="cfg-v"><span class="pill pill--{{ n.type }}">{{ n.type }}</span> {{ n.title }}</div>
-                    @if (n.subtitle) { <div class="cfg-help">{{ n.subtitle }}</div> }
+                    <div class="cfg-v">
+                      <span class="pill pill--{{ n.type }}">{{ nodeLabel(n) }}</span>
+                      {{ n.title }}
+                    </div>
+                    @if (n.type === 'department') {
+                      @if (departmentInfo(n); as dept) {
+                        <div class="cfg-dept-meta">
+                          <span class="dept-status-chip" [class.dept-status-chip--active]="dept.active">{{ dept.active ? 'Active' : 'Inactive' }}</span>
+                          <span class="dept-code-chip">{{ dept.code }}</span>
+                          <span class="dept-head-chip"><mat-icon>person</mat-icon>{{ dept.headName }}</span>
+                        </div>
+                      }
+                    }
                   </div>
                 }
 
-                <!-- Features section (hospital) -->
+                <!-- Hospital features -->
                 @if (n.type === 'hospital') {
                   <div class="cfg-section">
                     <div class="cfg-k">Features ({{ hospitalFeatureCount() }} enabled)</div>
-                    <div class="feat-list">
-                      @for (f of allFeatures(); track f.id) {
-                        <div class="feat-row" (click)="toggleHospitalFeature(f.id)">
-                          <mat-checkbox
-                            [checked]="isHospitalFeatureEnabled(f.id)"
-                            (click)="$event.stopPropagation()"
-                            (change)="toggleHospitalFeature(f.id)"
-                            color="primary"
-                          ></mat-checkbox>
-                          <mat-icon class="feat-row-ico">{{ f.icon }}</mat-icon>
-                          <span class="feat-row-name">{{ f.name }}</span>
-                        </div>
-                      }
-                    </div>
-                  </div>
-                }
-
-                <!-- Features section (doctor — from hospital's enabled features) -->
-                @if (n.type === 'doctor') {
-                  <div class="cfg-section">
-                    <div class="cfg-k">Features ({{ doctorFeatureCount(n.entityId) }} / {{ hospitalFeatureCount() }})</div>
-                    @if (hospitalFeatures().length === 0) {
-                      <div class="empty">No features enabled at hospital level.</div>
-                    } @else {
-                      <div class="feat-list">
-                        @for (f of hospitalFeatures(); track f.id) {
-                          <div class="feat-row" (click)="toggleDoctorFeature(n.entityId, f.id)">
-                            <mat-checkbox
-                              [checked]="isDoctorFeatureEnabled(n.entityId, f.id)"
-                              (click)="$event.stopPropagation()"
-                              (change)="toggleDoctorFeature(n.entityId, f.id)"
-                              color="primary"
-                            ></mat-checkbox>
-                            <mat-icon class="feat-row-ico">{{ f.icon }}</mat-icon>
-                            <span class="feat-row-name">{{ f.name }}</span>
+                    @for (grp of allFeaturesByService(); track grp.service) {
+                      <div class="svc-group">
+                        <button type="button" class="svc-group-header" (click)="toggleServiceGroup(grp.service)">
+                          <span class="svc-group-dot" [style.background]="grp.color"></span>
+                          <span class="svc-group-name" [style.color]="grp.color">{{ grp.service }}</span>
+                          <span class="svc-group-count">{{ grp.features.length }}</span>
+                          <button type="button" class="svc-toggle-all"
+                            [style.color]="grp.color"
+                            [class.svc-toggle-all--on]="areAllHospitalServiceFeaturesEnabled(grp)"
+                            (click)="toggleAllHospitalServiceFeatures(grp); $event.stopPropagation()"
+                            [matTooltip]="areAllHospitalServiceFeaturesEnabled(grp) ? 'Disable all' : 'Enable all'"
+                          >{{ areAllHospitalServiceFeaturesEnabled(grp) ? 'All off' : 'All on' }}</button>
+                          <mat-icon class="svc-group-chevron" [class.open]="!isServiceCollapsed(grp.service)">expand_more</mat-icon>
+                        </button>
+                        @if (!isServiceCollapsed(grp.service)) {
+                          <div class="feat-list">
+                            @for (f of grp.features; track f.id) {
+                              <div class="feat-row" (click)="toggleHospitalFeature(f.id)" (keydown.enter)="toggleHospitalFeature(f.id)" (keydown.space)="toggleHospitalFeature(f.id)">
+                                <mat-checkbox [checked]="isHospitalFeatureEnabled(f.id)" (click)="$event.stopPropagation()" (change)="toggleHospitalFeature(f.id)" (keydown.enter)="$event.stopPropagation()" color="primary"></mat-checkbox>
+                                <mat-icon class="feat-row-ico" [style.color]="isHospitalFeatureEnabled(f.id) ? grp.color : ''">{{ f.icon }}</mat-icon>
+                                <span class="feat-row-name">{{ f.name }}</span>
+                              </div>
+                            }
                           </div>
                         }
                       </div>
@@ -372,26 +540,69 @@
                   </div>
                 }
 
+                <!-- Doctor features -->
+                @if (n.type === 'doctor') {
+                  <div class="cfg-section">
+                    <div class="cfg-k">Assign Features ({{ doctorFeatureCount(n.entityId) }}/{{ hospitalFeatureCount() }})</div>
+                    @if (hospitalFeaturesByService().length === 0) {
+                      <div class="empty">No features enabled at hospital level yet.</div>
+                    } @else {
+                      @for (grp of hospitalFeaturesByService(); track grp.service) {
+                        <div class="svc-group">
+                          <button type="button" class="svc-group-header" (click)="toggleServiceGroup('doc_' + grp.service)">
+                            <span class="svc-group-dot" [style.background]="grp.color"></span>
+                            <span class="svc-group-name" [style.color]="grp.color">{{ grp.service }}</span>
+                            <span class="svc-group-count">{{ grp.features.length }}</span>
+                            <button type="button" class="svc-toggle-all"
+                              [style.color]="grp.color"
+                              [class.svc-toggle-all--on]="areAllDoctorServiceFeaturesEnabled(grp, n.entityId)"
+                              (click)="toggleAllDoctorServiceFeatures(grp, n.entityId); $event.stopPropagation()"
+                              [matTooltip]="areAllDoctorServiceFeaturesEnabled(grp, n.entityId) ? 'Remove all' : 'Assign all'"
+                            >{{ areAllDoctorServiceFeaturesEnabled(grp, n.entityId) ? 'All off' : 'All on' }}</button>
+                            <mat-icon class="svc-group-chevron" [class.open]="!isServiceCollapsed('doc_' + grp.service)">expand_more</mat-icon>
+                          </button>
+                          @if (!isServiceCollapsed('doc_' + grp.service)) {
+                            <div class="feat-list">
+                              @for (f of grp.features; track f.id) {
+                                <div class="feat-row" (click)="toggleDoctorFeature(n.entityId, f.id)" (keydown.enter)="toggleDoctorFeature(n.entityId, f.id)" (keydown.space)="toggleDoctorFeature(n.entityId, f.id)">
+                                  <mat-checkbox [checked]="isDoctorFeatureEnabled(n.entityId, f.id)" (click)="$event.stopPropagation()" (change)="toggleDoctorFeature(n.entityId, f.id)" (keydown.enter)="$event.stopPropagation()" color="primary"></mat-checkbox>
+                                  <mat-icon class="feat-row-ico" [style.color]="isDoctorFeatureEnabled(n.entityId, f.id) ? grp.color : ''">{{ f.icon }}</mat-icon>
+                                  <span class="feat-row-name">{{ f.name }}</span>
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+                    }
+                  </div>
+                }
+
                 <!-- Children list -->
                 @if (n.type !== 'staff') {
                   <div class="cfg-section">
-                    <div class="cfg-k">{{ childTypeLabel(n.type) }}</div>
+                    <div class="cfg-k">{{ childTypeLabel(n.type) }} ({{ selectedNodeChildren().length }})</div>
                     @if (selectedNodeChildren().length === 0) {
-                      <div class="empty">No {{ childTypeLabel(n.type) | lowercase }} connected yet.</div>
+                      <div class="empty">
+                        No {{ childTypeLabel(n.type) | lowercase }} connected yet.
+                        @if (n.type !== 'doctor') {
+                          <br>Use the <strong>+</strong> button on the node to add.
+                        }
+                      </div>
                     } @else {
                       <div class="list">
                         @for (child of selectedNodeChildren(); track child.id) {
                           <button type="button" class="row" [class.row--selected]="selectedNodeId() === child.id" (click)="selectNode(child.id); $event.stopPropagation()">
                             @if (child.type === 'doctor' || child.type === 'staff') {
-                              <div class="row-avatar" [class.avatar-doctor]="child.type === 'doctor'" [class.avatar-staff]="child.type === 'staff'">
-                                {{ getInitials(child.title) }}
-                              </div>
+                              <div class="row-avatar" [class.avatar-doctor]="child.type === 'doctor'" [class.avatar-staff]="child.type === 'staff'">{{ getInitials(child.title) }}</div>
+                            } @else {
+                              <div class="row-type-dot" [style.background]="nodeColor(child.type)"></div>
                             }
                             <div class="row-main">
                               <div class="row-t">{{ child.title }}</div>
                               @if (child.subtitle) { <div class="row-s">{{ child.subtitle }}</div> }
                             </div>
-                            <button mat-icon-button type="button" (click)="removeConnection(n.id, child.id); $event.stopPropagation()" title="Disconnect">
+                            <button mat-icon-button type="button" class="row-disconnect" (click)="removeConnection(n.id, child.id); $event.stopPropagation()" matTooltip="Disconnect">
                               <mat-icon>link_off</mat-icon>
                             </button>
                           </button>
@@ -400,13 +611,63 @@
                     }
                   </div>
                 }
+
               } @else {
-                <div class="empty">Select a node on the canvas to configure it.</div>
+                <!-- Empty config panel — org overview -->
+                <div class="org-overview">
+                  <div class="oo-title">Org Structure</div>
+                  <div class="oo-grid">
+                    <div class="oo-stat">
+                      <mat-icon [style.color]="nodeColor('department')">business</mat-icon>
+                      <span class="oo-val">{{ statDepts() }}</span>
+                      <span class="oo-lbl">Departments</span>
+                    </div>
+                    <div class="oo-stat">
+                      <mat-icon [style.color]="nodeColor('subdepartment')">account_tree</mat-icon>
+                      <span class="oo-val">{{ statSubDepts() }}</span>
+                      <span class="oo-lbl">Sub-Depts</span>
+                    </div>
+                    <div class="oo-stat">
+                      <mat-icon [style.color]="nodeColor('doctor')">stethoscope</mat-icon>
+                      <span class="oo-val">{{ statDoctors() }}</span>
+                      <span class="oo-lbl">Doctors</span>
+                    </div>
+                    <div class="oo-stat">
+                      <mat-icon class="oo-online-ico">circle</mat-icon>
+                      <span class="oo-val">{{ statOnline() }}</span>
+                      <span class="oo-lbl">Online</span>
+                    </div>
+                    <div class="oo-stat">
+                      <mat-icon [style.color]="nodeColor('staff')">badge</mat-icon>
+                      <span class="oo-val">{{ statStaff() }}</span>
+                      <span class="oo-lbl">Staff</span>
+                    </div>
+                    <div class="oo-stat">
+                      <mat-icon style="color: #0d9488">widgets</mat-icon>
+                      <span class="oo-val">{{ hospitalFeatureCount() }}</span>
+                      <span class="oo-lbl">Features</span>
+                    </div>
+                  </div>
+
+                  <div class="oo-hint">
+                    <mat-icon>touch_app</mat-icon>
+                    Select a node on the canvas to configure it.
+                  </div>
+
+                  <div class="oo-hierarchy">
+                    <div class="oo-hier-title">Supported Hierarchies</div>
+                    <div class="oo-hier-row"><span class="oo-node-tag oo-node-tag--hospital">Hospital</span> → <span class="oo-node-tag oo-node-tag--dept">Dept</span> → <span class="oo-node-tag oo-node-tag--sub">Sub-Dept</span> → <span class="oo-node-tag oo-node-tag--doc">Doctor</span></div>
+                    <div class="oo-hier-row"><span class="oo-node-tag oo-node-tag--hospital">Hospital</span> → <span class="oo-node-tag oo-node-tag--dept">Dept</span> → <span class="oo-node-tag oo-node-tag--doc">Doctor</span> <span class="oo-hier-opt">(no Sub-Dept)</span></div>
+                    <div class="oo-hier-row"><span class="oo-node-tag oo-node-tag--hospital">Hospital</span> → <span class="oo-node-tag oo-node-tag--doc">Doctor</span> <span class="oo-hier-opt">(no Dept)</span></div>
+                  </div>
+                </div>
               }
             </div>
           </aside>
         }
+
       </main>
     </div>
+
   </div>
 </app-page>

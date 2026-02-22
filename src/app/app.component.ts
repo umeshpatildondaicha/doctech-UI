@@ -2,10 +2,10 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, PLATFORM_ID, i
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import {
-  SidebarComponent,
   RightSidebarComponent,
   PatientQueueService
 } from '@lk/template';
+import { AppSidebarComponent } from './components/app-sidebar/app-sidebar.component';
 import { AppPatientQueueContentComponent } from './components/app-patient-queue-content/app-patient-queue-content.component';
 import { AuthService } from '@lk/core';
 import { AppTopbarComponent } from './components/app-topbar/app-topbar.component';
@@ -16,7 +16,7 @@ import { Subject, takeUntil, filter } from 'rxjs';
     imports: [
     RouterOutlet,
     CommonModule,
-    SidebarComponent,
+    AppSidebarComponent,
     AppTopbarComponent,
     RightSidebarComponent,
     AppPatientQueueContentComponent

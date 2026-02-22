@@ -33,6 +33,7 @@ import { ScheduleComponent } from './pages/schedule/schedule.component';
 import { MyScheduleComponent } from './pages/my-schedule/my-schedule.component';
 import { PatientBillingDashboardComponent } from './pages/billing/patient-billing-dashboard.component';
 import { InvoiceDetailComponent } from './pages/billing/invoice-detail.component';
+import { AdminBillingComponent } from './pages/billing/admin-billing.component';
 import { AuthGuard, LoginGuard } from "@lk/core";
 
 import { BaseConfigurationComponent } from './pages/admin/base-configuration/base-configuration.component';
@@ -78,6 +79,7 @@ export const routes: Routes = [
   { path: 'admin/roles', component: RolesComponent, canActivate: [AuthGuard] },
   { path: 'admin/plans', component: PlansComponent, canActivate: [AuthGuard] },
 
+  { path: 'admin/billing', component: AdminBillingComponent, canActivate: [AuthGuard], data: { breadcrumb: 'Billing', breadcrumbIcon: 'credit_card' } },
   { path: 'admin/hospital', component: HospitalComponent, canActivate: [AuthGuard], data: { breadcrumb: 'Hospital', breadcrumbIcon: 'apartment' } },
   {
     path: 'admin/base-configuration',

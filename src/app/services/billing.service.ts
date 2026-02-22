@@ -3,18 +3,35 @@ import { Observable, of } from 'rxjs';
 import { catchError, delay } from 'rxjs/operators';
 import { HttpService } from './http.service';
 import { ApiConfigService } from '@lk/core';
-import { Invoice, PaymentRecord } from '../interfaces/billing.interface';
+import { Invoice, PaymentRecord, DoctorBillingSummary, HospitalBillingSummary } from '../interfaces/billing.interface';
+
+/** Static display-name map used in mock mode to humanise doctor IDs. */
+const MOCK_DOCTOR_NAMES: Record<string, string> = {
+  'DOC-1': 'Dr. Swapnil Desai',
+  'DOC-2': 'Dr. Anika Rao',
+  'DOC-3': 'Dr. Rahul Mehta',
+  'UNASSIGNED': 'Unassigned'
+};
+
+function resolveDoctorName(doctorId: string | undefined): string {
+  if (!doctorId) return MOCK_DOCTOR_NAMES['UNASSIGNED'];
+  return MOCK_DOCTOR_NAMES[doctorId] ?? `Dr. (ID: ${doctorId})`;
+}
 
 @Injectable({ providedIn: 'root' })
 export class BillingService {
   private readonly apiConfig = inject(ApiConfigService);
-  // Note: endpoints and mock features should be provided by consuming app
-  private readonly endpoints = { base: '/api/billing', invoices: '/api/billing/invoices', payments: '/api/billing/payments', pdf: '/api/billing/invoices/pdf' };
-  private readonly mock = false; // Should be configurable via injection token
+  private readonly endpoints = {
+    base: '/api/billing',
+    invoices: '/api/billing/invoices',
+    payments: '/api/billing/payments',
+    pdf: '/api/billing/invoices/pdf',
+    summary: '/api/billing/summary'
+  };
+  private readonly mock = false;
 
   private shouldFallbackToMock(err: any): boolean {
     const status = err?.status;
-    // In dev/demo, backend often isn't wired yet (404). Treat as "use mock".
     return status === 404 || status === 0;
   }
 
@@ -68,7 +85,6 @@ export class BillingService {
 
     this.mockInvoices.unshift(inv2, inv1);
 
-    // Seed a payment record for the partially paid invoice (so Payments tab isn't empty)
     this.mockPayments.unshift({
       id: `PAY-${patientId}-001`,
       invoiceId: inv1.id as string,
@@ -84,7 +100,6 @@ export class BillingService {
     return this.apiConfig.getApiUrl();
   }
 
-  // In-memory store for mock mode
   private mockInvoices: Invoice[] = [
     {
       id: 'INV-1001',
@@ -93,7 +108,7 @@ export class BillingService {
       patientId: 'PAT-1',
       patientName: 'Rahul Sharma',
       date: new Date().toISOString(),
-      dueDate: new Date(Date.now() + 7*24*3600*1000).toISOString(),
+      dueDate: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
       status: 'ISSUED',
       items: [
         { description: 'Consultation', quantity: 1, unitPrice: 500 },
@@ -114,17 +129,35 @@ export class BillingService {
       patientId: 'PAT-2',
       patientName: 'Aditi Verma',
       date: new Date().toISOString(),
-      dueDate: new Date(Date.now() - 2*24*3600*1000).toISOString(),
+      dueDate: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(),
       status: 'PARTIALLY_PAID',
-      items: [ { description: 'Physiotherapy Session', quantity: 3, unitPrice: 700 } ],
+      items: [{ description: 'Physiotherapy Session', quantity: 3, unitPrice: 700 }],
       subTotal: 2100,
       discountTotal: 100,
       taxTotal: 360,
       total: 2360,
       amountPaid: 1000,
       balanceDue: 1360
+    },
+    {
+      id: 'INV-1003',
+      invoiceNo: 'INV-1003',
+      doctorId: 'DOC-2',
+      patientId: 'PAT-3',
+      patientName: 'Vikram Singh',
+      date: new Date(Date.now() - 10 * 24 * 3600 * 1000).toISOString(),
+      dueDate: new Date(Date.now() + 5 * 24 * 3600 * 1000).toISOString(),
+      status: 'PAID',
+      items: [{ description: 'Cardiology Consultation', quantity: 1, unitPrice: 1200, taxRate: 18 }],
+      subTotal: 1200,
+      discountTotal: 0,
+      taxTotal: 216,
+      total: 1416,
+      amountPaid: 1416,
+      balanceDue: 0
     }
   ];
+
   private mockPayments: PaymentRecord[] = [];
 
   constructor(private readonly http: HttpService) {}
@@ -159,33 +192,23 @@ export class BillingService {
         if (this.shouldFallbackToMock(err)) {
           const found = this.mockInvoices.find(i => i.id === id);
           if (found) return of(found).pipe(delay(50));
-          
-          // Try to extract patient ID from invoice ID (e.g., INV-PAT-1001-002 -> PAT-1001)
+
           let patientId = '';
           let patientName = '';
           const match = id.match(/INV-(PAT-\d+|\d+)-/);
           if (match) {
             const extractedId = match[1];
-            // Normalize: if numeric, format as PAT-XXXX; otherwise use as-is
-            if (/^\d+$/.test(extractedId)) {
-              patientId = `PAT-${extractedId.padStart(4, '0')}`;
-            } else {
-              patientId = extractedId;
-            }
-            // Find patient name from existing invoices or use default
+            patientId = /^\d+$/.test(extractedId) ? `PAT-${extractedId.padStart(4, '0')}` : extractedId;
             const existingInv = this.mockInvoices.find(i => i.patientId === patientId);
             patientName = existingInv?.patientName || `Patient ${patientId}`;
           }
-          
-          // If patient ID extracted, ensure demo data exists for that patient
+
           if (patientId) {
             this.ensurePatientDemoData(patientId, patientName);
-            // After ensuring demo data, check again for the invoice
-            const foundAfterEnsuring = this.mockInvoices.find(i => i.id === id);
-            if (foundAfterEnsuring) return of(foundAfterEnsuring).pipe(delay(50));
+            const foundAfter = this.mockInvoices.find(i => i.id === id);
+            if (foundAfter) return of(foundAfter).pipe(delay(50));
           }
-          
-          // If still not found, create a minimal demo invoice with that id
+
           const created: Invoice = {
             id,
             invoiceNo: id,
@@ -213,11 +236,9 @@ export class BillingService {
 
   createInvoice(payload: Invoice): Observable<Invoice> {
     if (this.mock) {
-      const id = payload.invoiceNo || `INV-${Math.floor(Math.random()*9000+1000)}`;
-      const inv: Invoice = { ...payload, id, invoiceNo: id };
-      inv.amountPaid = inv.amountPaid ?? 0;
-      const paid = inv.amountPaid || 0;
-      inv.balanceDue = (inv.total || 0) - paid;
+      const id = payload.invoiceNo || `INV-${Math.floor(Math.random() * 9000 + 1000)}`;
+      const inv: Invoice = { ...payload, id, invoiceNo: id, amountPaid: payload.amountPaid ?? 0 };
+      inv.balanceDue = (inv.total || 0) - (inv.amountPaid || 0);
       this.mockInvoices.unshift(inv);
       return of(inv).pipe(delay(150));
     }
@@ -225,12 +246,9 @@ export class BillingService {
     return this.http.sendPOSTRequest(url, JSON.stringify(payload)).pipe(
       catchError((err) => {
         if (this.shouldFallbackToMock(err)) {
-          // fallback to mock behavior
           const id = payload.invoiceNo || `INV-${Math.floor(Math.random() * 9000 + 1000)}`;
-          const inv: Invoice = { ...payload, id, invoiceNo: id };
-          inv.amountPaid = inv.amountPaid ?? 0;
-          const paid = inv.amountPaid || 0;
-          inv.balanceDue = (inv.total || 0) - paid;
+          const inv: Invoice = { ...payload, id, invoiceNo: id, amountPaid: payload.amountPaid ?? 0 };
+          inv.balanceDue = (inv.total || 0) - (inv.amountPaid || 0);
           this.mockInvoices.unshift(inv);
           return of(inv).pipe(delay(80));
         }
@@ -289,113 +307,156 @@ export class BillingService {
 
   recordPayment(invoiceId: string, payment: PaymentRecord): Observable<Invoice> {
     if (this.mock) {
-      const idx = this.mockInvoices.findIndex(i => i.id === invoiceId);
-      if (idx >= 0) {
-        const inv = { ...this.mockInvoices[idx] } as Invoice;
-        inv.amountPaid = (inv.amountPaid || 0) + payment.amount;
-        inv.balanceDue = (inv.total || 0) - (inv.amountPaid || 0);
-        if (inv.balanceDue <= 0) {
-          inv.status = 'PAID';
-        } else if (inv.amountPaid) {
-          inv.status = 'PARTIALLY_PAID';
-        }
-        this.mockInvoices[idx] = inv;
-        this.mockPayments.unshift({
-          ...payment,
-          id: payment.id || `PAY-${Date.now()}`,
-          invoiceId,
-          date: payment.date || new Date().toISOString()
-        });
-        return of(inv).pipe(delay(120));
-      }
-      return of(this.mockInvoices[0]).pipe(delay(120));
+      return of(this.applyPaymentToMock(invoiceId, payment)).pipe(delay(120));
     }
     const url = this.apiBase + this.endpoints.payments;
     return this.http.sendPOSTRequest(url, JSON.stringify({ ...payment, invoiceId })).pipe(
       catchError((err) => {
         if (this.shouldFallbackToMock(err)) {
-          const idx = this.mockInvoices.findIndex(i => i.id === invoiceId);
-          if (idx >= 0) {
-            const inv = { ...this.mockInvoices[idx] } as Invoice;
-            inv.amountPaid = (inv.amountPaid || 0) + payment.amount;
-            inv.balanceDue = (inv.total || 0) - (inv.amountPaid || 0);
-            if (inv.balanceDue <= 0) inv.status = 'PAID';
-            else if (inv.amountPaid) inv.status = 'PARTIALLY_PAID';
-            this.mockInvoices[idx] = inv;
-            this.mockPayments.unshift({
-              ...payment,
-              id: payment.id || `PAY-${Date.now()}`,
-              invoiceId,
-              date: payment.date || new Date().toISOString()
-            });
-            return of(inv).pipe(delay(80));
-          }
-          return of(this.mockInvoices[0]).pipe(delay(80));
+          return of(this.applyPaymentToMock(invoiceId, payment)).pipe(delay(80));
         }
         return of(this.mockInvoices[0]).pipe(delay(80));
       })
     );
   }
 
+  private applyPaymentToMock(invoiceId: string, payment: PaymentRecord): Invoice {
+    const idx = this.mockInvoices.findIndex(i => i.id === invoiceId);
+    if (idx < 0) return this.mockInvoices[0];
+    const inv = { ...this.mockInvoices[idx] } as Invoice;
+    inv.amountPaid = (inv.amountPaid || 0) + payment.amount;
+    inv.balanceDue = (inv.total || 0) - (inv.amountPaid || 0);
+    if (inv.balanceDue <= 0) inv.status = 'PAID';
+    else if (inv.amountPaid) inv.status = 'PARTIALLY_PAID';
+    this.mockInvoices[idx] = inv;
+    this.mockPayments.unshift({
+      ...payment,
+      id: payment.id || `PAY-${Date.now()}`,
+      invoiceId,
+      date: payment.date || new Date().toISOString()
+    });
+    return inv;
+  }
+
   listPayments(params?: Record<string, any>): Observable<PaymentRecord[]> {
     if (this.mock) {
-      // minimal filtering support; expand if needed
-      const invoiceId = params?.['invoiceId'];
-      const patientId = params?.['patientId'];
-      let rows = this.mockPayments.slice();
-      if (invoiceId) rows = rows.filter(p => p.invoiceId === invoiceId);
-      if (patientId) {
-        const invoiceIds = new Set(this.mockInvoices.filter(i => i.patientId === patientId).map(i => i.id));
-        rows = rows.filter(p => invoiceIds.has(p.invoiceId));
-      }
-      return of(rows).pipe(delay(150));
+      return of(this.filterPayments(params)).pipe(delay(150));
     }
     const url = this.apiBase + this.endpoints.payments;
     const query = params ? '?' + new URLSearchParams(params as any).toString() : '';
     return this.http.sendGETRequest(url + query).pipe(
       catchError((err) => {
         if (this.shouldFallbackToMock(err)) {
-          const invoiceId = params?.['invoiceId'];
-          const patientId = params?.['patientId'];
-          let rows = this.mockPayments.slice();
-          if (invoiceId) rows = rows.filter(p => p.invoiceId === invoiceId);
-          if (patientId) {
-            const invoiceIds = new Set(this.mockInvoices.filter(i => i.patientId === patientId).map(i => i.id));
-            rows = rows.filter(p => invoiceIds.has(p.invoiceId));
-          }
-          return of(rows).pipe(delay(80));
+          return of(this.filterPayments(params)).pipe(delay(80));
         }
         return of([] as PaymentRecord[]).pipe(delay(80));
       })
     );
   }
 
-  downloadInvoicePdf(id: string): Observable<any> {
-    if (this.mock) {
-      // In mock mode, just simulate success
-      return of({ ok: true }).pipe(delay(80));
+  private filterPayments(params?: Record<string, any>): PaymentRecord[] {
+    const invoiceId = params?.['invoiceId'];
+    const patientId = params?.['patientId'];
+    let rows = this.mockPayments.slice();
+    if (invoiceId) rows = rows.filter(p => p.invoiceId === invoiceId);
+    if (patientId) {
+      const invoiceIds = new Set(this.mockInvoices.filter(i => i.patientId === patientId).map(i => i.id));
+      rows = rows.filter(p => invoiceIds.has(p.invoiceId));
     }
+    return rows;
+  }
+
+  downloadInvoicePdf(id: string): Observable<any> {
+    if (this.mock) return of({ ok: true }).pipe(delay(80));
     const url = `${this.apiBase + this.endpoints.pdf}/${id}`;
     return this.http.downloadFile(url, `invoice-${id}.pdf`);
+  }
+
+  /**
+   * Returns a hospital-wide billing summary grouped by doctor.
+   * Falls back to computing from mock invoices when the backend is unavailable.
+   */
+  getHospitalSummary(params?: Record<string, any>): Observable<HospitalBillingSummary> {
+    if (this.mock) {
+      return of(this.computeHospitalSummary(this.mockInvoices.slice())).pipe(delay(150));
+    }
+    const url = `${this.apiBase}${this.endpoints.summary}/hospital`;
+    const query = params ? '?' + new URLSearchParams(params as any).toString() : '';
+    return this.http.sendGETRequest(url + query).pipe(
+      catchError((err) => {
+        if (this.shouldFallbackToMock(err)) {
+          const rows = this.applyFilters(this.mockInvoices.slice(), params);
+          return of(this.computeHospitalSummary(rows)).pipe(delay(80));
+        }
+        return of(this.computeHospitalSummary([]));
+      })
+    );
+  }
+
+  private computeHospitalSummary(invoices: Invoice[]): HospitalBillingSummary {
+    const today = new Date();
+    const doctorMap = new Map<string, DoctorBillingSummary & { _patients: Set<string> }>();
+    const allPatients = new Set<string>();
+
+    for (const inv of invoices) {
+      const doctorId = (inv.doctorId || 'UNASSIGNED').toString();
+      const doctorName = resolveDoctorName(inv.doctorId);
+      const total = Number(inv.total) || 0;
+      const paid = Number(inv.amountPaid) || 0;
+      const balance = Math.max(total - paid, 0);
+      const isOverdue = inv.status !== 'PAID' && !!inv.dueDate && new Date(inv.dueDate) < today && balance > 0;
+
+      allPatients.add(inv.patientId);
+
+      const existing = doctorMap.get(doctorId) ?? {
+        doctorId, doctorName, patientCount: 0, invoiceCount: 0,
+        totalBilled: 0, totalPaid: 0, totalOutstanding: 0, overdue: 0,
+        _patients: new Set<string>()
+      };
+
+      existing._patients.add(inv.patientId);
+      existing.invoiceCount++;
+      existing.totalBilled += total;
+      existing.totalPaid += paid;
+      existing.totalOutstanding += balance;
+      if (isOverdue) existing.overdue += balance;
+      doctorMap.set(doctorId, existing);
+    }
+
+    const byDoctor: DoctorBillingSummary[] = Array.from(doctorMap.values()).map(({ _patients, ...row }) => ({
+      ...row,
+      patientCount: _patients.size
+    }));
+
+    return {
+      totalBilled: invoices.reduce((s, i) => s + (i.total || 0), 0),
+      totalPaid: invoices.reduce((s, i) => s + (i.amountPaid || 0), 0),
+      totalOutstanding: invoices.reduce((s, i) => s + Math.max((i.total || 0) - (i.amountPaid || 0), 0), 0),
+      overdue: invoices.filter(i => i.status !== 'PAID' && !!i.dueDate && new Date(i.dueDate) < today)
+                       .reduce((s, i) => s + Math.max((i.total || 0) - (i.amountPaid || 0), 0), 0),
+      totalPatients: allPatients.size,
+      totalInvoices: invoices.length,
+      byDoctor
+    };
   }
 
   private applyFilters(rows: Invoice[], params?: Record<string, any>): Invoice[] {
     if (!params) return rows;
     const patientId = (params['patientId'] || '').toString();
+    const doctorId = (params['doctorId'] || '').toString();
     const q = (params['q'] || '').toString().toLowerCase();
     const status = (params['status'] || '').toString();
     const from = params['from'] ? new Date(params['from']) : null;
     const to = params['to'] ? new Date(params['to']) : null;
     return rows.filter(r => {
       const matchesPatient = !patientId || r.patientId === patientId;
+      const matchesDoctor = !doctorId || r.doctorId === doctorId;
       const matchesQ = !q || r.invoiceNo.toLowerCase().includes(q) || r.patientName.toLowerCase().includes(q);
       const matchesStatus = !status || r.status === status;
       const d = new Date(r.date);
       const matchesFrom = !from || d >= from;
       const matchesTo = !to || d <= to;
-      return matchesPatient && matchesQ && matchesStatus && matchesFrom && matchesTo;
+      return matchesPatient && matchesDoctor && matchesQ && matchesStatus && matchesFrom && matchesTo;
     });
   }
 }
-
-

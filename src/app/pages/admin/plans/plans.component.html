@@ -1,181 +1,422 @@
 <app-page [breadcrumb]="breadcrumb" [isFooter]="false">
   <div page-body class="plans-page">
 
-    <!-- Hero Stats Bar -->
+    <!-- ═══ STATS OVERVIEW ═══════════════════════════════════════════════ -->
     <div class="stats-bar">
-      <div class="stat-pill">
-        <mat-icon>payments</mat-icon>
-        <div class="sp-info">
-          <span class="sp-val">{{ plans.length }}</span>
-          <span class="sp-lbl">Plans</span>
+      <div class="stat-card">
+        <div class="stat-icon-wrap stat-icon-wrap--blue">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+        <div class="stat-body">
+          <span class="stat-val">{{ services.length }}</span>
+          <span class="stat-lbl">Total Services</span>
         </div>
       </div>
-      <div class="stat-pill">
-        <mat-icon>check_circle</mat-icon>
-        <div class="sp-info">
-          <span class="sp-val">{{ activePlans() }}</span>
-          <span class="sp-lbl">Active</span>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrap stat-icon-wrap--green">
+          <mat-icon>verified</mat-icon>
+        </div>
+        <div class="stat-body">
+          <span class="stat-val">{{ purchasedServices().length }}</span>
+          <span class="stat-lbl">Subscribed</span>
         </div>
       </div>
-      <div class="stat-pill">
-        <mat-icon>groups</mat-icon>
-        <div class="sp-info">
-          <span class="sp-val">{{ totalSubscribers() }}</span>
-          <span class="sp-lbl">Subscribers</span>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrap stat-icon-wrap--teal">
+          <mat-icon>tune</mat-icon>
+        </div>
+        <div class="stat-body">
+          <span class="stat-val">{{ totalActiveFeatures() }}</span>
+          <span class="stat-lbl">Active Features</span>
         </div>
       </div>
-      <div class="stat-pill">
-        <mat-icon>currency_rupee</mat-icon>
-        <div class="sp-info">
-          <span class="sp-val">{{ formatPrice(totalRevenue()) }}</span>
-          <span class="sp-lbl">Est. Revenue</span>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrap stat-icon-wrap--purple">
+          <mat-icon>medical_services</mat-icon>
+        </div>
+        <div class="stat-body">
+          <span class="stat-val">{{ totalDoctorsEquipped() }}</span>
+          <span class="stat-lbl">Doctors Equipped</span>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--spend">
+        <div class="stat-icon-wrap stat-icon-wrap--orange">
+          <mat-icon>currency_rupee</mat-icon>
+        </div>
+        <div class="stat-body">
+          <span class="stat-val">₹{{ monthlySpend() | number }}</span>
+          <span class="stat-lbl">Monthly Spend</span>
         </div>
       </div>
     </div>
 
-    <!-- Billing Cycle Toggle + Add -->
-    <div class="section-head">
-      <div class="sh-left">
-        <h2 class="section-title">Pricing Plans</h2>
-        <p class="section-sub">Choose the perfect plan for your patients</p>
-      </div>
-      <div class="sh-right">
-        <div class="cycle-toggle">
-          <button type="button" class="ct-btn" [class.active]="billingCycle() === 'monthly'" (click)="billingCycle.set('monthly')">Monthly</button>
-          <button type="button" class="ct-btn" [class.active]="billingCycle() === 'yearly'" (click)="billingCycle.set('yearly')">
-            Yearly
-            <span class="ct-save">Save 17%</span>
-          </button>
-        </div>
-        <button type="button" class="add-plan-btn" (click)="addNewPlan()">
-          <mat-icon>add</mat-icon>
-          Add Plan
-        </button>
-      </div>
+    <!-- ═══ TAB NAVIGATION ════════════════════════════════════════════════ -->
+    <div class="tab-nav">
+      <button type="button" class="tab-btn" [class.active]="activeTab() === 'catalog'" (click)="setTab('catalog')">
+        <mat-icon>storefront</mat-icon>
+        <span class="tab-label">Service Catalog</span>
+        <span class="tab-badge">{{ services.length }}</span>
+      </button>
+      <button type="button" class="tab-btn" [class.active]="activeTab() === 'subscriptions'" (click)="setTab('subscriptions')">
+        <mat-icon>verified</mat-icon>
+        <span class="tab-label">My Subscriptions</span>
+        <span class="tab-badge tab-badge--active">{{ purchasedServices().length }}</span>
+      </button>
+      <button type="button" class="tab-btn" [class.active]="activeTab() === 'offers'" (click)="setTab('offers')">
+        <mat-icon>local_offer</mat-icon>
+        <span class="tab-label">Offers & Deals</span>
+        <span class="tab-badge">{{ offers.length }}</span>
+      </button>
     </div>
 
-    <!-- Plans Grid -->
-    <div class="plans-grid">
-      @for (plan of plans; track plan.id) {
-        <div class="plan-card" [class.popular]="plan.popular" [class.inactive]="plan.status === 'inactive'">
-          <!-- Popular badge -->
-          @if (plan.badge) {
-            <div class="plan-badge" [style.background]="plan.gradient">{{ plan.badge }}</div>
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TAB 1 — SERVICE CATALOG
+    ════════════════════════════════════════════════════════════════════ -->
+    @if (activeTab() === 'catalog') {
+      <div class="tab-pane">
+
+        <!-- Header row -->
+        <div class="section-head">
+          <div class="sh-text">
+            <h2 class="sh-title">Choose Your Service Package</h2>
+            <p class="sh-sub">Purchase services to unlock specialized features for your medical staff</p>
+          </div>
+          <div class="billing-toggle">
+            <span class="bt-label" [class.active]="billingCycle() === 'monthly'">Monthly</span>
+            <button
+              type="button"
+              class="bt-pill"
+              [class.yearly]="billingCycle() === 'yearly'"
+              (click)="billingCycle.set(billingCycle() === 'monthly' ? 'yearly' : 'monthly')"
+              [attr.aria-label]="'Switch to ' + (billingCycle() === 'monthly' ? 'yearly' : 'monthly') + ' billing'"
+            >
+              <span class="bt-knob"></span>
+            </button>
+            <span class="bt-label" [class.active]="billingCycle() === 'yearly'">
+              Yearly
+              <span class="save-badge">Save 17%</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Services grid -->
+        <div class="services-grid">
+          @for (svc of services; track svc.id) {
+            <article class="svc-card" [class.svc-card--purchased]="svc.status === 'purchased'" [class.svc-card--popular]="svc.popular">
+
+              <!-- Badge ribbon -->
+              @if (svc.badge) {
+                <div class="svc-ribbon" [style.background]="svc.gradient">{{ svc.badge }}</div>
+              }
+
+              <!-- Gradient header -->
+              <div class="svc-header" [style.background]="svc.gradient">
+                <div class="svc-category-tag">{{ svc.category }}</div>
+
+                @if (svc.status === 'purchased') {
+                  <div class="svc-subscribed-pill">
+                    <mat-icon>verified</mat-icon>
+                    Subscribed
+                  </div>
+                }
+
+                <div class="svc-icon-circle">
+                  <mat-icon>{{ svc.icon }}</mat-icon>
+                </div>
+                <h3 class="svc-name">{{ svc.name }}</h3>
+                <p class="svc-tagline">{{ svc.tagline }}</p>
+              </div>
+
+              <!-- Features list -->
+              <div class="svc-features">
+                <div class="features-heading">
+                  <mat-icon>checklist</mat-icon>
+                  Included Features
+                  <span class="features-count">{{ svc.features.length }}</span>
+                </div>
+                <ul class="features-list">
+                  @for (feat of svc.features; track feat.id) {
+                    <li class="feat-row">
+                      <span class="feat-dot" [style.background]="svc.color"></span>
+                      <mat-icon class="feat-icon" [style.color]="svc.color">{{ feat.icon }}</mat-icon>
+                      <span class="feat-name">{{ feat.name }}</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+
+              <!-- Pricing & CTA -->
+              <div class="svc-footer">
+                <div class="svc-price-block">
+                  <div class="price-row">
+                    <span class="price-currency">{{ svc.currency }}</span>
+                    <span class="price-amount">{{ getPrice(svc) | number }}</span>
+                    <span class="price-period">/{{ billingCycle() === 'monthly' ? 'mo' : 'yr' }}</span>
+                  </div>
+                  @if (billingCycle() === 'yearly') {
+                    <div class="price-savings">
+                      <mat-icon>savings</mat-icon>
+                      Save {{ svc.currency }}{{ getSavings(svc) | number }}/year
+                    </div>
+                  }
+                </div>
+
+                @if (svc.status === 'purchased') {
+                  <button type="button" class="svc-btn svc-btn--manage" (click)="setTab('subscriptions')">
+                    <mat-icon>settings</mat-icon>
+                    Manage Service
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="svc-btn svc-btn--subscribe"
+                    [style.background]="svc.gradient"
+                    (click)="subscribeToService(svc)"
+                  >
+                    <mat-icon>add_circle_outline</mat-icon>
+                    Subscribe Now
+                  </button>
+                }
+              </div>
+
+            </article>
           }
+        </div>
 
-          <!-- Card header -->
-          <div class="pc-head">
-            <div class="pc-icon" [style.background]="plan.gradient">
-              <mat-icon>{{ plan.icon }}</mat-icon>
+      </div>
+    }
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TAB 2 — MY SUBSCRIPTIONS
+    ════════════════════════════════════════════════════════════════════ -->
+    @if (activeTab() === 'subscriptions') {
+      <div class="tab-pane">
+
+        @if (purchasedServices().length === 0) {
+          <!-- Empty state -->
+          <div class="empty-state">
+            <div class="empty-icon">
+              <mat-icon>inventory_2</mat-icon>
             </div>
-            <div class="pc-name">{{ plan.name }}</div>
-            <div class="pc-tagline">{{ plan.tagline }}</div>
+            <h3>No Active Subscriptions</h3>
+            <p>Subscribe to services from the catalog to start assigning features to your doctors.</p>
+            <button type="button" class="empty-cta" (click)="setTab('catalog')">
+              <mat-icon>storefront</mat-icon>
+              Browse Service Catalog
+            </button>
           </div>
 
-          <!-- Price -->
-          <div class="pc-price">
-            <span class="pc-currency">{{ plan.currency }}</span>
-            <span class="pc-amount">{{ getPrice(plan) }}</span>
-            <span class="pc-period">/{{ billingCycle() === 'monthly' ? 'mo' : 'yr' }}</span>
-          </div>
-          @if (billingCycle() === 'yearly') {
-            <div class="pc-savings">You save {{ plan.currency }}{{ getSavings(plan) }}/year</div>
-          }
+        } @else {
 
-          <!-- Subscribers -->
-          <div class="pc-subs">
-            <mat-icon>people</mat-icon>
-            <span>{{ plan.subscribers }} active subscribers</span>
+          <div class="section-head">
+            <div class="sh-text">
+              <h2 class="sh-title">Manage Your Subscriptions</h2>
+              <p class="sh-sub">Enable or disable features and track doctor assignments per service</p>
+            </div>
           </div>
 
-          <!-- Features -->
-          <div class="pc-features">
-            @for (feat of plan.features; track feat.name) {
-              <div class="pc-feat" [class.disabled]="!feat.included">
-                <mat-icon class="feat-check" [class.yes]="feat.included" [class.no]="!feat.included">
-                  {{ feat.included ? 'check_circle' : 'cancel' }}
-                </mat-icon>
-                <span>{{ feat.name }}</span>
+          <div class="sub-list">
+            @for (svc of purchasedServices(); track svc.id) {
+              <div class="sub-card" [class.sub-card--expanded]="isExpanded(svc.id)">
+
+                <!-- Sub-card header row -->
+                <div class="sub-header" [style.border-left-color]="svc.color">
+                  <div class="sub-svc-icon" [style.background]="svc.gradient">
+                    <mat-icon>{{ svc.icon }}</mat-icon>
+                  </div>
+
+                  <div class="sub-info">
+                    <div class="sub-name">{{ svc.name }}</div>
+                    <div class="sub-chips">
+                      <span class="chip chip--green">
+                        <mat-icon>check_circle</mat-icon>
+                        Active
+                      </span>
+                      <span class="chip">
+                        <mat-icon>calendar_today</mat-icon>
+                        Since {{ svc.purchasedOn | date:'MMM d, yyyy' }}
+                      </span>
+                      <span class="chip">
+                        <mat-icon>medical_services</mat-icon>
+                        {{ svc.totalDoctors }} doctors
+                      </span>
+                      <span class="chip chip--teal">
+                        <mat-icon>tune</mat-icon>
+                        {{ getEnabledCount(svc) }}/{{ svc.features.length }} features on
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="sub-actions">
+                    <button
+                      type="button"
+                      class="sub-manage-btn"
+                      [style.background]="isExpanded(svc.id) ? svc.color : ''"
+                      [style.border-color]="svc.color"
+                      [style.color]="isExpanded(svc.id) ? '#fff' : svc.color"
+                      (click)="toggleExpand(svc.id)"
+                    >
+                      <mat-icon>{{ isExpanded(svc.id) ? 'expand_less' : 'tune' }}</mat-icon>
+                      {{ isExpanded(svc.id) ? 'Collapse' : 'Manage Features' }}
+                    </button>
+                    <button
+                      type="button"
+                      class="sub-unsub-btn"
+                      matTooltip="Unsubscribe from this service"
+                      (click)="unsubscribeFromService(svc)"
+                    >
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Expandable feature management panel -->
+                @if (isExpanded(svc.id)) {
+                  <div class="feat-panel">
+                    <div class="feat-panel-title">
+                      <mat-icon>tune</mat-icon>
+                      Feature Management
+                      <span class="feat-panel-hint">Toggle features on/off and assign them to doctors</span>
+                    </div>
+
+                    <div class="feat-grid">
+                      @for (feat of svc.features; track feat.id) {
+                        <div class="feat-card" [class.feat-card--on]="feat.isEnabled">
+
+                          <div class="feat-card-top">
+                            <div
+                              class="feat-card-icon"
+                              [style.background]="feat.isEnabled ? svc.color + '18' : ''"
+                              [style.color]="feat.isEnabled ? svc.color : ''"
+                            >
+                              <mat-icon>{{ feat.icon }}</mat-icon>
+                            </div>
+                            <button
+                              type="button"
+                              class="feat-toggle"
+                              [class.feat-toggle--on]="feat.isEnabled"
+                              [style.background]="feat.isEnabled ? svc.color : ''"
+                              [attr.aria-label]="(feat.isEnabled ? 'Disable' : 'Enable') + ' ' + feat.name"
+                              (click)="toggleFeature(feat)"
+                            >
+                              <span class="feat-toggle-knob"></span>
+                            </button>
+                          </div>
+
+                          <div class="feat-card-name">{{ feat.name }}</div>
+                          <div class="feat-card-desc">{{ feat.description }}</div>
+
+                          @if (feat.isEnabled) {
+                            <div class="feat-card-footer">
+                              <div class="feat-assigned">
+                                <mat-icon>group</mat-icon>
+                                {{ feat.assignedDoctors }} doctors assigned
+                              </div>
+                              <button
+                                type="button"
+                                class="feat-assign-btn"
+                                [style.color]="svc.color"
+                                [style.border-color]="svc.color + '50'"
+                              >
+                                <mat-icon>person_add</mat-icon>
+                                Assign Doctors
+                              </button>
+                            </div>
+                          } @else {
+                            <div class="feat-disabled-note">Enable to assign to doctors</div>
+                          }
+
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+
               </div>
             }
           </div>
+        }
 
-          <!-- Actions -->
-          <div class="pc-actions">
-            <button type="button" class="pca-primary" [style.background]="plan.gradient" (click)="editPlan(plan)">
-              <mat-icon>edit</mat-icon>
-              Edit Plan
-            </button>
-            <div class="pca-secondary">
-              <button type="button" class="pca-icon" [matTooltip]="plan.status === 'active' ? 'Deactivate' : 'Activate'" (click)="togglePlanStatus(plan)">
-                <mat-icon>{{ plan.status === 'active' ? 'toggle_on' : 'toggle_off' }}</mat-icon>
-              </button>
-              <button type="button" class="pca-icon pca-del" matTooltip="Delete plan" (click)="deletePlan(plan)">
-                <mat-icon>delete_outline</mat-icon>
-              </button>
-            </div>
+      </div>
+    }
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TAB 3 — OFFERS & DEALS
+    ════════════════════════════════════════════════════════════════════ -->
+    @if (activeTab() === 'offers') {
+      <div class="tab-pane">
+
+        <div class="section-head">
+          <div class="sh-text">
+            <h2 class="sh-title">Offers & Promotions</h2>
+            <p class="sh-sub">Limited-time deals to maximize value for your hospital</p>
+          </div>
+          <div class="offer-count-badge">
+            <mat-icon>local_offer</mat-icon>
+            {{ offers.length }} Active Deals
           </div>
         </div>
-      }
-    </div>
 
-    <!-- Offers Section -->
-    <div class="section-head section-head--offers">
-      <div class="sh-left">
-        <h2 class="section-title">Active Offers</h2>
-        <p class="section-sub">Special promotions and discount codes</p>
-      </div>
-      <div class="sh-right">
-        <button type="button" class="add-plan-btn" (click)="addNewPlan()">
-          <mat-icon>add</mat-icon>
-          Add Offer
-        </button>
-      </div>
-    </div>
+        <div class="offers-grid">
+          @for (offer of offers; track offer.id) {
+            <div class="offer-card">
+              <!-- Top gradient strip -->
+              <div class="offer-strip" [style.background]="offer.gradient"></div>
 
-    <div class="offers-grid">
-      @for (offer of offers; track offer.id) {
-        <div class="offer-card">
-          <div class="oc-accent" [style.background]="offer.color"></div>
-          <div class="oc-body">
-            <div class="oc-head">
-              <div class="oc-icon" [style.background]="offer.color + '18'" [style.color]="offer.color">
-                <mat-icon>{{ offer.icon }}</mat-icon>
-              </div>
-              <div class="oc-discount" [style.background]="offer.color + '14'" [style.color]="offer.color">
-                {{ offer.discount }}
+              <div class="offer-body">
+                <div class="offer-top-row">
+                  <div class="offer-icon-wrap" [style.background]="offer.color + '18'" [style.color]="offer.color">
+                    <mat-icon>{{ offer.icon }}</mat-icon>
+                  </div>
+                  <div class="offer-discount-pill" [style.background]="offer.gradient">
+                    {{ offer.discount }}
+                  </div>
+                </div>
+
+                <h3 class="offer-title">{{ offer.title }}</h3>
+                <p class="offer-desc">{{ offer.description }}</p>
+
+                <div class="offer-services">
+                  @for (s of offer.applicableServices; track s) {
+                    <span
+                      class="offer-svc-tag"
+                      [style.color]="offer.color"
+                      [style.background]="offer.color + '10'"
+                      [style.border-color]="offer.color + '30'"
+                    >{{ s }}</span>
+                  }
+                </div>
+
+                <div class="offer-footer-row">
+                  <button
+                    type="button"
+                    class="offer-code-copy"
+                    [class.offer-code-copy--copied]="copiedCode() === offer.code"
+                    (click)="copyCode(offer.code)"
+                    matTooltip="Click to copy"
+                  >
+                    <mat-icon>{{ copiedCode() === offer.code ? 'check' : 'content_copy' }}</mat-icon>
+                    <span class="offer-code-text">{{ offer.code }}</span>
+                    @if (copiedCode() === offer.code) {
+                      <span class="copied-msg">Copied!</span>
+                    }
+                  </button>
+                  <div class="offer-expiry">
+                    <mat-icon>schedule</mat-icon>
+                    {{ offer.daysLeft }}d left
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="oc-title">{{ offer.title }}</div>
-            <div class="oc-desc">{{ offer.description }}</div>
-            <div class="oc-meta">
-              <div class="oc-code" (click)="copyCode(offer.code)" matTooltip="Click to copy">
-                <mat-icon>content_copy</mat-icon>
-                <span>{{ offer.code }}</span>
-              </div>
-              <div class="oc-expires">
-                <mat-icon>schedule</mat-icon>
-                <span>{{ offer.daysLeft }} days left</span>
-              </div>
-            </div>
-            <div class="oc-plans">
-              @for (p of offer.applicablePlans; track p) {
-                <span class="oc-plan-chip">{{ p }}</span>
-              }
-            </div>
-            <div class="oc-actions">
-              <button type="button" class="oca-edit" (click)="editOffer(offer)">
-                <mat-icon>edit</mat-icon>
-                Edit
-              </button>
-              <button type="button" class="oca-del" (click)="deleteOffer(offer)">
-                <mat-icon>delete_outline</mat-icon>
-              </button>
-            </div>
-          </div>
+          }
         </div>
-      }
-    </div>
+
+      </div>
+    }
 
   </div>
 </app-page>

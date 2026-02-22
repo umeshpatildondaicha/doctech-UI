@@ -1,5 +1,6 @@
 @if (invoice) {
   <div class="invoice-detail">
+
     <!-- Header Section -->
     <div class="invoice-header">
       <div class="header-left">
@@ -27,6 +28,7 @@
         </button>
       </div>
     </div>
+
     <!-- Invoice Meta -->
     <div class="invoice-meta">
       <div class="meta-card">
@@ -49,20 +51,21 @@
         </div>
       </div>
     </div>
+
     <!-- Payment Summary -->
     <div class="payment-summary">
       <div class="payment-card">
         <div class="payment-item">
           <span class="label">Total</span>
-          <span class="value total">{{ currencyFmt(invoice.total) }}</span>
+          <span class="value total">{{ invoice.total | billingCurrency }}</span>
         </div>
         <div class="payment-item">
           <span class="label">Paid</span>
-          <span class="value paid">{{ currencyFmt(invoice.amountPaid || 0) }}</span>
+          <span class="value paid">{{ (invoice.amountPaid || 0) | billingCurrency }}</span>
         </div>
         <div class="payment-item">
           <span class="label">Balance</span>
-          <span class="value balance">{{ currencyFmt(invoice.balanceDue || 0) }}</span>
+          <span class="value balance">{{ (invoice.balanceDue || 0) | billingCurrency }}</span>
         </div>
         <mat-progress-bar
           mode="determinate"
@@ -72,11 +75,12 @@
         </mat-progress-bar>
       </div>
       <div class="payment-actions">
-        <button mat-flat-button color="primary" (click)="recordPayment()">
+        <button mat-flat-button color="primary" (click)="recordPayment()"
+                [disabled]="invoice.status === 'PAID'">
           <mat-icon>payments</mat-icon>
           Record Payment
         </button>
-        <button mat-stroked-button (click)="editInvoice()">
+        <button mat-stroked-button (click)="selectedTabIndex = 0">
           <mat-icon>add</mat-icon>
           Add Item
         </button>
@@ -84,55 +88,28 @@
           <mat-icon>print</mat-icon>
           Print / Share
         </button>
-        <button mat-icon-button>
-          <mat-icon>more_vert</mat-icon>
-        </button>
       </div>
     </div>
+
     <!-- Tabs -->
     <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="invoice-tabs">
+
       <!-- Items Tab -->
       <mat-tab label="Items">
         <div class="tab-content items-tab">
-          <!-- Item Categories -->
+
+          <!-- Item Categories (quick-filter chips) -->
           <div class="item-categories">
-            <app-button
-            class="category-chip"
-            [fontIcon]="'medical_services'"
-            [text]="'Consultation'"
-            (btnClick)="onCategoryClick('Consultation')"
-            [appearance]="'stroked'"
-            [color]="'primary'"
-           
-            ></app-button>
-            <app-button
-            class="category-chip"
-            [fontIcon]="'healing'"
-            [text]="'Standard Procedure'"
-            (btnClick)="onCategoryClick('Standard Procedure')"
-            [appearance]="'stroked'"
-            [color]="'primary'"
-          
-            ></app-button>
-            <app-button
-            class="category-chip"
-            [fontIcon]="'science'"
-            [text]="'Lab Work'"
-            (btnClick)="onCategoryClick('Lab Work')"
-            [appearance]="'stroked'"
-            [color]="'primary'"
-           
-            ></app-button>
-            <app-button
-            class="category-chip"
-            [fontIcon]="'event'"
-            [text]="'Follow-up Visit'"
-            (btnClick)="onCategoryClick('Follow-up Visit')"
-            [appearance]="'stroked'"
-            [color]="'primary'"
-           
-            ></app-button>
+            <app-button class="category-chip" [fontIcon]="'medical_services'" [text]="'Consultation'"
+              [appearance]="'stroked'" [color]="'primary'" (btnClick)="editInvoice()"></app-button>
+            <app-button class="category-chip" [fontIcon]="'healing'" [text]="'Standard Procedure'"
+              [appearance]="'stroked'" [color]="'primary'" (btnClick)="editInvoice()"></app-button>
+            <app-button class="category-chip" [fontIcon]="'science'" [text]="'Lab Work'"
+              [appearance]="'stroked'" [color]="'primary'" (btnClick)="editInvoice()"></app-button>
+            <app-button class="category-chip" [fontIcon]="'event'" [text]="'Follow-up Visit'"
+              [appearance]="'stroked'" [color]="'primary'" (btnClick)="editInvoice()"></app-button>
           </div>
+
           <!-- Items Table -->
           <div class="items-table">
             <table mat-table [dataSource]="invoice.items" class="items-table-content">
@@ -146,11 +123,11 @@
               </ng-container>
               <ng-container matColumnDef="rate">
                 <th mat-header-cell *matHeaderCellDef>Rate</th>
-                <td mat-cell *matCellDef="let item">{{ currencyFmt(item.unitPrice) }}</td>
+                <td mat-cell *matCellDef="let item">{{ item.unitPrice | billingCurrency }}</td>
               </ng-container>
               <ng-container matColumnDef="discount">
                 <th mat-header-cell *matHeaderCellDef>Discount</th>
-                <td mat-cell *matCellDef="let item">{{ currencyFmt(item.discount || 0) }}</td>
+                <td mat-cell *matCellDef="let item">{{ (item.discount || 0) | billingCurrency }}</td>
               </ng-container>
               <ng-container matColumnDef="tax">
                 <th mat-header-cell *matHeaderCellDef>Tax</th>
@@ -159,13 +136,13 @@
               <ng-container matColumnDef="total">
                 <th mat-header-cell *matHeaderCellDef>Total</th>
                 <td mat-cell *matCellDef="let item">
-                  <strong>{{ currencyFmt(getItemTotal(item)) }}</strong>
+                  <strong>{{ getItemTotal(item) | billingCurrency }}</strong>
                 </td>
               </ng-container>
               <ng-container matColumnDef="paid">
                 <th mat-header-cell *matHeaderCellDef>Paid</th>
                 <td mat-cell *matCellDef="let item">
-                  <span class="paid-amount">{{ currencyFmt(item.amountPaid || 0) }}</span>
+                  <span class="paid-amount">{{ (item.amountPaid || 0) | billingCurrency }}</span>
                   <div class="item-progress">
                     <mat-progress-bar
                       mode="determinate"
@@ -179,72 +156,84 @@
                 <th mat-header-cell *matHeaderCellDef>Balance</th>
                 <td mat-cell *matCellDef="let item">
                   <span [class.overdue]="getItemBalance(item) > 0">
-                    {{ currencyFmt(getItemBalance(item)) }}
+                    {{ getItemBalance(item) | billingCurrency }}
                   </span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Actions</th>
-                <td mat-cell *matCellDef="let item">
+                <td mat-cell *matCellDef="let item; let i = index">
                   <app-button
-                  [fontIcon]="'payments'"
-                  [color]="'primary'"
-                  title="Record Payment"
-                  [disabled]="getItemBalance(item) <= 0"
-                  (btnClick)="recordItemPayment(item)">
-                </app-button>
-                
-                <app-button
-                  [fontIcon]="'delete'"
-                  [color]="'warn'"
-                  title="Remove">
-                </app-button>
-                
+                    [fontIcon]="'payments'"
+                    [color]="'primary'"
+                    title="Record Payment"
+                    [disabled]="getItemBalance(item) <= 0 || invoice.status === 'PAID'"
+                    (btnClick)="recordItemPayment(item)">
+                  </app-button>
+                  <app-button
+                    [fontIcon]="'delete'"
+                    [color]="'warn'"
+                    title="Remove Item"
+                    (btnClick)="removeItem(item, i)">
+                  </app-button>
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="['description', 'qty', 'rate', 'discount', 'tax', 'total', 'paid', 'balance', 'actions']"></tr>
               <tr mat-row *matRowDef="let row; columns: ['description', 'qty', 'rate', 'discount', 'tax', 'total', 'paid', 'balance', 'actions']"></tr>
             </table>
           </div>
-          <!-- Add Item Form -->
-          <div class="add-item-section">
+
+          <!-- Inline Add Item Form -->
+          <div class="add-item-section" [formGroup]="addItemForm">
             <mat-form-field appearance="outline">
-              <mat-label>Enter item description</mat-label>
-              <input matInput placeholder="e.g., Dressing, Consultation fees" />
+              <mat-label>Description</mat-label>
+              <input matInput formControlName="description" placeholder="e.g., Dressing, Consultation fees" />
+              @if (addItemForm.controls['description'].hasError('required') && addItemForm.controls['description'].touched) {
+                <mat-error>Description is required</mat-error>
+              }
             </mat-form-field>
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" class="qty-field">
               <mat-label>Qty</mat-label>
-              <input matInput type="number" />
+              <input matInput type="number" formControlName="quantity" min="1" />
             </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Rate</mat-label>
-              <input matInput type="number" />
+            <mat-form-field appearance="outline" class="rate-field">
+              <mat-label>Rate (₹)</mat-label>
+              <input matInput type="number" formControlName="unitPrice" min="0" />
             </mat-form-field>
             <app-button
-            [fontIcon]="'add'"
-            [color]="'primary'"
-           title="Add Item"
-            [appearance]="'raised'"
-            ></app-button>
-  
+              [fontIcon]="'add'"
+              [color]="'primary'"
+              [text]="'Add Item'"
+              [appearance]="'raised'"
+              title="Add Item"
+              (btnClick)="addItem()">
+            </app-button>
           </div>
+
           <!-- Totals Summary -->
           <div class="totals-summary">
             <div class="total-row">
               <span>Subtotal:</span>
-              <strong>{{ currencyFmt(invoice.subTotal) }}</strong>
+              <strong>{{ invoice.subTotal | billingCurrency }}</strong>
             </div>
+            @if (invoice.discountTotal > 0) {
+              <div class="total-row">
+                <span>Discount:</span>
+                <strong>{{ invoice.discountTotal | billingCurrency }}</strong>
+              </div>
+            }
             <div class="total-row">
-              <span>Tax (10%):</span>
-              <strong>{{ currencyFmt(invoice.taxTotal) }}</strong>
+              <span>Tax:</span>
+              <strong>{{ invoice.taxTotal | billingCurrency }}</strong>
             </div>
             <div class="total-row grand-total">
               <span>Total:</span>
-              <strong>{{ currencyFmt(invoice.total) }}</strong>
+              <strong>{{ invoice.total | billingCurrency }}</strong>
             </div>
           </div>
         </div>
       </mat-tab>
+
       <!-- Payments Tab -->
       <mat-tab label="Payments">
         <div class="tab-content payments-tab">
@@ -256,7 +245,7 @@
             <ng-container matColumnDef="amount">
               <th mat-header-cell *matHeaderCellDef>Amount</th>
               <td mat-cell *matCellDef="let payment">
-                <strong>{{ currencyFmt(payment.amount) }}</strong>
+                <strong>{{ payment.amount | billingCurrency }}</strong>
               </td>
             </ng-container>
             <ng-container matColumnDef="method">
@@ -280,10 +269,17 @@
             <div class="no-payments">
               <mat-icon>receipt_long</mat-icon>
               <p>No payments recorded yet</p>
+              @if (invoice.status !== 'PAID') {
+                <button mat-stroked-button color="primary" (click)="recordPayment()">
+                  <mat-icon>add</mat-icon>
+                  Record Payment
+                </button>
+              }
             </div>
           }
         </div>
       </mat-tab>
+
       <!-- Summary Tab -->
       <mat-tab label="Summary">
         <div class="tab-content summary-tab">
@@ -291,19 +287,19 @@
             <h3>Invoice Summary</h3>
             <div class="summary-row">
               <span>Subtotal:</span>
-              <strong>{{ currencyFmt(invoice.subTotal) }}</strong>
+              <strong>{{ invoice.subTotal | billingCurrency }}</strong>
             </div>
             <div class="summary-row">
               <span>Discount:</span>
-              <strong>{{ currencyFmt(invoice.discountTotal) }}</strong>
+              <strong>{{ invoice.discountTotal | billingCurrency }}</strong>
             </div>
             <div class="summary-row">
               <span>Tax:</span>
-              <strong>{{ currencyFmt(invoice.taxTotal) }}</strong>
+              <strong>{{ invoice.taxTotal | billingCurrency }}</strong>
             </div>
             <div class="summary-row grand-total">
               <span>Total:</span>
-              <strong>{{ currencyFmt(invoice.total) }}</strong>
+              <strong>{{ invoice.total | billingCurrency }}</strong>
             </div>
           </mat-card>
           <mat-card class="summary-card">
@@ -316,6 +312,12 @@
               <span>Patient ID:</span>
               <span>{{ invoice.patientId }}</span>
             </div>
+            @if (invoice.doctorId) {
+              <div class="info-row">
+                <span>Doctor ID:</span>
+                <span>{{ invoice.doctorId }}</span>
+              </div>
+            }
           </mat-card>
           @if (invoice.notes) {
             <mat-card class="summary-card">
@@ -325,28 +327,47 @@
           }
         </div>
       </mat-tab>
-      <!-- Activity Tab -->
+
+      <!-- Activity Tab — real payment history -->
       <mat-tab label="Activity">
         <div class="tab-content activity-tab">
           <div class="activity-list">
-            <div class="activity-item">
-              <mat-icon>payment</mat-icon>
-              <div class="activity-content">
-                <div class="activity-title">Payment recorded</div>
-                <div class="activity-time">2 hours ago</div>
+            @for (payment of payments; track payment.id) {
+              <div class="activity-item">
+                <mat-icon class="activity-icon payment-icon">payments</mat-icon>
+                <div class="activity-content">
+                  <div class="activity-title">
+                    Payment recorded · {{ payment.method }}
+                    @if (payment.reference) {
+                      <span class="activity-ref">Ref: {{ payment.reference }}</span>
+                    }
+                  </div>
+                  <div class="activity-time">{{ payment.date | date:'d MMM yyyy, HH:mm' }}</div>
+                  @if (payment.notes) {
+                    <div class="activity-notes">{{ payment.notes }}</div>
+                  }
+                </div>
+                <span class="activity-amount">{{ payment.amount | billingCurrency }}</span>
               </div>
-              <span class="activity-amount">{{ currencyFmt(600) }}</span>
-            </div>
+            }
+            <!-- Invoice creation is always the last event in the timeline -->
             <div class="activity-item">
-              <mat-icon>edit</mat-icon>
+              <mat-icon class="activity-icon create-icon">receipt</mat-icon>
               <div class="activity-content">
                 <div class="activity-title">Invoice created</div>
-                <div class="activity-time">{{ invoice.date | date:'d MMM yyyy HH:mm' }}</div>
+                <div class="activity-time">{{ invoice.date | date:'d MMM yyyy, HH:mm' }}</div>
               </div>
             </div>
+            @if (payments.length === 0) {
+              <div class="no-activity">
+                <mat-icon>history</mat-icon>
+                <p>No payment activity yet. Record a payment to see the history here.</p>
+              </div>
+            }
           </div>
         </div>
       </mat-tab>
+
       <!-- Files Tab -->
       <mat-tab label="Files">
         <div class="tab-content files-tab">
@@ -354,15 +375,15 @@
             <mat-icon>folder_open</mat-icon>
             <p>No files attached</p>
             <app-button
-            [fontIcon]="'upload'"
-            [text]="'Upload File'"
-            [appearance]="'stroked'"
-            [color]="'primary'"
-            ></app-button>
-           
+              [fontIcon]="'upload'"
+              [text]="'Upload File'"
+              [appearance]="'stroked'"
+              [color]="'primary'">
+            </app-button>
           </div>
         </div>
       </mat-tab>
+
     </mat-tab-group>
   </div>
 }
