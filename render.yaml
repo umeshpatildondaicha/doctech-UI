@@ -1,0 +1,11 @@
+# Render.com – Static site (Angular shree-clinic)
+# Publish directory must be dist/shree-clinic/browser (Angular app builder output).
+# If you deploy by extracting tar (e.g. tar -xvf tar/ui.tar), set the same in Dashboard.
+
+services:
+  - type: web
+    name: shree-clinic
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist/shree-clinic/browser
+    # SPA routing: in Dashboard add Rewrite rule: Source /* → Destination /index.html
