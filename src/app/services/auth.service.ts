@@ -280,6 +280,8 @@ export class AuthService {
         user = {
           id: data.userId || data.id || response.userId || response.id || '1',
           publicId: data.publicId ?? data.userId ?? response.publicId ?? response.userId,
+          // hospitalPublicId is explicitly sent by the backend for all user types
+          hospitalPublicId: data.hospitalPublicId ?? response.hospitalPublicId ?? undefined,
           email: data.email || response.email || '',
           fullName: data.fullName || data.name || data.displayName || response.fullName || response.name || 'User',
           userType: data.userType || data.user_type || response.userType || 'HOSPITAL',
@@ -290,7 +292,7 @@ export class AuthService {
           createdAt: data.createdAt || data.created_at || response.createdAt || new Date().toISOString(),
           lastLoginAt: data.lastLoginAt || data.last_login_at || response.lastLoginAt || new Date().toISOString(),
           status: (data.status || data.active || response.status || response.active) ? 'ACTIVE' : 'INACTIVE'
-        } as UserInfo & { publicId?: string };
+        } as UserInfo & { publicId?: string; hospitalPublicId?: string };
       }
 
       // Validate required user fields
@@ -577,6 +579,22 @@ export class AuthService {
    */
   public getUserType(): string | null {
     return this._authState.value.currentUser?.user.userType || null;
+  }
+
+  /**
+   * Get the hospital public ID for the currently logged-in user.
+   * Works for HOSPITAL, STAFF, and DOCTOR user types.
+   * - HOSPITAL: userId IS the hospital publicId
+   * - STAFF / DOCTOR: hospitalPublicId is stored separately from the login response
+   */
+  public getHospitalPublicId(): string {
+    const user = this.getCurrentUser() as any;
+    if (!user) return '';
+    // Prefer the explicit hospitalPublicId field (populated by backend for all user types)
+    if (user.hospitalPublicId) return user.hospitalPublicId;
+    // For HOSPITAL users the userId is the hospital UUID
+    if (user.userType === 'HOSPITAL') return user.publicId ?? user.id ?? '';
+    return '';
   }
 
   /**

@@ -20,6 +20,7 @@ import { AdminDoctorCreateComponent } from './doctor-create/doctor-create.compon
 import { DoctorViewDialogComponent } from './doctor-view-dialog/doctor-view-dialog.component';
 import { DoctorScheduleDialogComponent } from './doctor-schedule-dialog/doctor-schedule-dialog.component';
 import { DoctorService } from '../../../services/doctor.service';
+import { AuthService } from '../../../services/auth.service';
 import { environment } from '../../../../environments/environment';
 import { JsonPipe } from '@angular/common';
 
@@ -73,7 +74,7 @@ export class DoctorsComponent implements OnInit, OnDestroy {
   columnDefs: ColDef[] = [];
   gridOptions: any = {};
   rowData: any[] = [];
-  hospitalId = 'HOSP-001';
+  hospitalId = '';
   fiqlKey: string ='filter=true'
   showFilter = false;
 
@@ -100,6 +101,7 @@ export class DoctorsComponent implements OnInit, OnDestroy {
   constructor(
     private dialogService: DialogboxService,
     private doctorService: DoctorService,
+    private authService: AuthService,
     private snackBar: MatSnackBar,
     private router: Router,
     private snackbarService :SnackbarService,
@@ -149,6 +151,9 @@ export class DoctorsComponent implements OnInit, OnDestroy {
  
   
   ngOnInit() {
+    // Resolve the hospital public ID from the currently logged-in user
+    this.hospitalId = this.authService.getHospitalPublicId();
+
     console.log('apiConfig',this.apiConfig);
     // Set breadcrumb in topbar using CoreEventService
     this.eventService.setBreadcrumb(this.breadcrumb);
@@ -325,10 +330,9 @@ export class DoctorsComponent implements OnInit, OnDestroy {
 
       if (result?.action === 'save' && result?.formData) {
         // The dialog passed us the validated form data — now make the actual POST API call
-        const hospitalId = 'HOSP-001';
         console.log('📡 Calling POST createDoctor with:', result.formData);
 
-        this.doctorService.createDoctor(hospitalId, result.formData).subscribe({
+        this.doctorService.createDoctor(this.hospitalId, result.formData).subscribe({
           next: (response) => {
             console.log(' Doctor created successfully:', response);
             this.snackbarService.success('Doctor created successfully!');

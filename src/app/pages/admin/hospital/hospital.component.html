@@ -7,18 +7,27 @@
         <mat-icon class="hps-ico hps-ico--blue">business</mat-icon>
         <span class="hps-val">{{ statDepts() }}</span>
         <span class="hps-lbl">Departments</span>
+        <button type="button" class="hps-add hps-add--dept" (click)="toggleAddDeptForm()" matTooltip="Create department" matTooltipPosition="below">
+          <mat-icon>add</mat-icon>
+        </button>
       </div>
       <div class="hps-sep"></div>
       <div class="hps-item">
         <mat-icon class="hps-ico hps-ico--purple">account_tree</mat-icon>
         <span class="hps-val">{{ statSubDepts() }}</span>
         <span class="hps-lbl">Sub-Depts</span>
+        <button type="button" class="hps-add hps-add--subdept" (click)="toggleAddSubDeptForm()" matTooltip="Create sub-department" matTooltipPosition="below">
+          <mat-icon>add</mat-icon>
+        </button>
       </div>
       <div class="hps-sep"></div>
       <div class="hps-item">
         <mat-icon class="hps-ico hps-ico--cyan">stethoscope</mat-icon>
         <span class="hps-val">{{ statDoctors() }}</span>
         <span class="hps-lbl">Doctors</span>
+        <button type="button" class="hps-add hps-add--doctor" (click)="toggleAddDoctorForm()" matTooltip="Create doctor" matTooltipPosition="below">
+          <mat-icon>add</mat-icon>
+        </button>
       </div>
       <div class="hps-sep"></div>
       <div class="hps-item">
@@ -31,6 +40,9 @@
         <mat-icon class="hps-ico hps-ico--amber">badge</mat-icon>
         <span class="hps-val">{{ statStaff() }}</span>
         <span class="hps-lbl">Staff</span>
+        <button type="button" class="hps-add hps-add--staff" (click)="toggleAddStaffForm()" matTooltip="Create staff" matTooltipPosition="below">
+          <mat-icon>add</mat-icon>
+        </button>
       </div>
       <div class="hps-sep"></div>
       <div class="hps-item">
@@ -179,14 +191,10 @@
             </div>
 
             <div class="np-footer">
-              <button type="button" class="np-new-btn np-new-btn--doctor" (click)="toggleAddDoctorForm(); toggleNodePicker()">
-                <mat-icon>person_add</mat-icon>
-                <span>Create new doctor</span>
-              </button>
-              <button type="button" class="np-new-btn np-new-btn--staff" (click)="toggleAddStaffForm(); toggleNodePicker()">
-                <mat-icon>badge</mat-icon>
-                <span>Create new staff</span>
-              </button>
+              <span class="np-footer-hint">
+                <mat-icon>info_outline</mat-icon>
+                Use the <strong>+</strong> buttons in the stats bar above to create new entities.
+              </span>
             </div>
           </aside>
         }
@@ -359,23 +367,109 @@
           <span><kbd>Ctrl+Scroll</kbd> zoom</span>
         </div>
 
-        <!-- ── Add Doctor form ──────────────────────────────────────────── -->
-        @if (showAddDoctorForm()) {
+        <!-- ── Add Department form ──────────────────────────────────────── -->
+        @if (showAddDeptForm()) {
           <div class="add-person-panel">
-            <div class="app-head app-head--doctor">
-              <mat-icon>stethoscope</mat-icon>
-              <span>Create New Doctor</span>
-              <button mat-icon-button type="button" class="app-close" (click)="toggleAddDoctorForm()">
+            <div class="app-head app-head--dept">
+              <mat-icon>add_business</mat-icon>
+              <span>Create Department</span>
+              <button mat-icon-button type="button" class="app-close" (click)="toggleAddDeptForm()">
                 <mat-icon>close</mat-icon>
               </button>
             </div>
             <div class="app-body">
               <mat-form-field appearance="outline" class="app-field">
-                <mat-label>Full Name</mat-label>
-                <input matInput [(ngModel)]="newDoctorName" placeholder="e.g. Dr. Priya Sharma" />
+                <mat-label>Department Name *</mat-label>
+                <input matInput [(ngModel)]="newDeptName" placeholder="e.g. Cardiology" />
               </mat-form-field>
               <mat-form-field appearance="outline" class="app-field">
-                <mat-label>Specialization</mat-label>
+                <mat-label>Description</mat-label>
+                <textarea matInput [(ngModel)]="newDeptDesc" rows="2" placeholder="Optional description"></textarea>
+              </mat-form-field>
+            </div>
+            <div class="app-footer">
+              <button mat-button type="button" (click)="toggleAddDeptForm()">Cancel</button>
+              <button mat-flat-button color="primary" type="button"
+                [disabled]="!newDeptName.trim() || isCreating()"
+                (click)="createNewDepartment()">
+                @if (isCreating()) { <mat-icon class="spin">sync</mat-icon> } @else { Create }
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- ── Add Sub-Department form ──────────────────────────────────── -->
+        @if (showAddSubDeptForm()) {
+          <div class="add-person-panel">
+            <div class="app-head app-head--subdept">
+              <mat-icon>account_tree</mat-icon>
+              <span>Create Sub-Department</span>
+              <button mat-icon-button type="button" class="app-close" (click)="toggleAddSubDeptForm()">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <div class="app-body">
+              <mat-form-field appearance="outline" class="app-field">
+                <mat-label>Parent Department *</mat-label>
+                <mat-select [ngModel]="newSubDeptDeptId()" (ngModelChange)="newSubDeptDeptId.set($event)">
+                  @for (d of departments(); track d.departmentId) {
+                    @if (d.departmentId) {
+                      <mat-option [value]="d.departmentId">{{ d.name }}</mat-option>
+                    }
+                  }
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="app-field">
+                <mat-label>Sub-Department Name *</mat-label>
+                <input matInput [(ngModel)]="newSubDeptName" placeholder="e.g. ICU" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="app-field">
+                <mat-label>Description</mat-label>
+                <textarea matInput [(ngModel)]="newSubDeptDesc" rows="2" placeholder="Optional description"></textarea>
+              </mat-form-field>
+            </div>
+            <div class="app-footer">
+              <button mat-button type="button" (click)="toggleAddSubDeptForm()">Cancel</button>
+              <button mat-flat-button color="primary" type="button"
+                [disabled]="!newSubDeptName.trim() || !newSubDeptDeptId() || isCreating()"
+                (click)="createNewSubDepartment()">
+                @if (isCreating()) { <mat-icon class="spin">sync</mat-icon> } @else { Create }
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- ── Add Doctor form ──────────────────────────────────────────── -->
+        @if (showAddDoctorForm()) {
+          <div class="add-person-panel">
+            <div class="app-head app-head--doctor">
+              <mat-icon>stethoscope</mat-icon>
+              <span>Create Doctor</span>
+              <button mat-icon-button type="button" class="app-close" (click)="toggleAddDoctorForm()">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <div class="app-body">
+              <div class="app-row">
+                <mat-form-field appearance="outline" class="app-field">
+                  <mat-label>First Name *</mat-label>
+                  <input matInput [(ngModel)]="newDoctorFirstName" placeholder="e.g. Priya" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="app-field">
+                  <mat-label>Last Name *</mat-label>
+                  <input matInput [(ngModel)]="newDoctorLastName" placeholder="e.g. Sharma" />
+                </mat-form-field>
+              </div>
+              <mat-form-field appearance="outline" class="app-field">
+                <mat-label>Email *</mat-label>
+                <input matInput type="email" [(ngModel)]="newDoctorEmail" placeholder="doctor@hospital.com" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="app-field">
+                <mat-label>Password *</mat-label>
+                <input matInput type="password" [(ngModel)]="newDoctorPassword" placeholder="Min 8 characters" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="app-field">
+                <mat-label>Specialization *</mat-label>
                 <mat-select [(ngModel)]="newDoctorSpec">
                   <mat-option value="General Medicine">General Medicine</mat-option>
                   <mat-option value="Cardiology">Cardiology</mat-option>
@@ -384,14 +478,28 @@
                   <mat-option value="Physiotherapy">Physiotherapy</mat-option>
                   <mat-option value="Nutrition">Nutrition</mat-option>
                   <mat-option value="Mental Health">Mental Health</mat-option>
+                  <mat-option value="Dermatology">Dermatology</mat-option>
+                  <mat-option value="Neurology">Neurology</mat-option>
                   <mat-option value="General">General</mat-option>
                 </mat-select>
               </mat-form-field>
+              <div class="app-row">
+                <mat-form-field appearance="outline" class="app-field">
+                  <mat-label>Registration No.</mat-label>
+                  <input matInput [(ngModel)]="newDoctorRegNo" placeholder="Auto-generated if blank" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="app-field">
+                  <mat-label>Phone</mat-label>
+                  <input matInput [(ngModel)]="newDoctorPhone" placeholder="+91 9000..." />
+                </mat-form-field>
+              </div>
             </div>
             <div class="app-footer">
               <button mat-button type="button" (click)="toggleAddDoctorForm()">Cancel</button>
-              <button mat-flat-button color="primary" type="button" [disabled]="!newDoctorName.trim()" (click)="createNewDoctor()">
-                Add Doctor
+              <button mat-flat-button color="primary" type="button"
+                [disabled]="!newDoctorFirstName.trim() || !newDoctorLastName.trim() || !newDoctorEmail.trim() || !newDoctorPassword.trim() || isCreating()"
+                (click)="createNewDoctor()">
+                @if (isCreating()) { <mat-icon class="spin">sync</mat-icon> } @else { Create Doctor }
               </button>
             </div>
           </div>
@@ -402,15 +510,29 @@
           <div class="add-person-panel">
             <div class="app-head app-head--staff">
               <mat-icon>badge</mat-icon>
-              <span>Create New Staff</span>
+              <span>Create Staff</span>
               <button mat-icon-button type="button" class="app-close" (click)="toggleAddStaffForm()">
                 <mat-icon>close</mat-icon>
               </button>
             </div>
             <div class="app-body">
+              <div class="app-row">
+                <mat-form-field appearance="outline" class="app-field">
+                  <mat-label>First Name *</mat-label>
+                  <input matInput [(ngModel)]="newStaffFirstName" placeholder="e.g. John" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="app-field">
+                  <mat-label>Last Name *</mat-label>
+                  <input matInput [(ngModel)]="newStaffLastName" placeholder="e.g. Doe" />
+                </mat-form-field>
+              </div>
               <mat-form-field appearance="outline" class="app-field">
-                <mat-label>Full Name</mat-label>
-                <input matInput [(ngModel)]="newStaffName" placeholder="e.g. John Doe" />
+                <mat-label>Email</mat-label>
+                <input matInput type="email" [(ngModel)]="newStaffEmail" placeholder="staff@hospital.com" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="app-field">
+                <mat-label>Phone</mat-label>
+                <input matInput [(ngModel)]="newStaffPhone" placeholder="+91 9000..." />
               </mat-form-field>
               <mat-form-field appearance="outline" class="app-field">
                 <mat-label>Role</mat-label>
@@ -426,8 +548,10 @@
             </div>
             <div class="app-footer">
               <button mat-button type="button" (click)="toggleAddStaffForm()">Cancel</button>
-              <button mat-flat-button color="primary" type="button" [disabled]="!newStaffName.trim()" (click)="createNewStaff()">
-                Add Staff
+              <button mat-flat-button color="primary" type="button"
+                [disabled]="!newStaffFirstName.trim() || !newStaffLastName.trim() || isCreating()"
+                (click)="createNewStaff()">
+                @if (isCreating()) { <mat-icon class="spin">sync</mat-icon> } @else { Create Staff }
               </button>
             </div>
           </div>

@@ -18,6 +18,7 @@ import { Doctor } from '../../../../interfaces/doctor.interface';
 import { HttpService } from '../../../../services/http.service';
 import { AppButtonComponent, DIALOG_DATA_TOKEN } from '@lk/core';
 import { DoctorService } from '../../../../services/doctor.service';
+import { AuthService } from '../../../../services/auth.service';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
@@ -48,6 +49,7 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private destroy$ = new Subject<void>();
   private doctorService = inject(DoctorService);
+  private authService = inject(AuthService);
 
   // Hidden submit button reference — used to trigger form submission from footer button
   @ViewChild('hiddenSubmitBtn') hiddenSubmitBtn!: ElementRef<HTMLButtonElement>;
@@ -428,7 +430,7 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
       doctorRegistrationNumber: mobileNumber
     };
 
-    const hospitalId = 'HOSP-001';
+    const hospitalId = this.authService.getHospitalPublicId();
 
     this.doctorService.inviteDoctor(hospitalId, invitePayload)
       .subscribe({

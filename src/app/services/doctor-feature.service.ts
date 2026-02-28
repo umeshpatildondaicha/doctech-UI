@@ -1,29 +1,35 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { HttpService } from './http.service';
-import { ApiConfigService } from '@lk/core';
+import { environment } from '../../environments/environment';
+
+export interface DoctorFeatureDTO {
+  featureId: string;
+  featureCode: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class DoctorFeatureService {
-  private readonly apiConfig = inject(ApiConfigService);
 
-  constructor(private readonly http: HttpService) {}
+  private readonly baseUrl = environment.apiUrl;
 
-  private get apiBase(): string {
-    return this.apiConfig.getApiUrl();
+  constructor(private readonly http: HttpClient) {}
+
+  /** List all features granted to a doctor in the context of a hospital */
+  listFeatures(doctorPublicId: string, hospitalPublicId: string): Observable<DoctorFeatureDTO[]> {
+    const url = `${this.baseUrl}/api/doctors/${encodeURIComponent(doctorPublicId)}/features?hospitalPublicId=${encodeURIComponent(hospitalPublicId)}`;
+    return this.http.get<DoctorFeatureDTO[]>(url);
   }
 
-  grantFeature(doctorPublicId: string, featureId: string, hospitalPublicId: string): Observable<any> {
-    const url = `${this.apiBase}/api/doctors/${encodeURIComponent(doctorPublicId)}/features/grant/${encodeURIComponent(featureId)}?hospitalPublicId=${encodeURIComponent(hospitalPublicId)}`;
-    // Backend accepts no body; send a minimal non-empty JSON string to satisfy PayloadType
-    const payload = JSON.stringify({ doctorPublicId, featureId, hospitalPublicId, action: 'grant' });
-    return this.http.sendPOSTRequest(url, payload);
+  /** Grant a feature to a doctor in a hospital context */
+  grantFeature(doctorPublicId: string, featureId: string, hospitalPublicId: string): Observable<DoctorFeatureDTO> {
+    const url = `${this.baseUrl}/api/doctors/${encodeURIComponent(doctorPublicId)}/features/grant/${encodeURIComponent(featureId)}?hospitalPublicId=${encodeURIComponent(hospitalPublicId)}`;
+    return this.http.post<DoctorFeatureDTO>(url, {});
   }
 
-  revokeFeature(doctorPublicId: string, featureId: string, hospitalPublicId: string): Observable<any> {
-    const url = `${this.apiBase}/api/doctors/${encodeURIComponent(doctorPublicId)}/features/revoke/${encodeURIComponent(featureId)}?hospitalPublicId=${encodeURIComponent(hospitalPublicId)}`;
-    return this.http.sendDELETERequest(url);
+  /** Revoke a feature from a doctor in a hospital context */
+  revokeFeature(doctorPublicId: string, featureId: string, hospitalPublicId: string): Observable<void> {
+    const url = `${this.baseUrl}/api/doctors/${encodeURIComponent(doctorPublicId)}/features/revoke/${encodeURIComponent(featureId)}?hospitalPublicId=${encodeURIComponent(hospitalPublicId)}`;
+    return this.http.delete<void>(url);
   }
 }
-
-

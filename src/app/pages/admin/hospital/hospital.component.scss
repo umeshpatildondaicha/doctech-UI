@@ -43,6 +43,30 @@
     .hps-lbl { color: var(--text-secondary, #64748b); font-size: 11px; }
   }
 
+  .hps-add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0;
+    transition: opacity .15s, background .15s;
+    flex-shrink: 0;
+    mat-icon { font-size: 12px; width: 12px; height: 12px; line-height: 12px; }
+
+    &--dept    { color: #2563eb; &:hover { background: rgba(37,99,235,.1); } }
+    &--subdept { color: #7c3aed; &:hover { background: rgba(124,58,237,.1); } }
+    &--doctor  { color: #0891b2; &:hover { background: rgba(8,145,178,.1); } }
+    &--staff   { color: #d97706; &:hover { background: rgba(217,119,6,.1); } }
+  }
+
+  .hps-item:hover .hps-add { opacity: 1; }
+
   .hps-spacer { flex: 1; }
 
   .hps-save-info {
@@ -620,11 +644,19 @@
 }
 
 .np-footer {
-  padding: 8px 10px;
+  padding: 8px 12px;
   border-top: 1px solid rgba(0,0,0,.07);
+}
+
+.np-footer-hint {
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
   gap: 6px;
+  font-size: 11px;
+  color: var(--text-secondary, #64748b);
+  line-height: 1.4;
+  mat-icon { font-size: 13px; width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px; }
+  strong { color: #2563eb; }
 }
 
 .np-new-btn {
@@ -642,8 +674,10 @@
 
   mat-icon { font-size: 17px; width: 17px; height: 17px; }
 
-  &--doctor { color: #0891b2; border-color: rgba(8,145,178,.3); &:hover { background: rgba(8,145,178,.06); } }
-  &--staff  { color: #d97706; border-color: rgba(217,119,6,.3);  &:hover { background: rgba(217,119,6,.06);  } }
+  &--dept    { color: #2563eb; border-color: rgba(37,99,235,.3);  &:hover { background: rgba(37,99,235,.06);  } }
+  &--subdept { color: #7c3aed; border-color: rgba(124,58,237,.3); &:hover { background: rgba(124,58,237,.06); } }
+  &--doctor  { color: #0891b2; border-color: rgba(8,145,178,.3);  &:hover { background: rgba(8,145,178,.06);  } }
+  &--staff   { color: #d97706; border-color: rgba(217,119,6,.3);  &:hover { background: rgba(217,119,6,.06);  } }
 }
 
 // ─── Add Person Panel ────────────────────────────────────────────────────────
@@ -673,11 +707,22 @@
   mat-icon { font-size: 20px; width: 20px; height: 20px; }
   span { flex: 1; }
 
-  &--doctor { background: linear-gradient(135deg, #0891b2, #0e7490); }
-  &--staff  { background: linear-gradient(135deg, #d97706, #b45309); }
+  &--dept    { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+  &--subdept { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
+  &--doctor  { background: linear-gradient(135deg, #0891b2, #0e7490); }
+  &--staff   { background: linear-gradient(135deg, #d97706, #b45309); }
 
   .app-close { color: rgba(255,255,255,.8); }
 }
+
+.app-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin .8s linear infinite; display: inline-block; }
 
 .app-body {
   padding: 16px 16px 8px;

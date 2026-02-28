@@ -72,6 +72,7 @@ export interface Affiliation {
 export interface DoctorListItem {
   registrationNumber: string;
   publicDoctorCode: string;
+  publicId: string;
   firstName: string;
   lastName: string;
   specialization: string;
@@ -80,6 +81,8 @@ export interface DoctorListItem {
   doctorStatus: string;
   createdAt: string;
   createdByHospitalId: string;
+  departmentId?: number;
+  subDepartmentId?: number;
 }
 export interface DoctorListResponse {
   doctorDetails: DoctorListItem[];
@@ -167,8 +170,8 @@ export class DoctorService {
   //   const url =`/api/doctors?page=${page}&size=${size}`;
   //   return this.httpService.sendGETRequest(url);
   // }
-  getDoctorByHospital(hospitalId: string) {
-    return this.http.get(`${environment.apiUrl}/api/doctors?hospitalId=${hospitalId}`);
+  getDoctorByHospital(hospitalId: string): Observable<DoctorListResponse> {
+    return this.http.get<DoctorListResponse>(`${environment.apiUrl}/api/doctors/by-hospital/${hospitalId}`);
   }
 
   createDoctor(hospitalId: string, payload: any) {
