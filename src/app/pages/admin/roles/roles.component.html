@@ -1,174 +1,365 @@
 <app-page [breadcrumb]="breadcrumb" [isFooter]="false">
-  <div page-body class="roles-management-page">
+  <div page-body class="roles-page">
 
-    <!-- Navigation Tabs -->
-    <app-admin-tabs size="medium" variant="line">
-    </app-admin-tabs>
 
-    <!-- Bulk Actions Toolbar -->
-    <!-- @if (showBulkActions) {
-      <div class="bulk-actions-toolbar">
-        <div class="selected-count">{{ bulkSelectedStaff.size }} staff members selected</div>
-        <div class="bulk-actions">
-          <app-selectbox [label]="'Assign to Doctor'" [options]="doctorOptions" [valueField]="'value'"
-            [displayExpr]="'label'" (dataChange)="bulkAssignToDoctor($event)" class="bulk-assign-select">
-          </app-selectbox>
-          <app-button [text]="'Remove All'" [color]="'warn'" [fontIcon]="'remove'" class="bulk-remove-btn">
-          </app-button>
-          <app-button [text]="'Clear Selection'" [color]="'accent'" [fontIcon]="'clear'" (btnClick)="clearSelection()"
-            class="clear-selection-btn">
-          </app-button>
+    <!-- ── Overview cards ────────────────────────────────────────────── -->
+    <div class="overview-cards">
+      <div class="ov-card ov-total">
+        <span class="ov-icon material-icons">badge</span>
+        <div class="ov-body">
+          <span class="ov-val">{{ totalRoles }}</span>
+          <span class="ov-lbl">Total Roles</span>
         </div>
       </div>
-    } -->
-    <!-- -----Tab Content ------------>
-    <app-tabs [selectedIndex]="selectedTabIndex" class="tabs-content">
-      <!-- Overview Tab -->
-      <app-tab label="overview">
-        <div class="overview-dashboard">
-          <!-- Role Distribution (stat cards style) -->
-          <div class="role-dist-row">
-            @for (role of roles; track role.id) {
-            <button type="button" class="role-stat" [class.active]="activeRoleFilter() === role.name"
-              (click)="filterByRole(role.name)">
-              <div class="role-stat-ico" [style.background]="role.color">
-                <app-icon [fontIcon]="role.icon" [size]="22"></app-icon>
+      <div class="ov-card ov-system">
+        <span class="ov-icon material-icons">lock</span>
+        <div class="ov-body">
+          <span class="ov-val">{{ systemRoles }}</span>
+          <span class="ov-lbl">System Roles</span>
+        </div>
+      </div>
+      <div class="ov-card ov-custom">
+        <span class="ov-icon material-icons">tune</span>
+        <div class="ov-body">
+          <span class="ov-val">{{ customRoles }}</span>
+          <span class="ov-lbl">Custom Roles</span>
+        </div>
+      </div>
+      <div class="ov-card ov-features">
+        <span class="ov-icon material-icons">apps</span>
+        <div class="ov-body">
+          <span class="ov-val">{{ catalog().length }}</span>
+          <span class="ov-lbl">Total Features</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Main layout (sidebar + detail) ────────────────────────────── -->
+    <div class="roles-main-layout">
+
+      <!-- ── Sidebar ──────────────────────────────────────────── -->
+      <aside class="roles-sidebar">
+        <div class="rs-header">
+          <span class="rs-title">Hospital Roles</span>
+          <button class="rs-add-btn" type="button"
+                  (click)="showCreatePanel.set(true)" title="Create new role">
+            <span class="material-icons">add</span>
+          </button>
+        </div>
+
+        <div class="rs-search">
+          <span class="material-icons rs-search-ico">search</span>
+          <input type="text" class="rs-search-input" placeholder="Search roles…"
+                 [value]="roleSearch()"
+                 (input)="roleSearch.set($any($event.target).value)" />
+        </div>
+
+        <div class="rs-list">
+          @if (isLoading()) {
+            <div class="rs-loading">
+              <div class="loading-bar"><div class="loading-progress"></div></div>
+            </div>
+          } @else if (filteredRoles.length === 0) {
+            <div class="rs-empty">
+              <span class="material-icons">search_off</span>
+              <p>No roles found</p>
+            </div>
+          } @else {
+            @for (role of filteredRoles; track trackByRole($index, role)) {
+              <button type="button" class="rs-item" [class.active]="selectedRole()?.id === role.id"
+                      (click)="selectRole(role)">
+                <div class="rs-item-left">
+                  <span class="rs-dot"
+                        [attr.data-type]="role.roleType === 'SYSTEM' ? 'system' : 'custom'">
+                  </span>
+                  <div class="rs-item-info">
+                    <span class="rs-item-name">{{ role.roleName }}</span>
+                    <span class="rs-item-desc">{{ role.description || 'No description' }}</span>
+                  </div>
+                </div>
+                <div class="rs-item-right">
+                  @if (role.roleType === 'SYSTEM') {
+                    <span class="rs-badge rs-badge--system">
+                      <span class="material-icons">lock</span> SYSTEM
+                    </span>
+                  } @else {
+                    <span class="rs-badge rs-badge--custom">CUSTOM</span>
+                  }
+                </div>
+              </button>
+            }
+          }
+        </div>
+      </aside>
+
+      <!-- ── Detail panel ──────────────────────────────────────── -->
+      <section class="roles-detail">
+
+        @if (!selectedRole() && !isLoading()) {
+          <!-- Empty state -->
+          <div class="no-role-placeholder">
+            <span class="material-icons">badge</span>
+            <h3>Select a Role</h3>
+            <p>Choose a role from the sidebar to view and manage its permissions.</p>
+          </div>
+
+        } @else if (selectedRole()) {
+
+          <!-- ── Role header ────────────────────────────────── -->
+          <div class="rd-header">
+            <!-- Donut progress -->
+            <div class="rd-donut-wrap">
+              <svg class="rd-donut" viewBox="0 0 80 80" aria-hidden="true">
+                <circle class="donut-track" cx="40" cy="40" r="36"
+                        fill="none" stroke-width="6" />
+                <circle class="donut-fill" cx="40" cy="40" r="36"
+                        fill="none" stroke-width="6"
+                        [attr.stroke-dasharray]="donutDasharray"
+                        stroke-linecap="round"
+                        transform="rotate(-90 40 40)" />
+              </svg>
+              <div class="rd-donut-label">
+                <span class="rd-pct">{{ donutPercent }}%</span>
+                <span class="rd-pct-sub">granted</span>
               </div>
-              <div class="role-stat-body">
-                <div class="role-stat-value">{{ getStaffCountForRole(role.name) }}</div>
-                <div class="role-stat-label">{{ role.name }}</div>
+            </div>
+
+            <!-- Role info -->
+            <div class="rd-info">
+              <h2 class="rd-name">{{ selectedRole()!.roleName }}</h2>
+              <p class="rd-desc">{{ selectedRole()!.description || 'No description provided.' }}</p>
+              <div class="rd-meta">
+                <span class="rd-meta-chip"
+                      [class.rd-meta-chip--system]="selectedRole()!.roleType === 'SYSTEM'"
+                      [class.rd-meta-chip--custom]="selectedRole()!.roleType !== 'SYSTEM'">
+                  <span class="material-icons">
+                    {{ selectedRole()!.roleType === 'SYSTEM' ? 'lock' : 'tune' }}
+                  </span>
+                  {{ selectedRole()!.roleType === 'SYSTEM' ? 'System Role' : 'Custom Role' }}
+                </span>
+                <span class="rd-granted-pill">
+                  <span class="material-icons">check_circle</span>
+                  {{ grantedCount }} / {{ catalog().length }} features granted
+                </span>
               </div>
-            </button>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="rd-actions">
+              @if (hasUnsavedChanges) {
+                <span class="rd-pending-badge">
+                  <span class="material-icons">pending</span> Unsaved changes
+                </span>
+                <button class="btn-discard" type="button" (click)="discardChanges()">
+                  <span class="material-icons">undo</span> Discard
+                </button>
+                <button class="btn-save" type="button"
+                        [disabled]="isSaving()" (click)="saveChanges()">
+                  <span class="material-icons">
+                    {{ isSaving() ? 'hourglass_empty' : 'save' }}
+                  </span>
+                  {{ isSaving() ? 'Saving…' : 'Save Changes' }}
+                </button>
+              }
+              @if (selectedRole()!.roleType !== 'SYSTEM') {
+                <button class="btn-delete" type="button" title="Delete role"
+                        (click)="deleteRole(selectedRole()!)">
+                  <span class="material-icons">delete_outline</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- ── Toolbar ────────────────────────────────────── -->
+          <div class="rd-toolbar">
+            <div class="tt-search">
+              <span class="material-icons tt-search-ico">search</span>
+              <input type="text" class="tt-search-input" placeholder="Search features…"
+                     [value]="featureSearch()"
+                     (input)="featureSearch.set($any($event.target).value)" />
+              @if (featureSearch()) {
+                <button class="tt-clear-btn" type="button"
+                        (click)="featureSearch.set('')">
+                  <span class="material-icons">close</span>
+                </button>
+              }
+            </div>
+            <div class="tt-bulk">
+              <button class="btn-outline-sm" type="button" (click)="grantAll()">
+                <span class="material-icons">done_all</span> Grant All
+              </button>
+              <button class="btn-outline-sm btn-outline-sm--danger" type="button"
+                      (click)="revokeAll()">
+                <span class="material-icons">remove_done</span> Revoke All
+              </button>
+            </div>
+          </div>
+
+          <!-- ── Permission table ───────────────────────────── -->
+          <div class="perm-table">
+
+            <!-- Column headers -->
+            <div class="pt-head">
+              <div class="pt-col-resource">MODULE / RESOURCE</div>
+              <div class="pt-col-action pt-col-action--read">Read</div>
+              <div class="pt-col-action pt-col-action--write">Write</div>
+              <div class="pt-col-action pt-col-action--update">Update</div>
+              <div class="pt-col-action pt-col-action--delete">Delete</div>
+            </div>
+
+            @if (catalog().length === 0 && !isLoading()) {
+              <div class="perm-empty">
+                <span class="material-icons">inventory_2</span>
+                <p>No features found in catalog</p>
+              </div>
+            } @else {
+
+              @for (group of groupedFeatures; track trackByGroup($index, group)) {
+
+                <!-- Group / service row -->
+                <button type="button" class="pt-group-row"
+                        (click)="toggleGroupExpand(group.serviceCode)">
+
+                  <div class="pt-group-left">
+                    <span class="material-icons pt-group-chevron">
+                      {{ group.expanded ? 'expand_more' : 'chevron_right' }}
+                    </span>
+                    <span class="material-icons pt-group-icon">
+                      {{ getServiceIcon(group.serviceCode) }}
+                    </span>
+                    <div class="pt-group-info">
+                      <span class="pt-group-name">{{ group.serviceCode }}</span>
+                      <span class="pt-group-count">
+                        {{ getGrantedCountForGroup(group.serviceCode) }}/{{ getTotalCountForGroup(group.serviceCode) }} granted
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Group-level bulk toggle -->
+                  <div class="pt-group-access"
+                       (click)="$event.stopPropagation(); toggleGroup(group.serviceCode)"
+                       (keydown.enter)="$event.stopPropagation(); toggleGroup(group.serviceCode)"
+                       (keydown.space)="$event.stopPropagation(); toggleGroup(group.serviceCode)">
+                    <label class="pt-check-lbl"
+                           [class.checked]="isAllActionsForGroup(group.serviceCode)"
+                           [class.indeterminate]="isSomeActionsForGroup(group.serviceCode)"
+                           [attr.for]="'grp-' + group.serviceCode">
+                      <input [id]="'grp-' + group.serviceCode"
+                             type="checkbox"
+                             class="pt-hidden-chk"
+                             [checked]="isAllActionsForGroup(group.serviceCode)"
+                             [indeterminate]="isSomeActionsForGroup(group.serviceCode)"
+                             (change)="toggleGroup(group.serviceCode)" />
+                      <span class="pt-checkmark"></span>
+                      <span class="pt-check-text">All</span>
+                    </label>
+                  </div>
+
+                  <div class="pt-group-spacer"></div>
+                  <div class="pt-group-spacer"></div>
+                  <div class="pt-group-spacer"></div>
+                </button>
+
+                <!-- Feature rows -->
+                @if (group.expanded) {
+                  @for (feature of group.features; track trackByFeatureId($index, feature)) {
+                    <div class="pt-feature-row">
+                      <div class="pt-feature-left">
+                        <span class="pt-feature-indent"></span>
+                        <div class="pt-feature-info">
+                          <span class="pt-feature-name">{{ feature.featureName }}</span>
+                          <span class="pt-feature-code">{{ feature.featureCode }}</span>
+                        </div>
+                      </div>
+
+                      @for (action of allActions; track action) {
+                        <div class="pt-action-cell pt-action-cell--{{ action }}">
+                          <label class="pt-check-lbl"
+                                 [class.checked]="isActionEnabled(feature.id, action)"
+                                 [attr.aria-label]="action + ' permission for ' + feature.featureName">
+                            <input type="checkbox"
+                                   class="pt-hidden-chk"
+                                   [checked]="isActionEnabled(feature.id, action)"
+                                   (change)="toggleAction(feature.id, action)" />
+                            <span class="pt-checkmark"></span>
+                          </label>
+                        </div>
+                      }
+                    </div>
+                  }
+                }
+
+              }
+
+              <div class="perm-footer">
+                Showing {{ catalog().length }} features across {{ groupedFeatures.length }} modules
+              </div>
             }
           </div>
 
-          <!-- Staff Listing Grid -->
-          <app-card [title]="'Staff Directory'" [subtitle]="filteredStaff.length + ' members'" [divider]="true">
-            <div appCardActions>
-             
-            </div>
-            <app-grid 
-            [gridOptions]="staffGridOptions"
-             [apiConfig]="apiConfig"
-             [columnDefs]="staffColumnDefs"
-             [rightTooltemplateRef]="rightTooltemplate"
-              [height]="'520px'" [animateRows]="true" searchPlaceholder="Search staff & doctors...">
-            </app-grid>
-      
-          </app-card>
-         
-        </div>
-      </app-tab>
+        }
+      </section>
+    </div>
 
+    <!-- ── Create role side panel ─────────────────────────────────────── -->
+    @if (showCreatePanel()) {
+      <div class="side-panel-overlay"
+           (click)="showCreatePanel.set(false)"
+           (keydown.escape)="showCreatePanel.set(false)"
+           tabindex="-1">
+      </div>
 
-
-
-
-      <!-- Role Permissions Tab -->
-      <app-tab label="permissions">
-
-        <div class="permissions-management">
-          <app-card [title]="'Hospital Roles'" [subtitle]="roles.length + ' Roles'" [divider]="true"
-            class="permissions-sidebar">
-            <div class="roles-list">
-              @for (role of roles; track role) {
-              <div class="role-item" [class.selected]="selectedRole?.id === role.id" (click)="selectRole(role)">
-                <div class="role-icon" [style.background-color]="role.color">
-                  <app-icon [fontIcon]="role.icon" [size]="20"></app-icon>
-                </div>
-                <div class="role-details">
-                  <div class="role-name">{{ role.name }}</div>
-                  <div class="role-description">{{ role.description }}</div>
-                </div>
-                <div class="role-badge">
-                  <div class="staff-count">{{ getStaffCountForRole(role.name) }}</div>
-                </div>
-              </div>
-              }
-            </div>
-          </app-card>
-
-          <app-card class="permissions-main" [title]="selectedRole ? selectedRole.name + ' Permissions' : ''"
-            [subtitle]="selectedRole?.description" [divider]="true">
-            @if (selectedRole) {
-            <div appCardActions>
-              <app-button [text]="'Reset to Default'" [color]="'primary'" [fontIcon]="'refresh'"
-                [appearance]="'flat'"></app-button>
-              <app-button [text]="'Save Changes'" [color]="'primary'" [fontIcon]="'save'"></app-button>
-            </div>
-            }
-
-            @if (selectedRole) {
-            <div class="permissions-content">
-              <div class="permissions-grid">
-                <div class="permission-header">
-                  <span>Module</span>
-                  <span>Read</span>
-                  <span>Write</span>
-                  <span>Update</span>
-                  <span>Delete</span>
-                </div>
-                @for (module of moduleOptions; track module) {
-                <div class="permission-row">
-                  <div class="module-info">
-                    <app-icon [fontIcon]="module.icon" [size]="20"></app-icon>
-                    <div class="module-details">
-                      <div class="module-name">{{ module.label }}</div>
-                      <div class="module-description">Manage {{ module.label.toLowerCase() }} access</div>
-                    </div>
-                  </div>
-                  <div class="permission-checkboxes">
-                    <label class="permission-toggle">
-                      <input type="checkbox" [checked]="getPermissionValue(module.key, 'read')"
-                        (change)="updatePermission(module.key, 'read', $event)">
-                      <span class="toggle-slider"></span>
-                    </label>
-                    <label class="permission-toggle">
-                      <input type="checkbox" [checked]="getPermissionValue(module.key, 'write')"
-                        (change)="updatePermission(module.key, 'write', $event)">
-                      <span class="toggle-slider"></span>
-                    </label>
-                    <label class="permission-toggle">
-                      <input type="checkbox" [checked]="getPermissionValue(module.key, 'update')"
-                        (change)="updatePermission(module.key, 'update', $event)">
-                      <span class="toggle-slider"></span>
-                    </label>
-                    <label class="permission-toggle">
-                      <input type="checkbox" [checked]="getPermissionValue(module.key, 'delete')"
-                        (change)="updatePermission(module.key, 'delete', $event)">
-                      <span class="toggle-slider"></span>
-                    </label>
-                  </div>
-                </div>
-                }
-              </div>
-            </div>
-            }
-
-            @if (!selectedRole) {
-            <div class="no-role-selected">
-              <app-icon [fontIcon]="'security'" [size]="48"></app-icon>
-              <h3>Select a Role</h3>
-              <p>Choose a role from the sidebar to manage its permissions</p>
-            </div>
-            }
-          </app-card>
+      <dialog class="side-panel" open aria-label="Create Role">
+        <div class="panel-header">
+          <h3 class="panel-title">Create New Role</h3>
+          <button class="panel-close" type="button"
+                  (click)="showCreatePanel.set(false)" aria-label="Close panel">
+            <span class="material-icons">close</span>
+          </button>
         </div>
 
-      </app-tab>
+        <p class="panel-info-note">
+          <span class="material-icons">info</span>
+          Roles define the level of access staff members have within the system.
+        </p>
 
+        <form class="panel-form" [formGroup]="createForm" (ngSubmit)="submitCreateRole()">
+          <div class="form-field">
+            <label class="form-label" for="roleName">
+              Role Name <span class="req">*</span>
+            </label>
+            <input id="roleName" type="text" class="form-input"
+                   formControlName="roleName"
+                   placeholder="e.g. Head Nurse" autocomplete="off" />
+            @if (createForm.get('roleName')?.invalid && createForm.get('roleName')?.touched) {
+              <span class="field-error">Role name is required (min 2 characters)</span>
+            }
+          </div>
 
+          <div class="form-field">
+            <label class="form-label" for="roleType">Role Type</label>
+            <select id="roleType" class="form-select" formControlName="roleType">
+              <option value="CUSTOM">Custom</option>
+              <option value="SYSTEM">System</option>
+            </select>
+          </div>
 
+          <div class="form-field">
+            <label class="form-label" for="roleDesc">Description</label>
+            <textarea id="roleDesc" class="form-textarea"
+                      formControlName="description"
+                      rows="3"
+                      placeholder="Brief description of this role…"></textarea>
+          </div>
 
-    </app-tabs>
-
-
+          <div class="panel-actions">
+            <button type="button" class="btn-outline"
+                    (click)="showCreatePanel.set(false)">Cancel</button>
+            <button type="submit" class="btn-primary">Create Role</button>
+          </div>
+        </form>
+      </dialog>
+    }
 
   </div>
 </app-page>
-<ng-template #rightTooltemplate>
-  <button type="button" class="add-staff-btn" title="Add staff">
-    <app-icon [fontIcon]="'add'" [isCovered]="true"></app-icon>
-  </button>
-</ng-template> 
-

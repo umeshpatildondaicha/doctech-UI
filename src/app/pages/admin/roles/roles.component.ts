@@ -1,367 +1,416 @@
-import { Component, OnInit, signal } from '@angular/core';
+import {
+  Component, OnInit, OnDestroy,
+  ChangeDetectionStrategy, ChangeDetectorRef,
+  signal
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ColDef } from 'ag-grid-community';
-import { AppButtonComponent, AppInputComponent, IconComponent, CheckboxComponent, PageComponent, BreadcrumbItem, TabComponent, TabsComponent, GridComponent, FilterComponent, SnackbarService, DialogboxService } from '@lk/core';
-import { AppCardComponent } from '../../../core/components/app-card/app-card.component';
-import { AppCardActionsDirective } from '../../../core/components/app-card/app-card-actions.directive';
-import { 
-  AdminTabsComponent,
-  type TabItem
-} from '../../../components';
-import { StaffService } from '../../../services/staff.service';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Subject, forkJoin, of } from 'rxjs';
+import { catchError, takeUntil } from 'rxjs/operators';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
-interface Role {
-  id: number;
-  name: string;
-  description: string;
-  permissions: {
-    [key: string]: Permission;
-    patientRecords: Permission;
-    appointmentBooking: Permission;
-    billing: Permission;
-    labReports: Permission;
-    inventory: Permission;
-  };
-  color: string;
-  icon: string;
-}
+import { PageComponent, BreadcrumbItem } from '@lk/core';
+import { AdminTabsComponent, type TabItem } from '../../../components';
+import { RoleService, Role, FeatureCatalog, RolePermission } from '../../../services/role.service';
 
-interface Permission {
-  read: boolean;
-  write: boolean;
+export type ActionKey = 'read' | 'write' | 'update' | 'delete';
+
+const ALL_ACTIONS: ActionKey[] = ['read', 'write', 'update', 'delete'];
+
+export interface ActionState {
+  read:   boolean;
+  write:  boolean;
   update: boolean;
   delete: boolean;
 }
 
-interface Staff {
-  id: number;
-  fullName: string;
-  employeeId: string;
-  role: string;
-  profilePicture: string;
-  email: string;
-  phone: string;
-  specialization?: string;
+export interface GroupedFeatures {
+  serviceCode: string;
+  features:    FeatureCatalog[];
+  expanded:    boolean;
 }
 
 @Component({
-    selector: 'app-roles',
-    imports: [
-        CommonModule,
-        AppButtonComponent,
-        AppInputComponent,
-        IconComponent,
-        TabComponent,
-        TabsComponent,
-        CheckboxComponent,
-        AdminTabsComponent,
-        PageComponent,
-        GridComponent,
-        AppCardComponent,
-        AppCardActionsDirective,
-        FilterComponent
-    ],
-    templateUrl: './roles.component.html',
-    styleUrl: './roles.component.scss'
+  selector: 'app-roles',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatIconModule,
+    PageComponent,
+    AdminTabsComponent,
+  ],
+  templateUrl: './roles.component.html',
+  styleUrl: './roles.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RolesComponent implements OnInit {
-  // State Management
-  activeTab: 'overview' | 'permissions' = 'overview';
-  selectedTabIndex = 0;
-  selectedRole: Role | null = null;
+export class RolesComponent implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  roles           = signal<Role[]>([]);
+  catalog         = signal<FeatureCatalog[]>([]);
+  permissions     = signal<RolePermission[]>([]);
+  selectedRole    = signal<Role | null>(null);
+  isLoading       = signal(false);
+  isSaving        = signal(false);
+  showCreatePanel = signal(false);
+  roleSearch      = signal('');
+  featureSearch   = signal('');
+
+  readonly allActions: ActionKey[] = ALL_ACTIONS;
+
+  /** featureId → per-action booleans (current, possibly unsaved) */
+  private readonly localState      = new Map<string, ActionState>();
+  /** Snapshot of last-saved state for dirty-checking */
+  private readonly savedState      = new Map<string, ActionState>();
+  private readonly collapsedGroups = new Set<string>();
 
   breadcrumb: BreadcrumbItem[] = [
-    { label: 'Roles & Staff', route: '/admin/roles', icon: 'badge', isActive: true }
+    { label: 'Roles & Permissions', route: '/admin/roles', icon: 'badge', isActive: true }
   ];
-  // Tab configuration
-  tabs: TabItem[] = [
-    {
-      id: 'overview',
-      label: 'Overview',
-      icon: 'dashboard'
-    },
-    {
-      id: 'permissions',
-      label: 'Role Permissions',
-      icon: 'security'
+
+  readonly adminTabs: TabItem[] = [
+    { id: '/admin/doctors',  label: 'Doctors',  icon: 'medical_services'  },
+    { id: '/admin/staff',    label: 'Staff',    icon: 'groups'            },
+    { id: '/admin/roles',    label: 'Roles',    icon: 'badge'             },
+    { id: '/admin/hospital', label: 'Hospital', icon: 'local_hospital'    },
+    { id: '/admin/plans',    label: 'Plans',    icon: 'workspace_premium' },
+    { id: '/admin/billing',  label: 'Billing',  icon: 'receipt_long'      },
+  ];
+
+  createForm!: FormGroup;
+
+  // ── Computed getters ──────────────────────────────────────────────────────
+
+  get groupedFeatures(): GroupedFeatures[] {
+    const q = this.featureSearch().toLowerCase().trim();
+    const items = q
+      ? this.catalog().filter(f =>
+          f.featureName.toLowerCase().includes(q) ||
+          (f.serviceCode ?? '').toLowerCase().includes(q) ||
+          f.featureCode.toLowerCase().includes(q)
+        )
+      : this.catalog();
+
+    const map = new Map<string, FeatureCatalog[]>();
+    for (const f of items) {
+      const key = f.serviceCode ?? 'General';
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(f);
     }
-  ];
- staffList :Staff[]=[];
 
-  // Data
-  roles: Role[] = [
-    {
-      id: 1,
-      name: 'Doctor',
-      description: 'Medical practitioners with full patient access',
-      permissions: {
-        patientRecords: { read: true, write: true, update: true, delete: false },
-        appointmentBooking: { read: true, write: true, update: true, delete: true },
-        billing: { read: true, write: false, update: false, delete: false },
-        labReports: { read: true, write: true, update: true, delete: false },
-        inventory: { read: true, write: false, update: false, delete: false }
-      },
-      color: 'var(--role-doctor-color)',
-      icon: 'local_hospital'
-    },
-    {
-      id: 2,
-      name: 'Nurse',
-      description: 'Healthcare support staff with patient care access',
-      permissions: {
-        patientRecords: { read: true, write: true, update: true, delete: false },
-        appointmentBooking: { read: true, write: true, update: false, delete: false },
-        billing: { read: false, write: false, update: false, delete: false },
-        labReports: { read: true, write: false, update: false, delete: false },
-        inventory: { read: true, write: true, update: true, delete: false }
-      },
-      color: 'var(--role-nurse-color)',
-      icon: 'healing'
-    },
-    {
-      id: 3,
-      name: 'Receptionist',
-      description: 'Front desk staff managing appointments and billing',
-      permissions: {
-        patientRecords: { read: true, write: true, update: false, delete: false },
-        appointmentBooking: { read: true, write: true, update: true, delete: false },
-        billing: { read: true, write: true, update: true, delete: false },
-        labReports: { read: false, write: false, update: false, delete: false },
-        inventory: { read: false, write: false, update: false, delete: false }
-      },
-      color: 'var(--role-receptionist-color)',
-      icon: 'person'
-    },
-    {
-      id: 4,
-      name: 'Lab Technician',
-      description: 'Laboratory staff managing test results',
-      permissions: {
-        patientRecords: { read: true, write: false, update: false, delete: false },
-        appointmentBooking: { read: false, write: false, update: false, delete: false },
-        billing: { read: false, write: false, update: false, delete: false },
-        labReports: { read: true, write: true, update: true, delete: false },
-        inventory: { read: true, write: true, update: true, delete: false }
-      },
-      color: 'var(--role-lab-technician-color)',
-      icon: 'science'
-    },
-    {
-      id: 5,
-      name: 'Pharmacist',
-      description: 'Pharmacy staff managing medications and inventory',
-      permissions: {
-        patientRecords: { read: true, write: false, update: false, delete: false },
-        appointmentBooking: { read: false, write: false, update: false, delete: false },
-        billing: { read: true, write: true, update: false, delete: false },
-        labReports: { read: false, write: false, update: false, delete: false },
-        inventory: { read: true, write: true, update: true, delete: true }
-      },
-      color: 'var(--role-pharmacist-color)',
-      icon: 'medication'
-    },
-    {
-      id: 6,
-      name: 'Admin',
-      description: 'System administrators with full access',
-      permissions: {
-        patientRecords: { read: true, write: true, update: true, delete: true },
-        appointmentBooking: { read: true, write: true, update: true, delete: true },
-        billing: { read: true, write: true, update: true, delete: true },
-        labReports: { read: true, write: true, update: true, delete: true },
-        inventory: { read: true, write: true, update: true, delete: true }
-      },
-      color: 'var(--role-admin-color)',
-      icon: 'admin_panel_settings'
-    }
-  ];
-
-  staff: Staff[] = [
-    { id: 1, fullName: 'Dr. Sarah Johnson', employeeId: 'DOC001', role: 'Doctor', profilePicture: '', email: 'sarah.johnson@hospital.com', phone: '+1-555-0101', specialization: 'Cardiology' },
-    { id: 2, fullName: 'Dr. Robert Wilson', employeeId: 'DOC002', role: 'Doctor', profilePicture: '', email: 'robert.wilson@hospital.com', phone: '+1-555-0110', specialization: 'Neurology' },
-    { id: 3, fullName: 'Dr. Priya Sharma', employeeId: 'DOC003', role: 'Doctor', profilePicture: '', email: 'priya.sharma@hospital.com', phone: '+1-555-0111', specialization: 'Pediatrics' },
-    { id: 4, fullName: 'Dr. James Miller', employeeId: 'DOC004', role: 'Doctor', profilePicture: '', email: 'james.miller@hospital.com', phone: '+1-555-0112', specialization: 'Orthopedics' },
-    { id: 5, fullName: 'Emily Davis', employeeId: 'NUR001', role: 'Nurse', profilePicture: '', email: 'emily.davis@hospital.com', phone: '+1-555-0102', specialization: 'ICU' },
-    { id: 6, fullName: 'Maria Lopez', employeeId: 'NUR002', role: 'Nurse', profilePicture: '', email: 'maria.lopez@hospital.com', phone: '+1-555-0113', specialization: 'Emergency' },
-    { id: 7, fullName: 'Anita Patel', employeeId: 'NUR003', role: 'Nurse', profilePicture: '', email: 'anita.patel@hospital.com', phone: '+1-555-0114', specialization: 'OT' },
-    { id: 8, fullName: 'Michael Chen', employeeId: 'REC001', role: 'Receptionist', profilePicture: '', email: 'michael.chen@hospital.com', phone: '+1-555-0103' },
-    { id: 9, fullName: 'Sophie Turner', employeeId: 'REC002', role: 'Receptionist', profilePicture: '', email: 'sophie.turner@hospital.com', phone: '+1-555-0115' },
-    { id: 10, fullName: 'Lisa Rodriguez', employeeId: 'LAB001', role: 'Lab Technician', profilePicture: '', email: 'lisa.rodriguez@hospital.com', phone: '+1-555-0104', specialization: 'Pathology' },
-    { id: 11, fullName: 'Raj Kumar', employeeId: 'LAB002', role: 'Lab Technician', profilePicture: '', email: 'raj.kumar@hospital.com', phone: '+1-555-0116', specialization: 'Radiology' },
-    { id: 12, fullName: 'David Park', employeeId: 'PHR001', role: 'Pharmacist', profilePicture: '', email: 'david.park@hospital.com', phone: '+1-555-0117' },
-    { id: 13, fullName: 'Aisha Khan', employeeId: 'PHR002', role: 'Pharmacist', profilePicture: '', email: 'aisha.khan@hospital.com', phone: '+1-555-0118' },
-    { id: 14, fullName: 'Admin User', employeeId: 'ADM001', role: 'Admin', profilePicture: '', email: 'admin@hospital.com', phone: '+1-555-0100' }
-  ];
-    fiqlkey :string ='filter = true'
-    showFilter = false;
-    filterConfig :any={
-      filterConfig:[
-        { key: 'employeeId', label: 'Employee ID', type: 'input' },
-        { key: 'fullName', label: 'Full Name', type: 'input' },
-        { key: 'role', label: 'Role', type: 'input' },
-        { key: 'specialization', label: 'Specialization', type: 'input' },
-        { key: 'email', label: 'Email', type: 'input' },
-        { key: 'phone', label: 'Phone', type: 'input' }
-      ]
-    }
-    showAddStaffModal = signal<boolean>(false);
-    
-
-  // Staff grid
-  staffColumnDefs: ColDef[] = [];
-  staffGridOptions: any = {};
-  activeRoleFilter = signal<string | null>(null);
-
-  get filteredStaff(): Staff[] {
-    const role = this.activeRoleFilter();
-    if (!role) return this.staff;
-    return this.staff.filter(s => s.role === role);
+    return Array.from(map.entries()).map(([serviceCode, features]) => ({
+      serviceCode,
+      features,
+      expanded: !this.collapsedGroups.has(serviceCode)
+    }));
   }
 
-  // Options
-  moduleOptions = [
-    { key: 'patientRecords', label: 'Patient Records', icon: 'folder_shared' },
-    { key: 'appointmentBooking', label: 'Appointment Booking', icon: 'event' },
-    { key: 'billing', label: 'Billing', icon: 'receipt' },
-    { key: 'labReports', label: 'Lab Reports', icon: 'biotech' },
-    { key: 'inventory', label: 'Inventory', icon: 'inventory' }
-  ];
+  get filteredRoles(): Role[] {
+    const q = this.roleSearch().toLowerCase().trim();
+    return q
+      ? this.roles().filter(r => r.roleName.toLowerCase().includes(q))
+      : this.roles();
+  }
 
-  permissionLevels = ['read', 'write', 'update', 'delete'];
+  get hasUnsavedChanges(): boolean {
+    for (const [featureId, state] of this.localState) {
+      const saved = this.savedState.get(featureId);
+      if (saved) {
+        for (const a of ALL_ACTIONS) {
+          if (state[a] !== saved[a]) return true;
+        }
+      } else if (Object.values(state).some(Boolean)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  get grantedCount(): number {
+    let count = 0;
+    for (const state of this.localState.values()) {
+      if (Object.values(state).some(Boolean)) count++;
+    }
+    return count;
+  }
+
+  get totalRoles():  number { return this.roles().length; }
+  get systemRoles(): number { return this.roles().filter(r => r.roleType === 'SYSTEM').length; }
+  get customRoles(): number { return this.roles().filter(r => r.roleType !== 'SYSTEM').length; }
+
+  get donutPercent(): number {
+    const total = this.catalog().length;
+    if (!total) return 0;
+    return Math.round((this.grantedCount / total) * 100);
+  }
+
+  get donutDasharray(): string {
+    const r = 36;
+    const c = 2 * Math.PI * r;
+    const fill = (this.donutPercent / 100) * c;
+    return `${fill.toFixed(2)} ${c.toFixed(2)}`;
+  }
 
   constructor(
-    private staffService: StaffService,
-    private http: HttpClient,
-    private snackbarservice: SnackbarService,
-    private dialogService: DialogboxService
+    private readonly roleService: RoleService,
+    private readonly fb: FormBuilder,
+    private readonly snackBar: MatSnackBar,
+    private readonly cdr: ChangeDetectorRef,
   ) {}
 
-  apiConfig :any ={
-    dataConfig:{
-      url:environment.apiUrl,
-      rest:`/api/staff`,
-      params:"",
-      context:"",
-      fiqlkey:"",
-      lLimitKey:"llimit",
-      uLimitKey:"ulimit",
-      requestType:"GET",
-      type:"GET",
-      queryParamsUrl:"llimit=$llimit&ulimit=$ulimit",
-      suppressNullValues:true,
-      suppressDefaultFiqlOnApply:false,
-      dataKey:"content",
-      dataType:"array"
-
-    },
-     filterConfig:{
-      filterConfig:[
-        {
-          key:"employeeId",label:"Employee ID",type:"input"
-        },
-        {
-          key:"fullName",label:"Full Name",type:"input"
-        },
-        {
-          key:"role",label:"Role",type:"input"
-        },
-        {
-          key:"specialization",label:"Specialization",type:"input"
-        },
-      ]
-     }
+  ngOnInit(): void {
+    this.createForm = this.fb.group({
+      roleName:    ['', [Validators.required, Validators.minLength(2)]],
+      roleType:    ['CUSTOM'],
+      description: [''],
+    });
+    this.loadData();
   }
-  ngOnInit() {
-    this.initStaffGrid();
-    if (this.roles.length > 0) {
-      this.selectedRole = this.roles[0];
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // ── Data loading ──────────────────────────────────────────────────────────
+
+  private loadData(): void {
+    this.isLoading.set(true);
+    forkJoin({
+      roles:   this.roleService.getRoles().pipe(catchError(() => of([]))),
+      catalog: this.roleService.getFeatureCatalog().pipe(catchError(() => of([]))),
+    }).pipe(takeUntil(this.destroy$))
+      .subscribe(({ roles, catalog }) => {
+        this.roles.set(roles);
+        this.catalog.set(catalog);
+        if (roles.length > 0) {
+          this.selectRole(roles[0]);
+        }
+        this.isLoading.set(false);
+        this.cdr.markForCheck();
+      });
+  }
+
+  selectRole(role: Role): void {
+    this.selectedRole.set(role);
+    this.localState.clear();
+    this.savedState.clear();
+    this.loadRolePermissions(role);
+  }
+
+  private loadRolePermissions(role: Role): void {
+    if (!role.id) { this.cdr.markForCheck(); return; }
+    this.roleService.getRolePermissions(role.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (perms) => {
+          this.permissions.set(perms);
+          this.localState.clear();
+          this.savedState.clear();
+          for (const p of perms) {
+            const fid = p.featureId ?? p.featureCode ?? '';
+            if (!fid) continue;
+            const state: ActionState = { read: true, write: true, update: true, delete: true };
+            this.localState.set(fid, { ...state });
+            this.savedState.set(fid, { ...state });
+          }
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.permissions.set([]);
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  // ── Permission helpers ────────────────────────────────────────────────────
+
+  isActionEnabled(featureId: string, action: ActionKey): boolean {
+    return this.localState.get(featureId)?.[action] ?? false;
+  }
+
+  toggleAction(featureId: string, action: ActionKey): void {
+    const current = this.localState.get(featureId) ?? { read: false, write: false, update: false, delete: false };
+    this.localState.set(featureId, { ...current, [action]: !current[action] });
+    this.cdr.markForCheck();
+  }
+
+  isFeatureGranted(featureId: string): boolean {
+    const s = this.localState.get(featureId);
+    return s ? Object.values(s).some(Boolean) : false;
+  }
+
+  isAllActionsForGroup(serviceCode: string): boolean {
+    const features = this.catalog().filter(f => (f.serviceCode ?? 'General') === serviceCode);
+    return features.length > 0 && features.every(f => ALL_ACTIONS.every(a => this.isActionEnabled(f.id, a)));
+  }
+
+  isSomeActionsForGroup(serviceCode: string): boolean {
+    const features = this.catalog().filter(f => (f.serviceCode ?? 'General') === serviceCode);
+    const some = features.some(f => ALL_ACTIONS.some(a => this.isActionEnabled(f.id, a)));
+    return some && !this.isAllActionsForGroup(serviceCode);
+  }
+
+  toggleGroup(serviceCode: string): void {
+    const features = this.catalog().filter(f => (f.serviceCode ?? 'General') === serviceCode);
+    const allOn = this.isAllActionsForGroup(serviceCode);
+    for (const f of features) {
+      this.localState.set(f.id, { read: !allOn, write: !allOn, update: !allOn, delete: !allOn });
     }
-    this.getloadStaff();
-  }
-  getloadStaff():void{
-    this.staffService.getStaff().subscribe({
-      next:(res:any)=>{
-        this.staffList = res.data || res || [];
-        console.log('Staff loaded successfully', this.staffList.length);
-      },
-      error:(err)=>{
-        console.error('Failed to load staff', err);
-        this.snackbarservice.error('Failed to load staff');
-      }
-    })
+    this.cdr.markForCheck();
   }
 
-  initStaffGrid(): void {
-    this.apiConfig.filterConfig = this.filterConfig;
-    this.staffColumnDefs = [
-      { headerName: 'ID', field: 'employeeId', width: 110, sortable: true },
-      { headerName: 'Name', field: 'fullName', width:150, sortable: true, filter: true },
-      { headerName: 'Role', field: 'role', width: 140, sortable: true, filter: true },
-      { headerName: 'Specialization', field: 'specialization', width: 120, sortable: true, filter:true,
-        valueGetter: (params: any) => params.data?.specialization || '—'
-      },
-      { headerName: 'Email', field: 'email', width:180, sortable: true },
-      { headerName: 'Phone', field: 'phone', width: 150,sortable :true,filter:true }
+  toggleGroupExpand(serviceCode: string): void {
+    if (this.collapsedGroups.has(serviceCode)) {
+      this.collapsedGroups.delete(serviceCode);
+    } else {
+      this.collapsedGroups.add(serviceCode);
+    }
+    this.cdr.markForCheck();
+  }
+
+  isGroupExpanded(serviceCode: string): boolean {
+    return !this.collapsedGroups.has(serviceCode);
+  }
+
+  grantAll(): void {
+    for (const f of this.catalog()) {
+      this.localState.set(f.id, { read: true, write: true, update: true, delete: true });
+    }
+    this.cdr.markForCheck();
+  }
+
+  revokeAll(): void {
+    this.localState.clear();
+    this.cdr.markForCheck();
+  }
+
+  // ── Save / Discard ────────────────────────────────────────────────────────
+
+  saveChanges(): void {
+    const role = this.selectedRole();
+    if (!role?.id || this.isSaving()) return;
+    this.isSaving.set(true);
+
+    const perms = this.permissions();
+    const toGrant = this.catalog().filter(f => {
+      const savedEntry = this.savedState.get(f.id);
+      const wasGranted = savedEntry ? Object.values(savedEntry).some(Boolean) : false;
+      const isGranted  = this.isFeatureGranted(f.id);
+      return isGranted && !wasGranted;
+    });
+    const toRevoke = perms.filter(p => {
+      const fid = p.featureId ?? p.featureCode ?? '';
+      return !this.isFeatureGranted(fid);
+    });
+
+    const ops = [
+      ...toGrant.map(f  => this.roleService.grantPermission(role.id!, f.id).pipe(catchError(() => of(null)))),
+      ...toRevoke.map(p => this.roleService.revokePermission(role.id!, String(p.id)).pipe(catchError(() => of(null)))),
     ];
-    this.staffGridOptions = {
-      menuActions: [
-        { title: 'View', icon: 'visibility', click: (_p: any) => {} },
-        { title: 'Edit', icon: 'edit', click: (_p: any) => {} },
-        { title: 'Delete', icon: 'delete', click: (_p: any) => {} }
-      ]
+
+    forkJoin(ops.length > 0 ? ops : [of(null)])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.isSaving.set(false);
+          for (const [k, v] of this.localState.entries()) {
+            this.savedState.set(k, { ...v });
+          }
+          this.snackBar.open('Permissions saved successfully', 'Close', { duration: 3000 });
+          this.loadRolePermissions(role);
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.isSaving.set(false);
+          this.snackBar.open('Failed to save some permissions', 'Close', { duration: 3000 });
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  discardChanges(): void {
+    this.localState.clear();
+    for (const [k, v] of this.savedState.entries()) {
+      this.localState.set(k, { ...v });
+    }
+    this.cdr.markForCheck();
+  }
+
+  // ── Create / Delete role ──────────────────────────────────────────────────
+
+  submitCreateRole(): void {
+    if (this.createForm.invalid) { this.createForm.markAllAsTouched(); return; }
+    const { roleName, roleType, description } = this.createForm.value as { roleName: string; roleType: string; description: string };
+    this.roleService.createRole({ roleName, roleType, description })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (role) => {
+          this.roles.update(list => [...list, role]);
+          this.showCreatePanel.set(false);
+          this.createForm.reset({ roleType: 'CUSTOM' });
+          this.snackBar.open(`Role "${role.roleName}" created`, 'Close', { duration: 3000 });
+          this.selectRole(role);
+          this.cdr.markForCheck();
+        },
+        error: (err: { error?: { message?: string } }) => {
+          this.snackBar.open(err?.error?.message ?? 'Failed to create role', 'Close', { duration: 3000 });
+        }
+      });
+  }
+
+  deleteRole(role: Role): void {
+    if (!role.id || role.roleType === 'SYSTEM') return;
+    this.roleService.deleteRole(role.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.roles.update(list => list.filter(r => r.id !== role.id));
+          const remaining = this.roles();
+          this.selectedRole.set(remaining[0] ?? null);
+          if (remaining[0]) this.loadRolePermissions(remaining[0]);
+          this.snackBar.open('Role deleted', 'Close', { duration: 3000 });
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.snackBar.open('Failed to delete role', 'Close', { duration: 3000 });
+        }
+      });
+  }
+
+  // ── Utility helpers ───────────────────────────────────────────────────────
+
+  getServiceIcon(serviceCode: string): string {
+    const icons: Record<string, string> = {
+      PATIENT:     'folder_shared',
+      APPOINTMENT: 'event',
+      BILLING:     'receipt',
+      LAB:         'biotech',
+      INVENTORY:   'inventory',
+      PHARMACY:    'medication',
+      STAFF:       'groups',
+      ADMIN:       'admin_panel_settings',
+      REPORTS:     'assessment',
+      CHAT:        'chat',
+      SCHEDULE:    'calendar_month',
     };
+    return icons[serviceCode?.toUpperCase()] ?? 'widgets';
   }
 
-  filterByRole(roleName: string): void {
-    const current = this.activeRoleFilter();
-    this.activeRoleFilter.set(current === roleName ? null : roleName);
+  getGrantedCountForGroup(serviceCode: string): number {
+    return this.catalog()
+      .filter(f => (f.serviceCode ?? 'General') === serviceCode && this.isFeatureGranted(f.id))
+      .length;
   }
 
-  // Tab Management
-  setActiveTab(tab: 'overview' | 'permissions') {
-    this.activeTab = tab;
-    if (tab === 'permissions' && !this.selectedRole && this.roles.length > 0) {
-      this.selectedRole = this.roles[0];
-    }
+  getTotalCountForGroup(serviceCode: string): number {
+    return this.catalog().filter(f => (f.serviceCode ?? 'General') === serviceCode).length;
   }
 
-  // Role Management Methods
-  selectRole(role: Role) {
-    this.selectedRole = role;
-  }
-
-  getStaffCountForRole(roleName: string): number {
-    return this.staff.filter(s => s.role === roleName).length;
-  }
-
-  // Permission handling methods
-  getPermissionValue(moduleKey: string, permissionType: string): boolean {
-    if (!this.selectedRole) return false;
-    const permission = this.selectedRole.permissions[moduleKey];
-    return permission ? (permission as any)[permissionType] : false;
-  }
-
-  updatePermission(moduleKey: string, permissionType: string, event: Event): void {
-    if (!this.selectedRole) return;
-    const target = event.target as HTMLInputElement;
-    const permission = this.selectedRole.permissions[moduleKey];
-    if (permission) {
-      (permission as any)[permissionType] = target.checked;
-    }
-  }
-
-  // Utility Methods
-  getRoleByName(roleName: string): Role | undefined {
-    return this.roles.find(role => role.name === roleName);
-  }
-
-
-
-  // New methods for standardized components
-
-  onTabChange(tabId: string) {
-    this.setActiveTab(tabId as 'overview' | 'permissions');
-  }
-} 
+  trackByFeatureId(_i: number, f: FeatureCatalog): string { return f.id; }
+  trackByGroup(_i: number, g: GroupedFeatures):    string { return g.serviceCode; }
+  trackByRole(_i: number, r: Role):                string { return r.id ?? r.roleName; }
+}
