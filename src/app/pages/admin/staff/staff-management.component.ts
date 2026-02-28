@@ -261,18 +261,18 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
   sendInvite(): void {
     if (this.inviteForm.invalid) { this.inviteForm.markAllAsTouched(); return; }
     this.isLoading.set(true);
-    const dto: StaffInviteRequest = this.inviteForm.value;
+    const dto: StaffInviteRequest = this.inviteForm.value as StaffInviteRequest;
     this.staffService.inviteStaff(dto)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: res => {
+        next: (res: { message?: string }) => {
           this.isLoading.set(false);
           this.showInvitePanel.set(false);
           this.inviteForm.reset({ roles: [] });
           this.snackBar.open(res.message ?? 'Invitation sent!', 'Close', { duration: 4000 });
           this.loadData();
         },
-        error: err => {
+        error: (err: { error?: { message?: string } }) => {
           this.isLoading.set(false);
           this.snackBar.open(err?.error?.message ?? 'Failed to send invitation', 'Close', { duration: 3000 });
           this.cdr.markForCheck();
@@ -310,14 +310,18 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
   private loadData(): void {
     this.isLoading.set(true);
     forkJoin({
-      staff:   this.staffService.getStaff({ active: false }).pipe(catchError(() => of({ staffDetails: [] }))),
+      staff:   this.staffService.getStaff().pipe(catchError(() => of({ staffDetails: [] }))),
       depts:   this.departmentService.getDepartments().pipe(catchError(() => of([])))
     }).pipe(takeUntil(this.destroy$))
       .subscribe(({ staff, depts }) => {
         this.rawStaff    = staff.staffDetails ?? [];
         this.departments = depts;
         this.displayStaff = this.rawStaff
-          .filter(s => !(s.roles ?? []).some(r => r.toLowerCase().includes('doctor')))
+          .filter(s => {
+            const memberRoles = s.roles ?? (s.role ? [s.role] : []);
+            const isDoctor = memberRoles.some((r: string) => r.toLowerCase().includes('doctor'));
+            return !isDoctor;
+          })
           .map((s, i) => this.toDisplay(s, i));
         this.isLoading.set(false);
         this.cdr.markForCheck();
@@ -325,10 +329,13 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
   }
 
   private toDisplay(s: StaffMember, idx: number): DisplayStaff {
-    const fullName = `${s.firstName ?? ''} ${s.lastName ?? ''}`.trim();
-    const initials = `${(s.firstName ?? ' ')[0]}${(s.lastName ?? ' ')[0]}`.toUpperCase();
-    const roles    = (s.roles ?? []).filter(r => !r.toLowerCase().includes('doctor'));
-    const role     = roles[0] ?? 'Staff';
+    const parts    = (s.fullName ?? '').split(' ');
+    const fName    = s.firstName ?? parts[0] ?? '';
+    const lName    = s.lastName  ?? parts.slice(1).join(' ') ?? '';
+    const fullName = `${fName} ${lName}`.trim() || s.fullName || 'Unknown Staff';
+    const initials = `${(fName || ' ')[0]}${(lName || ' ')[0]}`.toUpperCase();
+    const allRoles = s.roles ?? (s.role ? [s.role] : []);
+    const role     = allRoles.find((r: string) => !r.toLowerCase().includes('doctor')) ?? s.role ?? 'Staff';
 
     const shiftMap: Record<string, ShiftLabel> = {
       MORNING: 'Morning', EVENING: 'Evening', NIGHT: 'Night',
@@ -345,7 +352,7 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
     let status: StaffStatus;
     if (s.isActive === false) {
       status = 'On Leave';
-    } else if (!s.isAvailable) {
+    } else if (s.isAvailable === false) {
       status = 'Off Duty';
     } else {
       const statusCycle: StaffStatus[] = ['Active', 'Active', 'On Break'];
@@ -370,8 +377,8 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
 
     return {
       raw: s,
-      id:   s.staffId ?? idx,
-      name: fullName || 'Unknown Staff',
+      id:   s.staffId ?? s.id ?? idx,
+      name: fullName,
       initials,
       avatarColor: AVATAR_COLORS[idx % AVATAR_COLORS.length],
       role,
@@ -385,7 +392,7 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
       onboardingStep: s.approvedByHospitalAdmin ? 4 : 2,
       loginActivity: mockLogins,
       documents: mockDocs,
-      username: `${s.firstName?.toLowerCase() ?? 'user'}.${(s.lastName?.substring(0,1) ?? '').toLowerCase()}`,
+      username: `${fName.toLowerCase() || 'user'}.${(lName.substring(0, 1)).toLowerCase()}`,
       twoFaEnabled: idx % 2 === 0,
     };
   }
