@@ -117,12 +117,16 @@ export class AppointmentService {
     );
   }
 
-  /** GET appointments for a specific patient (doctor + patient). */
+  /**
+   * GET appointments for a specific doctor–patient pair.
+   * Backend: GET /api/appointments/doctor/{doctorCode}/patient/{patientId} (no trailing /appointments).
+   * Supports doctorCode "me" for the authenticated doctor.
+   */
   getPatientAppointments(doctorCode: string, patientPublicId: string): Observable<any> {
     const safeDoctor = encodeURIComponent((doctorCode || '').trim());
     const safePatient = encodeURIComponent((patientPublicId || '').trim());
     return this.httpService.sendGETRequest(
-      `${this.baseUrl}/appointments/doctor/${safeDoctor}/patient/${safePatient}/appointments`
+      `${this.baseUrl}/appointments/doctor/${safeDoctor}/patient/${safePatient}`
     );
   }
 

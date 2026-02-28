@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpService } from '@lk/core';
 import { environment } from '../../environments/environment';
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
@@ -34,9 +35,12 @@ export class ChatApiService {
     (environment.endpoints as any)?.chat?.ws ??
     `${environment.apiUrl.replace(/^http/, 'ws').replace(/^https/, 'wss')}/ws/chat`;
   private ws: WebSocket | null = null;
+  private initOkTimeout: ReturnType<typeof setTimeout> | null = null;
   private readonly messageSubject = new Subject<ChatMessage>();
   private readonly connectionSubject = new BehaviorSubject<boolean>(false);
   private readonly isDev = !environment.production;
+  private readonly snackBar = inject(MatSnackBar);
+  private static readonly INIT_OK_TIMEOUT_MS = 10000;
 
   /** Stream of new messages from WebSocket */
   readonly messages$ = this.messageSubject.asObservable();
@@ -74,7 +78,7 @@ export class ChatApiService {
     const token = this.getAuthToken();
     const url = `${this.wsBaseUrl}?token=${encodeURIComponent(token || '')}`;
     if (this.isDev) {
-      console.log('[Chat] WebSocket connecting to', this.wsBaseUrl);
+      console.log('[Chat] WebSocket connecting to', this.wsBaseUrl, 'init:', { appointmentId: init.appointmentPublicId, userPublicId: init.userPublicId, senderType: init.senderType });
     }
     try {
       this.ws = new WebSocket(url);
@@ -85,20 +89,30 @@ export class ChatApiService {
     }
 
     this.ws.onopen = () => {
-      this.connectionSubject.next(true);
-      // Backend expects key "appointmentId" (appointment's public UUID) and type "CHAT" for messages
+      this.connectionSubject.next(false);
       this.ws?.send(JSON.stringify({
         type: 'INIT',
         appointmentId: init.appointmentPublicId,
         userPublicId: init.userPublicId,
         senderType: init.senderType
       }));
-      if (this.isDev) console.log('[Chat] WebSocket connected, sent INIT');
+      if (this.isDev) console.log('[Chat] WebSocket OPEN — INIT sent, waiting for INIT_OK');
+      this.clearInitOkTimeout();
+      this.initOkTimeout = setTimeout(() => {
+        this.initOkTimeout = null;
+        if (this.ws?.readyState === WebSocket.OPEN) {
+          if (this.isDev) console.warn('[Chat] INIT_OK timeout — server did not respond');
+          this.connectionSubject.next(false);
+          this.snackBar.open('Chat connection timed out. Check network or try again.', 'Close', { duration: 6000 });
+        }
+      }, ChatApiService.INIT_OK_TIMEOUT_MS);
     };
 
     this.ws.onmessage = (event) => {
+      if (this.isDev) console.log('[Chat] WS message raw:', typeof event.data === 'string' ? event.data : '(binary)');
       try {
-        const data: ChatWsMessage = JSON.parse(event.data);
+        const data: ChatWsMessage = JSON.parse(event.data as string);
+        const msgType = typeof data.type === 'string' ? (data.type as string).toUpperCase() : '';
         if (data.type === 'CHAT' && data.content != null) {
           // Backend echoes saved message as { type: 'CHAT', id, content, senderType, senderPublicId, createdAt }
           this.messageSubject.next(this.normalizeMessage({
@@ -110,29 +124,55 @@ export class ChatApiService {
           }));
         } else if (data.type === 'NEW_MESSAGE' && data.payload && this.isChatMessage(data.payload)) {
           this.messageSubject.next(this.normalizeMessage(data.payload));
-        } else if ((data.type === 'INIT_OK' || data.type === 'INIT_ACK') && this.isDev) {
-          console.log('[Chat] INIT OK received');
-        } else if (data.type === 'ERROR' && this.isDev) {
-          console.warn('[Chat] Server error:', data.message ?? data.payload);
+        } else if (msgType === 'INIT_OK' || msgType === 'INIT_ACK') {
+          this.clearInitOkTimeout();
+          this.connectionSubject.next(true);
+          if (this.isDev) console.log('[Chat] INIT OK received, connected');
+        } else if (msgType === 'ERROR') {
+          const msg = (data.message ?? (data.payload as any)?.message ?? 'Chat error').toString();
+          if (this.isDev) console.warn('[Chat] Server error:', msg);
+          this.connectionSubject.next(false);
+          this.snackBar.open(msg, 'Close', { duration: 5000 });
+        } else if (this.isDev && msgType) {
+          console.log('[Chat] WS message type:', msgType, data);
         }
-      } catch {
-        // ignore parse errors
+      } catch (e) {
+        if (this.isDev) console.warn('[Chat] WS message parse error', e, event.data);
       }
     };
 
     this.ws.onclose = (ev) => {
-      if (this.isDev) console.warn('[Chat] WebSocket closed', ev.code, ev.reason || '');
+      this.clearInitOkTimeout();
+      if (this.isDev) {
+        console.warn('[Chat] WebSocket CLOSED — code:', ev.code, 'reason:', ev.reason || '(none)', 'clean:', ev.wasClean);
+      }
+      // Code 1006 = abnormal closure (handshake failed or connection dropped before open)
+      if (ev.code === 1006) {
+        this.snackBar.open(
+          'Chat could not connect. The server may need WebSocket support enabled.',
+          'Close',
+          { duration: 7000 }
+        );
+      }
       this.connectionSubject.next(false);
       this.ws = null;
     };
 
     this.ws.onerror = () => {
-      if (this.isDev) console.warn('[Chat] WebSocket error');
+      if (this.isDev) console.warn('[Chat] WebSocket ERROR — check Network tab for wss:// and CORS');
       this.connectionSubject.next(false);
     };
   }
 
+  private clearInitOkTimeout(): void {
+    if (this.initOkTimeout != null) {
+      clearTimeout(this.initOkTimeout);
+      this.initOkTimeout = null;
+    }
+  }
+
   disconnect(): void {
+    this.clearInitOkTimeout();
     if (this.ws) {
       this.ws.close();
       this.ws = null;

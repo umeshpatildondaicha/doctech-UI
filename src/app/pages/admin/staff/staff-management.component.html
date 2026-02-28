@@ -1,0 +1,691 @@
+<app-page [breadcrumb]="breadcrumb" [isFooter]="false">
+  <div page-body class="staff-page">
+
+
+    @if (isLoading()) {
+      <div class="loading-bar"><div class="loading-progress"></div></div>
+    }
+
+    <!-- ── Overview stat cards ─────────────────────────────────────────── -->
+    <div class="stat-cards">
+      <div class="stat-card stat-card--total">
+        <div class="sc-icon"><mat-icon>groups</mat-icon></div>
+        <div class="sc-body">
+          <span class="sc-val">{{ displayStaff.length }}</span>
+          <span class="sc-lbl">Total Staff</span>
+          <span class="sc-sub">Non-doctor members</span>
+        </div>
+      </div>
+      <div class="stat-card stat-card--active">
+        <div class="sc-icon"><mat-icon>check_circle</mat-icon></div>
+        <div class="sc-body">
+          <span class="sc-val">{{ totalActive }}</span>
+          <span class="sc-lbl">Active</span>
+          <span class="sc-sub">Currently on duty</span>
+        </div>
+      </div>
+      <div class="stat-card stat-card--off">
+        <div class="sc-icon"><mat-icon>nights_stay</mat-icon></div>
+        <div class="sc-body">
+          <span class="sc-val">{{ totalOffDuty }}</span>
+          <span class="sc-lbl">Off Duty</span>
+          <span class="sc-sub">Not on shift</span>
+        </div>
+      </div>
+      <div class="stat-card stat-card--leave">
+        <div class="sc-icon"><mat-icon>event_busy</mat-icon></div>
+        <div class="sc-body">
+          <span class="sc-val">{{ totalOnLeave }}</span>
+          <span class="sc-lbl">On Leave</span>
+          <span class="sc-sub">Absent today</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Main content: table + optional detail panel ─────────────────── -->
+    <div class="content-area" [class.content-area--split]="selectedStaff()">
+
+      <!-- ── Staff table ──────────────────────────────────────────────── -->
+      <div class="table-card">
+        <!-- Toolbar -->
+        <div class="table-toolbar">
+          <div class="tt-search">
+            <mat-icon class="tt-search-ico">search</mat-icon>
+            <input
+              class="tt-search-input"
+              type="text"
+              placeholder="Search by name, role, department or ID..."
+              [value]="searchQuery()"
+              (input)="searchQuery.set($any($event.target).value)"
+              aria-label="Search staff"
+            />
+            @if (searchQuery()) {
+              <button class="tt-clear" (click)="searchQuery.set('')" aria-label="Clear">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </div>
+          <div class="tt-filters">
+            @for (s of ['All', 'Active', 'Off Duty', 'On Break', 'On Leave']; track s) {
+              <button
+                class="filter-chip"
+                [class.filter-chip--active]="statusFilter() === s"
+                (click)="statusFilter.set($any(s))"
+              >{{ s }}</button>
+            }
+          </div>
+          <div class="tt-actions">
+            <button class="btn-outline-sm" (click)="showInvitePanel.set(true)">
+              <mat-icon>mail</mat-icon> Invite
+            </button>
+            <button class="btn-primary-sm" (click)="showAddPanel.set(true)">
+              <mat-icon>person_add</mat-icon> Add Staff
+            </button>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="staff-table-wrap">
+          <table class="staff-table">
+            <thead>
+              <tr>
+                <th class="col-name">STAFF NAME</th>
+                <th class="col-role">ROLE</th>
+                <th class="col-dept">DEPARTMENT</th>
+                <th class="col-shift">CURRENT SHIFT</th>
+                <th class="col-assign">ASSIGNED TO</th>
+                <th class="col-status">STATUS</th>
+                <th class="col-actions">ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (staff of filteredStaff; track staff.id) {
+                <tr
+                  class="staff-row"
+                  [class.staff-row--selected]="selectedStaff()?.id === staff.id"
+                  (click)="openDetail(staff)"
+                  (keydown.enter)="openDetail(staff)"
+                  tabindex="0"
+                >
+                  <!-- Name + avatar -->
+                  <td class="col-name">
+                    <div class="staff-name-cell">
+                      <div class="staff-avatar" [style.background]="staff.avatarColor">
+                        {{ staff.initials }}
+                      </div>
+                      <div class="staff-name-info">
+                        <span class="sni-name">{{ staff.name }}</span>
+                        <span class="sni-id">ID: #{{ staff.employeeId }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <!-- Role -->
+                  <td class="col-role">
+                    <span class="role-text">{{ staff.role }}</span>
+                  </td>
+                  <!-- Department -->
+                  <td class="col-dept">
+                    <span class="dept-text">{{ staff.department }}</span>
+                  </td>
+                  <!-- Shift -->
+                  <td class="col-shift">
+                    @if (staff.shift !== '-') {
+                      <span class="shift-cell">
+                        <mat-icon class="shift-ico shift-ico--{{ staff.shift | lowercase }}">{{ staff.shiftIcon }}</mat-icon>
+                        {{ staff.shift }}
+                      </span>
+                    } @else {
+                      <span class="na-text">—</span>
+                    }
+                  </td>
+                  <!-- Assignment -->
+                  <td class="col-assign">
+                    @if (staff.assignmentType === 'doctor') {
+                      <span class="assign-chip assign-chip--doctor">
+                        <mat-icon>local_hospital</mat-icon>
+                        {{ staff.assignedDoctorName }}
+                      </span>
+                    } @else if (staff.assignmentType === 'hospital') {
+                      <span class="assign-chip assign-chip--hospital">
+                        <mat-icon>apartment</mat-icon>
+                        Hospital
+                      </span>
+                    } @else {
+                      <span class="assign-chip assign-chip--none">
+                        <mat-icon>person_off</mat-icon>
+                        Not Assigned
+                      </span>
+                    }
+                  </td>
+                  <!-- Status -->
+                  <td class="col-status">
+                    <span class="status-badge status-badge--{{ staff.status | lowercase | replace:' ':'-' }}">
+                      <span class="status-dot"></span>
+                      {{ staff.status }}
+                    </span>
+                  </td>
+                  <!-- Actions -->
+                  <td class="col-actions" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+                    <div class="action-menu">
+                      @if (!staff.raw.approvedByHospitalAdmin) {
+                        <button class="action-btn action-btn--approve" (click)="approveStaff(staff, $event)"
+                          title="Approve">
+                          <mat-icon>verified_user</mat-icon>
+                        </button>
+                      }
+                      <button class="action-btn action-btn--toggle" (click)="toggleStatus(staff, $event)"
+                        [title]="staff.status === 'Active' ? 'Set Off Duty' : 'Set Active'">
+                        <mat-icon>{{ staff.status === 'Active' ? 'pause_circle' : 'play_circle' }}</mat-icon>
+                      </button>
+                      <button class="action-btn action-btn--more" title="More options">
+                        <mat-icon>more_vert</mat-icon>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+              @if (filteredStaff.length === 0 && !isLoading()) {
+                <tr>
+                  <td colspan="7" class="empty-row">
+                    <mat-icon>search_off</mat-icon>
+                    <p>No staff found matching your criteria.</p>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer">
+          <span class="tf-count">Showing {{ filteredStaff.length }} of {{ displayStaff.length }} staff members</span>
+        </div>
+      </div>
+
+      <!-- ── Staff detail panel ──────────────────────────────────────────── -->
+      @if (selectedStaff(); as staff) {
+        <div class="detail-panel">
+
+          <!-- Close -->
+          <button class="detail-close" (click)="closeDetail()" aria-label="Close panel">
+            <mat-icon>close</mat-icon>
+          </button>
+
+          <!-- Header -->
+          <div class="dp-header">
+            <div class="dp-avatar" [style.background]="staff.avatarColor">{{ staff.initials }}</div>
+            <div class="dp-header-info">
+              <div class="dp-name-row">
+                <h2 class="dp-name">{{ staff.name }}</h2>
+                <span class="status-badge status-badge--{{ staff.status | lowercase | replace:' ':'-' }}">
+                  <span class="status-dot"></span>{{ staff.status }}
+                </span>
+              </div>
+              <p class="dp-sub">
+                {{ staff.role }} &nbsp;•&nbsp; ID: #{{ staff.employeeId }}
+                &nbsp;•&nbsp; Joined Jan 2024
+              </p>
+            </div>
+            <div class="dp-working-toggle">
+              <span class="dp-toggle-lbl">Status</span>
+              <label class="dp-toggle-switch" aria-label="Toggle working status">
+                <input type="checkbox" [checked]="staff.status === 'Active'"
+                  (change)="toggleStatus(staff, $event)" />
+                <span class="dp-toggle-track">
+                  <span class="dp-toggle-thumb"></span>
+                </span>
+                <span class="dp-toggle-txt">{{ staff.status === 'Active' ? 'Working' : 'Off' }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Tab bar -->
+          <div class="dp-tab-bar">
+            <button class="dp-tab" [class.dp-tab--active]="activeDetailTab() === 'overview'"
+              (click)="activeDetailTab.set('overview')">Overview</button>
+            <button class="dp-tab" [class.dp-tab--active]="activeDetailTab() === 'security'"
+              (click)="activeDetailTab.set('security')">Security & Access</button>
+            <button class="dp-tab" [class.dp-tab--active]="activeDetailTab() === 'documents'"
+              (click)="activeDetailTab.set('documents')">Documents</button>
+          </div>
+
+          <!-- ── Overview tab ─────────────────────────────────────────── -->
+          @if (activeDetailTab() === 'overview') {
+            <div class="dp-body">
+
+              <!-- Assignment card -->
+              <div class="dp-section">
+                <h4 class="dp-section-title">
+                  <mat-icon>assignment_ind</mat-icon> Assignment
+                </h4>
+                @if (staff.assignmentType === 'doctor') {
+                  <div class="assignment-card assignment-card--doctor">
+                    <mat-icon>local_hospital</mat-icon>
+                    <div>
+                      <span class="ac-label">Working under Doctor</span>
+                      <span class="ac-value">{{ staff.assignedDoctorName }}</span>
+                    </div>
+                  </div>
+                } @else if (staff.assignmentType === 'hospital') {
+                  <div class="assignment-card assignment-card--hospital">
+                    <mat-icon>apartment</mat-icon>
+                    <div>
+                      <span class="ac-label">Working under</span>
+                      <span class="ac-value">Hospital Administration</span>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="assignment-card assignment-card--none">
+                    <mat-icon>person_off</mat-icon>
+                    <div>
+                      <span class="ac-label">Not assigned to any doctor or hospital unit</span>
+                      <button class="ac-assign-btn">Assign Now</button>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Professional info -->
+              <div class="dp-section">
+                <h4 class="dp-section-title">
+                  <mat-icon>work_history</mat-icon> Professional History
+                </h4>
+                <div class="prof-grid">
+                  <div class="prof-item">
+                    <span class="pi-lbl">CURRENT ROLE</span>
+                    <span class="pi-val">{{ staff.role }}</span>
+                  </div>
+                  <div class="prof-item">
+                    <span class="pi-lbl">DEPARTMENT</span>
+                    <span class="pi-val dept-text">{{ staff.department }}</span>
+                  </div>
+                  <div class="prof-item">
+                    <span class="pi-lbl">PRIMARY SHIFT</span>
+                    <span class="pi-val">
+                      @if (staff.shift !== '-') {
+                        <mat-icon class="shift-ico shift-ico--{{ staff.shift | lowercase }}">{{ staff.shiftIcon }}</mat-icon>
+                        {{ staff.shift }} (08:00 – 16:00)
+                      } @else {
+                        —
+                      }
+                    </span>
+                  </div>
+                  <div class="prof-item">
+                    <span class="pi-lbl">CONTACT</span>
+                    <span class="pi-val">{{ staff.raw.contactNumber || '—' }}</span>
+                  </div>
+                  <div class="prof-item">
+                    <span class="pi-lbl">EMAIL</span>
+                    <span class="pi-val">{{ staff.raw.email }}</span>
+                  </div>
+                  <div class="prof-item">
+                    <span class="pi-lbl">SPECIALIZATION</span>
+                    <span class="pi-val">{{ staff.raw.specialization || '—' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Weekly shift visual -->
+              <div class="dp-section">
+                <h4 class="dp-section-title">
+                  <mat-icon>calendar_view_week</mat-icon> Weekly Shift Distribution
+                </h4>
+                <div class="week-grid">
+                  @for (day of ['M','T','W','T','F','S','S']; track $index) {
+                    <div class="week-day">
+                      <div class="wd-bar" [class.wd-bar--on]="$index < 5"
+                        [style.height]="$index < 5 ? (40 + $index * 8) + 'px' : '12px'"></div>
+                      <span class="wd-label">{{ day }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Onboarding + Admin actions (side by side) -->
+              <div class="dp-two-col">
+                <div class="dp-section">
+                  <h4 class="dp-section-title">
+                    <mat-icon>checklist</mat-icon>
+                    Onboarding Progress
+                    <span class="onboard-pct">{{ onboardingPercent }}%</span>
+                  </h4>
+                  <div class="onboard-steps">
+                    @for (step of getOnboardingSteps(staff); track step.label) {
+                      <div class="ob-step" [class.ob-step--done]="step.done">
+                        <div class="ob-icon">
+                          @if (step.done) {
+                            <mat-icon>check_circle</mat-icon>
+                          } @else {
+                            <mat-icon>radio_button_unchecked</mat-icon>
+                          }
+                        </div>
+                        <div class="ob-info">
+                          <span class="ob-label">{{ step.label }}</span>
+                          @if (step.date) { <span class="ob-date">{{ step.date }}</span> }
+                          @if (step.sub)  { <span class="ob-sub">{{ step.sub }}</span> }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <div class="dp-section">
+                  <h4 class="dp-section-title">
+                    <mat-icon>admin_panel_settings</mat-icon> Quick Admin Actions
+                  </h4>
+                  <div class="admin-actions">
+                    <button class="admin-action-btn admin-action-btn--blue">
+                      <div class="aab-icon"><mat-icon>lock_reset</mat-icon></div>
+                      <div class="aab-text">
+                        <span class="aab-lbl">Force Password Reset</span>
+                        <span class="aab-sub">Send email link instantly</span>
+                      </div>
+                    </button>
+                    <button class="admin-action-btn admin-action-btn--orange">
+                      <div class="aab-icon"><mat-icon>block</mat-icon></div>
+                      <div class="aab-text">
+                        <span class="aab-lbl">Suspend Access</span>
+                        <span class="aab-sub">Temporarily disable login</span>
+                      </div>
+                    </button>
+                    @if (!staff.raw.approvedByHospitalAdmin) {
+                      <button class="admin-action-btn admin-action-btn--green"
+                        (click)="approveStaff(staff, $event)">
+                        <div class="aab-icon"><mat-icon>verified_user</mat-icon></div>
+                        <div class="aab-text">
+                          <span class="aab-lbl">Approve Staff</span>
+                          <span class="aab-sub">Grant hospital access</span>
+                        </div>
+                      </button>
+                    }
+                    <button class="admin-action-btn admin-action-btn--red"
+                      (click)="deleteStaff(staff, $event)">
+                      <div class="aab-icon"><mat-icon>person_remove</mat-icon></div>
+                      <div class="aab-text">
+                        <span class="aab-lbl">Remove Staff</span>
+                        <span class="aab-sub">Permanently remove from system</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          }
+
+          <!-- ── Security tab ─────────────────────────────────────────── -->
+          @if (activeDetailTab() === 'security') {
+            <div class="dp-body">
+              <div class="dp-section">
+                <div class="security-user-row">
+                  <div class="sec-avatar" [style.background]="staff.avatarColor">{{ staff.initials }}</div>
+                  <div>
+                    <p class="sec-name">{{ staff.name }}</p>
+                    <p class="sec-email">{{ staff.raw.email }}</p>
+                    <p class="sec-uid">User ID: UID-99{{ staff.id }}</p>
+                  </div>
+                  <button class="sec-audit-btn">View Audit Log ↗</button>
+                </div>
+              </div>
+
+              <div class="dp-section">
+                  <div class="sec-fields">
+                  <div class="sec-field">
+                    <label for="sec-username">Username</label>
+                    <div class="sec-input-wrap">
+                      <input id="sec-username" type="text" [value]="staff.username" readonly class="sec-input" />
+                    </div>
+                  </div>
+                  <div class="sec-field">
+                    <label for="sec-password">Password</label>
+                    <div class="sec-input-wrap">
+                      <input id="sec-password" type="password" value="••••••••••" readonly class="sec-input" />
+                    </div>
+                  </div>
+                  <div class="sec-field sec-field--row">
+                    <div>
+                      <label for="sec-2fa">Two-Factor Auth</label>
+                      <p class="sec-field-sub">Secure via Authenticator App</p>
+                    </div>
+                    <label for="sec-2fa" class="dp-toggle-switch" aria-label="2FA toggle">
+                      <input id="sec-2fa" type="checkbox" [checked]="staff.twoFaEnabled" />
+                      <span class="dp-toggle-track">
+                        <span class="dp-toggle-thumb"></span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="dp-section">
+                <h4 class="dp-section-title"><mat-icon>history</mat-icon> Recent Login Activity</h4>
+                <div class="login-list">
+                  @for (ev of staff.loginActivity; track ev.ip) {
+                    <div class="login-event" [class.login-event--failed]="ev.type === 'failed'">
+                      <mat-icon class="le-icon">{{ ev.type === 'success' ? 'check_circle' : 'cancel' }}</mat-icon>
+                      <div class="le-info">
+                        <span class="le-device">{{ ev.type === 'success' ? 'Success' : 'Failed Attempt' }} — {{ ev.device }}</span>
+                        <span class="le-time">{{ ev.time }} &nbsp;•&nbsp; {{ ev.ip }}</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- ── Documents tab ────────────────────────────────────────── -->
+          @if (activeDetailTab() === 'documents') {
+            <div class="dp-body">
+              <div class="dp-section">
+                <div class="doc-header">
+                  <div>
+                    <h4 class="dp-section-title"><mat-icon>folder_open</mat-icon> Document Verification</h4>
+                    <p class="doc-sub">Review and approve uploaded files</p>
+                  </div>
+                  <button class="doc-upload-btn">
+                    <mat-icon>upload</mat-icon> Upload
+                  </button>
+                </div>
+
+                <div class="doc-list">
+                  @for (doc of staff.documents; track doc.filename) {
+                    <div class="doc-item" [class.doc-item--active]="$first" tabindex="0" (keydown.enter)="$event.preventDefault()">
+                      <mat-icon class="doc-ico">description</mat-icon>
+                      <div class="doc-info">
+                        <span class="doc-name">{{ doc.name }}</span>
+                        <span class="doc-file">{{ doc.filename }}</span>
+                        <span class="doc-date">{{ doc.date }}</span>
+                      </div>
+                      <span class="doc-status doc-status--{{ doc.status }}">
+                        @if (doc.status === 'verified') { <mat-icon>check_circle</mat-icon> }
+                        @else if (doc.status === 'pending') { <mat-icon>schedule</mat-icon> }
+                        @else { <mat-icon>cancel</mat-icon> }
+                        {{ doc.status | titlecase }}
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Preview placeholder -->
+              <div class="dp-section doc-preview-wrap">
+                <div class="doc-preview">
+                  <div class="doc-preview-head">
+                    <div class="doc-preview-title">Medical Board License</div>
+                    <div class="doc-preview-num">License No. ND-998822</div>
+                  </div>
+                  <div class="doc-preview-body">
+                    <div class="doc-preview-img-placeholder"></div>
+                    <div class="doc-preview-lines">
+                      <div class="dpl"></div>
+                      <div class="dpl dpl--sm"></div>
+                      <div class="dpl"></div>
+                      <div class="dpl dpl--sm"></div>
+                    </div>
+                  </div>
+                  <div class="doc-preview-actions">
+                    <button class="doc-act-btn"><mat-icon>download</mat-icon> Download</button>
+                    <button class="doc-act-btn"><mat-icon>open_in_new</mat-icon> Expand</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+        </div>
+      }
+
+    </div><!-- /content-area -->
+
+    <!-- ── Add Staff Side Panel ─────────────────────────────────────────── -->
+    @if (showAddPanel()) {
+      <div class="overlay" (click)="showAddPanel.set(false)"></div>
+      <div class="side-panel">
+        <div class="sp-header">
+          <h3><mat-icon>person_add</mat-icon> Add Staff Member</h3>
+          <button class="sp-close" (click)="showAddPanel.set(false)"><mat-icon>close</mat-icon></button>
+        </div>
+        <form class="sp-form" [formGroup]="addForm" (ngSubmit)="addStaff()">
+          <div class="form-row">
+            <div class="form-field">
+              <label for="add-first">First Name <span class="req">*</span></label>
+              <input id="add-first" type="text" formControlName="firstName" placeholder="First name" />
+              @if (hasError(addForm, 'firstName', 'required')) { <span class="field-error">Required</span> }
+            </div>
+            <div class="form-field">
+              <label for="add-last">Last Name <span class="req">*</span></label>
+              <input id="add-last" type="text" formControlName="lastName" placeholder="Last name" />
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="add-email">Email <span class="req">*</span></label>
+            <input id="add-email" type="email" formControlName="email" placeholder="staff@hospital.com" />
+            @if (hasError(addForm, 'email', 'required')) { <span class="field-error">Email required</span> }
+            @if (hasError(addForm, 'email', 'email')) { <span class="field-error">Invalid email</span> }
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="add-contact">Contact</label>
+              <input id="add-contact" type="tel" formControlName="contactNumber" placeholder="+91 99999 00000" />
+            </div>
+            <div class="form-field">
+              <label for="add-exp">Experience (yrs)</label>
+              <input id="add-exp" type="number" formControlName="experienceYears" placeholder="0" min="0" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="add-dept">Department</label>
+              <select id="add-dept" formControlName="departmentId">
+                <option [ngValue]="null">Select…</option>
+                @for (dept of departments; track dept.departmentId) {
+                  <option [ngValue]="dept.departmentId">{{ dept.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="add-shift">Shift</label>
+              <select id="add-shift" formControlName="shiftPattern">
+                <option value="">Select…</option>
+                @for (s of shiftPatterns; track s) { <option [value]="s">{{ s }}</option> }
+              </select>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="add-spec">Specialization</label>
+            <input id="add-spec" type="text" formControlName="specialization" placeholder="e.g. ICU Nursing" />
+          </div>
+          <div class="form-field">
+            <label>Roles</label>
+            <div class="chip-grid">
+              @for (role of defaultRoles; track role) {
+                <div class="role-chip" [class.role-chip--on]="addForm.get('roles')?.value?.includes(role)"
+                  (click)="toggleRole(addForm, role)">{{ role }}</div>
+              }
+            </div>
+          </div>
+          <div class="sp-actions">
+            <button type="button" class="btn-outline-sm" (click)="showAddPanel.set(false)">Cancel</button>
+            <button type="submit" class="btn-primary-sm" [disabled]="isLoading()">
+              <mat-icon>save</mat-icon> Save Staff
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+
+    <!-- ── Invite Staff Side Panel ──────────────────────────────────────── -->
+    @if (showInvitePanel()) {
+      <div class="overlay" (click)="showInvitePanel.set(false)"></div>
+      <div class="side-panel">
+        <div class="sp-header">
+          <h3><mat-icon>mail</mat-icon> Invite Staff Member</h3>
+          <button class="sp-close" (click)="showInvitePanel.set(false)"><mat-icon>close</mat-icon></button>
+        </div>
+        <form class="sp-form" [formGroup]="inviteForm" (ngSubmit)="sendInvite()">
+          <div class="form-row">
+            <div class="form-field">
+              <label for="inv-first">First Name <span class="req">*</span></label>
+              <input id="inv-first" type="text" formControlName="firstName" placeholder="First name" />
+              @if (hasError(inviteForm, 'firstName', 'required')) { <span class="field-error">Required</span> }
+            </div>
+            <div class="form-field">
+              <label for="inv-last">Last Name <span class="req">*</span></label>
+              <input id="inv-last" type="text" formControlName="lastName" placeholder="Last name" />
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="inv-email">Email <span class="req">*</span></label>
+            <input id="inv-email" type="email" formControlName="email" placeholder="staff@hospital.com" />
+            @if (hasError(inviteForm, 'email', 'required')) { <span class="field-error">Email required</span> }
+            @if (hasError(inviteForm, 'email', 'email')) { <span class="field-error">Invalid email</span> }
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="inv-contact">Contact</label>
+              <input id="inv-contact" type="tel" formControlName="contactNumber" placeholder="+91 99999 00000" />
+            </div>
+            <div class="form-field">
+              <label for="inv-spec">Specialization</label>
+              <input id="inv-spec" type="text" formControlName="specialization" placeholder="e.g. Cardiology" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="inv-dept">Department</label>
+              <select id="inv-dept" formControlName="departmentId">
+                <option [ngValue]="null">Select…</option>
+                @for (dept of departments; track dept.departmentId) {
+                  <option [ngValue]="dept.departmentId">{{ dept.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="inv-shift">Shift</label>
+              <select id="inv-shift" formControlName="shiftPattern">
+                <option value="">Select…</option>
+                @for (s of shiftPatterns; track s) { <option [value]="s">{{ s }}</option> }
+              </select>
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Roles</label>
+            <div class="chip-grid">
+              @for (role of defaultRoles; track role) {
+                <div class="role-chip" [class.role-chip--on]="inviteForm.get('roles')?.value?.includes(role)"
+                  (click)="toggleRole(inviteForm, role)">{{ role }}</div>
+              }
+            </div>
+          </div>
+          <div class="sp-actions">
+            <button type="button" class="btn-outline-sm" (click)="showInvitePanel.set(false)">Cancel</button>
+            <button type="submit" class="btn-primary-sm" [disabled]="isLoading()">
+              <mat-icon>send</mat-icon> Send Invitation
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+
+  </div><!-- /staff-page -->
+</app-page>

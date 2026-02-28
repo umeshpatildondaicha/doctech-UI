@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from '@lk/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class WardService {
-  private baseUrl = 'https://doctech.solutions/api/wards';
+  private baseUrl = `${environment.apiUrl}/api/wards`;
 
   constructor(private http: HttpService) {}
 

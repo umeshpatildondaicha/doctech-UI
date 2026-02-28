@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { RegisterComponent } from './pages/register/register.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { AppointmentComponent } from './pages/appointment/appointment.component';
 import { DoctorComponent } from './pages/doctor/doctor.component';
@@ -38,10 +39,12 @@ import { AuthGuard, LoginGuard } from "@lk/core";
 
 import { BaseConfigurationComponent } from './pages/admin/base-configuration/base-configuration.component';
 import { HospitalComponent } from './pages/admin/hospital/hospital.component';
+import { StaffManagementComponent } from './pages/admin/staff/staff-management.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
-  
+  { path: 'register', component: RegisterComponent },
+
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
   { path: 'appointment', component: AppointmentComponent, canActivate: [AuthGuard] },
@@ -77,6 +80,7 @@ export const routes: Routes = [
   { path: 'admin/doctors', component: DoctorsComponent, canActivate: [AuthGuard] },
   { path: 'admin/doctors/test', component: DoctorCreateTestComponent, canActivate: [AuthGuard] },
   { path: 'admin/roles', component: RolesComponent, canActivate: [AuthGuard] },
+  { path: 'admin/staff', component: StaffManagementComponent, canActivate: [AuthGuard], data: { breadcrumb: 'Staff Management', breadcrumbIcon: 'groups' } },
   { path: 'admin/plans', component: PlansComponent, canActivate: [AuthGuard] },
 
   { path: 'admin/billing', component: AdminBillingComponent, canActivate: [AuthGuard], data: { breadcrumb: 'Billing', breadcrumbIcon: 'credit_card' } },

@@ -47,6 +47,36 @@ export const environment = {
       count: '/base/util/rest/BaseConfiguration/count',
       getByTag: '/base/util/rest/BaseConfiguration/getBaseConfigByTag',
       getByKeyTypeApp: '/base/util/rest/BaseConfiguration/key-type-app'
+    },
+    hospitals: {
+      base: '/api/hospitals',
+      register: '/api/hospitals'
+    },
+    staff: {
+      base: '/api/staff',
+      invite: '/api/staff/invite',
+      acceptInvite: '/api/staff/accept-invite',
+      active: '/api/staff/active',
+      available: '/api/staff/available',
+      byDepartment: (deptId: number) => `/api/staff/by-department/${deptId}`,
+      approve: (id: number) => `/api/staff/${id}/approve`,
+      availability: (id: number) => `/api/staff/${id}/availability`
+    },
+    roles: {
+      base: '/api/roles',
+      byId: (id: string) => `/api/roles/${id}`,
+      permissions: (roleId: string) => `/api/roles/${roleId}/permissions`,
+      grantPermission: (roleId: string, featureId: string) => `/api/roles/${roleId}/permissions/grant/${featureId}`,
+      revokePermission: (roleId: string, permId: string) => `/api/roles/${roleId}/permissions/revoke/${permId}`
+    },
+    departments: {
+      base: '/api/departments',
+      byId: (id: number) => `/api/departments/${id}`,
+      staff: (deptId: number) => `/api/departments/${deptId}/staff`
+    },
+    catalog: {
+      features: '/api/catalog/features',
+      services: '/api/catalog/services'
     }
   },
   

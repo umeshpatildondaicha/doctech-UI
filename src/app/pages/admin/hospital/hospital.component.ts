@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, OnInit, ViewChild, computed, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, OnDestroy, ViewChild, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,6 +10,10 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BreadcrumbItem, PageComponent, DialogboxService } from '@lk/core';
+import { Subject, takeUntil, forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { DepartmentService } from '../../../services/department.service';
+import { StaffService } from '../../../services/staff.service';
 
 type NodeId = string;
 type EdgeId = string;
@@ -87,7 +91,7 @@ interface DragState {
   templateUrl: './hospital.component.html',
   styleUrl: './hospital.component.scss',
 })
-export class HospitalComponent implements OnInit {
+export class HospitalComponent implements OnInit, OnDestroy {
   @ViewChild('canvasEl', { static: true }) canvasRef!: ElementRef<HTMLElement>;
 
   breadcrumb: BreadcrumbItem[] = [
@@ -1034,6 +1038,35 @@ export class HospitalComponent implements OnInit {
       this.recomputeLayout();
     }
     this.save();
+    this.loadApiData();
+  }
+
+  private loadApiData(): void {
+    forkJoin({
+      departments: this.departmentService.getDepartments().pipe(catchError(() => of([]))),
+      staff: this.staffService.getStaff().pipe(catchError(() => of({ staffDetails: [] })))
+    }).pipe(takeUntil(this.destroy$))
+      .subscribe(({ departments, staff }) => {
+        if (departments.length > 0) {
+          const mapped = departments.map((d, i) => ({
+            id: `dep${d.departmentId ?? i}`,
+            name: d.name,
+            code: `DEPT-${(d.name ?? '').substring(0, 3).toUpperCase()}-${(d.departmentId ?? i).toString().padStart(2, '0')}`,
+            headName: '',
+            active: d.active !== false
+          } as Department));
+          this.departments.set(mapped);
+        }
+        const staffList = (staff as { staffDetails?: any[] }).staffDetails ?? [];
+        if (staffList.length > 0) {
+          const mapped = staffList.map((s: any) => ({
+            id: `s${s.staffId ?? Math.random()}`,
+            name: `${s.firstName ?? ''} ${s.lastName ?? ''}`.trim(),
+            role: (s.roles ?? []).join(', ') || s.specialization || 'Staff'
+          } as StaffMember));
+          this.staff.set(mapped);
+        }
+      });
   }
 
   // ── Private helpers ───────────────────────────────────────────────────────────
@@ -1057,5 +1090,16 @@ export class HospitalComponent implements OnInit {
     return count;
   }
 
-  constructor(private readonly dialogService: DialogboxService) {}
+  private readonly destroy$ = new Subject<void>();
+
+  constructor(
+    private readonly dialogService: DialogboxService,
+    private readonly departmentService: DepartmentService,
+    private readonly staffService: StaffService,
+  ) {}
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }

@@ -3,9 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { PageComponent, BreadcrumbItem, DialogboxService } from '@lk/core';
+import { PageComponent, BreadcrumbItem } from '@lk/core';
 
-export type ActiveTab = 'catalog' | 'subscriptions' | 'offers';
 export type BillingCycle = 'monthly' | 'yearly';
 
 export interface ServiceFeature {
@@ -37,20 +36,6 @@ export interface HospitalService {
   totalDoctors: number;
 }
 
-export interface SpecialOffer {
-  id: number;
-  title: string;
-  description: string;
-  discount: string;
-  code: string;
-  validUntil: string;
-  daysLeft: number;
-  color: string;
-  gradient: string;
-  icon: string;
-  applicableServices: string[];
-}
-
 @Component({
   selector: 'app-plans',
   imports: [CommonModule, FormsModule, MatIconModule, MatTooltipModule, PageComponent],
@@ -59,13 +44,10 @@ export interface SpecialOffer {
 })
 export class PlansComponent {
   breadcrumb: BreadcrumbItem[] = [
-    { label: 'Plans & Offers', route: '/admin/plans', icon: 'payments', isActive: true }
+    { label: 'Plans', route: '/admin/plans', icon: 'payments', isActive: true }
   ];
 
-  activeTab = signal<ActiveTab>('catalog');
   billingCycle = signal<BillingCycle>('monthly');
-  expandedServiceId = signal<number | null>(null);
-  copiedCode = signal<string | null>(null);
 
   services: HospitalService[] = [
     {
@@ -306,61 +288,6 @@ export class PlansComponent {
     }
   ];
 
-  offers: SpecialOffer[] = [
-    {
-      id: 1,
-      title: 'Annual Subscription Deal',
-      description: 'Subscribe to any service on an annual plan and save up to 17% compared to monthly billing.',
-      discount: '17% OFF',
-      code: 'ANNUAL17',
-      validUntil: '2026-12-31',
-      daysLeft: 313,
-      color: '#2563eb',
-      gradient: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-      icon: 'calendar_month',
-      applicableServices: ['Basic Service', 'Physiotherapy', 'Nutrition Service', 'Mental Wellness']
-    },
-    {
-      id: 2,
-      title: 'Bundle: Physio + Nutrition',
-      description: 'Subscribe to Physiotherapy and Nutrition together and get ₹2,000 off every month.',
-      discount: '₹2,000 OFF',
-      code: 'PHYSIONUT',
-      validUntil: '2026-06-30',
-      daysLeft: 129,
-      color: '#059669',
-      gradient: 'linear-gradient(135deg, #10b981, #047857)',
-      icon: 'local_offer',
-      applicableServices: ['Physiotherapy', 'Nutrition Service']
-    },
-    {
-      id: 3,
-      title: '30-Day Free Trial',
-      description: 'Try Mental Wellness or Nutrition Service absolutely free for 30 days. No payment required.',
-      discount: '30 Days Free',
-      code: 'TRIAL30',
-      validUntil: '2026-04-30',
-      daysLeft: 68,
-      color: '#7c3aed',
-      gradient: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
-      icon: 'star',
-      applicableServices: ['Mental Wellness', 'Nutrition Service']
-    },
-    {
-      id: 4,
-      title: 'All-In-One Hospital Package',
-      description: 'Subscribe to all 4 services together and get the Basic Service at ₹0 for the entire first year.',
-      discount: 'Basic Free',
-      code: 'ALLINCL',
-      validUntil: '2026-03-31',
-      daysLeft: 38,
-      color: '#d97706',
-      gradient: 'linear-gradient(135deg, #f59e0b, #b45309)',
-      icon: 'diamond',
-      applicableServices: ['Basic Service', 'Physiotherapy', 'Nutrition Service', 'Mental Wellness']
-    }
-  ];
-
   purchasedServices = computed(() => this.services.filter(s => s.status === 'purchased'));
 
   totalActiveFeatures = computed(() =>
@@ -375,12 +302,7 @@ export class PlansComponent {
     this.purchasedServices().reduce((sum, s) => sum + s.monthlyPrice, 0)
   );
 
-  constructor(private readonly dialogService: DialogboxService) {}
-
-  setTab(tab: ActiveTab): void {
-    this.activeTab.set(tab);
-    this.expandedServiceId.set(null);
-  }
+  constructor() {}
 
   getPrice(service: HospitalService): number {
     return this.billingCycle() === 'monthly' ? service.monthlyPrice : service.yearlyPrice;
@@ -390,59 +312,9 @@ export class PlansComponent {
     return (service.monthlyPrice * 12) - service.yearlyPrice;
   }
 
-  getEnabledCount(service: HospitalService): number {
-    return service.features.filter(f => f.isEnabled).length;
-  }
-
   subscribeToService(service: HospitalService): void {
     service.status = 'purchased';
     service.purchasedOn = new Date().toISOString().split('T')[0];
     service.features.forEach(f => (f.isEnabled = true));
-    this.activeTab.set('subscriptions');
-  }
-
-  unsubscribeFromService(service: HospitalService): void {
-    const dialogRef = this.dialogService.openConfirmationDialog({
-      title: 'Unsubscribe from Service',
-      message: `Are you sure you want to unsubscribe from "${service.name}"? All doctor feature assignments will be removed.`,
-      confirmText: 'Unsubscribe',
-      cancelText: 'Cancel',
-      icon: 'cancel',
-      showConfirm: true,
-      showCancel: true
-    });
-    dialogRef.afterClosed().subscribe((result: unknown) => {
-      const confirmed =
-        result === 'confirm' || (result as { action?: string })?.action === 'confirm' || result === true;
-      if (confirmed) {
-        service.status = 'available';
-        service.purchasedOn = undefined;
-        service.totalDoctors = 0;
-        service.features.forEach(f => {
-          f.isEnabled = false;
-          f.assignedDoctors = 0;
-        });
-      }
-    });
-  }
-
-  toggleFeature(feature: ServiceFeature): void {
-    feature.isEnabled = !feature.isEnabled;
-    if (!feature.isEnabled) feature.assignedDoctors = 0;
-  }
-
-  toggleExpand(serviceId: number): void {
-    this.expandedServiceId.set(this.expandedServiceId() === serviceId ? null : serviceId);
-  }
-
-  isExpanded(serviceId: number): boolean {
-    return this.expandedServiceId() === serviceId;
-  }
-
-  copyCode(code: string): void {
-    navigator.clipboard.writeText(code).then(() => {
-      this.copiedCode.set(code);
-      setTimeout(() => this.copiedCode.set(null), 2000);
-    });
   }
 }

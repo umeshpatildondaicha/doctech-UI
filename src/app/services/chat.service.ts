@@ -206,14 +206,19 @@ export class ChatService {
       }
       return;
     }
+    // Backend chat INIT requires a valid UUID (doctor's publicId). Prefer publicId from login response.
     const user = this.auth.getCurrentUser() as { publicId?: string; id?: string | number } | null;
-    const userPublicId =
-      (user?.publicId ?? user?.id ?? this.auth.getDoctorRegistrationNumber() ?? '').toString().trim();
-    if (!userPublicId) {
+    const rawId = (user?.publicId ?? user?.id ?? '').toString().trim();
+    const userPublicId = rawId || (this.auth.getDoctorRegistrationNumber() ?? '').toString().trim();
+    const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(userPublicId);
+    if (!userPublicId || !isUuid) {
       if (typeof ngDevMode !== 'undefined' && ngDevMode) {
-        console.warn('[Chat] WebSocket skipped: missing userPublicId');
+        console.warn('[Chat] WebSocket skipped: userPublicId must be a UUID (doctor publicId from login). Got:', userPublicId ? 'non-UUID' : 'empty');
       }
       return;
+    }
+    if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+      console.log('[Chat] Connecting WebSocket for appointment', session.appointmentPublicId, 'userPublicId', userPublicId);
     }
     this.chatApi.connectWebSocket({
       appointmentPublicId: session.appointmentPublicId,

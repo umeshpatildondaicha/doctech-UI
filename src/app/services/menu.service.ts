@@ -115,6 +115,13 @@ export class MenuService {
       section: 'management',
       userTypes: ['admin']
     },
+    {
+      label: 'Staff Management',
+      icon: 'groups',
+      route: '/admin/staff',
+      section: 'management',
+      userTypes: ['admin']
+    },
     { 
       label: 'Role Management', 
       icon: 'security', 
@@ -123,7 +130,7 @@ export class MenuService {
       userTypes: ['admin']
     },
     { 
-      label: 'Plans & Offers', 
+      label: 'Plans', 
       icon: 'card_giftcard', 
       route: '/admin/plans', 
       section: 'administration',

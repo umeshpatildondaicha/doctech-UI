@@ -6,32 +6,23 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-import { AppButtonComponent, AuthService, LoginRequest, SnackbarService, UserType } from "@lk/core";
+import { AuthService, LoginRequest, UserType } from "@lk/core";
 import { environment } from '../../../environments/environment';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { LottieComponent } from 'ngx-lottie';
-// 'ngx-lottie' may be missing; ensure this package and its types are installed if you use it:
 
 /**
  * Component responsible for user authentication
  */
 @Component({
-  selector: 'app-login',
-  imports: [
+    selector: 'app-login',
+    imports: [
     ReactiveFormsModule,
     MatIconModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatProgressSpinnerModule,
-    AppButtonComponent,
-    LottieComponent
+    RouterLink,
 ],
     templateUrl: './login.component.html',
     styleUrl: './login.component.scss',
@@ -52,7 +43,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   public statStaff = '0';
   public currentTime = '';
   private clockInterval: ReturnType<typeof setInterval> | null = null;
-
 
   // User type options
   public readonly userTypes = [
@@ -79,8 +69,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly authService: AuthService,
     private readonly router: Router,
     private readonly snackBar: MatSnackBar,
-    private readonly cdr: ChangeDetectorRef,
-    private readonly snackbarservice :SnackbarService
+    private readonly cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -145,7 +134,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       console.log('Auth state changed:', state);
       this.isLoading = state.isLoading;
       this.errorMessage = state.error || '';
-
+      
       if (state.isAuthenticated && state.currentUser) {
         console.log('User authenticated, redirecting...');
         this.showSuccessMessage(`Welcome back, ${state.currentUser.user.fullName}!`);
@@ -202,7 +191,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.loginAttempts >= this.maxLoginAttempts) {
       this.showErrorMessage('Account temporarily locked due to multiple failed attempts.');
       this.loginForm.disable();
-
+      
       // Re-enable form after lockout duration
       setTimeout(() => {
         this.loginAttempts = 0;
@@ -219,7 +208,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   public fillDemoCredentials(): void {
     const selectedUserType = this.loginForm.get('userType')?.value;
     const credentials = this.demoCredentials[selectedUserType as string];
-
+    
     if (credentials) {
       this.loginForm.patchValue({
         email: credentials.email,
@@ -285,7 +274,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   public getErrorMessage(controlName: string): string {
     const control = this.getFormControl(controlName);
-
+    
     if (!control?.errors) {
       return '';
     }
@@ -293,15 +282,15 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     if (control.errors['required']) {
       return 'This field is required';
     }
-
+    
     if (control.errors['email']) {
       return 'Please enter a valid email address';
     }
-
+    
     if (control.errors['minlength']) {
       return `Minimum length is ${control.errors['minlength'].requiredLength} characters`;
     }
-
+    
     if (control.errors['maxlength']) {
       return `Maximum length is ${control.errors['maxlength'].requiredLength} characters`;
     }
@@ -332,34 +321,26 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   /**
    * Show success message
    */
-  // private showSuccessMessage(message: string): void {
-  //   this.successMessage = message;
-  //   this.snackBar.open(message, 'Close', {
-  //     duration: 3000,
-  //     horizontalPosition: 'center',
-  //     verticalPosition: 'bottom',
-  //     panelClass: ['success-snackbar']
-  //   });
-  // }
   private showSuccessMessage(message: string): void {
-    this.snackbarservice.success("Login Successfully",{
-      duration:4000,
-      horizontalPosition:'center',
-      verticalPosition:'bottom',
-      panelClass:['success-snackbar'],
+    this.successMessage = message;
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: ['success-snackbar']
     });
   }
- 
+
   /**
    * Show error message
    */
   private showErrorMessage(message: string): void {
     this.errorMessage = message;
-    this.snackbarservice.error("Login Failed",{
-      duration:4000,
-      horizontalPosition:'center',
-      verticalPosition:'bottom',
-      panelClass:['error-snackbar'],
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: ['error-snackbar']
     });
   }
 

@@ -276,9 +276,10 @@ export class AuthService {
       } else if (response.user) {
         user = response.user;
       } else {
-        // Construct user from root level data
+        // Construct user from root level data (include publicId for chat WebSocket INIT)
         user = {
           id: data.userId || data.id || response.userId || response.id || '1',
+          publicId: data.publicId ?? data.userId ?? response.publicId ?? response.userId,
           email: data.email || response.email || '',
           fullName: data.fullName || data.name || data.displayName || response.fullName || response.name || 'User',
           userType: data.userType || data.user_type || response.userType || 'HOSPITAL',
@@ -289,7 +290,7 @@ export class AuthService {
           createdAt: data.createdAt || data.created_at || response.createdAt || new Date().toISOString(),
           lastLoginAt: data.lastLoginAt || data.last_login_at || response.lastLoginAt || new Date().toISOString(),
           status: (data.status || data.active || response.status || response.active) ? 'ACTIVE' : 'INACTIVE'
-        };
+        } as UserInfo & { publicId?: string };
       }
 
       // Validate required user fields

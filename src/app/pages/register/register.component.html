@@ -1,0 +1,302 @@
+<div class="register-wrapper">
+  <!-- Left Branding Panel -->
+  <div class="register-brand">
+    <div class="brand-content">
+      <div class="brand-logo">
+        <mat-icon>local_hospital</mat-icon>
+      </div>
+      <h1>DocTech SaaS</h1>
+      <p class="brand-subtitle">Hospital Management Platform</p>
+      <div class="brand-features">
+        <div class="feature-item">
+          <mat-icon>check_circle</mat-icon>
+          <span>Multi-tenant hospital management</span>
+        </div>
+        <div class="feature-item">
+          <mat-icon>check_circle</mat-icon>
+          <span>Staff & doctor management</span>
+        </div>
+        <div class="feature-item">
+          <mat-icon>check_circle</mat-icon>
+          <span>Patient records & appointments</span>
+        </div>
+        <div class="feature-item">
+          <mat-icon>check_circle</mat-icon>
+          <span>Billing & prescriptions</span>
+        </div>
+        <div class="feature-item">
+          <mat-icon>check_circle</mat-icon>
+          <span>Real-time analytics</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Form Panel -->
+  <div class="register-form-panel">
+    <div class="register-container">
+
+      <!-- Step Progress -->
+      <div class="step-progress" *ngIf="!isSubmitted">
+        <div class="step-bar">
+          @for (s of [1,2,3]; track s) {
+            <div class="step-item" [class.active]="currentStep >= s" [class.current]="currentStep === s">
+              <div class="step-circle">{{ s }}</div>
+              <div class="step-label">{{ getStepLabel(s) }}</div>
+            </div>
+            @if (s < 3) {
+              <div class="step-connector" [class.active]="currentStep > s"></div>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- Error Banner -->
+      @if (errorMessage) {
+        <div class="error-banner">
+          <mat-icon>error</mat-icon>
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+
+      <!-- Step 1: Basic Info -->
+      @if (currentStep === 1) {
+        <div class="form-step">
+          <div class="step-header">
+            <h2>Basic Information</h2>
+            <p>Tell us about your hospital</p>
+          </div>
+          <form [formGroup]="step1Form" class="reg-form">
+            <div class="form-field">
+              <label>Hospital Name <span class="required">*</span></label>
+              <input type="text" formControlName="name" placeholder="e.g. Shree City Hospital" />
+              @if (hasError(step1Form, 'name', 'required')) {
+                <span class="field-error">Hospital name is required</span>
+              }
+              @if (hasError(step1Form, 'name', 'minlength')) {
+                <span class="field-error">Name must be at least 3 characters</span>
+              }
+            </div>
+
+            <div class="form-field">
+              <label>Registration Number <span class="required">*</span></label>
+              <input type="text" formControlName="registrationNumber" placeholder="e.g. MH/HOS/2024/001" />
+              @if (hasError(step1Form, 'registrationNumber', 'required')) {
+                <span class="field-error">Registration number is required</span>
+              }
+            </div>
+
+            <div class="form-field">
+              <label>Hospital Type <span class="required">*</span></label>
+              <select formControlName="hospitalType">
+                <option value="">Select type...</option>
+                @for (type of hospitalTypes; track type) {
+                  <option [value]="type">{{ type }}</option>
+                }
+              </select>
+              @if (hasError(step1Form, 'hospitalType', 'required')) {
+                <span class="field-error">Please select a hospital type</span>
+              }
+            </div>
+
+            <div class="form-field">
+              <label>Description</label>
+              <textarea formControlName="hospitalDescription" rows="3"
+                placeholder="Briefly describe your hospital..."></textarea>
+            </div>
+
+            <div class="form-field">
+              <label>Specializations</label>
+              <div class="spec-grid">
+                @for (spec of specializationOptions; track spec) {
+                  <div class="spec-chip" [class.selected]="isSpecializationSelected(spec)"
+                    (click)="toggleSpecialization(spec)">
+                    {{ spec }}
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" routerLink="/login">
+                Already registered? Login
+              </button>
+              <button type="button" class="btn-primary" (click)="nextStep()">
+                Next <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
+      <!-- Step 2: Contact & Access -->
+      @if (currentStep === 2) {
+        <div class="form-step">
+          <div class="step-header">
+            <h2>Contact & Access</h2>
+            <p>Set up your admin account credentials</p>
+          </div>
+          <form [formGroup]="step2Form" class="reg-form">
+            <div class="form-row">
+              <div class="form-field">
+                <label>Admin Email <span class="required">*</span></label>
+                <input type="email" formControlName="email" placeholder="admin@hospital.com" />
+                @if (hasError(step2Form, 'email', 'required')) {
+                  <span class="field-error">Email is required</span>
+                }
+                @if (hasError(step2Form, 'email', 'email')) {
+                  <span class="field-error">Please enter a valid email</span>
+                }
+              </div>
+              <div class="form-field">
+                <label>Contact Number <span class="required">*</span></label>
+                <input type="tel" formControlName="contactNumber" placeholder="+91 9876543210" />
+                @if (hasError(step2Form, 'contactNumber', 'required')) {
+                  <span class="field-error">Contact number is required</span>
+                }
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label>Password <span class="required">*</span></label>
+                <input type="password" formControlName="password" placeholder="Min 8 characters" />
+                @if (hasError(step2Form, 'password', 'required')) {
+                  <span class="field-error">Password is required</span>
+                }
+                @if (hasError(step2Form, 'password', 'minlength')) {
+                  <span class="field-error">Password must be at least 8 characters</span>
+                }
+              </div>
+              <div class="form-field">
+                <label>Confirm Password <span class="required">*</span></label>
+                <input type="password" formControlName="confirmPassword" placeholder="Repeat password" />
+                @if (step2Form.hasError('passwordMismatch') && step2Form.get('confirmPassword')?.touched) {
+                  <span class="field-error">Passwords do not match</span>
+                }
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label>Hospital Website</label>
+              <input type="url" formControlName="hospitalWebsite" placeholder="https://yourhospital.com" />
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label>Latitude (optional)</label>
+                <input type="number" formControlName="latitude" placeholder="e.g. 18.5204" step="0.0001" />
+              </div>
+              <div class="form-field">
+                <label>Longitude (optional)</label>
+                <input type="number" formControlName="longitude" placeholder="e.g. 73.8567" step="0.0001" />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-outline" (click)="prevStep()">
+                <mat-icon>arrow_back</mat-icon> Back
+              </button>
+              <button type="button" class="btn-primary" (click)="nextStep()">
+                Next <mat-icon>arrow_forward</mat-icon>
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
+      <!-- Step 3: Facilities -->
+      @if (currentStep === 3) {
+        <div class="form-step">
+          <div class="step-header">
+            <h2>Facilities</h2>
+            <p>Tell us about your hospital's capacity and services</p>
+          </div>
+          <form [formGroup]="step3Form" class="reg-form">
+            <div class="form-row">
+              <div class="form-field">
+                <label>Total Beds <span class="required">*</span></label>
+                <input type="number" formControlName="totalBeds" placeholder="0" min="0" />
+                @if (hasError(step3Form, 'totalBeds', 'required')) {
+                  <span class="field-error">Total beds is required</span>
+                }
+              </div>
+            </div>
+
+            <div class="toggle-row">
+              <label>Emergency Services Available</label>
+              <label class="toggle-switch">
+                <input type="checkbox" formControlName="hasEmergencyServices" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="toggle-row">
+              <label>Telemedicine Support</label>
+              <label class="toggle-switch">
+                <input type="checkbox" formControlName="supportsTelemedicine" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label>Emergency Contact</label>
+                <input type="tel" formControlName="emergencyContactNumber" placeholder="+91 9876543210" />
+              </div>
+              <div class="form-field">
+                <label>Emergency Email</label>
+                <input type="email" formControlName="emergencyEmail" placeholder="emergency@hospital.com" />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-outline" (click)="prevStep()">
+                <mat-icon>arrow_back</mat-icon> Back
+              </button>
+              <button type="button" class="btn-primary" (click)="nextStep()" [disabled]="isLoading">
+                @if (isLoading) {
+                  <span class="spinner"></span> Registering...
+                } @else {
+                  Submit Registration <mat-icon>send</mat-icon>
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
+      <!-- Step 4: Confirmation -->
+      @if (currentStep === 4 && isSubmitted) {
+        <div class="confirmation-panel">
+          <div class="success-icon">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+          <h2>Registration Submitted!</h2>
+          <p class="confirm-msg">
+            Your hospital has been registered successfully. A super admin will review and approve your account.
+            You will receive a confirmation email once approved.
+          </p>
+          <div class="confirm-steps">
+            <div class="confirm-step">
+              <mat-icon>email</mat-icon>
+              <span>Check your email for confirmation</span>
+            </div>
+            <div class="confirm-step">
+              <mat-icon>admin_panel_settings</mat-icon>
+              <span>Await super admin approval (1-2 business days)</span>
+            </div>
+            <div class="confirm-step">
+              <mat-icon>login</mat-icon>
+              <span>Login once approved to set up your hospital</span>
+            </div>
+          </div>
+          <button class="btn-primary" (click)="goToLogin()">
+            <mat-icon>login</mat-icon> Go to Login
+          </button>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>

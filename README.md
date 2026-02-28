@@ -61,7 +61,7 @@ npm install
 ng serve
 ```
 
-4. Open your browser and navigate to `http://localhost:4200`
+4. Open your browser and navigate to `https://doctech.solutions`
 
 ### Build for Production
 
