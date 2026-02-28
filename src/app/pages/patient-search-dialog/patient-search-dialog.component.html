@@ -15,12 +15,21 @@
       @if (isLoading) {
         <div class="loading-state">
           <mat-spinner diameter="40"></mat-spinner>
-          <p>Searching patients...</p>
+          <p>Loading patients...</p>
+        </div>
+      }
+
+      <!-- Load Error -->
+      @if (!isLoading && loadError) {
+        <div class="load-error">
+          <app-icon fontIcon="error_outline" [size]="48" class="error-icon"></app-icon>
+          <h3>Could not load patients</h3>
+          <p>{{ loadError }}</p>
         </div>
       }
 
       <!-- No Results -->
-      @if (!isLoading && searchResults.length === 0) {
+      @if (!isLoading && !loadError && searchResults.length === 0) {
         <div class="no-results">
           <app-icon fontIcon="search_off" [size]="48" class="no-results-icon"></app-icon>
           <h3>No patients found</h3>
@@ -29,10 +38,10 @@
       }
 
       <!-- Results Grid -->
-      @if (!isLoading && searchResults.length > 0) {
+      @if (!isLoading && !loadError && searchResults.length > 0) {
         <div class="patients-grid-container">
           <app-grid
-            [rowData]="searchResults"
+            [apiConfig]="apiConfig"
             [columnDefs]="columnDefs"
             [gridOptions]="gridOptions"
             [showHeader]="true"
@@ -41,6 +50,12 @@
             (rowClicked)="selectPatient($event)"
             (searchChange)="onGridSearch($event)">
           </app-grid>
+        </div>
+        <div class="dialog-actions">
+          @if (selectedPatient) {
+            <h3 class="selected-hint">Selected: {{ selectedPatient.fullName || (selectedPatient.firstName + ' ' + selectedPatient.lastName) }}</h3>
+          }
+         
         </div>
       }
     </div>

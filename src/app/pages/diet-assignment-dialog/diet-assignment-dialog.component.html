@@ -277,14 +277,15 @@
         </div>
         <div class="footer-right">
           <app-button
-          [fontIcon]="'cancel'"
+          [text]="'cancel'"
           title="Cancel"
           (btnClick)="onCancel()"
-          [appearance]="'stroked'"
+          [appearance]="'flat'"
           ></app-button>
         
           <app-button
-          class="confirm-btn"
+          
+          [appearance]="'flat'"
           [text]="'Assign Diet'"
           [color]="'primary'"
           [disabled]="

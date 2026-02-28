@@ -3,6 +3,27 @@
   font-family: var(--primary-font-family);
 }
 
+// Add staff button in grid toolbar
+.add-staff-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  color: #6b7280;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: #f9fafb;
+    color: #374151;
+  }
+}
+
 // Page Header
 .page-header {
   display: flex;
@@ -383,6 +404,7 @@
   }
   
   .permissions-main {
+     padding: 5px;
     .permissions-content {
       .permissions-grid {
         .permission-header {
@@ -1554,6 +1576,7 @@
     
     .permissions-main {
       order: 2;
+
     }
   }
   

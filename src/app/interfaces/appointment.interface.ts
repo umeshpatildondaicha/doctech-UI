@@ -1,5 +1,5 @@
 export interface Appointment {
-  appointment_id: number;
+  appointment_id: number | string;
   patient_id: number;
   appointment_date_time: string;
   notes: string;

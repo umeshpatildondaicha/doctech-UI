@@ -114,5 +114,13 @@ export class TimingsService {
   deleteLeave(doctorId: string, leaveId: number): Observable<void> {
     return this.http.delete<void>(`${this.doctorsBaseUrl}/${doctorId}/timings/leaves/${leaveId}`);
   }
+  bookAppointment(payload: any) {
+    return this.http.post(
+      'http://doctech.solutions/api/appointments/book',
+      payload);
+  }
+  deleteAppointment(appointmentId:string):Observable<void>{
+    return this.http.delete<void>(`http://doctech.solutions/api/appointments/${appointmentId}`);
+  }
 }
 

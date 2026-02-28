@@ -8,20 +8,36 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef } from '@angular/material/dialog';
-import { AppButtonComponent } from "@lk/core";
+import { DialogRef } from '@angular/cdk/dialog';
+import { AppButtonComponent, SnackbarService } from "@lk/core";
 import { AppInputComponent } from "@lk/core";
 import { AppSelectboxComponent } from "@lk/core";
 import { IconComponent } from "@lk/core";
 import { DIALOG_DATA_TOKEN } from "@lk/core";
 import { Patient } from '../../interfaces/patient.interface';
 import { PatientService } from '../../services/patient.service';
-import { DialogRef } from '@angular/cdk/dialog';
 
 export type DialogMode = 'create' | 'edit' | 'view';
+
+/** Payload returned when form is submitted (create or edit). */
+export interface PatientFormPayload {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  gender: string;
+  contact: string;
+  email: string;
+  password: string;
+  address: string;
+  city: string;
+  bloodGroup: string;
+}
 
 export interface DialogData {
   patient?: Patient;
   mode: DialogMode;
+  /** When set, dialog calls this with payload and does not close; parent creates/updates and closes. */
+  onSubmit?: (payload: PatientFormPayload, mode: DialogMode, patientId?: number) => void;
 }
 
 @Component({
@@ -37,7 +53,7 @@ export interface DialogData {
     AppButtonComponent,
     AppInputComponent,
     AppSelectboxComponent,
-    IconComponent
+    IconComponent,
 ],
     templateUrl: './patient-create.component.html',
     styleUrl: './patient-create.component.scss'
@@ -65,14 +81,21 @@ export class PatientCreateComponent implements OnInit, OnDestroy {
     { value: 'other', label: 'Other' }
   ];
 
-  dialogRef = inject(MatDialogRef<PatientCreateComponent>);
+  /** Stable title for AppSelectbox to avoid NG0100 (null -> '' change). */
+  genderSelectTitle = 'Gender';
+  /** Stable title for AppSelectbox to avoid NG0100 (null -> '' change). */
+  bloodGroupSelectTitle = 'Blood Group';
+
+  private matDialogRef = inject(MatDialogRef<PatientCreateComponent>, { optional: true });
+  private cdkDialogRef = inject(DialogRef, { optional: true });
+  private get dialogRef(): MatDialogRef<PatientCreateComponent> | DialogRef {
+    return this.matDialogRef ?? this.cdkDialogRef!;
+  }
   data = inject<DialogData>(DIALOG_DATA_TOKEN);
 
-  constructor(
-    private fb: FormBuilder,
-    private patientService:PatientService,
-    private dialogRefs :DialogRef
-  ) {
+  constructor(private fb: FormBuilder,
+     private patientService: PatientService,
+     private snackbarservice: SnackbarService) {
     this.mode = this.data?.mode || 'create';
     this.submitButtonText = this.getsubmitButtonText();
     
@@ -80,13 +103,13 @@ export class PatientCreateComponent implements OnInit, OnDestroy {
       firstName: ['', [Validators.required, Validators.minLength(3)]],
       lastName: ['', [Validators.required, Validators.minLength(3)]],
       dateOfBirth: ['', Validators.required],
-      gender: ['FEMALE', Validators.required],     //  default backend-compatible
+      gender: ['female', Validators.required],     //  match genderOptions value; backend normalizes to FEMALE
       contact: ['', [Validators.required, Validators.minLength(10)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],         //  REQUIRED
       address: ['', [Validators.required, Validators.minLength(10)]],
       city: ['', Validators.required],              //  REQUIRED
-      bloodGroup: ['A_POSITIVE', Validators.required] //  backend enum
+      bloodGroup: ['A+', Validators.required]       //  match bloodGroups value; backend normalizes to A_POSITIVE
     });
 
     // If editing or viewing existing patient, populate form
@@ -112,57 +135,88 @@ export class PatientCreateComponent implements OnInit, OnDestroy {
 patientId!: number;
 
   ngOnInit() {
-    this.dialogRef.beforeClosed().pipe(
-      takeUntil(this.destroy$),
-      filter(result => result?.action === 'submit' || result?.action === 'cancel')
-    ).subscribe((result) => {
-  
-      if (result?.action === 'cancel') {
-        return;
-      }
-  
-      if (result?.action === 'submit') {
-  
-        if (this.isViewMode) {
-          this.dialogRef.close();
-          return;
-        }
-  
-        if (!this.patientForm.valid) {
-          this.markFormGroupTouched();
-          setTimeout(() => {
-            this.dialogRef.close(false);
-          }, 0);
-          return;
-        }
-  
-       
-        const payload = {
-          firstName: this.patientForm.value.firstName,
-          lastName: this.patientForm.value.lastName,
-          dateOfBirth: this.patientForm.value.dateOfBirth,
-          gender: this.patientForm.value.gender,      // e.g. FEMALE
-          contact: this.patientForm.value.contact,
-          email: this.patientForm.value.email,
-          password: this.patientForm.value.password,  // MUST
-          address: this.patientForm.value.address,
-          city: this.patientForm.value.city,
-          bloodGroup: this.patientForm.value.bloodGroup // e.g. A_POSITIVE
-        };
-  
-        console.log(' Dialog payload ', payload);
-  
-        setTimeout(() => {
-          this.dialogRef.close(payload);
-        }, 0);
-      }
-    });
+    this.interceptFooterActions();
+    if (this.matDialogRef?.beforeClosed) {
+      this.matDialogRef.beforeClosed().pipe(
+        takeUntil(this.destroy$),
+        filter((r: any) => r?.action === 'submit' || r?.action === 'cancel')
+      ).subscribe((result: any) => {
+        if (result?.action === 'cancel') return;
+        if (result?.action === 'submit') this.handleFooterSubmit();
+      });
+    }
     if (this.data?.mode === 'edit' && this.data.patient) {
       this.mode = 'edit';
       this.patientId = this.data.patient.patientId as number;
-
       this.patientForm.patchValue(this.data.patient as { [key: string]: any });
       this.patientForm.enable();
+    }
+  }
+
+  /**
+   * Intercept footer "Create Patient" / "Save Changes" so we validate and close with
+   * form payload instead of the dialog closing with only { action: 'submit' }.
+   */
+  private interceptFooterActions() {
+    setTimeout(() => {
+      try {
+        const container = (this.dialogRef as any)._containerInstance;
+        const overlayRef = container?._overlayRef;
+        const componentRef = overlayRef?._componentRef;
+        const dialogboxContent = componentRef?.instance;
+
+        if (dialogboxContent && typeof dialogboxContent.onFooterAction === 'function') {
+          const original = dialogboxContent.onFooterAction.bind(dialogboxContent);
+          dialogboxContent.onFooterAction = (action: any) => {
+            const actionId = action?.id || action;
+            const text = (action?.text ?? actionId ?? '').toString().trim().toLowerCase();
+
+            if (actionId === 'submit' || text.includes('create') || text.includes('save')) {
+              this.handleFooterSubmit();
+              return;
+            }
+            original(action);
+          };
+        } else {
+          const overlayPane = (overlayRef as any)?._pane as HTMLElement | undefined;
+          if (overlayPane) {
+            const handler = (e: Event) => {
+              const btn = (e.target as HTMLElement).closest('button');
+              if (!btn) return;
+              const btnText = btn.textContent?.trim().toLowerCase() ?? '';
+              if (btnText.includes('create patient') || btnText.includes('save changes')) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleFooterSubmit();
+              }
+            };
+            overlayPane.addEventListener('click', handler, true);
+            this.destroy$.subscribe(() => overlayPane.removeEventListener('click', handler, true));
+          }
+        }
+      } catch {
+        // Intercept failed; beforeClosed() in ngOnInit will still try to close with payload
+      }
+    }, 200);
+  }
+
+  private handleFooterSubmit() {
+    if (this.isViewMode) {
+      this.dialogRef.close();
+      return;
+    }
+    if (!this.patientForm.valid) {
+      this.markFormGroupTouched();
+      this.dialogRef.close(false);
+      return;
+    }
+    const payload = this.buildPayload();
+    if (this.data.onSubmit) {
+      console.log('[PatientCreate] Calling parent onSubmit', this.mode, this.patientId);
+      this.data.onSubmit(payload, this.mode, this.patientId);
+    } else {
+      console.log('[PatientCreate] No onSubmit callback, closing with payload');
+      this.dialogRef.close(payload);
     }
   }
   
@@ -173,24 +227,32 @@ patientId!: number;
   }
 
   onSubmit() {
-  
-    const payload = {
+    if (this.isViewMode) {
+      this.dialogRef.close();
+      return;
+    }
+    if (!this.patientForm.valid) {
+      this.markFormGroupTouched();
+      return;
+    }
+    this.dialogRef.close(this.buildPayload());
+    this.snackbarservice.success('Patient Created Successfully');
+  }
+
+  private buildPayload(): PatientFormPayload {
+    return {
       firstName: this.patientForm.value.firstName,
       lastName: this.patientForm.value.lastName,
       dateOfBirth: this.patientForm.value.dateOfBirth,
-      gender: this.patientForm.value.gender || 'FEMALE',
-      contact: this.patientForm.value.contact,
+      gender: this.patientForm.value.gender || 'female',
+      contact: String(this.patientForm.value.contact ?? ''),
       email: this.patientForm.value.email,
-      password: this.patientForm.value.password, // MUST
+      password: this.patientForm.value.password,
       address: this.patientForm.value.address,
       city: this.patientForm.value.city,
-      bloodGroup: this.patientForm.value.bloodGroup || 'A_POSITIVE'
+      bloodGroup: this.patientForm.value.bloodGroup || 'A+'
     };
-  
-    console.log(' Dialog payload ', payload);
-    console.log(this.patientForm.value);
 
-    this.dialogRef.close(payload);
   }
   
 

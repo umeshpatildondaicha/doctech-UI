@@ -22,7 +22,7 @@
         }
       </mat-tab-group>
       <div class="tabs-footer-action">
-        <app-button appearance="stroked" color="primary" (btnClick)="openTabConfig()">
+        <app-button appearance="flat" [text]="'Customize Tabs'" color="primary" (btnClick)="openTabConfig()">
           <app-icon fontIcon="tune" [size]="16"></app-icon>
           <span>Customize Tabs</span>
         </app-button>
@@ -737,11 +737,11 @@
           <div class="rounds-header">
             <h2>Patient Rounds</h2>
             <div class="rounds-actions">
-              <app-button appearance="stroked" color="primary" (btnClick)="addNewRound()">
+              <app-button appearance="flat" [color]="'primary'" [text]="'Add New'" (btnClick)="addNewRound()">
                 <app-icon fontIcon="add" [size]="16"></app-icon>
                 <span>Add Round</span>
               </app-button>
-              <app-button appearance="basic" color="primary" (btnClick)="scheduleRounds()">
+              <app-button appearance="flat" color="primary" [text]="'Schedule Rounds'" (btnClick)="scheduleRounds()">
                 <app-icon fontIcon="schedule" [size]="16"></app-icon>
                 <span>Schedule Rounds</span>
               </app-button>
@@ -856,7 +856,7 @@
         <div class="medicine-requests-tab">
           <div class="medicine-requests-header">
             <h2>Medicine Requests</h2>
-            <app-button appearance="stroked" color="primary" (btnClick)="addMedicineRequest()">
+            <app-button appearance="flat" [color]="'primary'" [text]="'Request Medicine'" (btnClick)="addMedicineRequest()">
               <app-icon fontIcon="add" [size]="16"></app-icon>
               <span>Request Medicine</span>
             </app-button>
@@ -934,9 +934,9 @@
         <div class="relatives-tab">
           <div class="relatives-header">
             <h2>Patient Relatives</h2>
-            <app-button appearance="stroked" color="primary" (btnClick)="addRelative()">
+            <app-button appearance="flat" [color]="'primary'" [text]="'Add Relative'" (btnClick)="addRelative()">
               <app-icon fontIcon="add" [size]="16" [color]="'var(--primary-text-color)'"></app-icon>
-              <span>Add Relative</span>
+           
             </app-button>
           </div>
           <div class="relatives-list">
@@ -945,7 +945,7 @@
                 <div class="relative-header">
                   <div class="relative-info">
                     <div class="relative-avatar" [style.background-color]="getRelativeRelationshipColor(relative.relationship)">
-                      <app-icon [fontIcon]="getRelativeRelationshipIcon(relative.relationship)" [size]="25" [color]="'var(--primary-text-color)'"></app-icon>
+                      <app-icon [fontIcon]="getRelativeRelationshipIcon(relative.relationship)" [size]="25" [color]="'var(--primary-text-color)'" ></app-icon>
                     </div>
                     <div class="relative-details">
                       <h4>{{ relative.relativeName }}</h4>
@@ -964,8 +964,8 @@
                     </div>
                   </div>
                   <div class="relative-actions">
-                    <app-button appearance="basic" color="primary" (btnClick)="contactRelative(relative)">
-                      <app-icon fontIcon="call" [size]="16"></app-icon>
+                    <app-button appearance="basic" [color]="'primary'" [text]="'Call'" (btnClick)="contactRelative(relative)">
+                      <app-icon fontIcon="call" [size]="18"></app-icon>
                       <span>Call</span>
                     </app-button>
                     @if (relative.verificationStatus !== 'VERIFIED') {
@@ -1039,8 +1039,9 @@
                 <p class="header-subtitle">Manage and track patient exercise programs</p>
               </div>
               <app-button
-                appearance="raised"
-                color="primary"
+                appearance="flat"
+                [color]="'primary'"
+                [text]="'Assign Exercise'"
                 (btnClick)="openExerciseAssignmentDialog()"
                 class="assign-exercise-btn">
                 <app-icon fontIcon="add" [size]="18" [color]="'#ffffff'"></app-icon>
@@ -1229,15 +1230,17 @@
               </div>
               <div class="header-actions" style="display:flex; gap:8px;">
                 <app-button
-                  appearance="stroked"
-                  color="primary"
+                  appearance="flat"
+                  [color]="'primary'"
+                  [text]="'New Weekly Plan'"
                   (btnClick)="createWeeklyPlan()">
                   <app-icon fontIcon="add" [size]="18"></app-icon>
                   <span>New Weekly Plan</span>
                 </app-button>
                 <app-button
-                  appearance="raised"
-                  color="primary"
+                  appearance="flat"
+                  [color]="'primary'"
+                  [text]="'Assign Diet'"
                   (btnClick)="openDietAssignmentDialog()"
                   class="assign-diet-btn">
                   <app-icon fontIcon="add" [size]="18" [color]="'#ffffff'"></app-icon>

@@ -1510,7 +1510,7 @@ export class PatientProfileComponent implements OnInit {
         id: 'cancel',
         text: 'Cancel',
         color: 'primary',
-        appearance: 'stroked',
+        appearance: 'flat',
         disabled: false
       },
       {
@@ -1714,7 +1714,7 @@ export class PatientProfileComponent implements OnInit {
         id: 'cancel',
         text: 'Cancel',
         color: 'primary',
-        appearance: 'stroked',
+        appearance: 'flat',
         disabled: false
       },
       {
@@ -1764,7 +1764,7 @@ export class PatientProfileComponent implements OnInit {
         id: 'cancel',
         text: 'Cancel',
         color: 'primary',
-        appearance: 'stroked',
+        appearance: 'flat',
         disabled: false
       },
       {
@@ -1811,7 +1811,7 @@ export class PatientProfileComponent implements OnInit {
         id: 'cancel',
         text: 'Cancel',
         color: 'primary',
-        appearance: 'stroked',
+        appearance: 'flat',
         disabled: false
       },
       {
@@ -1896,7 +1896,7 @@ export class PatientProfileComponent implements OnInit {
         id: 'cancel',
         text: 'Cancel',
         color: 'primary',
-        appearance: 'stroked',
+        appearance: 'raised',
         disabled: false
       },
       {
@@ -1954,7 +1954,7 @@ export class PatientProfileComponent implements OnInit {
         id: 'cancel',
         text: 'Cancel',
         color: 'primary',
-        appearance: 'stroked',
+        appearance: 'raised',
         disabled: false
       },
       {
@@ -2080,7 +2080,7 @@ export class PatientProfileComponent implements OnInit {
         id: 'cancel',
         text: 'Cancel',
         color: 'primary',
-        appearance: 'stroked',
+        appearance: 'flat',
         disabled: false
       },
       {
@@ -2847,7 +2847,7 @@ export class PatientProfileComponent implements OnInit {
         id: 'cancel',
         text: 'Cancel',
         color: 'primary',
-        appearance: 'stroked',
+        appearance: 'flat',
         disabled: false
       },
       {

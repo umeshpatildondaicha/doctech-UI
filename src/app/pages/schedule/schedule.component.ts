@@ -18,7 +18,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
-import { AppButtonComponent, AppInputComponent, DividerComponent, IconComponent, CalendarComponent, CoreEventService, DialogboxService, DialogFooterAction, PageComponent, PageBodyDirective, GridComponent, ExtendedGridOptions, TabsComponent, TabComponent } from '@lk/core';
+import { AppButtonComponent, AppInputComponent, DividerComponent, IconComponent, CalendarComponent, CoreEventService, DialogboxService, DialogFooterAction, PageComponent, PageBodyDirective, GridComponent, ExtendedGridOptions, TabsComponent, TabComponent, SnackbarService } from '@lk/core';
 import { ColDef } from 'ag-grid-community';
 import { AppointmentCreateComponent } from '../appointment-create/appointment-create.component';
 import { AppointmentViewComponent } from '../appointment-view/appointment-view.component';
@@ -566,6 +566,7 @@ export class ScheduleComponent implements OnInit {
     private readonly authService: AuthService,
     private readonly appointmentService: AppointmentService,
     private timingManageService: TimingManageService,
+    private snackbarservice :SnackbarService
 
   ) {
     this.eventService.setBreadcrumb({
@@ -646,14 +647,6 @@ export class ScheduleComponent implements OnInit {
       error: () => this.manageSpecificDays = []
     });
   }
-
-
-
-
-
-
-  
-
   loadWeeklyRoutine() {
     this.timingManageService.getAllTimings(this.doctorCode).subscribe({
 
@@ -695,7 +688,7 @@ export class ScheduleComponent implements OnInit {
     const isEdit = !!existing?.raw;
     const footerActions: DialogFooterAction[] = [
       { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
-      { id: 'back', text: 'Previous', color: 'secondary', appearance: 'stroked' },
+      { id: 'back', text: 'Previous', color: 'primary', appearance: 'flat' },
       { id: 'apply', text: isEdit ? 'Update Base Availability' : 'Next', color: 'primary', appearance: 'raised' }
     ];
     const ref = this.dialogService.openDialog(AvailabilitySetupDialogComponent, {
@@ -736,6 +729,7 @@ export class ScheduleComponent implements OnInit {
     this.timingsService.deleteBase(doctorId).subscribe({
       next: () => {
         this.loadTimingsFromApi({ fallbackToDemo: false });
+
       },
       error: (err) => {
         console.error('Delete base availability failed', err);
@@ -1593,7 +1587,7 @@ export class ScheduleComponent implements OnInit {
     const doctorId = this.resolveDoctorIdForTimings();
     const footerActions: DialogFooterAction[] = [
       { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
-      { id: 'back', text: 'Previous', color: 'secondary', appearance: 'stroked' },
+      { id: 'back', text: 'Previous', color: 'primary', appearance: 'flat' },
       { id: 'apply', text: 'Update Leave', color: 'primary', appearance: 'raised' }
     ];
     const ref = this.dialogService.openDialog(AvailabilitySetupDialogComponent, {
@@ -1626,10 +1620,12 @@ export class ScheduleComponent implements OnInit {
     this.timingsService.deleteLeave(doctorId, item.recordId).subscribe({
       next: () => {
         this.loadTimingsFromApi({ fallbackToDemo: false });
+        this.snackbarservice.success('leave deleted successfully');
       },
       error: (err) => {
         console.error('Delete leave failed', err);
         this.scheduleApiError = err?.error?.message || err?.message || 'Failed to delete leave.';
+        this.snackbarservice.error('Failed to delete leave');
       }
     });
   }
@@ -1639,7 +1635,7 @@ export class ScheduleComponent implements OnInit {
     const o = item.raw ;
     const footerActions: DialogFooterAction[] = [
       { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
-      { id: 'back', text: 'Previous', color: 'secondary', appearance: 'stroked' },
+      { id: 'back', text: 'Previous', color: 'primary', appearance: 'flat' },
       { id: 'apply', text: 'Update Override', color: 'primary', appearance: 'raised' }
     ];
     const ref = this.dialogService.openDialog(AvailabilitySetupDialogComponent, {
@@ -1668,6 +1664,7 @@ export class ScheduleComponent implements OnInit {
     ref.afterClosed().subscribe((result) => {
       if (result === true) {
         this.loadTimingsFromApi({ fallbackToDemo: false });
+        this.snackbarservice.success('Override update successfully');
       }
     });
   }
@@ -1691,7 +1688,7 @@ export class ScheduleComponent implements OnInit {
     const o = item.raw;
     const footerActions: DialogFooterAction[] = [
       { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
-      { id: 'back', text: 'Previous', color: 'secondary', appearance: 'stroked' },
+      { id: 'back', text: 'Previous', color: 'primary', appearance: 'flat' },
       { id: 'apply', text: 'Update Weekly Routine', color: 'primary', appearance: 'raised' }
     ];
     const ref = this.dialogService.openDialog(AvailabilitySetupDialogComponent, {
@@ -1730,10 +1727,12 @@ export class ScheduleComponent implements OnInit {
     this.timingsService.deleteWeekly(doctorId, item.ruleId).subscribe({
       next: () => {
         this.loadTimingsFromApi({ fallbackToDemo: false });
+        this.snackbarservice.success('weekly routine deleted Successfully');
       },
       error: (err) => {
         console.error('Delete weekly routine failed', err);
         this.scheduleApiError = err?.error?.message || err?.message || 'Failed to delete weekly routine.';
+        this.snackbarservice.error('Failed to delete weekly routine');
       }
     });
   }
@@ -1762,7 +1761,7 @@ export class ScheduleComponent implements OnInit {
     const doctorId = this.resolveDoctorIdForTimings();
     const footerActions: DialogFooterAction[] = [
       { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
-      { id: 'back', text: 'Previous', color: 'secondary', appearance: 'stroked' },
+      { id: 'back', text: 'Previous', color: 'primary', appearance: 'flat' },
       { id: 'apply', text: 'Next', color: 'primary', appearance: 'raised' }
     ];
     const ref = this.dialogService.openDialog(AvailabilitySetupDialogComponent, {
@@ -1775,9 +1774,11 @@ export class ScheduleComponent implements OnInit {
       data: { doctorId }
     });
 
+
     ref.afterClosed().subscribe((result) => {
       if (result === true) {
         this.loadTimingsFromApi({ fallbackToDemo: false });
+
       }
     });
   }
@@ -2463,6 +2464,8 @@ export class ScheduleComponent implements OnInit {
       // Create appointment when dialog returns form data (patient + date/time), not on cancel or submit-without-data
       if (result && result.action !== 'cancel' && result.appointment_date_time && (result.patient_id != null || result.patientName)) {
         this.createAppointmentFromDialogResult(result);
+        this.snackbarservice.success('Appointment Created Successfully');
+
       }
     });
   }
@@ -2473,7 +2476,8 @@ export class ScheduleComponent implements OnInit {
         id: 'reschedule',
         text: 'Reschedule',
         color: 'primary',
-        appearance: 'stroked'
+        appearance: 'flat',
+        fontIcon:'schedule'
       },
       {
         id: 'viewProfile',
@@ -2485,8 +2489,9 @@ export class ScheduleComponent implements OnInit {
       {
         id: 'cancelAppointment',
         text: 'Cancel Appointment',
-        color: 'warn',
-        appearance: 'stroked'
+        color: 'primary',
+        appearance: 'raised',
+        fontIcon:'cancel'
       },
       {
         id: 'close',
@@ -2559,6 +2564,7 @@ export class ScheduleComponent implements OnInit {
     if (confirm(`Are you sure you want to delete appointment for ${appointment.patientName}?`)) {
       // Handle deletion
       this.loadDoctorSchedule();
+
     }
   }
 
@@ -2813,6 +2819,7 @@ export class ScheduleComponent implements OnInit {
       const patient = result?.patient as PatientSearchResult | null | undefined;
       if (!patient) return;
       this.createAppointmentForSlot(time, patient);
+      this.snackbarservice.success('Appointment Created Successfully');
     });
   }
 
@@ -2821,34 +2828,37 @@ export class ScheduleComponent implements OnInit {
     alert(`Cannot schedule: ${message}`);
   }
 
-  private patientIdToNumber(id: string): number {
-    const digits = id.replace(/\D+/g, '');
+  private patientIdToNumber(id: string | null | undefined): number {
+    if (id == null) return 0;
+    const digits = String(id).replace(/\D+/g, '');
     const n = Number.parseInt(digits || '0', 10);
     return Number.isFinite(n) ? n : 0;
   }
 
   private createAppointmentForSlot(time: string, patient: PatientSearchResult): void {
-    if (time) {
-      const newAppointment: Appointment = {
-        appointment_id: this.mockAppointments.length + 1,
-        patient_id: this.patientIdToNumber(patient.id),
-        appointment_date_time: `${this.selectedDate.toISOString().split('T')[0]}T${time}:00`,
-        notes: 'Appointment created from schedule',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        doctor_id: this.doctorInfo.doctorId,
-        slot_id: 0,
-        status: 'SCHEDULED',
-        patientName: patient.fullName,
-        doctorName: this.doctorInfo.doctorName,
-        slotTime: this.formatTimeForDisplay(time)
-      };
+    if (!time) return;
+    const idStr = patient?.publicId ?? patient?.id ?? '';
+    const patientId = this.patientIdToNumber(idStr);
+    const patientName = (patient?.fullName ?? [patient?.firstName, patient?.lastName].filter(Boolean).join(' ').trim()) || 'Patient';
+    const newAppointment: Appointment = {
+      appointment_id: this.mockAppointments.length + 1,
+      patient_id: patientId,
+      appointment_date_time: `${this.selectedDate.toISOString().split('T')[0]}T${time}:00`,
+      notes: 'Appointment created from schedule',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      doctor_id: this.doctorInfo.doctorId,
+      slot_id: 0,
+      status: 'SCHEDULED',
+      patientName,
+      doctorName: this.doctorInfo.doctorName,
+      slotTime: this.formatTimeForDisplay(time)
+    };
 
-      this.mockAppointments.push(newAppointment);
-      this.loadDoctorSchedule();
-      this.recomputeScheduleSummary();
-      this.recomputeScheduleAvailability();
-    }
+    this.mockAppointments.push(newAppointment);
+    this.loadDoctorSchedule();
+    this.recomputeScheduleSummary();
+    this.recomputeScheduleAvailability();
   }
 
   /** Create appointment from Book-appointment dialog result (form data with patient_id, appointment_date_time, etc.) */

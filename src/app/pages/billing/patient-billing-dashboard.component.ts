@@ -722,7 +722,7 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges, OnDe
 
   createNewInvoice(): void {
     const footerActions: DialogFooterAction[] = [
-      { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'stroked' },
+      { id: 'cancel', text: 'Cancel', color: 'primary', appearance: 'flat' },
       { id: 'save', text: 'Create Invoice', color: 'primary', appearance: 'raised' }
     ];
     const ref = this.dialogService.openDialog(InvoiceFormComponent, {

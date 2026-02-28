@@ -34,9 +34,9 @@
               role="tab"
               [attr.aria-selected]="viewTab === 'exercises'"
               appearance="basic"
-              [text]="''">
+              [text]="'Diet Exercises'">
               <mat-icon>fitness_center</mat-icon>
-              <span class="tab-label">Exercises</span>
+              
               @if (getFilteredExercises()?.length) {
                 <span class="tab-count">{{ getFilteredExercises().length }}</span>
               }
@@ -49,9 +49,9 @@
               role="tab"
               [attr.aria-selected]="viewTab === 'groups'"
               appearance="basic"
-              [text]="''">
+              [text]="'Exercise Groups'">
               <mat-icon>group_work</mat-icon>
-              <span class="tab-label">Exercise Groups</span>
+        
               @if (getFilteredGroups()?.length) {
                 <span class="tab-count">{{ getFilteredGroups().length }}</span>
               }
@@ -177,7 +177,7 @@
                         appearance="icon"
                         fontIcon="edit"
                         class="edit-sets-btn"
-                        [text]="''"
+                        [text]="'Edit Sets'"
                         (btnClick)="editExerciseSets(exercise, i)"
                         matTooltip="Edit Sets">
                       </app-button>
@@ -187,7 +187,7 @@
                     appearance="icon"
                     fontIcon="delete"
                     class="remove-btn"
-                    [text]="''"
+                    [text]="'Remove'"
                     (btnClick)="removeExercise(i)">
                   </app-button>
                 </div>

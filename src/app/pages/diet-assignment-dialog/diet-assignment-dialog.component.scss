@@ -605,17 +605,17 @@
       }
 
       .confirm-btn {
-        padding: 12px 24px;
+        padding: 12px 20px;
         border-radius: 8px;
         font-weight: 500;
         transition: all 0.2s ease;
-        background: #2563eb;
+       // background: #2563eb;
         color: white;
 
         &:hover:not(:disabled) {
-          background: #1d4ed8;
+          
           transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+         // box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
         &:disabled {

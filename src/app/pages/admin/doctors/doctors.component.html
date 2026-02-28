@@ -10,7 +10,7 @@
     <div class="grid-section">
       <app-grid 
         [gridOptions]="gridOptions"
-        [rowData]="rowData"
+        [apiConfig]="apiConfig"
         [columnDefs]="columnDefs"
         [height]="'600px'"
         [animateRows]="true"
@@ -23,5 +23,5 @@
 </app-page>
 
 <ng-template #rightTooltemplate>
-  <app-icon [fontIcon]="'add'" [isCovered]="true" (iconClick)="addNewDoctor()" label="Add New Doctor"></app-icon>
+  <app-icon [fontIcon]="'add'" [isCovered]="true" (iconClick)="addNewDoctor()" ></app-icon>
 </ng-template> 

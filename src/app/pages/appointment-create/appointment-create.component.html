@@ -12,7 +12,7 @@
           <div class="patient-search-input" [class.error-state]="!selectedPatient && appointmentForm.get('patient_id')?.touched">
             <app-input
               id="patient-search-input"
-              [value]="selectedPatient?.fullName || ''"
+              [value]="getSelectedPatientDisplayName()"
               placeholder="Search and select patient..."
               [disabled]="false"
               (click)="openPatientSearch()"
@@ -29,7 +29,7 @@
           @if (!selectedPatient) {
             <div class="patient-selection-hint">
               <app-icon [fontIcon]="'info'" [size]="16"></app-icon>
-              <span>Please select a patient to create an appointment</span>
+              <span>Click above to open the list, select a patient, then click <strong>Select Patient</strong> in the dialog to add them.</span>
             </div>
           }
 
@@ -42,8 +42,8 @@
                     <app-icon [fontIcon]="'person'" [size]="24"></app-icon>
                   </div>
                   <div class="patient-basic-info">
-                    <h4 class="patient-name">{{ selectedPatient.fullName }}</h4>
-                    <p class="patient-id">ID: {{ selectedPatient.id }}</p>
+                    <h4 class="patient-name">{{ getSelectedPatientDisplayName() }}</h4>
+                    <p class="patient-id">ID: {{ getSelectedPatientDisplayId() }}</p>
                   </div>
                   <app-button
                   class="change-patient-btn"

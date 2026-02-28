@@ -90,13 +90,16 @@ html{
   color: #e74c3c !important;
 }
 
-/* Button styles */
+/* Button styles – primary uses theme variable */
 .mat-mdc-raised-button.mat-primary {
-  background-color: #667eea !important;
+  background-color: var(--primary-color, #10b3b3) !important;
+  color: var(--primary-text-color, var(--color-white, #ffffff)) !important;
 }
 
 .mat-mdc-raised-button.mat-primary:hover {
-  background-color: #5a6fd8 !important;
+  background-color: var(--primary-color) !important;
+  filter: brightness(0.95);
+  color: var(--primary-text-color, var(--color-white, #ffffff)) !important;
 }
 
 /* Chip styles */
@@ -107,9 +110,9 @@ html{
 }
 
 .mat-mdc-chip.mat-mdc-standard-chip.mat-mdc-chip-selected {
-  background-color: #667eea;
-  color: white;
-  border-color: #667eea;
+  background-color: var(--primary-color, #667eea);
+  color: var(--color-white, #ffffff);
+  border-color: var(--primary-color, #667eea);
 }
 
 /* Exercise Assignment Dialog Panel Styles */
@@ -576,6 +579,16 @@ html{
    Mobile UI — beautiful, touch-friendly experience
    ============================================================================= */
 :root {
+  /* Base white – change this to adjust white across the app (e.g. #f8f9fa for off-white) */
+  --color-white: #ffffff;
+  /* Primary brand color – used for buttons, links, icons, accents */
+  --primary-color: #10b3b3;
+  /* Text on primary background (e.g. primary buttons) */
+  --primary-text-color: var(--color-white);
+  /* Lighter primary for hover/backgrounds */
+  --primary-color100: rgba(16, 179, 179, 0.1);
+  --primary-color200: rgba(16, 179, 179, 0.2);
+
   --mobile-tap-min: 44px;
   --mobile-radius: 16px;
   --mobile-radius-sm: 12px;
@@ -618,4 +631,41 @@ html{
     border-radius: var(--mobile-radius) !important;
     box-shadow: var(--mobile-shadow) !important;
   }
+}
+
+/* Dialog footer: primary buttons use theme white text (Select a Filter, Create Patient, etc.) */
+.custom-dialog-panel .dialogbox-footer .mat-mdc-raised-button.mat-primary,
+.custom-dialog-panel .dialogbox-footer .footer-actions .mat-mdc-raised-button.mat-primary,
+.custom-dialog-panel .dialogbox-footer .footer-actions button.mat-primary,
+.dialogbox-footer .mat-mdc-raised-button.mat-primary,
+.dialogbox-footer .footer-actions .mat-mdc-raised-button.mat-primary {
+  color: var(--primary-text-color, var(--color-white, #ffffff)) !important;
+}
+.custom-dialog-panel .dialogbox-footer .mat-mdc-raised-button.mat-primary:hover,
+.custom-dialog-panel .dialogbox-footer .footer-actions .mat-mdc-raised-button.mat-primary:hover {
+  color: var(--primary-text-color, var(--color-white, #ffffff)) !important;
+}
+
+/* Filter dialog footer: Reset to default + Apply buttons - proper layout and labels */
+.custom-dialog-panel .dialogbox-footer .footer-actions {
+  gap: 12px !important;
+  justify-content: flex-end !important;
+  flex-wrap: nowrap !important;
+}
+.custom-dialog-panel .dialogbox-footer .footer-actions app-button,
+.custom-dialog-panel .dialogbox-footer .footer-actions .app-button-wrapper {
+  min-width: 7.5em !important;
+  white-space: nowrap !important;
+}
+.custom-dialog-panel .dialogbox-footer .footer-actions app-button:first-child {
+  /* Reset to default = Clear filters (secondary) */
+  margin-right: 0 !important;
+}
+.custom-dialog-panel .dialogbox-footer .footer-actions app-button:last-child {
+  /* Apply (primary) */
+  min-width: 5em !important;
+}
+/* Ensure filter dialog is wide enough for button text */
+.custom-dialog-panel .mat-dialog-container:has(.filter-container) {
+  min-width: 22em !important;
 }

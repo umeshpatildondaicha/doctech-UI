@@ -34,7 +34,8 @@ import { Subject, takeUntil, filter } from 'rxjs';
     MatTooltipModule,
     AppInputComponent,
     AppSelectboxComponent,
-    AppButtonComponent
+    AppButtonComponent,
+    AppSelectboxComponent
 
 ],
     templateUrl: './exercise-create.component.html',

@@ -695,9 +695,16 @@ $muted: rgba(0, 0, 0, 0.62);
   grid-template-columns: 1fr;
   gap: 12px;
 }
-.adv-emergency-fields {
+.adv-emergency-fields,
+.adv-flexible-fields {
   margin-top: 12px;
   grid-template-columns: 1fr 1fr;
+}
+.flexible-capacity-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 .adv-col {
   border: 1px solid $border;

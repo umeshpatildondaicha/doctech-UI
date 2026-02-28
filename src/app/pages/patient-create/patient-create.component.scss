@@ -54,6 +54,13 @@
   display:block;
 }
 
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
 /* premium input style */
 ::ng-deep app-input input,
 ::ng-deep app-selectbox{

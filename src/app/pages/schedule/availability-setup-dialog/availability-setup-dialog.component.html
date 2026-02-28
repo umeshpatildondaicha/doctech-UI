@@ -191,6 +191,19 @@
               </mat-form-field>
             </div>
 
+            @if (schedulingType() === 'flexible') {
+              <div class="flexible-capacity-row">
+                <mat-form-field appearance="outline" class="f">
+                  <mat-label>Max appointments per day</mat-label>
+                  <input matInput type="number" min="1" [formControl]="step4.controls.maxAppointmentsPerDay" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="f">
+                  <mat-label>Total estimated appointments</mat-label>
+                  <input matInput type="number" min="0" [formControl]="step4.controls.totalEstimatedAppointments" />
+                </mat-form-field>
+              </div>
+            }
+
             <div class="break-head">
               <div class="break-title">Manage breaks</div>
               <button mat-stroked-button type="button" (click)="openBreakForm()">+ Add another break</button>
@@ -284,19 +297,20 @@
           <div class="adv-block">
             <div class="adv-title">Emergency priority</div>
             <mat-slide-toggle formControlName="emergencyPriority">Enable emergency slot priority</mat-slide-toggle>
-            @if (schedulingType() === 'flexible' && step4Changes()?.emergencyPriority) {
-              <div class="adv-row adv-emergency-fields">
-                <mat-form-field appearance="outline" class="f">
-                  <mat-label>Max appointments per day</mat-label>
-                  <input matInput type="number" min="1" formControlName="maxAppointmentsPerDay" />
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="f">
-                  <mat-label>Total estimated appointments</mat-label>
-                  <input matInput type="number" min="0" formControlName="totalEstimatedAppointments" />
-                </mat-form-field>
-              </div>
-            }
           </div>
+
+          @if (schedulingType() === 'flexible') {
+            <!-- <div class="adv-row adv-flexible-fields">
+              <mat-form-field appearance="outline" class="f">
+                <mat-label>Max appointments per day</mat-label>
+                <input matInput type="number" min="1" formControlName="maxAppointmentsPerDay" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="f">
+                <mat-label>Total estimated appointments</mat-label>
+                <input matInput type="number" min="0" formControlName="totalEstimatedAppointments" />
+              </mat-form-field>
+            </div> -->
+          }
 
           @if (schedulingType() === 'slots') {
             <div class="adv-row">
@@ -409,7 +423,7 @@
                   <div class="rs-value-box rs-value-unit">{{ step4.value.maxAppointmentsPerSlot ?? '—' }}</div>
                 </div>
               }
-              @if (schedulingType() === 'flexible' && step4.value.emergencyPriority) {
+              <!-- @if (schedulingType() === 'flexible') {
                 <div class="rs-field">
                   <div class="rs-label">MAX APPOINTMENTS PER DAY</div>
                   <div class="rs-value-box rs-value-unit">{{ step4.value.maxAppointmentsPerDay ?? '—' }}</div>
@@ -418,7 +432,7 @@
                   <div class="rs-label">TOTAL ESTIMATED APPOINTMENTS</div>
                   <div class="rs-value-box rs-value-unit">{{ step4.value.totalEstimatedAppointments ?? '—' }}</div>
                 </div>
-              }
+              } -->
               <div class="rs-capacity">
                 <mat-icon>trending_up</mat-icon>
                 <div>

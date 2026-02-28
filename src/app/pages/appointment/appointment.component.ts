@@ -3,7 +3,7 @@ import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ColDef } from 'ag-grid-community';
 import { Appointment } from '../../interfaces/appointment.interface';
-import { ExtendedGridOptions, GridComponent } from "@lk/core";
+import { ExtendedGridOptions, GridComponent, SnackbarService } from "@lk/core";
 import { AppButtonComponent } from "@lk/core";
 import { IconComponent } from "@lk/core";
 import { CalendarComponent } from "@lk/core";
@@ -39,6 +39,12 @@ export class AppointmentComponent implements OnInit, AfterViewInit {
   displayedRows = 0;
   totalRows = 0;
 
+  /** Grid API config (built in ngOnInit with dynamic doctor code). */
+  apiConfig!: {
+    dataConfig: Record<string, unknown>;
+    countConfig: Record<string, unknown>;
+  };
+
   appointmentSearchHints = [
     'Search by patient name...',
     'Search by doctor name...',
@@ -73,7 +79,8 @@ export class AppointmentComponent implements OnInit, AfterViewInit {
     private eventService: CoreEventService,
     private route: ActivatedRoute,
     private appointmentService: AppointmentService,
-    private authService: AuthService
+    private authService: AuthService,
+    private snackbarservice :SnackbarService
   ) {
     this.eventService.setBreadcrumb({
       label: 'Appointments',
@@ -85,36 +92,43 @@ export class AppointmentComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.getQueryParams();
+    this.buildApiConfig();
     this.initializeAppointmentGrid();
+  }
+
+  /** Build apiConfig with logged-in doctor code (matches backend and appointment.service). */
+  private buildApiConfig(): void {
+    const doctorCode = this.authService.getDoctorRegistrationNumber()?.trim() || 'DR1';
+    const basePath = `/api/appointments/doctor/${encodeURIComponent(doctorCode)}/appointments`;
+    this.apiConfig = {
+      dataConfig: {
+        url: environment.apiUrl,
+        rest: basePath,
+        params: '',
+        context: '',
+        fiqlKey: '',
+        lLimitKey: 'llimit',
+        uLimitKey: 'ulimit',
+        requestType: 'GET',
+        type: 'GET',
+        queryParamsUrl: 'llimit=$llimit&ulimit=$ulimit',
+        suppressNullValues: true,
+        suppressDefaultFiqlOnApply: false,
+        dataKey: 'content',
+        dataType: 'array'
+      },
+      countConfig: {
+        rest: `${basePath}/count`,
+        type: 'GET',
+        queryParamsUrl: '',
+        suppressNullValues: true
+      }
+    };
   }
 
   ngAfterViewInit(): void {
     // Sync display counts after grid has loaded data (grid uses apiConfig so data loads async)
     setTimeout(() => this.syncDisplayCounts(), 800);
-  }
-   apiConfig: any = {
-    dataConfig: {
-      url: environment.apiUrl,
-      rest: '/api/appointments/doctor/DR1/appointments', // New format - API endpoint path
-      params: "",
-      context: "",
-      fiqlKey: "", // Key name for FIQL filter parameter
-      lLimitKey: 'llimit',
-      uLimitKey: 'ulimit',
-      requestType: 'GET',
-      type: 'GET', // Alternative format
-      queryParamsUrl: 'llimit=$llimit&ulimit=$ulimit',
-      suppressNullValues: true,
-      suppressDefaultFiqlOnApply: false,
-      dataKey: "content", // Key to extract data from response
-      dataType: 'array'
-    },
-    countConfig: {
-      rest: '/api/appointments/doctor/DR1/appointments/count',
-      type: 'GET',
-      queryParamsUrl: '',
-      suppressNullValues: true
-    }
   }
 
   getQueryParams() {
@@ -155,38 +169,36 @@ export class AppointmentComponent implements OnInit, AfterViewInit {
             filter: true 
             },
           {
-             headerName: 'Reason',
-            field: 'reason', 
-             width: 150, 
+            headerName: 'Reason',
+            field: 'reason',
+            width: 150,
             sortable: true,
-             filter: true, 
-             valueFormatter: (params: any) => {
-             return new Date(params.value).toLocaleDateString();
-           } 
+            filter: true
           },
           {
-           headerName: 'Start Time',
-           field: 'startTime', 
-           width: 120, 
-           sortable: true, 
-            filter: true 
-           },
-            {
-             headerName:'date',
-              field: 'date', 
-              width: 150, 
-             sortable: true, 
+            headerName: 'Start Time',
+            field: 'startTime',
+            width: 120,
+            sortable: true,
+            filter: true
+          },
+          {
+            headerName: 'Date',
+            field: 'date',
+            width: 150,
+            sortable: true,
             filter: true,
-            
+            valueFormatter: (params: { value?: string | null }) =>
+              params.value ? new Date(params.value).toLocaleDateString() : '—'
           },
            
           {
-            headerName: 'Notes', 
-             field: 'notes',
-              width: 200,
-              sortable: true, 
-          filter: true 
-        } 
+            headerName: 'Notes',
+            field: 'notes',
+            width: 200,
+            sortable: true,
+            filter: true
+          } 
       ];
   }
   //  loadAppointmentData(): void {
@@ -279,22 +291,61 @@ export class AppointmentComponent implements OnInit, AfterViewInit {
       appearance: 'raised'
     });
 
+
     const dialogRef = this.dialogService.openDialog(AppointmentCreateComponent, {
       title: mode === 'create' ? 'Create Appointment' : mode === 'edit' ? 'Edit Appointment' : 'View Appointment',
       data: { mode, appointment: data },
       width: '60%',
       footerActions: footerActions
+
     });
+
 
     dialogRef.afterClosed().subscribe((result) => {
-      // If result has form data (not just action), it means form was submitted successfully
-      if (result && (result.patient_id || result.appointment_date_time || (!result.action && result !== null))) {
-        // Handle appointment creation/update
+      // If result has form data (not just action), form was submitted – call API and refresh list
+      const hasFormData = result && (result['patient_id'] != null || result['publicId'] != null) && result['appointment_date_time'];
+      if (!hasFormData) return;
 
-      }
-      // If result is just { action: 'submit' } without form data, form validation failed
-      // The component will show validation errors
+      const doctorCode = this.authService.getDoctorRegistrationNumber()?.trim() || 'DR1';
+      const payload = this.buildBookPayload(result, doctorCode);
+
+      this.appointmentService.bookAppointment(payload).subscribe({
+        next: () => {
+          this.snackbarservice.success('Appointment Created Successfully');
+          this.refreshAppointmentGrid();
+        },
+        error: (err) => {
+          console.error('Create appointment failed', err);
+          this.snackbarservice.error(err?.error?.message ?? 'Failed to create appointment.');
+        }
+      });
     });
+  }
+
+  /** Build payload for book appointment API from dialog result. */
+  private buildBookPayload(result: Record<string, unknown>, doctorCode: string): Record<string, unknown> {
+    const patientId = result['publicId'] ?? result['patient_id'];
+    const dateTime = String(result['appointment_date_time'] ?? '');
+    const [datePart, timePart] = dateTime.includes('T') ? dateTime.split('T') : [dateTime, '09:00:00'];
+    const startTime = (timePart as string)?.slice(0, 8) ?? '09:00:00'; // HH:mm:ss
+    const endTime = this.addMinutesToTime(startTime, 30); // 30 min slot
+
+    return {
+      doctorRegistrationNumber: doctorCode,
+      patientPublicId: patientId,
+      date: (datePart as string)?.slice(0, 10),
+      startTime: startTime.slice(0, 5), // HH:mm
+      endTime: endTime.slice(0, 5),
+      notes: result['notes'] ?? ''
+    };
+  }
+
+  private addMinutesToTime(timeStr: string, minutes: number): string {
+    const [h = 0, m = 0] = (timeStr || '09:00').split(':').map(Number);
+    const totalM = h * 60 + m + minutes;
+    const nh = Math.floor(totalM / 60) % 24;
+    const nm = totalM % 60;
+    return `${String(nh).padStart(2, '0')}:${String(nm).padStart(2, '0')}:00`;
   }
 
   openViewDialog(appointment: Appointment) {
@@ -303,7 +354,7 @@ export class AppointmentComponent implements OnInit, AfterViewInit {
         id: 'reschedule',
         text: 'Reschedule',
         color: 'primary',
-        appearance: 'stroked'
+        appearance: 'flat'
       },
       {
         id: 'viewProfile',
@@ -315,8 +366,8 @@ export class AppointmentComponent implements OnInit, AfterViewInit {
       {
         id: 'cancelAppointment',
         text: 'Cancel Appointment',
-        color: 'warn',
-        appearance: 'stroked'
+        color: 'primary',
+        appearance: 'flat'
       },
       {
         id: 'close',
@@ -366,8 +417,10 @@ export class AppointmentComponent implements OnInit, AfterViewInit {
   }
 
   deleteAppointment(appointment: Appointment) {
-    if (confirm(`Are you sure you want to delete appointment for ${appointment.patientName}?`)) {
-      this.apiConfig = this.apiConfig.filter((item: Appointment) => item.appointment_id !== appointment.appointment_id);
+    if (confirm(`Are you sure you want to delete appointment for ${appointment.patientName ?? 'this patient'}?`)) {
+      // Refresh grid so data stays in sync (backend delete would be called here if API exists)
+      this.refreshAppointmentGrid();
+      this.snackbarservice.success('Appointment list refreshed.');
     }
   }
 

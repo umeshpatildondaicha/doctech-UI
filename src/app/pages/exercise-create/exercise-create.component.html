@@ -24,7 +24,7 @@
             [required]="true"
             [displayExpr]="'label'"
             [valueField]="'value'"
-            [errorMessage]="getErrorMessage('category')"
+          
             class="form-field">
           </app-selectbox>
 
@@ -36,7 +36,7 @@
             [required]="true"
             [displayExpr]="'label'"
             [valueField]="'value'"
-            [errorMessage]="getErrorMessage('difficulty')"
+            
             class="form-field">
           </app-selectbox>
         </div>
@@ -118,7 +118,8 @@
             class="upload-btn"
             [fontIcon]="'cloud_upload'"
             [text]="'Choose files'"
-            [appearance]="'stroked'"
+            [appearance]="'flat'"
+            [color]="'primary'"
           ></app-button>
 
             @if (selectedFiles.length > 0) {
@@ -190,7 +191,7 @@
             [fontIcon]="'add'"
             [text]="'+ Add Set'"
             [color]="'primary'"
-            [appearance]="'stroked'"
+            [appearance]="'flat'"
             (btnClick)="addSet()"
           ></app-button>
         </div>
@@ -202,7 +203,7 @@
             [fontIcon]="'add'"
             text="'+ Add Set'"
             [color]="'primary'"
-            [appearance]="'stroked'"
+            [appearance]="'flat'"
             (btnClick)="addSet()">
           </app-button>
         </div>

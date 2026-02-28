@@ -105,7 +105,7 @@ export class AppointmentService {
   getAllAppointmentsCount(doctorCode: string): Observable<{ count: number }> {
     const safeDoctor = encodeURIComponent((doctorCode || '').trim());
     return this.httpService.sendGETRequest(
-      `${this.baseUrl}/appointments/doctor/${safeDoctor}/count`
+      `${this.baseUrl}/appointments/doctor/${safeDoctor}/appointments/count`
     );
   }
 
@@ -123,6 +123,14 @@ export class AppointmentService {
     const safePatient = encodeURIComponent((patientPublicId || '').trim());
     return this.httpService.sendGETRequest(
       `${this.baseUrl}/appointments/doctor/${safeDoctor}/patient/${safePatient}/appointments`
+    );
+  }
+
+  /** Create/book an appointment. POST /api/appointments/book */
+  bookAppointment(payload: Record<string, unknown>): Observable<any> {
+    return this.httpService.sendPOSTRequest(
+      `${this.baseUrl}/appointments/book`,
+      JSON.stringify(payload)
     );
   }
 }

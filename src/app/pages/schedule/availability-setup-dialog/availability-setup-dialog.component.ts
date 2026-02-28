@@ -24,7 +24,7 @@ import type {
 } from '../../../interfaces/timings.interface';
 import { firstValueFrom } from 'rxjs';
 import { startWith } from 'rxjs/operators';
-import { DIALOG_DATA_TOKEN } from '@lk/core';
+import { DIALOG_DATA_TOKEN, SnackbarService } from '@lk/core';
 
 type Weekday = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
 
@@ -346,7 +346,7 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
     let effectiveSlot = 0;
     let slotsPerDay: number | null = null;
 
-    // ✅ Only for fixed slots
+    // Only for fixed slots
     if (schedulingType === 'slots' && slotDuration > 0) {
 
       // Slot + buffer
@@ -390,7 +390,7 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
   readonly step3Changes!: Signal<any>;
   readonly step4Changes!: Signal<any>
 
-  constructor() {
+  constructor(private readonly snackbarservice :SnackbarService) {
     this.step3Changes = toSignal(
       this.step3.valueChanges.pipe(startWith(this.step3.value))
     );
@@ -614,6 +614,7 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
       primaryText = 'Saving…';
     } else if (isLast) {
       primaryText = this.setupType() === 'leave' ? 'Confirm Leave' : 'Save Availability';
+
     }
 
     const applyDisabled = this.saving() || !this.canAdvance();
@@ -624,7 +625,7 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
       const hasBack = actions.some((a: any) => a.id === 'back');
       let list = hasBack ? actions : [
         ...actions.slice(0, 1),
-        { id: 'back', text: 'Previous', color: 'secondary', appearance: 'stroked' },
+        { id: 'back', text: 'Previous', color: 'primary', appearance: 'flat' },
         ...actions.slice(1)
       ];
       const normalized = list
@@ -720,7 +721,7 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
     const leaveStart = this.step3.get('leaveStart');
     const leaveEnd = this.step3.get('leaveEnd');
 
-    // ✅ START / END TIME
+    //  START / END TIME
     if (t !== 'leave') {
       startTime?.setValidators([Validators.required]);
       endTime?.setValidators([Validators.required]);
@@ -731,7 +732,7 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
       endTime?.setErrors(null);
     }
 
-    // ✅ WEEKLY
+    // WEEKLY
     if (t === 'weekly') {
       weekdays?.setValidators([Validators.required]);
     } else {
@@ -741,7 +742,7 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
       weekdays?.markAsUntouched();
     }
 
-    // ✅ OVERRIDE
+    //  OVERRIDE
     if (t === 'override') {
       date?.setValidators([Validators.required]);
     } else {
@@ -749,7 +750,7 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
       date?.setErrors(null);
     }
 
-    // ✅ LEAVE
+    //  LEAVE
     if (t === 'leave') {
       leaveStart?.setValidators([Validators.required]);
       leaveEnd?.setValidators([Validators.required]);
@@ -761,6 +762,7 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
     }
 
     this.step3.updateValueAndValidity();
+  
   }
 
 
@@ -930,8 +932,10 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
         const editLeave = this.data?.editLeave;
         if (editLeave?.recordId != null) {
           await firstValueFrom(this.timingsService.updateLeave(doctorId, editLeave.recordId, body));
+          this.snackbarservice.success('Leave Updated Successfully');
         } else {
           await firstValueFrom(this.timingsService.createLeave(doctorId, body));
+          this.snackbarservice.success('Leave Created Successfully');
         }
         this.dialogRef.close(true);
         return;
@@ -967,8 +971,10 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
         const editOverride = this.data?.editOverride;
         if (editOverride?.recordId != null) {
           req$ = this.timingsService.updateOverride(doctorId, editOverride.recordId, overrideBody);
+          this.snackbarservice.success('Override Updated Successfully');
         } else {
           req$ = this.timingsService.createOverride(doctorId, overrideBody);
+          this.snackbarservice.success('Override Created Successfully');
         }
       } else {
         const weeklyBody: WeeklyTimingUpsertRequest = {
@@ -978,8 +984,10 @@ export class AvailabilitySetupDialogComponent implements AfterViewInit {
         const editWeekly = this.data?.editWeekly;
         if (editWeekly?.ruleId) {
           req$ = this.timingsService.updateWeekly(doctorId, editWeekly.ruleId, weeklyBody);
+          this.snackbarservice.success('Weekly Schedule Updated Successfully');
         } else {
           req$ = this.timingsService.createWeekly(doctorId, weeklyBody);
+          this.snackbarservice.success('Weekly Schedule Created Successfully!');
         }
       }
 

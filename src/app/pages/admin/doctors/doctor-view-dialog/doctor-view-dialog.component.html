@@ -5,7 +5,7 @@
         @if (doctor.profilePic) {
           <img
             [src]="doctor.profilePic"
-            [alt]="doctor.name"
+            [alt]="displayName"
             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
         }
         @if (!doctor.profilePic) {
@@ -15,10 +15,10 @@
         }
       </div>
       <div class="doctor-info">
-        <h2 class="doctor-name">{{ doctor.name }}</h2>
+        <h2 class="doctor-name">{{ displayName }}</h2>
         <div class="doctor-id">
           <app-icon fontIcon="assignment_ind" [size]="16" color="var(--primary-color)"></app-icon>
-          <span>{{ doctor.id }}</span>
+          <span>{{ displayId }}</span>
         </div>
       </div>
     </div>
@@ -27,7 +27,7 @@
         <app-icon fontIcon="circle" [size]="12" [color]="getStatusColor(doctor.status)"></app-icon>
         <span>{{ doctor.status }}</span>
       </div>
-      <div class="status-badge availability" [class]="doctor.availability?.toLowerCase().replace(' ', '-')">
+      <div class="status-badge availability" [class]="(doctor.availability ?? '')?.toLowerCase()?.replace(' ', '-')">
         <app-icon fontIcon="schedule" [size]="12" [color]="getAvailabilityColor(doctor.availability)"></app-icon>
         <span>{{ doctor.availability }}</span>
       </div>

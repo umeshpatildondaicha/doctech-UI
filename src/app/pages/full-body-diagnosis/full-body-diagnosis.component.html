@@ -9,22 +9,24 @@
       <div class="header-actions">
         @if (!isClickModeEnabled) {
           <app-button
-            appearance="raised"
+            appearance="flat"
             color="primary"
+            [text]="'Add Comment'"
             (btnClick)="toggleClickMode()"
             class="add-comment-btn">
             <app-icon fontIcon="add" [size]="18" [color]="'#ffffff'"></app-icon>
-            <span>Add Comment</span>
+          
           </app-button>
         }
         @if (isClickModeEnabled) {
           <app-button
-            appearance="stroked"
+            appearance="flat"
             color="warn"
             (btnClick)="toggleClickMode()"
+            [text]="'Remove Click'"
             class="remove-click-btn">
             <app-icon fontIcon="close" [size]="18"></app-icon>
-            <span>Remove Click</span>
+            
           </app-button>
         }
       </div>

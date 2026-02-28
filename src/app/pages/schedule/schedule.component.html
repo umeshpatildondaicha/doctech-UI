@@ -20,10 +20,10 @@
             </div>
           </app-card>
 
-          <!-- Appointments list: entity-toolbar + Book appointment -->
+          <!-- Appointments list: entity-toolbar + Create appointment -->
           <app-card class="sched-list-card" [divider]="true" [dense]="false">
             <div class="sched-list-header">
-              <app-entity-toolbar [title]="''" [subtitle]="''" [showCounts]="false" [newLabel]="'Book appointment'"
+              <app-entity-toolbar [title]="''" [subtitle]="''" [showCounts]="false" [newLabel]="'Create appointment'"
                 [showRefresh]="false" [showFilter]="false" [searchPlaceholder]="'Search appointments...'"
                 (newClick)="createAppointment()">
               </app-entity-toolbar>
@@ -651,8 +651,8 @@
                     <span class="timings-manage-badge">Default</span>
                     }
                     <span class="timings-manage-count">{{ manageBaseAvailability.length }}</span>
-                    <app-button type="button" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'"
-                      [disabled]="manageBaseAvailability.length > 0" (btnClick)="openDailyBaseDialog()"></app-button>
+                    <!-- <app-button type="button" [fontIcon]="'add'" [text]="'Add'" [color]="'primary'"
+                      [disabled]="manageBaseAvailability.length > 0" (click)="openDailyBaseDialog()"></app-button> -->
                   </div>
                 </div>
                 @if (manageBaseAvailability.length === 0) {
@@ -668,9 +668,9 @@
                     </div>
                     <div class="timings-manage-list-actions">
                       <app-button type="button" [fontIcon]="'edit'" [appearance]="'icon'" title="Edit"
-                        (btnClick)="openDailyBaseDialog(item)"></app-button>
+                        ></app-button>
                       <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" title="Delete"
-                        (btnClick)="onDeleteTiming(item)"></app-button>
+                    ></app-button>
                     </div>
                   </li>
                   }

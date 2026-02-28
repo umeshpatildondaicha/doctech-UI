@@ -318,10 +318,13 @@ export class AppointmentCreateComponent implements OnInit {
   }
 
   onDateSelected(date: Date) {
-    // Update the appointment date when a date is selected
-    const formattedDate = date.toISOString().split('T')[0];
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const current = this.appointmentForm.get('appointment_date_time')?.value;
+    const timePart = typeof current === 'string' && current.includes('T') ? current.slice(11, 19) : '09:00:00';
     this.appointmentForm.patchValue({
-      appointment_date_time: formattedDate
+      appointment_date_time: `${yyyy}-${mm}-${dd}T${timePart}`
     });
   }
 
@@ -337,7 +340,6 @@ export class AppointmentCreateComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log("submit clicked");
     if (this.isViewMode) {
       this.dialogRef.close();
       return;
@@ -358,7 +360,11 @@ export class AppointmentCreateComponent implements OnInit {
 
   private getClosePayload(): Record<string, unknown> {
     const value = this.appointmentForm.value as Record<string, unknown>;
-    return { ...value, patientName: this.selectedPatient?.fullName ?? value['patientName'] };
+    return {
+      ...value,
+      patientName: this.selectedPatient?.fullName ?? value['patientName'],
+      publicId: this.selectedPatient?.publicId ?? (this.selectedPatient?.id || value['patient_id'])
+    };
   }
 
   onCancel() {
@@ -392,9 +398,14 @@ export class AppointmentCreateComponent implements OnInit {
 
     patientSearchDialogRef.afterClosed().subscribe((result) => {
       if (result && result.action === 'select' && result.patient) {
-        this.selectedPatient = result.patient;
+        const p = result.patient;
+        this.selectedPatient = {
+          ...p,
+          fullName: p.fullName || [p.firstName, p.lastName].filter(Boolean).join(' ').trim() || 'Patient',
+          id: p.id ?? p.publicId ?? ''
+        };
         this.appointmentForm.patchValue({
-          patient_id: result.patient.id
+          patient_id: p.publicId ?? p.id ?? ''
         });
       }
     });
@@ -435,5 +446,15 @@ export class AppointmentCreateComponent implements OnInit {
       return 'Please select a patient to create an appointment';
     }
     return '';
+  }
+
+  getSelectedPatientDisplayName(): string {
+    if (!this.selectedPatient) return '';
+    return this.selectedPatient.fullName || [this.selectedPatient.firstName, this.selectedPatient.lastName].filter(Boolean).join(' ').trim() || 'Patient';
+  }
+
+  getSelectedPatientDisplayId(): string {
+    if (!this.selectedPatient) return '';
+    return this.selectedPatient.id ?? this.selectedPatient.publicId ?? '';
   }
 } 

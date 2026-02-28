@@ -2,7 +2,7 @@
   <div page-body class="roles-management-page">
 
     <!-- Navigation Tabs -->
-    <app-admin-tabs size="medium" variant="line" >
+    <app-admin-tabs size="medium" variant="line">
     </app-admin-tabs>
 
     <!-- Bulk Actions Toolbar -->
@@ -29,44 +29,50 @@
           <!-- Role Distribution (stat cards style) -->
           <div class="role-dist-row">
             @for (role of roles; track role.id) {
-              <button type="button" class="role-stat" [class.active]="activeRoleFilter() === role.name" (click)="filterByRole(role.name)">
-                <div class="role-stat-ico" [style.background]="role.color">
-                  <app-icon [fontIcon]="role.icon" [size]="22"></app-icon>
-                </div>
-                <div class="role-stat-body">
-                  <div class="role-stat-value">{{ getStaffCountForRole(role.name) }}</div>
-                  <div class="role-stat-label">{{ role.name }}</div>
-                </div>
-              </button>
+            <button type="button" class="role-stat" [class.active]="activeRoleFilter() === role.name"
+              (click)="filterByRole(role.name)">
+              <div class="role-stat-ico" [style.background]="role.color">
+                <app-icon [fontIcon]="role.icon" [size]="22"></app-icon>
+              </div>
+              <div class="role-stat-body">
+                <div class="role-stat-value">{{ getStaffCountForRole(role.name) }}</div>
+                <div class="role-stat-label">{{ role.name }}</div>
+              </div>
+            </button>
             }
           </div>
 
           <!-- Staff Listing Grid -->
           <app-card [title]="'Staff Directory'" [subtitle]="filteredStaff.length + ' members'" [divider]="true">
-            <app-grid
-              [gridOptions]="staffGridOptions"
-              [rowData]="filteredStaff"
-              [columnDefs]="staffColumnDefs"
-              [height]="'520px'"
-              [animateRows]="true"
-              searchPlaceholder="Search staff & doctors..."
-            ></app-grid>
+            <div appCardActions>
+             
+            </div>
+            <app-grid 
+            [gridOptions]="staffGridOptions"
+             [apiConfig]="apiConfig"
+             [columnDefs]="staffColumnDefs"
+             [rightTooltemplateRef]="rightTooltemplate"
+              [height]="'520px'" [animateRows]="true" searchPlaceholder="Search staff & doctors...">
+            </app-grid>
+      
           </app-card>
+         
         </div>
       </app-tab>
 
 
 
 
-    <!-- Role Permissions Tab -->
-    <app-tab label="permissions">
 
-      <div class="permissions-management">
-        <app-card [title]="'Hospital Roles'" [subtitle]="roles.length + ' Roles'" [divider]="true" class="permissions-sidebar">
-          <div class="roles-list">
-            @for (role of roles; track role) {
-              <div class="role-item" [class.selected]="selectedRole?.id === role.id"
-                (click)="selectRole(role)">
+      <!-- Role Permissions Tab -->
+      <app-tab label="permissions">
+
+        <div class="permissions-management">
+          <app-card [title]="'Hospital Roles'" [subtitle]="roles.length + ' Roles'" [divider]="true"
+            class="permissions-sidebar">
+            <div class="roles-list">
+              @for (role of roles; track role) {
+              <div class="role-item" [class.selected]="selectedRole?.id === role.id" (click)="selectRole(role)">
                 <div class="role-icon" [style.background-color]="role.color">
                   <app-icon [fontIcon]="role.icon" [size]="20"></app-icon>
                 </div>
@@ -78,19 +84,21 @@
                   <div class="staff-count">{{ getStaffCountForRole(role.name) }}</div>
                 </div>
               </div>
-            }
-          </div>
-        </app-card>
+              }
+            </div>
+          </app-card>
 
-        <app-card class="permissions-main" [title]="selectedRole ? selectedRole.name + ' Permissions' : ''" [subtitle]="selectedRole?.description" [divider]="true">
-          @if (selectedRole) {
+          <app-card class="permissions-main" [title]="selectedRole ? selectedRole.name + ' Permissions' : ''"
+            [subtitle]="selectedRole?.description" [divider]="true">
+            @if (selectedRole) {
             <div appCardActions>
-              <app-button [text]="'Reset to Default'" [color]="'accent'" [fontIcon]="'refresh'" [appearance]="'stroked'"></app-button>
+              <app-button [text]="'Reset to Default'" [color]="'primary'" [fontIcon]="'refresh'"
+                [appearance]="'flat'"></app-button>
               <app-button [text]="'Save Changes'" [color]="'primary'" [fontIcon]="'save'"></app-button>
             </div>
-          }
+            }
 
-          @if (selectedRole) {
+            @if (selectedRole) {
             <div class="permissions-content">
               <div class="permissions-grid">
                 <div class="permission-header">
@@ -101,60 +109,66 @@
                   <span>Delete</span>
                 </div>
                 @for (module of moduleOptions; track module) {
-                  <div class="permission-row">
-                    <div class="module-info">
-                      <app-icon [fontIcon]="module.icon" [size]="20"></app-icon>
-                      <div class="module-details">
-                        <div class="module-name">{{ module.label }}</div>
-                        <div class="module-description">Manage {{ module.label.toLowerCase() }} access</div>
-                      </div>
-                    </div>
-                    <div class="permission-checkboxes">
-                      <label class="permission-toggle">
-                        <input type="checkbox" [checked]="getPermissionValue(module.key, 'read')"
-                          (change)="updatePermission(module.key, 'read', $event)">
-                        <span class="toggle-slider"></span>
-                      </label>
-                      <label class="permission-toggle">
-                        <input type="checkbox" [checked]="getPermissionValue(module.key, 'write')"
-                          (change)="updatePermission(module.key, 'write', $event)">
-                        <span class="toggle-slider"></span>
-                      </label>
-                      <label class="permission-toggle">
-                        <input type="checkbox" [checked]="getPermissionValue(module.key, 'update')"
-                          (change)="updatePermission(module.key, 'update', $event)">
-                        <span class="toggle-slider"></span>
-                      </label>
-                      <label class="permission-toggle">
-                        <input type="checkbox" [checked]="getPermissionValue(module.key, 'delete')"
-                          (change)="updatePermission(module.key, 'delete', $event)">
-                        <span class="toggle-slider"></span>
-                      </label>
+                <div class="permission-row">
+                  <div class="module-info">
+                    <app-icon [fontIcon]="module.icon" [size]="20"></app-icon>
+                    <div class="module-details">
+                      <div class="module-name">{{ module.label }}</div>
+                      <div class="module-description">Manage {{ module.label.toLowerCase() }} access</div>
                     </div>
                   </div>
+                  <div class="permission-checkboxes">
+                    <label class="permission-toggle">
+                      <input type="checkbox" [checked]="getPermissionValue(module.key, 'read')"
+                        (change)="updatePermission(module.key, 'read', $event)">
+                      <span class="toggle-slider"></span>
+                    </label>
+                    <label class="permission-toggle">
+                      <input type="checkbox" [checked]="getPermissionValue(module.key, 'write')"
+                        (change)="updatePermission(module.key, 'write', $event)">
+                      <span class="toggle-slider"></span>
+                    </label>
+                    <label class="permission-toggle">
+                      <input type="checkbox" [checked]="getPermissionValue(module.key, 'update')"
+                        (change)="updatePermission(module.key, 'update', $event)">
+                      <span class="toggle-slider"></span>
+                    </label>
+                    <label class="permission-toggle">
+                      <input type="checkbox" [checked]="getPermissionValue(module.key, 'delete')"
+                        (change)="updatePermission(module.key, 'delete', $event)">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
                 }
               </div>
             </div>
-          }
+            }
 
-          @if (!selectedRole) {
+            @if (!selectedRole) {
             <div class="no-role-selected">
               <app-icon [fontIcon]="'security'" [size]="48"></app-icon>
               <h3>Select a Role</h3>
               <p>Choose a role from the sidebar to manage its permissions</p>
             </div>
-          }
-        </app-card>
-      </div>
+            }
+          </app-card>
+        </div>
 
-            </app-tab>
-
-
-
-
-            </app-tabs>
-          </div>
+      </app-tab>
 
 
 
-        </app-page>
+
+    </app-tabs>
+
+
+
+  </div>
+</app-page>
+<ng-template #rightTooltemplate>
+  <button type="button" class="add-staff-btn" title="Add staff">
+    <app-icon [fontIcon]="'add'" [isCovered]="true"></app-icon>
+  </button>
+</ng-template> 
+

@@ -1,13 +1,16 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ColDef } from 'ag-grid-community';
-import { AppButtonComponent, AppInputComponent, IconComponent, CheckboxComponent, PageComponent, BreadcrumbItem, TabComponent, TabsComponent, GridComponent } from '@lk/core';
+import { AppButtonComponent, AppInputComponent, IconComponent, CheckboxComponent, PageComponent, BreadcrumbItem, TabComponent, TabsComponent, GridComponent, FilterComponent, SnackbarService, DialogboxService } from '@lk/core';
 import { AppCardComponent } from '../../../core/components/app-card/app-card.component';
 import { AppCardActionsDirective } from '../../../core/components/app-card/app-card-actions.directive';
 import { 
   AdminTabsComponent,
   type TabItem
 } from '../../../components';
+import { StaffService } from '../../../services/staff.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 interface Role {
   id: number;
@@ -57,7 +60,8 @@ interface Staff {
         PageComponent,
         GridComponent,
         AppCardComponent,
-        AppCardActionsDirective
+        AppCardActionsDirective,
+        FilterComponent
     ],
     templateUrl: './roles.component.html',
     styleUrl: './roles.component.scss'
@@ -84,7 +88,7 @@ export class RolesComponent implements OnInit {
       icon: 'security'
     }
   ];
-
+ staffList :Staff[]=[];
 
   // Data
   roles: Role[] = [
@@ -190,6 +194,20 @@ export class RolesComponent implements OnInit {
     { id: 13, fullName: 'Aisha Khan', employeeId: 'PHR002', role: 'Pharmacist', profilePicture: '', email: 'aisha.khan@hospital.com', phone: '+1-555-0118' },
     { id: 14, fullName: 'Admin User', employeeId: 'ADM001', role: 'Admin', profilePicture: '', email: 'admin@hospital.com', phone: '+1-555-0100' }
   ];
+    fiqlkey :string ='filter = true'
+    showFilter = false;
+    filterConfig :any={
+      filterConfig:[
+        { key: 'employeeId', label: 'Employee ID', type: 'input' },
+        { key: 'fullName', label: 'Full Name', type: 'input' },
+        { key: 'role', label: 'Role', type: 'input' },
+        { key: 'specialization', label: 'Specialization', type: 'input' },
+        { key: 'email', label: 'Email', type: 'input' },
+        { key: 'phone', label: 'Phone', type: 'input' }
+      ]
+    }
+    showAddStaffModal = signal<boolean>(false);
+    
 
   // Staff grid
   staffColumnDefs: ColDef[] = [];
@@ -213,25 +231,79 @@ export class RolesComponent implements OnInit {
 
   permissionLevels = ['read', 'write', 'update', 'delete'];
 
-  constructor() {}
+  constructor(
+    private staffService: StaffService,
+    private http: HttpClient,
+    private snackbarservice: SnackbarService,
+    private dialogService: DialogboxService
+  ) {}
 
+  apiConfig :any ={
+    dataConfig:{
+      url:environment.apiUrl,
+      rest:`/api/staff`,
+      params:"",
+      context:"",
+      fiqlkey:"",
+      lLimitKey:"llimit",
+      uLimitKey:"ulimit",
+      requestType:"GET",
+      type:"GET",
+      queryParamsUrl:"llimit=$llimit&ulimit=$ulimit",
+      suppressNullValues:true,
+      suppressDefaultFiqlOnApply:false,
+      dataKey:"content",
+      dataType:"array"
+
+    },
+     filterConfig:{
+      filterConfig:[
+        {
+          key:"employeeId",label:"Employee ID",type:"input"
+        },
+        {
+          key:"fullName",label:"Full Name",type:"input"
+        },
+        {
+          key:"role",label:"Role",type:"input"
+        },
+        {
+          key:"specialization",label:"Specialization",type:"input"
+        },
+      ]
+     }
+  }
   ngOnInit() {
     this.initStaffGrid();
     if (this.roles.length > 0) {
       this.selectedRole = this.roles[0];
     }
+    this.getloadStaff();
+  }
+  getloadStaff():void{
+    this.staffService.getStaff().subscribe({
+      next:(res:any)=>{
+        this.staffList = res.data || res || [];
+        console.log('Staff loaded successfully', this.staffList.length);
+      },
+      error:(err)=>{
+        console.error('Failed to load staff', err);
+        this.snackbarservice.error('Failed to load staff');
+      }
+    })
   }
 
   initStaffGrid(): void {
+    this.apiConfig.filterConfig = this.filterConfig;
     this.staffColumnDefs = [
       { headerName: 'ID', field: 'employeeId', width: 110, sortable: true },
-      { headerName: 'Name', field: 'fullName', flex: 1, sortable: true, filter: true },
+      { headerName: 'Name', field: 'fullName', width:150, sortable: true, filter: true },
       { headerName: 'Role', field: 'role', width: 140, sortable: true, filter: true },
-      { headerName: 'Specialization', field: 'specialization', width: 150, sortable: true,
+      { headerName: 'Specialization', field: 'specialization', width: 120, sortable: true, filter:true,
         valueGetter: (params: any) => params.data?.specialization || '—'
       },
-      { headerName: 'Email', field: 'email', flex: 1, sortable: true },
-      { headerName: 'Phone', field: 'phone', width: 140 }
+      { headerName: 'Email', field: 'email', width:180, sortable: true },
+      { headerName: 'Phone', field: 'phone', width: 150,sortable :true,filter:true }
     ];
     this.staffGridOptions = {
       menuActions: [
@@ -284,6 +356,8 @@ export class RolesComponent implements OnInit {
   getRoleByName(roleName: string): Role | undefined {
     return this.roles.find(role => role.name === roleName);
   }
+
+
 
   // New methods for standardized components
 

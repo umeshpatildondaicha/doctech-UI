@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ColDef } from 'ag-grid-community';
 import { Router } from '@angular/router';
 
-import { GridComponent } from "@lk/core";
+import { FilterComponent, GridComponent, SnackbarService } from "@lk/core";
 import { IconComponent } from "@lk/core";
 import { StatusCellRendererComponent } from "@lk/core";
 import { DialogboxService } from "@lk/core";
@@ -20,6 +20,8 @@ import { AdminDoctorCreateComponent } from './doctor-create/doctor-create.compon
 import { DoctorViewDialogComponent } from './doctor-view-dialog/doctor-view-dialog.component';
 import { DoctorScheduleDialogComponent } from './doctor-schedule-dialog/doctor-schedule-dialog.component';
 import { DoctorService } from '../../../services/doctor.service';
+import { environment } from '../../../../environments/environment';
+import { JsonPipe } from '@angular/common';
 
 
 
@@ -51,13 +53,17 @@ interface DoctorStats {
 
 @Component({
   selector: 'app-doctors',
+  standalone:true,
   imports: [
     FormsModule,
     MatIconModule,
     GridComponent,
     IconComponent,
     AdminStatsCardComponent,
-    PageComponent
+    PageComponent,
+    FilterComponent,
+    JsonPipe
+    
   ],
   templateUrl: './doctors.component.html',
   styleUrl: './doctors.component.scss'
@@ -68,6 +74,8 @@ export class DoctorsComponent implements OnInit, OnDestroy {
   gridOptions: any = {};
   rowData: any[] = [];
   hospitalId = 'HOSP-001';
+  fiqlKey: string ='filter=true'
+  showFilter = false;
 
   // Page header configuration
   headerActions: HeaderAction[] = [
@@ -94,10 +102,54 @@ export class DoctorsComponent implements OnInit, OnDestroy {
     private doctorService: DoctorService,
     private snackBar: MatSnackBar,
     private router: Router,
+    private snackbarService :SnackbarService,
     private eventService: CoreEventService
   ) { }
 
+  apiConfig:any = {
+    dataConfig: {
+      url: environment.apiUrl,
+      rest: `/api/doctors?hospitalId=${this.hospitalId}`,
+      params: "",
+      context: "",
+      dataKey: "doctorDetails",
+      fiqlKey: "",
+      lLimitKey: 'llimit',
+      uLimitKey: 'ulimit',
+      requestType: 'GET',
+      type: 'GET',
+      queryParamsUrl: 'llimit=$llimit&ulimit=$ulimit',
+      suppressNullValues: true,
+      suppressDefaultFiqlOnApply: false,
+      dataType: 'array',
+      
+    },
+    filterConfig: {
+      filterConfig: [
+        { key: 'registrationNumber', label: 'Doctor ID', type: 'input' },
+        { key: 'firstName', label: 'First Name', type: 'input' },
+        { key: 'lastName', label: 'Last Name', type: 'input' },
+        { key: 'specialization', label: 'Specialization', type: 'input' },
+        {
+          key: 'doctorStatus',
+          label: 'Status',
+          type: 'select',
+          optionList: [
+            { name: 'Approved', value: 'APPROVED' },
+            { name: 'Pending', value: 'PENDING' },
+            { name: 'Rejected', value: 'REJECTED' },
+            { name: 'Inactive', value: 'INACTIVE' }
+          ]
+        },
+        { key: 'contactNumber', label: 'Contact Number', type: 'input' },
+        { key: 'email', label: 'Email', type: 'input' }
+      ]
+    }
+  }
+ 
+  
   ngOnInit() {
+    console.log('apiConfig',this.apiConfig);
     // Set breadcrumb in topbar using CoreEventService
     this.eventService.setBreadcrumb(this.breadcrumb);
 
@@ -115,15 +167,22 @@ export class DoctorsComponent implements OnInit, OnDestroy {
     this.columnDefs = [
       {
         headerName: 'Doctor ID',
-        field: 'id',
+        field: 'registrationNumber',
         width: 120,
         sortable: true,
         filter: true
       },
       {
-        headerName: 'Name',
-        field: 'name',
-        width: 200,
+        headerName: 'FirstName',
+        field: 'firstName',
+        width: 150,
+        sortable: true,
+        filter: true
+      },
+      {
+        headerName: 'LastName',
+        field: 'lastName',
+        width: 150,
         sortable: true,
         filter: true
       },
@@ -134,25 +193,18 @@ export class DoctorsComponent implements OnInit, OnDestroy {
         sortable: true,
         filter: true
       },
-      {
-        headerName: 'Availability',
-        field: 'availability',
-        width: 140,
-        sortable: true,
-        filter: true,
-        cellRenderer: StatusCellRendererComponent
-      },
+      
       {
         headerName: 'Status',
-        field: 'status',
+        field: 'doctorStatus',
         width: 120,
         sortable: true,
         filter: true,
         cellRenderer: StatusCellRendererComponent
       },
       {
-        headerName: 'Phone',
-        field: 'phone',
+        headerName: 'Contact Number',
+        field: 'contactNumber',
         width: 150,
         sortable: true,
         filter: true
@@ -167,13 +219,13 @@ export class DoctorsComponent implements OnInit, OnDestroy {
       {
         headerName: 'Qualifications',
         field: 'qualifications',
-        width: 120,
+        width: 150,
         sortable: true,
         filter: true
       },
       {
         headerName: 'Joined Date',
-        field: 'joinedDate',
+        field: 'createdAt',
         width: 120,
         sortable: true,
         filter: true,
@@ -184,6 +236,8 @@ export class DoctorsComponent implements OnInit, OnDestroy {
     ];
 
     this.gridOptions = {
+      enableFilter: true,
+      filterConfig: this.apiConfig.filterConfig,
       menuActions: [
         {
           title: 'View',
@@ -229,7 +283,7 @@ export class DoctorsComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error(' Failed to load doctors:', err);
-          this.showSnackBar('Failed to load doctor list: ' + (err?.message || 'Network error'));
+          this.snackbarService.error('Failed to load doctor list: ' + (err?.message || 'Network error'));
         }
       });
   }
@@ -277,31 +331,32 @@ export class DoctorsComponent implements OnInit, OnDestroy {
         this.doctorService.createDoctor(hospitalId, result.formData).subscribe({
           next: (response) => {
             console.log(' Doctor created successfully:', response);
-            this.showSnackBar('Doctor created successfully!');
+            this.snackbarService.success('Doctor created successfully!');
             this.loadDoctorData();  // refresh grid
           },
           error: (err) => {
             console.error(' Create doctor failed:', err);
             const msg = err?.error?.message || err?.message || 'Server error';
-            this.showSnackBar('Failed to create doctor: ' + msg);
+            this.snackbarService.error('Failed to create doctor: ' + msg);
           }
         });
       }
 
       if (result?.action === 'invite') {
         this.loadDoctorData();
-        this.showSnackBar('Invitation sent successfully');
+        this.snackbarService.success('Invitation sent successfully');
       }
     });
   }
 
   viewDoctor(doctor: any) {
+    const normalized = this.normalizeDoctorForView(doctor);
     const dialogRef = this.dialogService.openDialog(DoctorViewDialogComponent, {
-      title: `Doctor Profile - ${doctor.name}`,
+      title: `Doctor Profile - ${normalized.name}`,
       width: '60%',
       height: '90%',
       data: {
-        doctor: doctor
+        doctor: normalized
       },
       footerActions: [
         {
@@ -319,26 +374,26 @@ export class DoctorsComponent implements OnInit, OnDestroy {
   }
 
   editDoctor(doctor: any) {
-    // Convert doctor data to the format expected by AdminDoctorCreateComponent (Doctor interface)
-    const nameParts = doctor.name?.split(' ') || [];
+    const d = this.normalizeDoctorForView(doctor);
+    const nameParts = d.name?.split(' ') || [];
     const doctorData = {
-      registrationNumber: doctor.id || '',
-      firstName: nameParts[0] || '',
-      lastName: nameParts.slice(1).join(' ') || '',
-      specialization: doctor.specialization || '',
+      registrationNumber: d.id || '',
+      firstName: nameParts[0] || d.firstName || '',
+      lastName: nameParts.slice(1).join(' ') || d.lastName || '',
+      specialization: d.specialization || '',
       password: '', // Password not required for edit, will be handled by form
-      doctorStatus: this.mapStatusToDoctorStatus(doctor.status),
-      contactNumber: doctor.phone || '',
-      email: doctor.email || '',
-      qualifications: doctor.qualifications || '',
+      doctorStatus: this.mapStatusToDoctorStatus(d.status),
+      contactNumber: d.phone || '',
+      email: d.email || '',
+      qualifications: d.qualifications || '',
       certifications: doctor.certifications || [],
-      profileImageUrl: doctor.profilePic || '',
+      profileImageUrl: d.profilePic || '',
       workingDays: doctor.workingDays || [],
       appointmentTimings: doctor.appointmentTimings || []
     };
 
     const dialogRef = this.dialogService.openDialog(AdminDoctorCreateComponent, {
-      title: `Edit Doctor - ${doctor.name}`,
+      title: `Edit Doctor - ${d.name}`,
       width: '90%',
       height: '90%',
       data: {
@@ -366,25 +421,26 @@ export class DoctorsComponent implements OnInit, OnDestroy {
         // Refresh the doctor list after successful update
         this.loadDoctorData();
         this.updateStatsCards();
-        this.showSnackBar('Doctor updated successfully!');
+        this.snackbarService.info('Doctor updated successfully!');
       }
     });
   }
 
   scheduleDoctor(doctor: any) {
+    const normalized = this.normalizeDoctorForView(doctor);
     const dialogRef = this.dialogService.openDialog(DoctorScheduleDialogComponent, {
-      title: `Schedule - ${doctor.name}`,
+      title: `Schedule - ${normalized.name}`,
       width: '65%',
       height: '90%',
       data: {
-        doctor: doctor
+        doctor: normalized
       },
       footerActions: [
         {
           id: 'cancel',
           text: 'Cancel',
-          color: 'secondary',
-          appearance: 'stroked'
+          color: 'primary',
+          appearance: 'flat'
         },
         {
           id: 'save',
@@ -398,17 +454,17 @@ export class DoctorsComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result && result.action === 'save' && result.formData) {
-        // Handle schedule save
-        this.showSnackBar(`Schedule saved for ${doctor.name}`);
-        // You can add API call here to save the schedule
+        this.snackbarService.info(`Schedule saved for ${normalized.name}`);
       }
     });
   }
 
   deleteDoctor(doctor: any) {
-    if (confirm(`Are you sure you want to delete ${doctor.name}?`)) {
-      this.rowData = this.rowData.filter(d => d.id !== doctor.id);
-      this.showSnackBar(`Doctor ${doctor.name} deleted successfully`);
+    const d = this.normalizeDoctorForView(doctor);
+    if (confirm(`Are you sure you want to delete ${d.name}?`)) {
+      const idToRemove = d.id ?? doctor.registrationNumber ?? doctor.id;
+      this.rowData = this.rowData.filter((row: any) => (row.id ?? row.registrationNumber) !== idToRemove);
+      this.snackbarService.success(`Doctor ${d.name} deleted successfully`);
     }
   }
 
@@ -517,5 +573,29 @@ export class DoctorsComponent implements OnInit, OnDestroy {
       default:
         return 'Inactive';
     }
+  }
+
+  /** Normalize doctor from either API shape (firstName, registrationNumber, etc.) or mapped shape (name, id) for view dialog. */
+  private normalizeDoctorForView(d: any): any {
+    if (!d) return {};
+    const first = d.firstName ?? d.first_name ?? '';
+    const last = d.lastName ?? d.last_name ?? '';
+    const name = (d.name ?? d.fullName ?? [first, last].filter(Boolean).join(' ').trim()) || 'Unknown';
+    const id = d.id ?? d.registrationNumber ?? '';
+    const status = d.status ?? (d.doctorStatus === 'APPROVED' ? 'Active' : d.doctorStatus === 'REJECTED' ? 'Inactive' : 'Pending');
+    const availability = d.availability ?? this.mapDoctorStatusToAvailability(d.doctorStatus);
+    return {
+      ...d,
+      id,
+      name,
+      status,
+      availability,
+      phone: d.phone ?? d.contactNumber ?? '',
+      hospital: d.hospital ?? '',
+      experience: d.experience ?? '',
+      joinedDate: d.joinedDate ?? d.createdAt ?? '',
+      profilePic: d.profilePic ?? d.profileImageUrl ?? '',
+      qualifications: d.qualifications ?? ''
+    };
   }
 } 

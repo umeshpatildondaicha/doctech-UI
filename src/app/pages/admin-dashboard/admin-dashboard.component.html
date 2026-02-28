@@ -39,7 +39,7 @@
         <!-- Financial Summary -->
         <app-card [title]="'Financial Summary'" [divider]="true">
           <div appCardActions>
-            <app-button [text]="'View Details'" [color]="'primary'" [appearance]="'stroked'"></app-button>
+            <app-button [text]="'View Details'" [color]="'primary'" [appearance]="'flat'"></app-button>
           </div>
           <div class="fin-grid">
             @for (metric of financialMetrics; track metric.label) {
@@ -77,7 +77,7 @@
         <!-- Department Performance -->
         <app-card [title]="'Department Performance'" [divider]="true">
           <div appCardActions>
-            <app-button [text]="'View All'" [color]="'accent'" [appearance]="'stroked'"></app-button>
+            <app-button [text]="'View All'" [color]="'primary'" [appearance]="'flat'"></app-button>
           </div>
           <div class="dept-list">
             @for (dept of departments; track dept.id) {
@@ -104,7 +104,7 @@
         <!-- Recent Activities -->
         <app-card [title]="'Recent Activities'" [divider]="true">
           <div appCardActions>
-            <app-button [text]="'View All'" [color]="'accent'" [appearance]="'stroked'" (btnClick)="viewAllActivities()"></app-button>
+            <app-button [text]="'View All'" [color]="'primary'" [appearance]="'flat'" (btnClick)="viewAllActivities()"></app-button>
           </div>
           <div class="act-list">
             @for (activity of recentActivities; track activity.id) {

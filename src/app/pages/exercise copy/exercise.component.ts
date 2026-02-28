@@ -12,7 +12,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
-import { GridComponent, DialogboxService, DialogFooterAction, AppInputComponent, AppButtonComponent, CoreEventService, BreadcrumbItem } from "@lk/core";
+import { GridComponent, DialogboxService, DialogFooterAction, AppInputComponent, AppButtonComponent, CoreEventService, BreadcrumbItem, SnackbarService } from "@lk/core";
 import { ExerciseSet, Exercise, ExerciseStats } from '../../interfaces/exercise.interface';
 import { IconComponent } from "@lk/core";
 import { ExerciseCreateComponent } from '../exercise-create/exercise-create.component';
@@ -60,7 +60,8 @@ export class ExerciseComponent implements OnInit, OnDestroy {
 
   constructor(
     private dialogService: DialogboxService,
-    private eventService: CoreEventService
+    private eventService: CoreEventService,
+    private snackbarService :SnackbarService
   ) {}
 
   ngOnInit() {
@@ -515,6 +516,7 @@ export class ExerciseComponent implements OnInit, OnDestroy {
         this.exercises.splice(index, 1);
         this.exercises = [...this.exercises];
         this.calculateStats();
+
       }
     }
   }
@@ -663,10 +665,12 @@ export class ExerciseComponent implements OnInit, OnDestroy {
       // Check if result has form data (not just action), it means form was submitted successfully
       if (result && (result.groupId || result.groupName || (!result.action && result !== null))) {
         console.log('New exercise group created:', result);
+        this.snackbarService.success('Exercise Group Created Successfully');
         // Add the new exercise group to the array
         this.exerciseGroups.push(result);
         // Refresh the groups data
         this.exerciseGroups = [...this.exerciseGroups];
+        this.snackbarService.success('Exercise Group Updated Successfully');
       }
     });
   }
@@ -735,6 +739,7 @@ export class ExerciseComponent implements OnInit, OnDestroy {
         }
         this.exercises = [...this.exercises];
         this.calculateStats();
+        this.snackbarService.success('Exercise Created Successfully');
       }
     });
   }

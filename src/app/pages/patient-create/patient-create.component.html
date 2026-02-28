@@ -17,8 +17,8 @@
           [required]="true" [rows]="3" [errorMessage]="getErrorMessage('dateOfBirth')" class="form-field">
         </app-input>
 
-        <app-selectbox label="Gender" formControlName="gender" [options]="genderOptions" placeholder="Select gender"
-          [required]="true" [displayExpr]="'label'" [errorMessage]="getErrorMessage('gender')" class="form-field">
+        <app-selectbox label="Gender" [title]="genderSelectTitle" formControlName="gender" [options]="genderOptions" placeholder="Select gender"
+          [required]="true" [displayExpr]="'label'" class="form-field">
         </app-selectbox>
 
         <app-input label="Contact" formControlName="contact" placeholder="Enter contact" [required]="true"
@@ -32,9 +32,9 @@
         <app-input label="City" formControlName="city" [required]="true">
         </app-input>
 
-        <app-selectbox label="Blood Group" formControlName="bloodGroup" [options]="bloodGroups"
+        <app-selectbox label="Blood Group" [title]="bloodGroupSelectTitle" formControlName="bloodGroup" [options]="bloodGroups"
           placeholder="Select blood group" [required]="true" [displayExpr]="'label'"
-          [errorMessage]="getErrorMessage('bloodGroup')" class="form-field">
+         class="form-field">
         </app-selectbox>
       </div>
       <div class="form-row">
@@ -42,9 +42,6 @@
           [multiline]="true" [rows]="3" [errorMessage]="getErrorMessage('address')" class="form-field">
         </app-input>
       </div>
-
-
-
     </form>
   </div>
 

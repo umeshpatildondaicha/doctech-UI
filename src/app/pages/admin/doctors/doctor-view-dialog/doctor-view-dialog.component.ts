@@ -30,12 +30,29 @@ export class DoctorViewDialogComponent {
     return this.data?.doctor || {};
   }
 
+  get displayName(): string {
+    const d = this.doctor;
+    if (!d) return 'Unknown';
+    if (d.name && String(d.name).trim()) return String(d.name).trim();
+    const first = d.firstName ?? d.first_name ?? '';
+    const last = d.lastName ?? d.last_name ?? '';
+    const full = [first, last].filter(Boolean).join(' ').trim();
+    if (full) return full;
+    if (d.fullName && String(d.fullName).trim()) return String(d.fullName).trim();
+    return 'Unknown';
+  }
+
+  get displayId(): string {
+    const d = this.doctor;
+    return d.id ?? d.registrationNumber ?? '';
+  }
+
   close(): void {
     this.dialogRef.close();
   }
 
-  getStatusColor(status: string): string {
-    switch (status?.toLowerCase()) {
+  getStatusColor(status: string | undefined): string {
+    switch (String(status ?? '').toLowerCase()) {
       case 'active':
         return '#4caf50';
       case 'inactive':
@@ -47,8 +64,8 @@ export class DoctorViewDialogComponent {
     }
   }
 
-  getAvailabilityColor(availability: string): string {
-    switch (availability?.toLowerCase()) {
+  getAvailabilityColor(availability: string | undefined): string {
+    switch (String(availability ?? '').toLowerCase()) {
       case 'available':
         return '#4caf50';
       case 'on leave':

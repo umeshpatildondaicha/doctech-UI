@@ -250,8 +250,8 @@ export class BaseConfigurationComponent implements OnInit {
       {
         id: 'cancel',
         text: 'Cancel',
-        color: 'secondary',
-        appearance: 'stroked'
+        color: 'primary',
+        appearance: 'flat'
       },
       {
         id: 'save',
@@ -297,8 +297,8 @@ export class BaseConfigurationComponent implements OnInit {
       {
         id: 'cancel',
         text: 'Cancel',
-        color: 'secondary',
-        appearance: 'stroked'
+        color: 'primary',
+        appearance: 'flat'
       },
       {
         id: 'save',
@@ -338,8 +338,8 @@ export class BaseConfigurationComponent implements OnInit {
       {
         id: 'cancel',
         text: 'Close',
-        color: 'secondary',
-        appearance: 'stroked'
+        color: 'primary',
+        appearance: 'flat'
       }
     ];
 

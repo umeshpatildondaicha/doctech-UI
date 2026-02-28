@@ -76,6 +76,33 @@
         }
       }
 
+      .load-error {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        text-align: center;
+        color: #6b7280;
+
+        .error-icon {
+          margin-bottom: 16px;
+          color: #dc2626;
+        }
+
+        h3 {
+          margin: 0 0 8px;
+          font-size: 18px;
+          font-weight: 600;
+          color: #374151;
+        }
+
+        p {
+          margin: 0;
+          font-size: 14px;
+        }
+      }
+
       .patients-grid-container {
         border: 1px solid #e5e7eb;
         border-radius: 8px;
@@ -101,6 +128,22 @@
               }
             }
           }
+        }
+      }
+
+      .dialog-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #e5e7eb;
+
+        .selected-hint {
+          margin: 0;
+          font-size: 14px;
+          color: #6b7280;
         }
       }
     }

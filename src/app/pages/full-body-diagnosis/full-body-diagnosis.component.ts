@@ -105,15 +105,15 @@ export class FullBodyDiagnosisComponent implements OnInit, OnDestroy {
         {
           id: 'cancel',
           text: 'Cancel',
-          color: 'secondary' as const,
-          appearance: 'stroked' as const
+          color: 'primary' as const,
+          appearance: 'flat' as const
         },
         {
           id: 'save',
           text: 'Add Comment',
           color: 'primary' as const,
-          appearance: 'raised' as const,
-          disabled: true
+          appearance: 'flat' as const,
+          disabled: false
         }
       ],
       width: '500px'
