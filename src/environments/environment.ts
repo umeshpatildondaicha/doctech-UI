@@ -72,11 +72,34 @@ export const environment = {
     departments: {
       base: '/api/departments',
       byId: (id: number) => `/api/departments/${id}`,
+      byHospital: (hospitalPublicId: string) => `/api/departments/by-hospital/${hospitalPublicId}`,
       staff: (deptId: number) => `/api/departments/${deptId}/staff`
+    },
+    subDepartments: {
+      base: '/api/subdepartments',
+      byId: (id: number) => `/api/subdepartments/${id}`,
+      byDepartment: (deptId: number) => `/api/subdepartments/by-department/${deptId}`
+    },
+    subscriptions: {
+      base: '/api/subscriptions',
+      byHospital: (hospitalPublicId: string) => `/api/subscriptions/hospital/${hospitalPublicId}`,
+      subscribe: '/api/subscriptions/subscribe',
+      unsubscribe: '/api/subscriptions/unsubscribe'
+    },
+    staffRoles: {
+      byStaff: (staffId: number) => `/api/staff/${staffId}/roles`,
+      assign: (staffId: number, roleId: string) => `/api/staff/${staffId}/roles/assign/${roleId}`,
+      unassign: (staffId: number, staffRoleId: string) => `/api/staff/${staffId}/roles/unassign/${staffRoleId}`
+    },
+    staffFeatures: {
+      byStaff: (staffId: number) => `/api/staff/${staffId}/features`,
+      grant: (staffId: number, featureId: string) => `/api/staff/${staffId}/features/grant/${featureId}`,
+      revoke: (staffId: number, featureId: string) => `/api/staff/${staffId}/features/revoke/${featureId}`
     },
     catalog: {
       features: '/api/catalog/features',
-      services: '/api/catalog/services'
+      services: '/api/catalog/services',
+      featuresByService: (serviceId: string) => `/api/catalog/features/by-service/${serviceId}`
     }
   },
   

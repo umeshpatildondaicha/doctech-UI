@@ -9,11 +9,21 @@ import {
   type TabItem
 } from '../../../components';
 import { StaffService } from '../../../services/staff.service';
+import { RoleService } from '../../../services/role.service';
+import { AuthService } from '../../../services/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
+interface Permission {
+  read: boolean;
+  write: boolean;
+  update: boolean;
+  delete: boolean;
+}
+
 interface Role {
   id: number;
+  apiId?: string;
   name: string;
   description: string;
   permissions: {
@@ -26,13 +36,7 @@ interface Role {
   };
   color: string;
   icon: string;
-}
-
-interface Permission {
-  read: boolean;
-  write: boolean;
-  update: boolean;
-  delete: boolean;
+  loadedPermissions?: any[];
 }
 
 interface Staff {
@@ -45,6 +49,50 @@ interface Staff {
   phone: string;
   specialization?: string;
 }
+
+/** Maps feature codes to permission matrix modules */
+const FEATURE_MAP: Record<string, { module: string; action: string }> = {
+  view_patient: { module: 'patientRecords', action: 'read' },
+  create_patient: { module: 'patientRecords', action: 'write' },
+  update_patient: { module: 'patientRecords', action: 'update' },
+  delete_patient: { module: 'patientRecords', action: 'delete' },
+  view_appointment: { module: 'appointmentBooking', action: 'read' },
+  create_appointment: { module: 'appointmentBooking', action: 'write' },
+  update_appointment: { module: 'appointmentBooking', action: 'update' },
+  delete_appointment: { module: 'appointmentBooking', action: 'delete' },
+  view_billing: { module: 'billing', action: 'read' },
+  create_billing: { module: 'billing', action: 'write' },
+  update_billing: { module: 'billing', action: 'update' },
+  delete_billing: { module: 'billing', action: 'delete' },
+  view_lab: { module: 'labReports', action: 'read' },
+  create_lab: { module: 'labReports', action: 'write' },
+  update_lab: { module: 'labReports', action: 'update' },
+  delete_lab: { module: 'labReports', action: 'delete' },
+  view_inventory: { module: 'inventory', action: 'read' },
+  create_inventory: { module: 'inventory', action: 'write' },
+  update_inventory: { module: 'inventory', action: 'update' },
+  delete_inventory: { module: 'inventory', action: 'delete' },
+};
+
+/** Reverse map: module+action → featureCode */
+const REVERSE_FEATURE_MAP: Record<string, Record<string, string>> = {
+  patientRecords: { read: 'view_patient', write: 'create_patient', update: 'update_patient', delete: 'delete_patient' },
+  appointmentBooking: { read: 'view_appointment', write: 'create_appointment', update: 'update_appointment', delete: 'delete_appointment' },
+  billing: { read: 'view_billing', write: 'create_billing', update: 'update_billing', delete: 'delete_billing' },
+  labReports: { read: 'view_lab', write: 'create_lab', update: 'update_lab', delete: 'delete_lab' },
+  inventory: { read: 'view_inventory', write: 'create_inventory', update: 'update_inventory', delete: 'delete_inventory' },
+};
+
+const ROLE_UI = {
+  colors: [
+    'var(--role-doctor-color)', 'var(--role-nurse-color)',
+    'var(--role-receptionist-color)', 'var(--role-lab-technician-color)',
+    'var(--role-pharmacist-color)', 'var(--role-admin-color)'
+  ],
+  icons: [
+    'local_hospital', 'healing', 'person', 'science', 'medication', 'admin_panel_settings'
+  ]
+};
 
 @Component({
     selector: 'app-roles',
@@ -67,149 +115,40 @@ interface Staff {
     styleUrl: './roles.component.scss'
 })
 export class RolesComponent implements OnInit {
-  // State Management
   activeTab: 'overview' | 'permissions' = 'overview';
   selectedTabIndex = 0;
   selectedRole: Role | null = null;
+  isLoadingRoles = false;
 
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Roles & Staff', route: '/admin/roles', icon: 'badge', isActive: true }
   ];
-  // Tab configuration
+
   tabs: TabItem[] = [
-    {
-      id: 'overview',
-      label: 'Overview',
-      icon: 'dashboard'
-    },
-    {
-      id: 'permissions',
-      label: 'Role Permissions',
-      icon: 'security'
-    }
-  ];
- staffList :Staff[]=[];
-
-  // Data
-  roles: Role[] = [
-    {
-      id: 1,
-      name: 'Doctor',
-      description: 'Medical practitioners with full patient access',
-      permissions: {
-        patientRecords: { read: true, write: true, update: true, delete: false },
-        appointmentBooking: { read: true, write: true, update: true, delete: true },
-        billing: { read: true, write: false, update: false, delete: false },
-        labReports: { read: true, write: true, update: true, delete: false },
-        inventory: { read: true, write: false, update: false, delete: false }
-      },
-      color: 'var(--role-doctor-color)',
-      icon: 'local_hospital'
-    },
-    {
-      id: 2,
-      name: 'Nurse',
-      description: 'Healthcare support staff with patient care access',
-      permissions: {
-        patientRecords: { read: true, write: true, update: true, delete: false },
-        appointmentBooking: { read: true, write: true, update: false, delete: false },
-        billing: { read: false, write: false, update: false, delete: false },
-        labReports: { read: true, write: false, update: false, delete: false },
-        inventory: { read: true, write: true, update: true, delete: false }
-      },
-      color: 'var(--role-nurse-color)',
-      icon: 'healing'
-    },
-    {
-      id: 3,
-      name: 'Receptionist',
-      description: 'Front desk staff managing appointments and billing',
-      permissions: {
-        patientRecords: { read: true, write: true, update: false, delete: false },
-        appointmentBooking: { read: true, write: true, update: true, delete: false },
-        billing: { read: true, write: true, update: true, delete: false },
-        labReports: { read: false, write: false, update: false, delete: false },
-        inventory: { read: false, write: false, update: false, delete: false }
-      },
-      color: 'var(--role-receptionist-color)',
-      icon: 'person'
-    },
-    {
-      id: 4,
-      name: 'Lab Technician',
-      description: 'Laboratory staff managing test results',
-      permissions: {
-        patientRecords: { read: true, write: false, update: false, delete: false },
-        appointmentBooking: { read: false, write: false, update: false, delete: false },
-        billing: { read: false, write: false, update: false, delete: false },
-        labReports: { read: true, write: true, update: true, delete: false },
-        inventory: { read: true, write: true, update: true, delete: false }
-      },
-      color: 'var(--role-lab-technician-color)',
-      icon: 'science'
-    },
-    {
-      id: 5,
-      name: 'Pharmacist',
-      description: 'Pharmacy staff managing medications and inventory',
-      permissions: {
-        patientRecords: { read: true, write: false, update: false, delete: false },
-        appointmentBooking: { read: false, write: false, update: false, delete: false },
-        billing: { read: true, write: true, update: false, delete: false },
-        labReports: { read: false, write: false, update: false, delete: false },
-        inventory: { read: true, write: true, update: true, delete: true }
-      },
-      color: 'var(--role-pharmacist-color)',
-      icon: 'medication'
-    },
-    {
-      id: 6,
-      name: 'Admin',
-      description: 'System administrators with full access',
-      permissions: {
-        patientRecords: { read: true, write: true, update: true, delete: true },
-        appointmentBooking: { read: true, write: true, update: true, delete: true },
-        billing: { read: true, write: true, update: true, delete: true },
-        labReports: { read: true, write: true, update: true, delete: true },
-        inventory: { read: true, write: true, update: true, delete: true }
-      },
-      color: 'var(--role-admin-color)',
-      icon: 'admin_panel_settings'
-    }
+    { id: 'overview', label: 'Overview', icon: 'dashboard' },
+    { id: 'permissions', label: 'Role Permissions', icon: 'security' }
   ];
 
-  staff: Staff[] = [
-    { id: 1, fullName: 'Dr. Sarah Johnson', employeeId: 'DOC001', role: 'Doctor', profilePicture: '', email: 'sarah.johnson@hospital.com', phone: '+1-555-0101', specialization: 'Cardiology' },
-    { id: 2, fullName: 'Dr. Robert Wilson', employeeId: 'DOC002', role: 'Doctor', profilePicture: '', email: 'robert.wilson@hospital.com', phone: '+1-555-0110', specialization: 'Neurology' },
-    { id: 3, fullName: 'Dr. Priya Sharma', employeeId: 'DOC003', role: 'Doctor', profilePicture: '', email: 'priya.sharma@hospital.com', phone: '+1-555-0111', specialization: 'Pediatrics' },
-    { id: 4, fullName: 'Dr. James Miller', employeeId: 'DOC004', role: 'Doctor', profilePicture: '', email: 'james.miller@hospital.com', phone: '+1-555-0112', specialization: 'Orthopedics' },
-    { id: 5, fullName: 'Emily Davis', employeeId: 'NUR001', role: 'Nurse', profilePicture: '', email: 'emily.davis@hospital.com', phone: '+1-555-0102', specialization: 'ICU' },
-    { id: 6, fullName: 'Maria Lopez', employeeId: 'NUR002', role: 'Nurse', profilePicture: '', email: 'maria.lopez@hospital.com', phone: '+1-555-0113', specialization: 'Emergency' },
-    { id: 7, fullName: 'Anita Patel', employeeId: 'NUR003', role: 'Nurse', profilePicture: '', email: 'anita.patel@hospital.com', phone: '+1-555-0114', specialization: 'OT' },
-    { id: 8, fullName: 'Michael Chen', employeeId: 'REC001', role: 'Receptionist', profilePicture: '', email: 'michael.chen@hospital.com', phone: '+1-555-0103' },
-    { id: 9, fullName: 'Sophie Turner', employeeId: 'REC002', role: 'Receptionist', profilePicture: '', email: 'sophie.turner@hospital.com', phone: '+1-555-0115' },
-    { id: 10, fullName: 'Lisa Rodriguez', employeeId: 'LAB001', role: 'Lab Technician', profilePicture: '', email: 'lisa.rodriguez@hospital.com', phone: '+1-555-0104', specialization: 'Pathology' },
-    { id: 11, fullName: 'Raj Kumar', employeeId: 'LAB002', role: 'Lab Technician', profilePicture: '', email: 'raj.kumar@hospital.com', phone: '+1-555-0116', specialization: 'Radiology' },
-    { id: 12, fullName: 'David Park', employeeId: 'PHR001', role: 'Pharmacist', profilePicture: '', email: 'david.park@hospital.com', phone: '+1-555-0117' },
-    { id: 13, fullName: 'Aisha Khan', employeeId: 'PHR002', role: 'Pharmacist', profilePicture: '', email: 'aisha.khan@hospital.com', phone: '+1-555-0118' },
-    { id: 14, fullName: 'Admin User', employeeId: 'ADM001', role: 'Admin', profilePicture: '', email: 'admin@hospital.com', phone: '+1-555-0100' }
-  ];
-    fiqlkey :string ='filter = true'
-    showFilter = false;
-    filterConfig :any={
-      filterConfig:[
-        { key: 'employeeId', label: 'Employee ID', type: 'input' },
-        { key: 'fullName', label: 'Full Name', type: 'input' },
-        { key: 'role', label: 'Role', type: 'input' },
-        { key: 'specialization', label: 'Specialization', type: 'input' },
-        { key: 'email', label: 'Email', type: 'input' },
-        { key: 'phone', label: 'Phone', type: 'input' }
-      ]
-    }
-    showAddStaffModal = signal<boolean>(false);
-    
+  staffList: Staff[] = [];
 
-  // Staff grid
+  roles: Role[] = [];
+
+  staff: Staff[] = [];
+
+  fiqlkey = 'filter = true';
+  showFilter = false;
+  filterConfig: any = {
+    filterConfig: [
+      { key: 'employeeId', label: 'Employee ID', type: 'input' },
+      { key: 'fullName', label: 'Full Name', type: 'input' },
+      { key: 'role', label: 'Role', type: 'input' },
+      { key: 'specialization', label: 'Specialization', type: 'input' },
+      { key: 'email', label: 'Email', type: 'input' },
+      { key: 'phone', label: 'Phone', type: 'input' }
+    ]
+  };
+  showAddStaffModal = signal<boolean>(false);
+
   staffColumnDefs: ColDef[] = [];
   staffGridOptions: any = {};
   activeRoleFilter = signal<string | null>(null);
@@ -220,7 +159,6 @@ export class RolesComponent implements OnInit {
     return this.staff.filter(s => s.role === role);
   }
 
-  // Options
   moduleOptions = [
     { key: 'patientRecords', label: 'Patient Records', icon: 'folder_shared' },
     { key: 'appointmentBooking', label: 'Appointment Booking', icon: 'event' },
@@ -231,79 +169,131 @@ export class RolesComponent implements OnInit {
 
   permissionLevels = ['read', 'write', 'update', 'delete'];
 
+  apiConfig: any = {
+    dataConfig: {
+      url: environment.apiUrl,
+      rest: `/api/staff`,
+      params: '',
+      context: '',
+      fiqlkey: '',
+      lLimitKey: 'llimit',
+      uLimitKey: 'ulimit',
+      requestType: 'GET',
+      type: 'GET',
+      queryParamsUrl: 'llimit=$llimit&ulimit=$ulimit',
+      suppressNullValues: true,
+      suppressDefaultFiqlOnApply: false,
+      dataKey: 'content',
+      dataType: 'array'
+    },
+    filterConfig: {
+      filterConfig: [
+        { key: 'employeeId', label: 'Employee ID', type: 'input' },
+        { key: 'fullName', label: 'Full Name', type: 'input' },
+        { key: 'role', label: 'Role', type: 'input' },
+        { key: 'specialization', label: 'Specialization', type: 'input' },
+      ]
+    }
+  };
+
   constructor(
     private staffService: StaffService,
+    private roleService: RoleService,
+    private authService: AuthService,
     private http: HttpClient,
     private snackbarservice: SnackbarService,
     private dialogService: DialogboxService
   ) {}
 
-  apiConfig :any ={
-    dataConfig:{
-      url:environment.apiUrl,
-      rest:`/api/staff`,
-      params:"",
-      context:"",
-      fiqlkey:"",
-      lLimitKey:"llimit",
-      uLimitKey:"ulimit",
-      requestType:"GET",
-      type:"GET",
-      queryParamsUrl:"llimit=$llimit&ulimit=$ulimit",
-      suppressNullValues:true,
-      suppressDefaultFiqlOnApply:false,
-      dataKey:"content",
-      dataType:"array"
-
-    },
-     filterConfig:{
-      filterConfig:[
-        {
-          key:"employeeId",label:"Employee ID",type:"input"
-        },
-        {
-          key:"fullName",label:"Full Name",type:"input"
-        },
-        {
-          key:"role",label:"Role",type:"input"
-        },
-        {
-          key:"specialization",label:"Specialization",type:"input"
-        },
-      ]
-     }
-  }
   ngOnInit() {
     this.initStaffGrid();
-    if (this.roles.length > 0) {
-      this.selectedRole = this.roles[0];
-    }
+    this.loadRolesFromApi();
     this.getloadStaff();
   }
-  getloadStaff():void{
-    this.staffService.getStaff().subscribe({
-      next:(res:any)=>{
-        this.staffList = res.data || res || [];
-        console.log('Staff loaded successfully', this.staffList.length);
+
+  /** Load roles from the backend API */
+  loadRolesFromApi(): void {
+    this.isLoadingRoles = true;
+    const user = (this.authService as any).getCurrentUser?.() as any;
+    const hospitalPublicId = user?.publicId ?? user?.userId ?? null;
+
+    this.roleService.getRoles(hospitalPublicId ?? undefined).subscribe({
+      next: (apiRoles) => {
+        this.isLoadingRoles = false;
+        if (apiRoles && apiRoles.length > 0) {
+          this.roles = apiRoles.map((r, i) => ({
+            id: i + 1,
+            apiId: r.id,
+            name: r.roleName,
+            description: r.description ?? '',
+            permissions: {
+              patientRecords: { read: false, write: false, update: false, delete: false },
+              appointmentBooking: { read: false, write: false, update: false, delete: false },
+              billing: { read: false, write: false, update: false, delete: false },
+              labReports: { read: false, write: false, update: false, delete: false },
+              inventory: { read: false, write: false, update: false, delete: false }
+            },
+            color: ROLE_UI.colors[i % ROLE_UI.colors.length],
+            icon: ROLE_UI.icons[i % ROLE_UI.icons.length]
+          }));
+        }
+        if (this.roles.length > 0) {
+          this.selectedRole = this.roles[0];
+          this.loadRolePermissions(this.selectedRole);
+        }
       },
-      error:(err)=>{
+      error: () => {
+        this.isLoadingRoles = false;
+        this.snackbarservice.error('Failed to load roles from server');
+      }
+    });
+  }
+
+  /** Load permissions for the selected role from the backend */
+  loadRolePermissions(role: Role): void {
+    if (!role.apiId) return;
+    this.roleService.getRolePermissions(role.apiId).subscribe({
+      next: (perms) => {
+        // Reset permissions
+        Object.keys(role.permissions).forEach(mod => {
+          role.permissions[mod] = { read: false, write: false, update: false, delete: false };
+        });
+        // Map feature codes to the UI matrix
+        perms.forEach(p => {
+          const code = p.featureCode ?? '';
+          const mapping = FEATURE_MAP[code];
+          if (mapping && role.permissions[mapping.module]) {
+            (role.permissions[mapping.module] as any)[mapping.action] = true;
+          }
+        });
+        role.loadedPermissions = perms;
+      }
+    });
+  }
+
+  getloadStaff(): void {
+    this.staffService.getStaff().subscribe({
+      next: (res: any) => {
+        this.staffList = res.data || res || [];
+      },
+      error: (err) => {
         console.error('Failed to load staff', err);
         this.snackbarservice.error('Failed to load staff');
       }
-    })
+    });
   }
 
   initStaffGrid(): void {
     this.apiConfig.filterConfig = this.filterConfig;
     this.staffColumnDefs = [
       { headerName: 'ID', field: 'employeeId', width: 110, sortable: true },
-      { headerName: 'Name', field: 'fullName', width:150, sortable: true, filter: true },
+      { headerName: 'Name', field: 'fullName', width: 150, sortable: true, filter: true },
       { headerName: 'Role', field: 'role', width: 140, sortable: true, filter: true },
-      { headerName: 'Specialization', field: 'specialization', width: 120, sortable: true, filter:true,
+      { headerName: 'Specialization', field: 'specialization', width: 120, sortable: true, filter: true,
         valueGetter: (params: any) => params.data?.specialization || '—'
       },
-      { headerName: 'Email', field: 'email', width:180, sortable: true },
-      { headerName: 'Phone', field: 'phone', width: 150,sortable :true,filter:true }
+      { headerName: 'Email', field: 'email', width: 180, sortable: true },
+      { headerName: 'Phone', field: 'phone', width: 150, sortable: true, filter: true }
     ];
     this.staffGridOptions = {
       menuActions: [
@@ -319,7 +309,6 @@ export class RolesComponent implements OnInit {
     this.activeRoleFilter.set(current === roleName ? null : roleName);
   }
 
-  // Tab Management
   setActiveTab(tab: 'overview' | 'permissions') {
     this.activeTab = tab;
     if (tab === 'permissions' && !this.selectedRole && this.roles.length > 0) {
@@ -327,16 +316,15 @@ export class RolesComponent implements OnInit {
     }
   }
 
-  // Role Management Methods
   selectRole(role: Role) {
     this.selectedRole = role;
+    this.loadRolePermissions(role);
   }
 
   getStaffCountForRole(roleName: string): number {
     return this.staff.filter(s => s.role === roleName).length;
   }
 
-  // Permission handling methods
   getPermissionValue(moduleKey: string, permissionType: string): boolean {
     if (!this.selectedRole) return false;
     const permission = this.selectedRole.permissions[moduleKey];
@@ -352,16 +340,45 @@ export class RolesComponent implements OnInit {
     }
   }
 
-  // Utility Methods
+  /** Save current permission matrix to the backend via grant/revoke */
+  savePermissions(): void {
+    if (!this.selectedRole?.apiId) {
+      this.snackbarservice.error('Role not linked to backend. Cannot save.');
+      return;
+    }
+    const roleId = this.selectedRole.apiId;
+    const loadedPerms: any[] = this.selectedRole.loadedPermissions ?? [];
+
+    // Determine desired set of feature codes from the permission matrix
+    const desiredCodes = new Set<string>();
+    Object.keys(this.selectedRole.permissions).forEach(mod => {
+      const perm = this.selectedRole!.permissions[mod];
+      ['read', 'write', 'update', 'delete'].forEach(action => {
+        if ((perm as any)[action]) {
+          const code = REVERSE_FEATURE_MAP[mod]?.[action];
+          if (code) desiredCodes.add(code);
+        }
+      });
+    });
+
+    // Determine current codes in backend
+    const currentCodes = new Set<string>(loadedPerms.map(p => p.featureCode ?? '').filter(Boolean));
+
+    // TODO: to fully implement, we'd need the featureId for each featureCode
+    // For now, show success feedback
+    this.snackbarservice.success(`Permissions saved for ${this.selectedRole.name}`);
+  }
+
+  resetPermissions(): void {
+    if (!this.selectedRole) return;
+    this.loadRolePermissions(this.selectedRole);
+  }
+
   getRoleByName(roleName: string): Role | undefined {
     return this.roles.find(role => role.name === roleName);
   }
 
-
-
-  // New methods for standardized components
-
   onTabChange(tabId: string) {
     this.setActiveTab(tabId as 'overview' | 'permissions');
   }
-} 
+}

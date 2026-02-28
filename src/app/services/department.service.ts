@@ -8,9 +8,17 @@ import { StaffMember } from './staff.service';
 export interface Department {
   departmentId?: number;
   tenantId?: string;
-  hospitalId?: string;
+  hospitalPublicId?: string;
   name: string;
   description?: string;
+  active?: boolean;
+}
+
+export interface SubDepartment {
+  subDepartmentId?: number;
+  name: string;
+  description?: string;
+  departmentId?: number;
   active?: boolean;
 }
 
@@ -29,16 +37,20 @@ export class DepartmentService {
 
   private readonly baseUrl = environment.apiUrl;
   private readonly ep = environment.endpoints.departments;
+  private readonly subEp = environment.endpoints.subDepartments;
 
   constructor(private http: HttpClient) {}
 
   getDepartments(): Observable<Department[]> {
-    return this.http.get<DepartmentListResponse>(`${this.baseUrl}${this.ep.base}`)
-      .pipe(map(res => res.departments ?? []));
+    return this.http.get<Department[]>(`${this.baseUrl}${this.ep.base}`);
   }
 
   getDepartmentById(id: number): Observable<Department> {
     return this.http.get<Department>(`${this.baseUrl}${this.ep.byId(id)}`);
+  }
+
+  getDepartmentsByHospital(hospitalPublicId: string): Observable<Department[]> {
+    return this.http.get<Department[]>(`${this.baseUrl}${this.ep.byHospital(hospitalPublicId)}`);
   }
 
   createDepartment(dept: Department): Observable<Department> {
@@ -56,5 +68,31 @@ export class DepartmentService {
   getDepartmentStaff(deptId: number): Observable<StaffMember[]> {
     return this.http.get<DepartmentStaffResponse>(`${this.baseUrl}${this.ep.staff(deptId)}`)
       .pipe(map(res => res.staffDetails ?? []));
+  }
+
+  // ── SubDepartment methods ──────────────────────────────────────────────────
+
+  getSubDepartments(): Observable<SubDepartment[]> {
+    return this.http.get<SubDepartment[]>(`${this.baseUrl}${this.subEp.base}`);
+  }
+
+  getSubDepartmentById(id: number): Observable<SubDepartment> {
+    return this.http.get<SubDepartment>(`${this.baseUrl}${this.subEp.byId(id)}`);
+  }
+
+  getSubDepartmentsByDepartment(departmentId: number): Observable<SubDepartment[]> {
+    return this.http.get<SubDepartment[]>(`${this.baseUrl}${this.subEp.byDepartment(departmentId)}`);
+  }
+
+  createSubDepartment(subDept: SubDepartment): Observable<SubDepartment> {
+    return this.http.post<SubDepartment>(`${this.baseUrl}${this.subEp.base}`, subDept);
+  }
+
+  updateSubDepartment(id: number, subDept: SubDepartment): Observable<SubDepartment> {
+    return this.http.put<SubDepartment>(`${this.baseUrl}${this.subEp.byId(id)}`, subDept);
+  }
+
+  deleteSubDepartment(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}${this.subEp.byId(id)}`);
   }
 }
