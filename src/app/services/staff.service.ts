@@ -18,6 +18,7 @@ export interface StaffMember {
   role?: string;
   roles?: string[];
   departmentId?: number;
+  hospitalPublicId?: string;
   specialization?: string;
   qualifications?: string;
   experienceYears?: number;
@@ -58,16 +59,29 @@ export class StaffService {
 
   constructor(private readonly http: HttpClient) {}
 
+  /** GET /api/staff - list all staff */
   getStaff(_params?: { role?: string; departmentId?: number; active?: boolean }): Observable<StaffListResponse> {
     return this.http.get<unknown>(`${this.baseUrl}/api/staff`).pipe(
       map((res: unknown) => {
-        if (Array.isArray(res)) {
-          return { staffDetails: res as StaffMember[] };
-        }
+        if (Array.isArray(res)) return { staffDetails: res as StaffMember[] };
         const r = res as Record<string, unknown>;
         if (r['staffDetails']) return res as StaffListResponse;
         if (r['data'])         return { staffDetails: r['data'] as StaffMember[] };
         if (r['content'])      return { staffDetails: r['content'] as StaffMember[] };
+        return { staffDetails: [] };
+      }),
+      catchError(() => of({ staffDetails: [] }))
+    );
+  }
+
+  /** GET /api/staff/by-hospital/{hospitalPublicId} */
+  getStaffByHospital(hospitalPublicId: string): Observable<StaffListResponse> {
+    return this.http.get<unknown>(`${this.baseUrl}/api/staff/by-hospital/${encodeURIComponent(hospitalPublicId)}`).pipe(
+      map((res: unknown) => {
+        if (Array.isArray(res)) return { staffDetails: res as StaffMember[] };
+        const r = res as Record<string, unknown>;
+        if (r['staffDetails']) return res as StaffListResponse;
+        if (r['data'])         return { staffDetails: r['data'] as StaffMember[] };
         return { staffDetails: [] };
       }),
       catchError(() => of({ staffDetails: [] }))

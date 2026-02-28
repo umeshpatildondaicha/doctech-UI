@@ -14,6 +14,11 @@ import { PageComponent, BreadcrumbItem } from '@lk/core';
 import { AdminTabsComponent, type TabItem } from '../../../components';
 import { StaffService, StaffMember, StaffInviteRequest } from '../../../services/staff.service';
 import { DepartmentService, Department } from '../../../services/department.service';
+import { RoleService, Role } from '../../../services/role.service';
+import { StaffRoleService, StaffRoleAssignment } from '../../../services/staff-role.service';
+import { StaffFeatureService, StaffFeaturePermission } from '../../../services/staff-feature.service';
+import { CatalogService, FeatureCatalogItem } from '../../../services/catalog.service';
+import { AuthService } from '../../../services/auth.service';
 import { ReplacePipe } from '../../../pipes/replace.pipe';
 
 export type StaffStatus = 'Active' | 'Off Duty' | 'On Break' | 'On Leave';
@@ -34,7 +39,7 @@ export interface DisplayStaff {
   employeeId: string;
   assignmentType: AssignmentType;
   assignedDoctorName?: string;
-  onboardingStep: number;   // 0–4
+  onboardingStep: number;
   loginActivity: LoginEvent[];
   documents: StaffDocument[];
   username: string;
@@ -82,14 +87,24 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
   showAddPanel     = signal(false);
   showInvitePanel  = signal(false);
   selectedStaff    = signal<DisplayStaff | null>(null);
-  activeDetailTab  = signal<'overview' | 'security' | 'documents'>('overview');
+  activeDetailTab  = signal<'overview' | 'security' | 'documents' | 'roles'>('overview');
 
-  searchQuery      = signal('');
-  statusFilter     = signal<StaffStatus | 'All'>('All');
+  searchQuery  = signal('');
+  statusFilter = signal<StaffStatus | 'All'>('All');
 
   rawStaff: StaffMember[]   = [];
   departments: Department[] = [];
   displayStaff: DisplayStaff[] = [];
+
+  // Roles & Access tab state
+  availableRoles: Role[]                   = [];
+  assignedRoles: StaffRoleAssignment[]     = [];
+  grantedFeatures: StaffFeaturePermission[] = [];
+  allFeatures: FeatureCatalogItem[]        = [];
+  isLoadingRoles   = signal(false);
+  isLoadingFeatures = signal(false);
+
+  hospitalPublicId: string | null = null;
 
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Staff Management', route: '/admin/staff', icon: 'groups', isActive: true }
@@ -128,24 +143,41 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
     });
   }
 
-  get totalActive(): number { return this.displayStaff.filter(s => s.status === 'Active').length; }
+  get totalActive(): number  { return this.displayStaff.filter(s => s.status === 'Active').length; }
   get totalOffDuty(): number { return this.displayStaff.filter(s => s.status === 'Off Duty').length; }
   get totalOnLeave(): number { return this.displayStaff.filter(s => s.status === 'On Leave').length; }
 
-  // ── Lifecycle ──────────────────────────────────────────────────────────────
+  // ── Roles tab helpers ──────────────────────────────────────────────────────
+  get assignedRoleIds(): Set<string> {
+    return new Set(this.assignedRoles.map(r => r.roleId));
+  }
 
+  get grantedFeatureIds(): Set<string> {
+    return new Set(this.grantedFeatures.map(f => f.featureId));
+  }
+
+  // ── Lifecycle ──────────────────────────────────────────────────────────────
   constructor(
-    private readonly staffService:     StaffService,
-    private readonly departmentService: DepartmentService,
-    private readonly fb:               FormBuilder,
-    private readonly snackBar:         MatSnackBar,
-    private readonly cdr:              ChangeDetectorRef,
-    private readonly router:           Router
+    private readonly staffService:         StaffService,
+    private readonly departmentService:    DepartmentService,
+    private readonly roleService:          RoleService,
+    private readonly staffRoleService:     StaffRoleService,
+    private readonly staffFeatureService:  StaffFeatureService,
+    private readonly catalogService:       CatalogService,
+    private readonly authService:          AuthService,
+    private readonly fb:                   FormBuilder,
+    private readonly snackBar:             MatSnackBar,
+    private readonly cdr:                  ChangeDetectorRef,
+    private readonly router:               Router
   ) {}
 
   ngOnInit(): void {
+    const user = (this.authService as any).getCurrentUser?.() as any;
+    this.hospitalPublicId = user?.publicId ?? user?.userId ?? null;
     this.initForms();
     this.loadData();
+    this.loadAvailableRoles();
+    this.loadAllFeatures();
   }
 
   ngOnDestroy(): void {
@@ -154,24 +186,141 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
   }
 
   // ── Navigation ─────────────────────────────────────────────────────────────
-
   onAdminTabChange(tabId: string): void {
     this.router.navigate([tabId]);
   }
 
   // ── Selection ──────────────────────────────────────────────────────────────
-
   openDetail(staff: DisplayStaff): void {
     this.selectedStaff.set(staff);
     this.activeDetailTab.set('overview');
+    this.assignedRoles = [];
+    this.grantedFeatures = [];
   }
 
   closeDetail(): void {
     this.selectedStaff.set(null);
   }
 
-  // ── Staff actions ──────────────────────────────────────────────────────────
+  switchTab(tab: 'overview' | 'security' | 'documents' | 'roles'): void {
+    this.activeDetailTab.set(tab);
+    if (tab === 'roles') {
+      const staff = this.selectedStaff();
+      if (staff) {
+        this.loadStaffRoles(staff.id);
+        if (this.hospitalPublicId) this.loadStaffFeatures(staff.id);
+      }
+    }
+  }
 
+  // ── Roles & Access API methods ─────────────────────────────────────────────
+
+  private loadAvailableRoles(): void {
+    this.roleService.getRoles(this.hospitalPublicId ?? undefined).pipe(
+      catchError(() => of([] as Role[])),
+      takeUntil(this.destroy$)
+    ).subscribe(roles => {
+      this.availableRoles = roles;
+      this.cdr.markForCheck();
+    });
+  }
+
+  private loadAllFeatures(): void {
+    this.catalogService.getFeatures('').pipe(
+      catchError(() => of([] as FeatureCatalogItem[])),
+      takeUntil(this.destroy$)
+    ).subscribe(features => {
+      this.allFeatures = features;
+      this.cdr.markForCheck();
+    });
+  }
+
+  loadStaffRoles(staffId: number): void {
+    this.isLoadingRoles.set(true);
+    this.staffRoleService.getStaffRoles(staffId).pipe(
+      catchError(() => of([] as StaffRoleAssignment[])),
+      takeUntil(this.destroy$)
+    ).subscribe(roles => {
+      this.assignedRoles = roles;
+      this.isLoadingRoles.set(false);
+      this.cdr.markForCheck();
+    });
+  }
+
+  loadStaffFeatures(staffId: number): void {
+    if (!this.hospitalPublicId) return;
+    this.isLoadingFeatures.set(true);
+    this.staffFeatureService.getStaffFeatures(staffId, this.hospitalPublicId).pipe(
+      catchError(() => of([] as StaffFeaturePermission[])),
+      takeUntil(this.destroy$)
+    ).subscribe(features => {
+      this.grantedFeatures = features;
+      this.isLoadingFeatures.set(false);
+      this.cdr.markForCheck();
+    });
+  }
+
+  assignRole(roleId: string): void {
+    const staff = this.selectedStaff();
+    if (!staff || !roleId) return;
+    this.staffRoleService.assignRole(staff.id, roleId).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (assignment) => {
+        this.assignedRoles = [...this.assignedRoles, assignment];
+        this.snackBar.open('Role assigned successfully', 'Close', { duration: 3000 });
+        this.cdr.markForCheck();
+      },
+      error: () => this.snackBar.open('Failed to assign role', 'Close', { duration: 3000 })
+    });
+  }
+
+  unassignRole(staffRoleId: string): void {
+    const staff = this.selectedStaff();
+    if (!staff) return;
+    this.staffRoleService.unassignRole(staff.id, staffRoleId).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: () => {
+        this.assignedRoles = this.assignedRoles.filter(r => r.id !== staffRoleId);
+        this.snackBar.open('Role removed', 'Close', { duration: 3000 });
+        this.cdr.markForCheck();
+      },
+      error: () => this.snackBar.open('Failed to remove role', 'Close', { duration: 3000 })
+    });
+  }
+
+  grantFeature(featureId: string): void {
+    const staff = this.selectedStaff();
+    if (!staff || !this.hospitalPublicId) return;
+    this.staffFeatureService.grantFeature(staff.id, featureId, this.hospitalPublicId).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (perm) => {
+        this.grantedFeatures = [...this.grantedFeatures, perm];
+        this.snackBar.open('Feature granted', 'Close', { duration: 3000 });
+        this.cdr.markForCheck();
+      },
+      error: () => this.snackBar.open('Failed to grant feature', 'Close', { duration: 3000 })
+    });
+  }
+
+  revokeFeature(featureId: string): void {
+    const staff = this.selectedStaff();
+    if (!staff || !this.hospitalPublicId) return;
+    this.staffFeatureService.revokeFeature(staff.id, featureId, this.hospitalPublicId).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: () => {
+        this.grantedFeatures = this.grantedFeatures.filter(f => f.featureId !== featureId);
+        this.snackBar.open('Feature revoked', 'Close', { duration: 3000 });
+        this.cdr.markForCheck();
+      },
+      error: () => this.snackBar.open('Failed to revoke feature', 'Close', { duration: 3000 })
+    });
+  }
+
+  // ── Staff actions ──────────────────────────────────────────────────────────
   approveStaff(staff: DisplayStaff, event: Event): void {
     event.stopPropagation();
     this.staffService.approveStaff(staff.id, 'Approved by admin')
@@ -214,7 +363,6 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
   }
 
   // ── Forms ──────────────────────────────────────────────────────────────────
-
   private initForms(): void {
     const baseFields = {
       firstName:    ['', Validators.required],
@@ -240,7 +388,9 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
   addStaff(): void {
     if (this.addForm.invalid) { this.addForm.markAllAsTouched(); return; }
     this.isLoading.set(true);
-    this.staffService.createStaff(this.addForm.value)
+    const staffData = { ...this.addForm.value };
+    if (this.hospitalPublicId) staffData['hospitalPublicId'] = this.hospitalPublicId;
+    this.staffService.createStaff(staffData)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -292,10 +442,10 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
 
   getOnboardingSteps(staff: DisplayStaff): { label: string; done: boolean; date?: string; sub?: string }[] {
     return [
-      { label: 'Account Created',       done: true,                    date: 'Jan 10, 2024' },
-      { label: 'Personal Info Verified',done: true,                    date: 'Jan 12, 2024' },
-      { label: 'Document Verification', done: staff.onboardingStep > 2, sub: staff.onboardingStep <= 2 ? 'Pending admin review of certifications.' : undefined },
-      { label: 'Badge Issuance',        done: staff.onboardingStep > 3, sub: staff.onboardingStep <= 3 ? 'Locked' : undefined },
+      { label: 'Account Created',        done: true,                      date: 'Jan 10, 2024' },
+      { label: 'Personal Info Verified', done: true,                      date: 'Jan 12, 2024' },
+      { label: 'Document Verification',  done: staff.onboardingStep > 2,  sub: staff.onboardingStep <= 2 ? 'Pending admin review.' : undefined },
+      { label: 'Badge Issuance',         done: staff.onboardingStep > 3,  sub: staff.onboardingStep <= 3 ? 'Locked' : undefined },
     ];
   }
 
@@ -306,16 +456,21 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
   }
 
   // ── Data loading ───────────────────────────────────────────────────────────
-
   private loadData(): void {
     this.isLoading.set(true);
+
+    // Use hospital-scoped endpoint if hospitalPublicId is available
+    const staffObs = this.hospitalPublicId
+      ? this.staffService.getStaffByHospital(this.hospitalPublicId).pipe(catchError(() => of({ staffDetails: [] })))
+      : this.staffService.getStaff().pipe(catchError(() => of({ staffDetails: [] })));
+
     forkJoin({
-      staff:   this.staffService.getStaff().pipe(catchError(() => of({ staffDetails: [] }))),
-      depts:   this.departmentService.getDepartments().pipe(catchError(() => of([])))
+      staff: staffObs,
+      depts: this.departmentService.getDepartments().pipe(catchError(() => of([])))
     }).pipe(takeUntil(this.destroy$))
       .subscribe(({ staff, depts }) => {
-        this.rawStaff    = staff.staffDetails ?? [];
-        this.departments = depts;
+        this.rawStaff    = (staff as any).staffDetails ?? [];
+        this.departments = depts as Department[];
         this.displayStaff = this.rawStaff
           .filter(s => {
             const memberRoles = s.roles ?? (s.role ? [s.role] : []);
@@ -348,31 +503,24 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
     const shift     = shiftMap[s.shiftPattern?.toUpperCase() ?? ''] ?? '-' as ShiftLabel;
     const shiftIcon = shiftIconMap[shift] ?? 'schedule';
 
-    // Mock status cycling for demo
     let status: StaffStatus;
-    if (s.isActive === false) {
-      status = 'On Leave';
-    } else if (s.isAvailable === false) {
-      status = 'Off Duty';
-    } else {
-      const statusCycle: StaffStatus[] = ['Active', 'Active', 'On Break'];
-      status = statusCycle[idx % 3];
-    }
+    if (s.isActive === false)      { status = 'On Leave'; }
+    else if (s.isAvailable === false) { status = 'Off Duty'; }
+    else { const cycle: StaffStatus[] = ['Active', 'Active', 'On Break']; status = cycle[idx % 3]; }
 
-    // Assignment mock
     const assignmentTypes: AssignmentType[] = ['hospital', 'doctor', 'unassigned'];
     const assignmentType = assignmentTypes[idx % 3];
     const doctorNames = ['Dr. Emily Chen', 'Dr. Anika Singh', 'Dr. Marcus Thorne'];
 
     const mockDocs: StaffDocument[] = [
-      { name: 'Medical License',    filename: 'License-MD-998822.pdf', date: 'Jan 15, 2024', status: 'verified' },
-      { name: 'National ID Proof',  filename: 'Passport-Copy-Scan.jpg', date: 'Jan 15, 2024', status: 'verified' },
-      { name: 'ACLS Certification', filename: 'ACLS-Cert-8822.pdf',    date: 'Feb 10, 2024', status: 'pending'  },
+      { name: 'Medical License',    filename: 'License-MD-998822.pdf',    date: 'Jan 15, 2024', status: 'verified' },
+      { name: 'National ID Proof',  filename: 'Passport-Copy-Scan.jpg',   date: 'Jan 15, 2024', status: 'verified' },
+      { name: 'ACLS Certification', filename: 'ACLS-Cert-8822.pdf',       date: 'Feb 10, 2024', status: 'pending'  },
     ];
     const mockLogins: LoginEvent[] = [
-      { type: 'success', device: 'Chrome (Win)', time: 'Today, 09:41 AM', ip: '183.168.11' },
-      { type: 'success', device: 'Mobile App',   time: 'Yesterday, 08:30 PM', ip: '10.0.0.14' },
-      { type: 'failed',  device: 'Unknown',      time: 'Jan 26, 11:30 AM', ip: '143.22.14' },
+      { type: 'success', device: 'Chrome (Win)',  time: 'Today, 09:41 AM',       ip: '183.168.11' },
+      { type: 'success', device: 'Mobile App',    time: 'Yesterday, 08:30 PM',   ip: '10.0.0.14'  },
+      { type: 'failed',  device: 'Unknown',       time: 'Jan 26, 11:30 AM',      ip: '143.22.14'  },
     ];
 
     return {

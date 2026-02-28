@@ -14,6 +14,7 @@ import { Subject, takeUntil, forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { DepartmentService } from '../../../services/department.service';
 import { StaffService } from '../../../services/staff.service';
+import { AuthService } from '../../../services/auth.service';
 
 type NodeId = string;
 type EdgeId = string;
@@ -1031,6 +1032,8 @@ export class HospitalComponent implements OnInit, OnDestroy {
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────────
   ngOnInit(): void {
+    const user = (this.authService as any).getCurrentUser?.() as any;
+    this.hospitalPublicId = user?.publicId ?? user?.userId ?? null;
     this.load();
     if (!this.nodes().some(n => n.type === 'hospital')) {
       const h = this.hospitals()[0];
@@ -1042,9 +1045,17 @@ export class HospitalComponent implements OnInit, OnDestroy {
   }
 
   private loadApiData(): void {
+    const deptObs = this.hospitalPublicId
+      ? this.departmentService.getDepartmentsByHospital(this.hospitalPublicId).pipe(catchError(() => of([])))
+      : this.departmentService.getDepartments().pipe(catchError(() => of([])));
+
+    const staffObs = this.hospitalPublicId
+      ? this.staffService.getStaffByHospital(this.hospitalPublicId).pipe(catchError(() => of({ staffDetails: [] })))
+      : this.staffService.getStaff().pipe(catchError(() => of({ staffDetails: [] })));
+
     forkJoin({
-      departments: this.departmentService.getDepartments().pipe(catchError(() => of([]))),
-      staff: this.staffService.getStaff().pipe(catchError(() => of({ staffDetails: [] })))
+      departments: deptObs,
+      staff: staffObs
     }).pipe(takeUntil(this.destroy$))
       .subscribe(({ departments, staff }) => {
         if (departments.length > 0) {
@@ -1092,10 +1103,13 @@ export class HospitalComponent implements OnInit, OnDestroy {
 
   private readonly destroy$ = new Subject<void>();
 
+  private hospitalPublicId: string | null = null;
+
   constructor(
     private readonly dialogService: DialogboxService,
     private readonly departmentService: DepartmentService,
     private readonly staffService: StaffService,
+    private readonly authService: AuthService,
   ) {}
 
   ngOnDestroy(): void {

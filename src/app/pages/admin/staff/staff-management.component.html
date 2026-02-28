@@ -241,11 +241,13 @@
           <!-- Tab bar -->
           <div class="dp-tab-bar">
             <button class="dp-tab" [class.dp-tab--active]="activeDetailTab() === 'overview'"
-              (click)="activeDetailTab.set('overview')">Overview</button>
+              (click)="switchTab('overview')">Overview</button>
             <button class="dp-tab" [class.dp-tab--active]="activeDetailTab() === 'security'"
-              (click)="activeDetailTab.set('security')">Security & Access</button>
+              (click)="switchTab('security')">Security & Access</button>
             <button class="dp-tab" [class.dp-tab--active]="activeDetailTab() === 'documents'"
-              (click)="activeDetailTab.set('documents')">Documents</button>
+              (click)="switchTab('documents')">Documents</button>
+            <button class="dp-tab" [class.dp-tab--active]="activeDetailTab() === 'roles'"
+              (click)="switchTab('roles')">Roles & Access</button>
           </div>
 
           <!-- ── Overview tab ─────────────────────────────────────────── -->
@@ -470,6 +472,93 @@
                   }
                 </div>
               </div>
+            </div>
+          }
+
+          <!-- ── Roles & Access tab ──────────────────────────────────── -->
+          @if (activeDetailTab() === 'roles') {
+            <div class="dp-body">
+
+              <!-- Assigned Roles -->
+              <div class="dp-section">
+                <h4 class="dp-section-title">
+                  <mat-icon>manage_accounts</mat-icon> Assigned Roles
+                </h4>
+                @if (isLoadingRoles()) {
+                  <p class="roles-loading">Loading roles…</p>
+                } @else {
+                  <div class="roles-list">
+                    @for (r of assignedRoles; track r.id) {
+                      <div class="role-item">
+                        <mat-icon class="ri-icon">badge</mat-icon>
+                        <span class="ri-name">{{ r.roleName }}</span>
+                        <button class="ri-remove" (click)="unassignRole(r.id)" title="Remove role">
+                          <mat-icon>remove_circle_outline</mat-icon>
+                        </button>
+                      </div>
+                    }
+                    @if (assignedRoles.length === 0) {
+                      <p class="roles-empty">No roles assigned yet.</p>
+                    }
+                  </div>
+
+                  <h5 class="roles-sub-title">Add a Role</h5>
+                  <div class="roles-available">
+                    @for (r of availableRoles; track r.id) {
+                      @if (!assignedRoleIds.has(r.id!)) {
+                        <button class="role-add-chip" (click)="assignRole(r.id!)">
+                          <mat-icon>add</mat-icon> {{ r.roleName }}
+                        </button>
+                      }
+                    }
+                    @if (availableRoles.length === 0) {
+                      <p class="roles-empty">No roles available.</p>
+                    }
+                  </div>
+                }
+              </div>
+
+              <!-- Feature Permissions (only when hospitalPublicId is known) -->
+              @if (hospitalPublicId) {
+                <div class="dp-section">
+                  <h4 class="dp-section-title">
+                    <mat-icon>key</mat-icon> Feature Permissions
+                  </h4>
+                  @if (isLoadingFeatures()) {
+                    <p class="roles-loading">Loading features…</p>
+                  } @else {
+                    <div class="roles-list">
+                      @for (f of grantedFeatures; track f.featureId) {
+                        <div class="role-item">
+                          <mat-icon class="ri-icon ri-icon--feature">check_circle</mat-icon>
+                          <span class="ri-name">{{ f.featureName }}</span>
+                          <button class="ri-remove" (click)="revokeFeature(f.featureId)" title="Revoke">
+                            <mat-icon>remove_circle_outline</mat-icon>
+                          </button>
+                        </div>
+                      }
+                      @if (grantedFeatures.length === 0) {
+                        <p class="roles-empty">No features directly granted.</p>
+                      }
+                    </div>
+
+                    <h5 class="roles-sub-title">Grant a Feature</h5>
+                    <div class="roles-available">
+                      @for (f of allFeatures; track f.id) {
+                        @if (!grantedFeatureIds.has(f.id)) {
+                          <button class="role-add-chip" (click)="grantFeature(f.id)">
+                            <mat-icon>add</mat-icon> {{ f.featureName }}
+                          </button>
+                        }
+                      }
+                      @if (allFeatures.length === 0) {
+                        <p class="roles-empty">No features available.</p>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+
             </div>
           }
 
