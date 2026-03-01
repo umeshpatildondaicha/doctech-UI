@@ -76,7 +76,23 @@ export const environment = {
     },
     catalog: {
       features: '/api/catalog/features',
-      services: '/api/catalog/services'
+      services: '/api/catalog/services',
+      featuresGrouped: '/api/catalog/features/grouped'
+    },
+    orgFlow: {
+      get: (hospitalPublicId: string) => `/api/hospitals/${hospitalPublicId}/org-flow`,
+      save: (hospitalPublicId: string) => `/api/hospitals/${hospitalPublicId}/org-flow`
+    },
+    hospitalSubscriptions: {
+      byHospital: (hospitalPublicId: string) => `/api/subscriptions/hospital/${hospitalPublicId}`,
+      subscribe: '/api/subscriptions',
+      unsubscribe: (subscriptionId: string) => `/api/subscriptions/${subscriptionId}`,
+      unsubscribeByService: (hospitalPublicId: string, serviceId: string) => `/api/subscriptions/hospital/${hospitalPublicId}/service/${serviceId}`
+    },
+    subDepartments: {
+      base: '/api/sub-departments',
+      byId: (id: number) => `/api/sub-departments/${id}`,
+      byDepartment: (departmentId: number) => `/api/sub-departments/by-department/${departmentId}`
     }
   },
   
