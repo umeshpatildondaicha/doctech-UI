@@ -76,23 +76,32 @@ export const environment = {
     },
     catalog: {
       features: '/api/catalog/features',
-      services: '/api/catalog/services',
-      featuresGrouped: '/api/catalog/features/grouped'
+      featuresGrouped: '/api/catalog/features/grouped',
+      services: '/api/catalog/services'
     },
-    orgFlow: {
-      get: (hospitalPublicId: string) => `/api/hospitals/${hospitalPublicId}/org-flow`,
-      save: (hospitalPublicId: string) => `/api/hospitals/${hospitalPublicId}/org-flow`
-    },
-    hospitalSubscriptions: {
-      byHospital: (hospitalPublicId: string) => `/api/subscriptions/hospital/${hospitalPublicId}`,
-      subscribe: '/api/subscriptions',
-      unsubscribe: (subscriptionId: string) => `/api/subscriptions/${subscriptionId}`,
-      unsubscribeByService: (hospitalPublicId: string, serviceId: string) => `/api/subscriptions/hospital/${hospitalPublicId}/service/${serviceId}`
-    },
+    
     subDepartments: {
       base: '/api/sub-departments',
       byId: (id: number) => `/api/sub-departments/${id}`,
-      byDepartment: (departmentId: number) => `/api/sub-departments/by-department/${departmentId}`
+      byDepartment: (departmentId: number) =>
+        `/api/sub-departments/by-department/${departmentId}`
+    },
+    
+    hospitalSubscriptions: {
+      byHospital: (hospitalPublicId: string) =>
+        `/api/hospital-subscriptions/hospital/${hospitalPublicId}`,
+      subscribe: '/api/hospital-subscriptions',
+      unsubscribe: (subscriptionId: string) =>
+        `/api/hospital-subscriptions/${subscriptionId}`,
+      unsubscribeByService: (hospitalPublicId: string, serviceId: string) =>
+        `/api/hospital-subscriptions/hospital/${hospitalPublicId}/service/${serviceId}`
+    },
+    
+    orgFlow: {
+      get: (hospitalPublicId: string) =>
+        `/api/hospitals/${hospitalPublicId}/org-flow`,
+      save: (hospitalPublicId: string) =>
+        `/api/hospitals/${hospitalPublicId}/org-flow`
     }
   },
 
