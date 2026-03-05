@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { RegisterComponent } from './pages/register/register.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { AppointmentComponent } from './pages/appointment/appointment.component';
-import { DoctorComponent } from './pages/doctor/doctor.component';
 import { PatientComponent } from './pages/patient/patient.component';
 import { PatientProfileComponent } from './pages/patient/patient-profile/patient-profile.component';
 import { BillingComponent } from './pages/billing/billing.component';
@@ -50,7 +49,6 @@ export const routes: Routes = [
   { path: 'appointment', component: AppointmentComponent, canActivate: [AuthGuard] },
   { path: 'schedule', component: ScheduleComponent, canActivate: [AuthGuard] },
   { path: 'my-schedule', component: MyScheduleComponent, canActivate: [AuthGuard] },
-  { path: 'doctor', component: DoctorComponent, canActivate: [AuthGuard] },
   { path: 'patient', component: PatientComponent, canActivate: [AuthGuard] },
   { path: 'patient/:id', component: PatientProfileComponent, canActivate: [AuthGuard] },
   { path: 'patient-profile', component: PatientProfileComponent, canActivate: [AuthGuard] },

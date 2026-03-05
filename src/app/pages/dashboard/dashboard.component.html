@@ -79,6 +79,91 @@
       </div>
 
       <div class="main-right">
+
+        <!-- Appointment Status Card -->
+        <section class="card card--elevated appt-status-card" aria-label="Appointment status">
+
+          @if (appointmentCardState === 'loading') {
+            <div class="appt-body appt-body--center">
+              <span class="appt-desc">Loading appointment info...</span>
+            </div>
+          }
+
+          @if (appointmentCardState === 'none') {
+            <div class="appt-body appt-body--center">
+              <span class="appt-icon-wrap appt-icon-wrap--neutral">
+                <app-icon fontIcon="event_busy" [size]="30"></app-icon>
+              </span>
+              <h3 class="appt-card-title">No Appointment Scheduled</h3>
+              <p class="appt-desc">You have no upcoming appointments. Book one to get started.</p>
+              <app-button label="Book Appointment" (click)="navigateToAppointments()"></app-button>
+            </div>
+          }
+
+          @if (appointmentCardState === 'upcoming' && nextUpcomingAppointment) {
+            <div class="appt-head">
+              <span class="appt-icon-wrap appt-icon-wrap--upcoming">
+                <app-icon fontIcon="event_upcoming" [size]="22"></app-icon>
+              </span>
+              <div class="appt-head-text">
+                <h3 class="appt-card-title">Upcoming Appointment</h3>
+                <span class="appt-badge appt-badge--upcoming">Scheduled</span>
+              </div>
+            </div>
+            <app-divider></app-divider>
+            <div class="appt-body">
+              <div class="appt-detail-row">
+                <app-icon fontIcon="person" [size]="15"></app-icon>
+                <span>{{ nextUpcomingAppointment.patientName }}</span>
+              </div>
+              <div class="appt-detail-row">
+                <app-icon fontIcon="calendar_today" [size]="15"></app-icon>
+                <span>{{ nextUpcomingAppointment.appointmentDate | date:'mediumDate' }}</span>
+              </div>
+              <div class="appt-detail-row">
+                <app-icon fontIcon="schedule" [size]="15"></app-icon>
+                <span>{{ nextUpcomingAppointment.startTime }}</span>
+              </div>
+              @if (nextUpcomingAppointment.reason) {
+                <div class="appt-detail-row">
+                  <app-icon fontIcon="notes" [size]="15"></app-icon>
+                  <span>{{ nextUpcomingAppointment.reason }}</span>
+                </div>
+              }
+            </div>
+          }
+
+          @if (appointmentCardState === 'today' && todayAppointments.length > 0) {
+            <div class="appt-head">
+              <span class="appt-icon-wrap appt-icon-wrap--today">
+                <app-icon fontIcon="today" [size]="22"></app-icon>
+              </span>
+              <div class="appt-head-text">
+                <h3 class="appt-card-title">Today's Appointments</h3>
+                <span class="appt-badge appt-badge--today">{{ todayAppointments.length }} Today</span>
+              </div>
+            </div>
+            <app-divider></app-divider>
+            <ul class="appt-today-list">
+              @for (appt of todayAppointments.slice(0, 4); track appt.appointmentPublicId) {
+                <li class="appt-today-item">
+                  <div class="appt-today-info">
+                    <span class="appt-today-name">{{ appt.patientName }}</span>
+                    <span class="appt-today-time">{{ appt.startTime }}</span>
+                  </div>
+                  <span class="appt-today-status" [ngClass]="getApptStatusClass(appt.status)">
+                    {{ appt.status | titlecase }}
+                  </span>
+                </li>
+              }
+              @if (todayAppointments.length > 4) {
+                <li class="appt-today-more">+{{ todayAppointments.length - 4 }} more appointments</li>
+              }
+            </ul>
+          }
+
+        </section>
+
         <!-- Recent Activity -->
         <section class="card card--elevated">
           <div class="card-head">

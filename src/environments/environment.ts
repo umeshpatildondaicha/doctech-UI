@@ -33,7 +33,7 @@ export const environment = {
     },
     chat: {
       base: '/api/chat',
-      ws: 'wss://doctech.solutions/ws/chat'
+      ws: 'ws://doctech.solutions/ws/chat'
     },
     billing: {
       base: '/api/billing',

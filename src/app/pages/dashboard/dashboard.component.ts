@@ -21,6 +21,15 @@ interface DashboardStats {
   overallVisitors: number;
 }
 
+interface TodayAppointmentItem {
+  appointmentPublicId: string;
+  patientName: string;
+  appointmentDate: string;
+  startTime: string;
+  status: string;
+  reason: string;
+}
+
 /** API response shape for GET /api/appointments/doctor/:doctorCode/requests */
 interface AppointmentRequestApi {
   appointmentPublicId: string;
@@ -105,6 +114,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   revenueChartOptions: Highcharts.Options = {};
   patientDemographicsChartOptions: Highcharts.Options = {};
   appointmentStatusChartOptions: Highcharts.Options = {};
+  // Appointment status card state
+  appointmentCardState: 'loading' | 'none' | 'upcoming' | 'today' = 'loading';
+  todayAppointments: TodayAppointmentItem[] = [];
+  nextUpcomingAppointment: TodayAppointmentItem | null = null;
+
   requestGridOptions: ExtendedGridOptions = {
   rowHeight: 44,
   headerHeight: 36,
@@ -140,6 +154,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     const doctorCode =
     this.authService.getDoctorRegistrationNumber() || 'DR1';
     this.loadConnectedPatientsCount(doctorCode);
+    this.loadAppointmentCardState();
   }
   loadAllAppointmentsCount() {
     const doctorCode =
@@ -660,6 +675,86 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }
     date.setHours(hours, minutes, 0, 0);
     return date;
+  }
+
+  loadAppointmentCardState() {
+    const doctorCode = this.authService.getDoctorRegistrationNumber() || 'DR1';
+    const today = new Date().toISOString().split('T')[0];
+
+    this.appointmentCardState = 'loading';
+    this.appointmentService.getDoctorSchedule(doctorCode, today).subscribe({
+      next: (res: any) => {
+        const list: any[] = Array.isArray(res) ? res : res?.data ?? res?.content ?? res?.appointments ?? [];
+        this.todayAppointments = list.map((item: any) => ({
+          appointmentPublicId: item.appointmentPublicId ?? item.id ?? '',
+          patientName: item.patientName ?? item.patient_name ?? '—',
+          appointmentDate: item.appointmentDate ?? item.appointment_date ?? today,
+          startTime: item.startTime ?? item.start_time ?? '—',
+          status: (item.status ?? 'SCHEDULED').toUpperCase(),
+          reason: item.reason ?? item.notes ?? ''
+        }));
+
+        if (this.todayAppointments.length > 0) {
+          this.appointmentCardState = 'today';
+        } else {
+          this.loadNextUpcomingAppointment(doctorCode);
+        }
+      },
+      error: () => {
+        this.loadNextUpcomingAppointment(doctorCode);
+      }
+    });
+  }
+
+  private loadNextUpcomingAppointment(doctorCode: string) {
+    this.appointmentService.getDoctorAppointments(doctorCode).subscribe({
+      next: (res: any) => {
+        const list: any[] = Array.isArray(res) ? res : res?.data ?? res?.content ?? res?.appointments ?? [];
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        const upcoming = list
+          .filter((item: any) => {
+            const d = new Date(item.appointmentDate ?? item.appointment_date ?? '');
+            return d > todayStart;
+          })
+          .sort((a: any, b: any) => {
+            const da = new Date(a.appointmentDate ?? a.appointment_date ?? '');
+            const db = new Date(b.appointmentDate ?? b.appointment_date ?? '');
+            return da.getTime() - db.getTime();
+          });
+
+        if (upcoming.length > 0) {
+          const item = upcoming[0];
+          this.nextUpcomingAppointment = {
+            appointmentPublicId: item.appointmentPublicId ?? item.id ?? '',
+            patientName: item.patientName ?? item.patient_name ?? '—',
+            appointmentDate: item.appointmentDate ?? item.appointment_date ?? '',
+            startTime: item.startTime ?? item.start_time ?? '—',
+            status: (item.status ?? 'SCHEDULED').toUpperCase(),
+            reason: item.reason ?? item.notes ?? ''
+          };
+          this.appointmentCardState = 'upcoming';
+        } else {
+          this.appointmentCardState = 'none';
+        }
+      },
+      error: () => {
+        this.appointmentCardState = 'none';
+      }
+    });
+  }
+
+  getApptStatusClass(status: string): string {
+    const map: { [key: string]: string } = {
+      COMPLETED: 'appt-status--completed',
+      SCHEDULED: 'appt-status--scheduled',
+      CONFIRMED: 'appt-status--confirmed',
+      CANCELLED: 'appt-status--cancelled',
+      IN_PROGRESS: 'appt-status--inprogress',
+      PENDING: 'appt-status--pending'
+    };
+    return map[status] ?? 'appt-status--scheduled';
   }
 
   getStatusClass(status: string): string {

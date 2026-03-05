@@ -1,11 +1,11 @@
 /**
- * Environment for local development – API points to local backend (port 8080).
- * Used when running: ng serve (defaultConfiguration: development)
+ * Environment configuration for production (AWS / doctech.solutions)
+ * Uses HTTPS and WSS so WebSocket works when the app is served over HTTPS.
  */
 
 export const environment = {
-  production: false,
-  apiUrl: 'http://doctech.solutions',
+  production: true,
+  apiUrl: 'https://doctech.solutions',
   appName: 'Shree Clinic Management System',
   version: '1.0.0',
   buildNumber: '2024.1.0',
@@ -33,7 +33,7 @@ export const environment = {
     },
     chat: {
       base: '/api/chat',
-      ws: 'ws://doctech.solutions/ws/chat'
+      ws: 'wss://doctech.solutions/ws/chat'
     },
     billing: {
       base: '/api/billing',
@@ -79,14 +79,12 @@ export const environment = {
       featuresGrouped: '/api/catalog/features/grouped',
       services: '/api/catalog/services'
     },
-    
     subDepartments: {
       base: '/api/sub-departments',
       byId: (id: number) => `/api/sub-departments/${id}`,
       byDepartment: (departmentId: number) =>
         `/api/sub-departments/by-department/${departmentId}`
     },
-    
     hospitalSubscriptions: {
       byHospital: (hospitalPublicId: string) =>
         `/api/hospital-subscriptions/hospital/${hospitalPublicId}`,
@@ -96,7 +94,6 @@ export const environment = {
       unsubscribeByService: (hospitalPublicId: string, serviceId: string) =>
         `/api/hospital-subscriptions/hospital/${hospitalPublicId}/service/${serviceId}`
     },
-    
     orgFlow: {
       get: (hospitalPublicId: string) =>
         `/api/hospitals/${hospitalPublicId}/org-flow`,
@@ -107,10 +104,10 @@ export const environment = {
 
   features: {
     enableAnalytics: false,
-    enableDebugMode: true,
+    enableDebugMode: false,
     enablePerformanceMonitoring: false,
     enableMockBilling: false,
-    enableMockDoctorInvite: false
+    enableMockDoctorInvite: true
   },
 
   security: {
