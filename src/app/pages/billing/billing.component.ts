@@ -10,31 +10,31 @@ import {
   GridComponent,
   IconComponent,
   PageBodyDirective,
-  PageComponent
+  PageComponent,
+  SnackbarData,
+  SnackbarService
 } from '@lk/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
+import { Observable, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { BillingService } from '../../services/billing.service';
 import { AuthService } from '../../services/auth.service';
+import { PatientService } from '../../services/patient.service';
 import { Invoice } from '../../interfaces/billing.interface';
 import { PatientSearchDialogComponent } from '../patient-search-dialog/patient-search-dialog.component';
 import { AppCardComponent } from '../../core/components/app-card/app-card.component';
 import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
 import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-card/admin-stats-card.component';
 import { BillingCurrencyPipe } from '../../pipes/billing-currency.pipe';
+import { BillingservicesService, PatientBillingSummaryRow } from '../../services/billingservices.service';
 
-interface PatientBillingSummaryRow {
-  patientId: string;
-  patientName: string;
-  invoicesCount: number;
-  billed: number;
-  paid: number;
-  outstanding: number;
-  overdue: number;
-  lastInvoiceDate?: string;
+interface PatientBillingSummaryRowLocal extends PatientBillingSummaryRow {
+  /** Used only by aggregatePatients when building from invoices */
+  _lastTs?: number;
 }
 
 @Component({
@@ -76,6 +76,9 @@ export class BillingComponent implements OnInit, OnDestroy {
   ];
 
   patientRows: PatientBillingSummaryRow[] = [];
+  hospitalId = 'H1';
+ 
+
 
   // ── Patient summary grid ──────────────────────────────────────────────────
 
@@ -106,7 +109,7 @@ export class BillingComponent implements OnInit, OnDestroy {
     },
     {
       headerName: 'Billed',
-      field: 'billed',
+      field: 'totalBilled',
       filter: 'agNumberColumnFilter',
       sortable: true,
       minWidth: 140,
@@ -114,7 +117,7 @@ export class BillingComponent implements OnInit, OnDestroy {
     },
     {
       headerName: 'Paid',
-      field: 'paid',
+      field: 'totalCollected',
       filter: 'agNumberColumnFilter',
       sortable: true,
       minWidth: 140,
@@ -122,7 +125,7 @@ export class BillingComponent implements OnInit, OnDestroy {
     },
     {
       headerName: 'Outstanding',
-      field: 'outstanding',
+      field: 'totalOutstanding',
       filter: 'agNumberColumnFilter',
       sortable: true,
       minWidth: 160,
@@ -146,7 +149,7 @@ export class BillingComponent implements OnInit, OnDestroy {
     },
     {
       headerName: 'Last Invoice',
-      field: 'lastInvoiceDate',
+      field: 'dueDate',
       filter: 'agDateColumnFilter',
       sortable: true,
       minWidth: 160,
@@ -173,21 +176,109 @@ export class BillingComponent implements OnInit, OnDestroy {
   constructor(
     private readonly billing: BillingService,
     private readonly authService: AuthService,
+    private readonly patientService: PatientService,
     private readonly dialogService: DialogboxService,
     private readonly snack: MatSnackBar,
     private readonly fb: FormBuilder,
+    private readonly snackbarservice : SnackbarService,
     private readonly router: Router,
-    private readonly eventService: CoreEventService
+    private readonly eventService: CoreEventService,
+    private readonly billingservices :BillingservicesService
   ) {}
 
   ngOnInit(): void {
-    // Resolve doctor's own ID to scope invoices to their patients only
     this.doctorId = this.authService.getDoctorRegistrationNumber()
-                    || this.authService.getCurrentUser()?.id
-                    || null;
-
+      || this.authService.getCurrentUser()?.id
+      || null;
     this.eventService.setBreadcrumb(this.breadcrumb);
-    this.refresh();
+    this.loadPatientBillingSummary();
+  }
+
+  loadPatientBillingSummary(): void {
+    this.loading = true;
+    this.isDemoData = false;
+    this.billingservices.getPatientsBillingSummary(this.hospitalId).pipe(
+      switchMap(rows => this.enrichPatientNames(rows ?? []))
+    ).subscribe({
+      next: (rows) => {
+        this.patientRows = rows;
+        this.computeSummaryFromRows(this.patientRows);
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading patient billing summary', err);
+        this.loadFromInvoicesFallback();
+      }
+    });
+  }
+
+  /**
+   * API returns only patientId; enrich rows with patient names from patient list.
+   */
+  private enrichPatientNames(rows: PatientBillingSummaryRow[]): Observable<PatientBillingSummaryRow[]> {
+    if (rows.length === 0) return of(rows);
+    return this.patientService.getPatients().pipe(
+      map(res => {
+        const list = this.normalizePatientList(res);
+        const nameMap = new Map<string, string>();
+        for (const p of list) {
+          const id = p?.id != null ? String(p.id) : p?.patientId != null ? String(p.patientId) : null;
+          if (!id) continue;
+          const firstName = p?.firstName ?? p?.first_name ?? '';
+          const lastName = p?.lastName ?? p?.last_name ?? '';
+          const fullName = (p?.fullName ?? `${firstName} ${lastName}`.trim() ?? p?.name ?? '').toString().trim();
+          if (fullName) nameMap.set(id, fullName);
+        }
+        for (const row of rows) {
+          const id = String(row.patientId ?? '').trim();
+          if (id && !id.startsWith('NAME:')) {
+            const name = nameMap.get(id);
+            if (name) row.patientName = name;
+          }
+        }
+        return rows;
+      }),
+      catchError(() => of(rows))
+    );
+  }
+
+  private normalizePatientList(res: any): any[] {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    const data = res?.data ?? res?.content ?? res?.items ?? res?.patients ?? res;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray((data as any).content)) return (data as any).content;
+    return [];
+  }
+
+  /** Fallback: use getInvoices and aggregate by patient when summary API is unavailable. */
+  private loadFromInvoicesFallback(): void {
+    this.billingservices.getInvoices(this.hospitalId).pipe(
+      map(invoices => this.aggregatePatients(invoices as Invoice[])),
+      switchMap(rows => this.enrichPatientNames(rows))
+    ).subscribe({
+      next: (rows) => {
+        this.patientRows = rows;
+        this.computeSummaryFromRows(this.patientRows);
+        this.loading = false;
+      },
+      error: () => {
+        this.patientRows = [];
+        this.computeSummaryFromRows(this.patientRows);
+        this.loading = false;
+        this.snack.open('Failed to load billing data', 'Dismiss', { duration: 3500 });
+      }
+    });
+  }
+
+  /** Compute summary from patient summary rows (from getPatientsBillingSummary). */
+  private computeSummaryFromRows(rows: PatientBillingSummaryRow[]): void {
+    this.summary = {
+      billed: rows.reduce((s, r) => s + (r.totalBilled ?? 0), 0),
+      paid: rows.reduce((s, r) => s + (r.totalCollected ?? 0), 0),
+      outstanding: rows.reduce((s, r) => s + (r.totalOutstanding ?? 0), 0),
+      overdue: rows.reduce((s, r) => s + (r.overdue ?? 0), 0)
+    };
   }
 
   ngOnDestroy(): void {
@@ -219,35 +310,9 @@ export class BillingComponent implements OnInit, OnDestroy {
   }
 
   refresh(): void {
-    this.loading = true;
-    this.isDemoData = false;
-
-    const params: Record<string, string> = {};
-    const f = this.filters.getRawValue();
-    if (f.search)                   params['q']       = f.search;
-    if (f.status)                   params['status']  = f.status;
-    if (f.from instanceof Date)     params['from']    = f.from.toISOString();
-    if (f.to instanceof Date)       params['to']      = f.to.toISOString();
-    // Scope invoices to this doctor's patients only
-    if (this.doctorId)              params['doctorId'] = this.doctorId;
-
-    this.billing.listInvoices(params).subscribe({
-      next: (res) => {
-        const rows = (res || []).map(r => ({
-          ...r,
-          amountPaid: r.amountPaid ?? 0,
-          balanceDue: r.balanceDue ?? Math.max((r.total || 0) - (r.amountPaid || 0), 0)
-        }));
-        this.applyRows(rows as Invoice[]);
-      },
-      error: () => {
-        const demo = this.getDemoInvoices();
-        this.isDemoData = true;
-        this.applyRows(demo);
-        this.snack.open('Backend unavailable — showing demo billing data', 'OK', { duration: 3500 });
-      }
-    });
+    this.loadPatientBillingSummary();
   }
+
 
   private applyRows(rows: Invoice[]): void {
     this.computeSummary(rows);
@@ -257,7 +322,7 @@ export class BillingComponent implements OnInit, OnDestroy {
 
   private aggregatePatients(invoices: Invoice[]): PatientBillingSummaryRow[] {
     const today = new Date();
-    const map = new Map<string, PatientBillingSummaryRow & { _lastTs: number }>();
+    const map = new Map<string, PatientBillingSummaryRowLocal>();
 
     for (const inv of invoices) {
       const pid = (inv.patientId ?? '').toString().trim()
@@ -266,25 +331,30 @@ export class BillingComponent implements OnInit, OnDestroy {
       const existing = map.get(pid) ?? {
         patientId: pid,
         patientName: (inv.patientName ?? 'Unknown').toString(),
-        invoicesCount: 0, billed: 0, paid: 0, outstanding: 0, overdue: 0,
-        lastInvoiceDate: undefined, _lastTs: 0
+        invoicesCount: 0,
+        totalBilled: 0,
+        totalCollected: 0,
+        totalOutstanding: 0,
+        overdue: 0,
+        lastInvoiceDate: undefined,
+        _lastTs: 0
       };
 
       const total = Number(inv.total) || 0;
-      const paid  = Number(inv.amountPaid) || 0;
+      const paid = Number(inv.amountPaid) || 0;
       const balance = inv.balanceDue ?? Math.max(total - paid, 0);
       const ts = inv.date ? new Date(inv.date).getTime() : 0;
 
       existing.invoicesCount++;
-      existing.billed      += total;
-      existing.paid        += paid;
-      existing.outstanding += balance;
+      existing.totalBilled += total;
+      existing.totalCollected += paid;
+      existing.totalOutstanding += balance;
 
       const isOverdue = inv.status !== 'PAID' && !!inv.dueDate
         && new Date(inv.dueDate) < today && balance > 0;
       if (isOverdue) existing.overdue += balance;
 
-      if (ts > existing._lastTs) {
+      if (ts > (existing._lastTs ?? 0)) {
         existing._lastTs = ts;
         existing.lastInvoiceDate = inv.date;
       }
@@ -294,7 +364,7 @@ export class BillingComponent implements OnInit, OnDestroy {
 
     return Array.from(map.values())
       .map(({ _lastTs, ...row }) => row)
-      .sort((a, b) => b.overdue - a.overdue || b.outstanding - a.outstanding || b.billed - a.billed);
+      .sort((a, b) => b.overdue - a.overdue || b.totalOutstanding - a.totalOutstanding || b.totalBilled - a.totalBilled);
   }
 
   private computeSummary(rows: Invoice[]): void {
@@ -314,6 +384,7 @@ export class BillingComponent implements OnInit, OnDestroy {
     const ref = this.dialogService.openDialog(PatientSearchDialogComponent, {
       title: 'Search Patient',
       width: '90%',
+      height:'600px',
       data: {}
     });
     ref.afterClosed().subscribe((result) => {
@@ -342,41 +413,5 @@ export class BillingComponent implements OnInit, OnDestroy {
   clearFilters(): void {
     this.filters.reset({ search: '', status: '', from: null, to: null });
     this.refresh();
-  }
-
-  // ── Demo data fallback ────────────────────────────────────────────────────
-
-  private getDemoInvoices(): Invoice[] {
-    const now = Date.now();
-    const d   = (days: number) => new Date(now - days * 86_400_000).toISOString();
-    const f   = (days: number) => new Date(now + days * 86_400_000).toISOString();
-
-    const mk = (
-      n: number, patientId: string, patientName: string, doctorId: string,
-      total: number, paid: number, status: Invoice['status'],
-      date: string, dueDate?: string
-    ): Invoice => {
-      const id = `INV-${String(n).padStart(4, '0')}`;
-      return {
-        id, invoiceNo: `INV-2026-${String(n).padStart(3, '0')}`,
-        doctorId, patientId, patientName,
-        date, dueDate, status,
-        items: [
-          { description: 'OPD Consultation', quantity: 1, unitPrice: Math.min(total, 700), taxRate: 0, amountPaid: Math.min(paid, 700) },
-          { description: 'Lab Test - CBC',   quantity: 1, unitPrice: Math.max(total - 700, 0), taxRate: 0, amountPaid: Math.max(paid - 700, 0) }
-        ],
-        subTotal: total, taxTotal: 0, discountTotal: 0, total,
-        amountPaid: paid, balanceDue: Math.max(total - paid, 0), notes: ''
-      };
-    };
-
-    // Demo invoices scoped to DOC-12332 (default mock doctor ID)
-    const myDoctorId = this.doctorId || 'DOC-12332';
-    return [
-      mk(1, 'PAT-1001', 'Anjali Bendre',  myDoctorId, 3200, 3200, 'PAID',           d(98), f(0)),
-      mk(2, 'PAT-1002', 'Rahul Sharma',   myDoctorId, 4500, 2000, 'PARTIALLY_PAID', d(74), d(60)),
-      mk(3, 'PAT-1005', 'Neha Kapoor',    myDoctorId, 5000, 1500, 'PARTIALLY_PAID', d(16), d(2)),
-      mk(4, 'PAT-1009', 'Kavita Joshi',   myDoctorId, 6200, 6200, 'PAID',           d(45), f(0)),
-    ];
   }
 }

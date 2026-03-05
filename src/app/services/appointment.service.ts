@@ -26,14 +26,17 @@ export class AppointmentService {
   }
 
   getAppointmentRequests(doctorCode: string): Observable<any> {
+    const safeDoctor = encodeURIComponent((doctorCode || '').trim());
     return this.httpService.sendGETRequest(
-      `${this.baseUrl}/appointments/doctor/${doctorCode}/requests`
+      `${this.baseUrl}/appointments/doctor/${safeDoctor}/requests`
     );
   }
 
   approveAppointmentRequest(doctorCode: string, requestId: string): Observable<any> {
+    const safeDoctor = encodeURIComponent((doctorCode || '').trim());
+    const safeId = encodeURIComponent((requestId || '').trim());
     return this.httpService.sendPUTRequest(
-      `${this.baseUrl}/appointments/doctor/${doctorCode}/requests/${requestId}/approve`,
+      `${this.baseUrl}/appointments/doctor/${safeDoctor}/requests/${safeId}/approve`,
       JSON.stringify({ approved: true })
     );
   }

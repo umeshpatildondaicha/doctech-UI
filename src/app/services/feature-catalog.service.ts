@@ -35,7 +35,7 @@ export class FeatureCatalogService {
   /** Returns all services with their nested features — ideal for building grouped UI */
   getServicesWithFeatures(): Observable<ServiceWithFeaturesDTO[]> {
     return this.http.get<ServiceWithFeaturesDTO[]>(
-      `${this.baseUrl}${environment.endpoints.catalog.featuresGrouped}`
+      `${this.baseUrl}${environment.endpoints.catalog.features}`
     );
   }
 

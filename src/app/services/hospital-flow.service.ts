@@ -40,14 +40,16 @@ export class HospitalFlowService {
   /** Loads the saved canvas layout for a hospital. Returns 404 if none saved yet. */
   getOrgFlow(hospitalPublicId: string): Observable<OrgFlowResponse> {
     return this.http.get<OrgFlowResponse>(
-      `${this.baseUrl}${environment.endpoints.orgFlow.get(hospitalPublicId)}`
+     // `${this.baseUrl}${environment.endpoints.orgFlow.get(hospitalPublicId)}`
+      `${this.baseUrl}${environment.endpoints.hospitals.register}/${hospitalPublicId}`
     );
   }
 
   /** Upserts the canvas layout for a hospital. */
   saveOrgFlow(hospitalPublicId: string, layout: OrgFlowLayout): Observable<OrgFlowResponse> {
     return this.http.put<OrgFlowResponse>(
-      `${this.baseUrl}${environment.endpoints.orgFlow.save(hospitalPublicId)}`,
+      `${this.baseUrl}${environment.endpoints.hospitals.register}/${hospitalPublicId}`,
+      //`${this.baseUrl}${environment.endpoints.orgFlow.save(hospitalPublicId)}`,
       { layoutJson: JSON.stringify(layout) }
     );
   }

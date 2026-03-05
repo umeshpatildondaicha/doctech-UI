@@ -5,8 +5,8 @@
 /* dialog bg */
 .tab-navigation{
   //background:linear-gradient(180deg,#f8fafc,#eef2ff);
-  padding:20px;
-  border-radius:18px;
+  padding:12px;
+  border-radius:14px;
 }
 
 /* ---------- TABS ---------- */
@@ -38,10 +38,11 @@
 
 ::ng-deep .mdc-tab:hover{
   background:#eef2ff;
+  color:var(--primary-color);
 }
 
 ::ng-deep .mdc-tab--active{
-  background:#9894e1;
+  background:var(--primary-color);
 }
 
 ::ng-deep .mdc-tab--active .mdc-tab__text-label{
@@ -51,13 +52,15 @@
 
 /* ---------- TAB BODY ---------- */
 .tab-content{
-  padding:24px 10px;
+  .invite-form{
+  padding:20px ;
+}
 }
 
 /* ---------- FORM CARD ---------- */
 .doctor-form{
   background:#fff;
-  padding:26px;
+  padding:20px 0px 0px 5px;
   border-radius:16px;
   box-shadow:0 12px 28px rgba(0,0,0,0.08);
 }

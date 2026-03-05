@@ -125,7 +125,7 @@
                   </td>
                   <!-- Department -->
                   <td class="col-dept">
-                    <span class="dept-text">{{ staff.department }}</span>
+                    <span class="dept-id">{{ staff.department }}</span>
                   </td>
                   <!-- Shift -->
                   <td class="col-shift">
@@ -296,7 +296,7 @@
                   </div>
                   <div class="prof-item">
                     <span class="pi-lbl">DEPARTMENT</span>
-                    <span class="pi-val dept-text">{{ staff.department }}</span>
+                    <span class="pi-val dept-text">{{ staff.name }}</span>
                   </div>
                   <div class="prof-item">
                     <span class="pi-lbl">PRIMARY SHIFT</span>
@@ -576,10 +576,10 @@
           <div class="form-row">
             <div class="form-field">
               <label for="add-dept">Department</label>
-              <select id="add-dept" formControlName="departmentId">
+              <select id="add-dept" formControlName="subDepartmentId">
                 <option [ngValue]="null">Select…</option>
-                @for (dept of departments; track dept.departmentId) {
-                  <option [ngValue]="dept.departmentId">{{ dept.name }}</option>
+                @for (dept of subDepartments; track dept.subDepartmentId ?? dept.id) {
+                  <option [ngValue]="dept.subDepartmentId ?? dept.id">{{ dept.name }}</option>
                 }
               </select>
             </div>
@@ -655,8 +655,8 @@
               <label for="inv-dept">Department</label>
               <select id="inv-dept" formControlName="departmentId">
                 <option [ngValue]="null">Select…</option>
-                @for (dept of departments; track dept.departmentId) {
-                  <option [ngValue]="dept.departmentId">{{ dept.name }}</option>
+                @for (dept of subDepartments; track dept.subDepartmentId ?? dept.id) {
+                  <option [ngValue]="dept.subDepartmentId ?? dept.id">{{ dept.name }}</option>
                 }
               </select>
             </div>

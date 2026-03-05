@@ -352,13 +352,9 @@ export class PatientProfileComponent implements OnInit {
     { id: 'overview', label: 'Overview', icon: 'dashboard', badge: 0 },
     { id: 'medical-record', label: 'Medical Record', icon: 'receipt', badge: 0 },
     { id: 'profile', label: 'Profile', icon: 'person', badge: 0 },
-    { id: 'vitals', label: 'Vitals', icon: 'favorite', badge: 3 },
     { id: 'medications', label: 'Medications', icon: 'local_pharmacy', badge: 0 },
     { id: 'appointments', label: 'Appointments', icon: 'event', badge: 2 },
     { id: 'lab-reports', label: 'Lab Reports', icon: 'assessment', badge: 1 },
-    { id: 'clinical-notes', label: 'Clinical Notes', icon: 'note', badge: 0 },
-    { id: 'care-plan', label: 'Care Plan', icon: 'date_range', badge: 0 },
-    { id: 'rounds', label: 'Rounds', icon: 'access_time', badge: 0 },
     { id: 'medicine-requests', label: 'Medicine Requests', icon: 'healing', badge: 0 },
     { id: 'relatives', label: 'Relatives', icon: 'people', badge: 0 },
     { id: 'exercise-assignment', label: 'Exercise Assignment', icon: 'fitness_center', badge: 0 },
@@ -384,13 +380,9 @@ export class PatientProfileComponent implements OnInit {
     { id: 'overview', label: 'Overview', icon: 'dashboard', builtIn: true },
     { id: 'medical-record', label: 'Medical Record', icon: 'receipt', builtIn: true },
     { id: 'profile', label: 'Profile', icon: 'person', builtIn: true },
-    { id: 'vitals', label: 'Vitals', icon: 'favorite', builtIn: true },
     { id: 'medications', label: 'Medications', icon: 'local_pharmacy', builtIn: true },
     { id: 'appointments', label: 'Appointments', icon: 'event', builtIn: true },
     { id: 'lab-reports', label: 'Lab Reports', icon: 'assessment', builtIn: true },
-    { id: 'clinical-notes', label: 'Clinical Notes', icon: 'note', builtIn: true },
-    { id: 'care-plan', label: 'Care Plan', icon: 'date_range', builtIn: true },
-    { id: 'rounds', label: 'Rounds', icon: 'access_time', builtIn: true },
     { id: 'medicine-requests', label: 'Medicine Requests', icon: 'healing', builtIn: true },
     { id: 'relatives', label: 'Relatives', icon: 'people', builtIn: true },
     { id: 'exercise-assignment', label: 'Exercise Assignment', icon: 'fitness_center', builtIn: true },
@@ -1287,7 +1279,6 @@ export class PatientProfileComponent implements OnInit {
     this.initializeForm();
     this.initializeEnhancedForms();
     this.loadEnhancedData();
-    this.updateTabBadges();
     this.initializeSearchData();
     this.initializeNotifications();
     this.initializeCareTeam();
@@ -1485,7 +1476,7 @@ export class PatientProfileComponent implements OnInit {
 
   updateTabBadges(): void {
     // Update badges based on data
-    this.tabs.find(t => t.id === 'vitals')!.badge = this.vitalSigns.filter(v => !v.isNormal).length;
+    
     this.tabs.find(t => t.id === 'appointments')!.badge = this.appointments.filter(a => a.status === 'scheduled').length;
     this.tabs.find(t => t.id === 'lab-reports')!.badge = this.labReports.filter(l => l.status === 'abnormal').length;
   }

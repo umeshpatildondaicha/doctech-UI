@@ -80,10 +80,10 @@
           <mat-icon>payments</mat-icon>
           Record Payment
         </button>
-        <button mat-stroked-button (click)="selectedTabIndex = 0">
+        <!-- <button mat-stroked-button (click)="selectedTabIndex = 0">
           <mat-icon>add</mat-icon>
           Add Item
-        </button>
+        </button> -->
         <button mat-stroked-button (click)="printInvoice()">
           <mat-icon>print</mat-icon>
           Print / Share
@@ -184,7 +184,7 @@
           </div>
 
           <!-- Inline Add Item Form -->
-          <div class="add-item-section" [formGroup]="addItemForm">
+          <!-- <div class="add-item-section" [formGroup]="addItemForm">
             <mat-form-field appearance="outline">
               <mat-label>Description</mat-label>
               <input matInput formControlName="description" placeholder="e.g., Dressing, Consultation fees" />
@@ -208,7 +208,7 @@
               title="Add Item"
               (btnClick)="addItem()">
             </app-button>
-          </div>
+          </div> -->
 
           <!-- Totals Summary -->
           <div class="totals-summary">
@@ -277,110 +277,6 @@
               }
             </div>
           }
-        </div>
-      </mat-tab>
-
-      <!-- Summary Tab -->
-      <mat-tab label="Summary">
-        <div class="tab-content summary-tab">
-          <mat-card class="summary-card">
-            <h3>Invoice Summary</h3>
-            <div class="summary-row">
-              <span>Subtotal:</span>
-              <strong>{{ invoice.subTotal | billingCurrency }}</strong>
-            </div>
-            <div class="summary-row">
-              <span>Discount:</span>
-              <strong>{{ invoice.discountTotal | billingCurrency }}</strong>
-            </div>
-            <div class="summary-row">
-              <span>Tax:</span>
-              <strong>{{ invoice.taxTotal | billingCurrency }}</strong>
-            </div>
-            <div class="summary-row grand-total">
-              <span>Total:</span>
-              <strong>{{ invoice.total | billingCurrency }}</strong>
-            </div>
-          </mat-card>
-          <mat-card class="summary-card">
-            <h3>Patient Information</h3>
-            <div class="info-row">
-              <span>Name:</span>
-              <span>{{ invoice.patientName }}</span>
-            </div>
-            <div class="info-row">
-              <span>Patient ID:</span>
-              <span>{{ invoice.patientId }}</span>
-            </div>
-            @if (invoice.doctorId) {
-              <div class="info-row">
-                <span>Doctor ID:</span>
-                <span>{{ invoice.doctorId }}</span>
-              </div>
-            }
-          </mat-card>
-          @if (invoice.notes) {
-            <mat-card class="summary-card">
-              <h3>Notes</h3>
-              <p>{{ invoice.notes }}</p>
-            </mat-card>
-          }
-        </div>
-      </mat-tab>
-
-      <!-- Activity Tab — real payment history -->
-      <mat-tab label="Activity">
-        <div class="tab-content activity-tab">
-          <div class="activity-list">
-            @for (payment of payments; track payment.id) {
-              <div class="activity-item">
-                <mat-icon class="activity-icon payment-icon">payments</mat-icon>
-                <div class="activity-content">
-                  <div class="activity-title">
-                    Payment recorded · {{ payment.method }}
-                    @if (payment.reference) {
-                      <span class="activity-ref">Ref: {{ payment.reference }}</span>
-                    }
-                  </div>
-                  <div class="activity-time">{{ payment.date | date:'d MMM yyyy, HH:mm' }}</div>
-                  @if (payment.notes) {
-                    <div class="activity-notes">{{ payment.notes }}</div>
-                  }
-                </div>
-                <span class="activity-amount">{{ payment.amount | billingCurrency }}</span>
-              </div>
-            }
-            <!-- Invoice creation is always the last event in the timeline -->
-            <div class="activity-item">
-              <mat-icon class="activity-icon create-icon">receipt</mat-icon>
-              <div class="activity-content">
-                <div class="activity-title">Invoice created</div>
-                <div class="activity-time">{{ invoice.date | date:'d MMM yyyy, HH:mm' }}</div>
-              </div>
-            </div>
-            @if (payments.length === 0) {
-              <div class="no-activity">
-                <mat-icon>history</mat-icon>
-                <p>No payment activity yet. Record a payment to see the history here.</p>
-              </div>
-            }
-          </div>
-        </div>
-      </mat-tab>
-
-      <!-- Files Tab -->
-      <mat-tab label="Files">
-        <div class="tab-content files-tab">
-          <div class="no-files">
-            <mat-icon>folder_open</mat-icon>
-            <p>No files attached</p>
-            <app-button
-              [fontIcon]="'upload'"
-              [text]="'Upload File'"
-              [appearance]="'stroked'"
-              [color]="'primary'">
-            </app-button>
-          </div>
         </div>
       </mat-tab>
 

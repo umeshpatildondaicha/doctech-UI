@@ -18,6 +18,8 @@ export interface StaffMember {
   role?: string;
   roles?: string[];
   departmentId?: number;
+  /** Optional link to a specific sub-department (ward/unit) */
+  subDepartmentId?: number;
   specialization?: string;
   qualifications?: string;
   experienceYears?: number;
@@ -42,6 +44,7 @@ export interface StaffInviteRequest {
   contactNumber?: string;
   roles?: string[];
   departmentId?: number;
+  subDepartmentId?: number;
   specialization?: string;
   shiftPattern?: string;
 }
@@ -100,5 +103,13 @@ export class StaffService {
 
   inviteStaff(dto: StaffInviteRequest): Observable<StaffInviteResponse> {
     return this.http.post<StaffInviteResponse>(`${this.baseUrl}/api/staff/invite`, dto);
+  }
+  getDepartments():Observable<any[]>{
+    const token = localStorage.getItem('token');
+
+  const headers = {
+    Authorization: `Bearer ${token}`
+  };
+    return this.http.get<any[]>(`${this.baseUrl}/api/sub-departments`);
   }
 }

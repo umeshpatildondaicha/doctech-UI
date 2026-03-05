@@ -1,5 +1,5 @@
 import { Component, Output, EventEmitter, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgFor } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -13,6 +13,7 @@ import {
 } from '../add-emergency-patient-dialog/add-emergency-patient-dialog.component';
 import { AppointmentService } from '../../services/appointment.service';
 import { AuthService } from '../../services/auth.service';
+import { PatientQueueServices } from '../../services/patient-queue.service';
 
 /** API queue item shape */
 interface QueueApiItem {
@@ -31,7 +32,7 @@ interface QueueApiItem {
 @Component({
   selector: 'app-app-patient-queue-content',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, NgFor],
   templateUrl: './app-patient-queue-content.component.html',
   styleUrl: './app-patient-queue-content.component.scss',
 })
@@ -44,14 +45,36 @@ export class AppPatientQueueContentComponent implements OnInit {
   private dialogService = inject(DialogboxService);
   private snackBar = inject(MatSnackBar);
 
+
+
   @Output() startClick = new EventEmitter<{ id: string; name: string }>();
   @Output() patientClick = new EventEmitter<{ id: string; name: string }>();
 
   displayNextUp = this.queueService.nextUp;
   displayQueue = this.queueService.queue;
   displayWaitingCount = this.queueService.waitingCount;
+  queueData: any[] = [];
+  doctorCode: string = '';
 
+
+  constructor(private queueservices: PatientQueueServices) { }
+
+
+  GetDoctorQueue() {
+    console.log("get the doctor Called")
+    this.queueservices.getDoctorQueue(this.doctorCode).subscribe({
+      next: (data: any) => {
+        this.queueData = data;
+        this.applyQueueData(this.normalizeQueueResponse(this.queueData));
+        console.log("show the data", this.queueData);
+      },
+      error: (err: any) => {
+        console.error('Error fetching doctor queue:', err);
+      }
+    })
+  }
   ngOnInit(): void {
+    this.GetDoctorQueue();
     // Queue API requires doctor authentication; skip request if user is not logged in as doctor
     if (!this.authService.isDoctor()) {
       this.applyQueueData([]);
@@ -79,6 +102,7 @@ export class AppPatientQueueContentComponent implements OnInit {
         this.applyQueueData([]);
       },
     });
+    
   }
 
   private normalizeQueueResponse(data: unknown): QueueApiItem[] {

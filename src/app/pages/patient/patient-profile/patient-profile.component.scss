@@ -2729,8 +2729,9 @@
     // Main Content Layout
     .medical-content {
       display: flex;
-      flex-wrap: wrap;
-      gap: var(--spacing-lg);
+      justify-content:space-between;
+      gap: var(--spacing-sm);
+
       height: calc(100% - 4em);
 
       .left-panel,
@@ -2770,9 +2771,9 @@
 
       // Left Panel - Vital Signs
       .left-panel {
-        max-width: 22em;
+        max-width: 38em;
         height: 100%;
-        width: 38%;
+        width: 65%;
 
         .vitals-list {
           display: flex;
@@ -5122,8 +5123,9 @@
       gap: var(--spacing-md);
 
       app-button {
-        font-size: var(--font-size-sm);
+        font-size: var(--font-size-xl);
         font-weight: var(--font-weight-medium);
+        
       }
     }
   }
@@ -5377,7 +5379,7 @@
     }
 
     app-button {
-      font-size: var(--font-size-sm);
+      font-size: var(--font-size-md);
       font-weight: var(--font-weight-medium);
     }
   }
@@ -5582,8 +5584,8 @@
     }
 
     app-button {
-      font-size: var(--font-size-sm);
-      font-weight: var(--font-weight-medium);
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-bold);
     }
   }
 
@@ -5702,8 +5704,8 @@
           flex-shrink: 0;
 
           app-button {
-            font-size: var(--font-size-sm);
-            font-weight: var(--font-weight-medium);
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
             min-width: 100px;
           }
         }
@@ -6677,9 +6679,14 @@
       flex-direction: column;
       align-items: stretch;
       gap: var(--spacing-md);
+      .request-medicine-btn{
+        width:100%;
+        font-size: var(--font-size-md);
+      }
 
       app-button {
         align-self: center;
+      
       }
     }
 

@@ -4,22 +4,28 @@
     <div class="dialog-left">
       <!-- Tabs -->
       <div class="tabs-toggle">
-        <app-button
+        <!-- <app-button
           type="button"
           class="tab-btn"
+          [color]="'primary'"
           [class.active]="activeTab === 'medicines'"
           [text]="'Medicines'"
-          [appearance]="'stroked'"
+          [appearance]="'basic'"
           (btnClick)="setTab('medicines')">
-        </app-button>
-        <app-button
+        </app-button> -->
+        <span class="tab-btn" [class.active]="activeTab ==='medicines'" (click)="setTab('medicines')" color="primary" >Medicines</span>
+        <span class="tab-btn" [class.active]="activeTab ==='template'" (click)="setTab('template')" color="primary">Template</span>
+
+
+        <!-- <app-button
           type="button"
           class="tab-btn"
+          [color]="'primary'"
           [class.active]="activeTab === 'template'"
           [text]="'Template'"
-          [appearance]="'stroked'"
+          [appearance]="'basic'"
           (btnClick)="setTab('template')">
-        </app-button>
+        </app-button> -->
       </div>
 
       <!-- Medicines Tab Content -->
@@ -69,10 +75,13 @@
                   <div class="form-field full-width">
                     <label>Timing</label>
                     <div class="timing-pills">
-                      <app-button type="button" class="pill" [class.active]="formData.timing === 'Morning'" [text]="'Morning'" [appearance]="'stroked'" (btnClick)="formData.timing = 'Morning'"></app-button>
-                      <app-button type="button" class="pill" [class.active]="formData.timing === 'Afternoon'" [text]="'Afternoon'" [appearance]="'stroked'" (btnClick)="formData.timing = 'Afternoon'"></app-button>
-                      <app-button type="button" class="pill" [class.active]="formData.timing === 'Evening'" [text]="'Evening'" [appearance]="'stroked'" (btnClick)="formData.timing = 'Evening'"></app-button>
-                      <app-button type="button" class="pill" [class.active]="formData.timing === 'Night'" [text]="'Night'" [appearance]="'stroked'" (btnClick)="formData.timing = 'Night'"></app-button>
+                      <app-toggle-button
+                        [options]="timingOptions"
+                        [(value)]="formData.timing"
+                        [multiple]="false"
+                        color="primary"
+                        (valueChange)="formData.timing=$event">
+                      </app-toggle-button>
                     </div>
                   </div>
                 </div>

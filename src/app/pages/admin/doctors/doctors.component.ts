@@ -74,6 +74,7 @@ export class DoctorsComponent implements OnInit, OnDestroy {
   columnDefs: ColDef[] = [];
   gridOptions: any = {};
   rowData: any[] = [];
+  /** Hospital ID from logged-in user context; do not use hardcoded value. */
   hospitalId = '';
   fiqlKey: string ='filter=true'
   showFilter = false;
@@ -104,7 +105,7 @@ export class DoctorsComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private snackBar: MatSnackBar,
     private router: Router,
-    private snackbarService :SnackbarService,
+    private snackbarService: SnackbarService,
     private eventService: CoreEventService
   ) { }
 
@@ -151,16 +152,17 @@ export class DoctorsComponent implements OnInit, OnDestroy {
  
   
   ngOnInit() {
-    // Resolve the hospital public ID from the currently logged-in user
-    this.hospitalId = this.authService.getHospitalPublicId();
-
-    console.log('apiConfig',this.apiConfig);
-    // Set breadcrumb in topbar using CoreEventService
+    this.hospitalId = this.authService.getHospitalPublicId() || '';
+    this.apiConfig.dataConfig.rest = `/api/doctors?hospitalId=${this.hospitalId}`;
     this.eventService.setBreadcrumb(this.breadcrumb);
-
     this.initializeGrid();
-    this.loadDoctorData();
-    this.updateStatsCards();
+    if (this.hospitalId) {
+      this.loadDoctorData();
+    } else {
+      this.snackbarService.warning('Hospital context not available. Please log in with a hospital account.');
+      this.rowData = [];
+      this.updateStatsCards();
+    }
   }
 
   ngOnDestroy() {
@@ -279,7 +281,8 @@ export class DoctorsComponent implements OnInit, OnDestroy {
             phone: d.contactNumber,
             email: d.email,
             qualifications: d.qualifications,
-            status: d.doctorStatus === 'APPROVED' ? 'Active' : d.doctorStatus === 'REJECTED' ? 'Inactive' : 'Pending',
+            doctorStatus: d.doctorStatus,
+            status: d.doctorStatus === 'APPROVED' ? 'Active' : d.doctorStatus === 'REJECTED' ? 'Inactive' : d.doctorStatus === 'ON_LEAVE' ? 'On Leave' : 'Pending',
             availability: this.mapDoctorStatusToAvailability(d.doctorStatus),
             joinedDate: d.createdAt
           }));
@@ -287,8 +290,15 @@ export class DoctorsComponent implements OnInit, OnDestroy {
           console.log(' Doctors loaded successfully, count:', this.rowData.length);
         },
         error: (err) => {
-          console.error(' Failed to load doctors:', err);
-          this.snackbarService.error('Failed to load doctor list: ' + (err?.message || 'Network error'));
+          const status = err?.status;
+          const serverMsg = err?.error?.message || err?.error?.error;
+          if (status === 404 || serverMsg === 'RESOURCE_NOT_FOUND') {
+            this.snackbarService.error('Hospital not found. Please ensure you are linked to a valid hospital.');
+            this.rowData = [];
+          } else {
+            this.snackbarService.error('Failed to load doctor list: ' + (serverMsg || err?.message || 'Network error'));
+          }
+          this.updateStatsCards();
         }
       });
   }
@@ -329,9 +339,10 @@ export class DoctorsComponent implements OnInit, OnDestroy {
       console.log('Dialog closed with result:', result);
 
       if (result?.action === 'save' && result?.formData) {
-        // The dialog passed us the validated form data — now make the actual POST API call
-        console.log('📡 Calling POST createDoctor with:', result.formData);
-
+        if (!this.hospitalId) {
+          this.snackbarService.error('Hospital context not available. Cannot create doctor.');
+          return;
+        }
         this.doctorService.createDoctor(this.hospitalId, result.formData).subscribe({
           next: (response) => {
             console.log(' Doctor created successfully:', response);
@@ -358,7 +369,7 @@ export class DoctorsComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialogService.openDialog(DoctorViewDialogComponent, {
       title: `Doctor Profile - ${normalized.name}`,
       width: '60%',
-      height: '90%',
+      height: '70%',
       data: {
         doctor: normalized
       },
@@ -430,12 +441,13 @@ export class DoctorsComponent implements OnInit, OnDestroy {
     });
   }
 
+
   scheduleDoctor(doctor: any) {
     const normalized = this.normalizeDoctorForView(doctor);
     const dialogRef = this.dialogService.openDialog(DoctorScheduleDialogComponent, {
       title: `Schedule - ${normalized.name}`,
       width: '65%',
-      height: '90%',
+      height: '80%',
       data: {
         doctor: normalized
       },
@@ -473,23 +485,25 @@ export class DoctorsComponent implements OnInit, OnDestroy {
   }
 
   getUniqueSpecializations(): number {
-    const specializations = new Set(this.rowData.map(d => d.specialization));
-    return specializations.size;
+    const values = (this.rowData || []).map(d => d.specialization).filter(s => s != null && String(s).trim() !== '');
+    return new Set(values).size;
   }
 
   getActiveDoctorsCount(): number {
-    return this.rowData.filter(d => d.status === 'Active').length;
+    const data = this.rowData || [];
+    return data.filter(d => d.status === 'Active').length;
   }
 
   getOnLeaveDoctorsCount(): number {
-    return this.rowData.filter(d => d.status === 'On Leave').length;
+    const data = this.rowData || [];
+    return data.filter(d => d.availability === 'On Leave' || d.status === 'On Leave').length;
   }
 
   updateStatsCards() {
     this.statsCards = [
       {
         label: 'Total Doctors',
-        value: this.rowData.length,
+        value: this.rowData?.length ?? 0,
         icon: 'local_hospital',
         type: 'info',
         valueColor: 'var(--admin-text-primary)'

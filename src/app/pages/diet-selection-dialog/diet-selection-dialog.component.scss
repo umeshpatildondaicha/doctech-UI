@@ -425,16 +425,16 @@
     margin-top: 0;
 
     .cancel-btn {
-      padding: 12px 24px;
-      border-radius: 8px;
       font-weight: 500;
-      color: #6c757d;
-      border-color: #dee2e6;
+      color: #ffffff;
       transition: all 0.2s ease;
+  
+      border: none;
 
       &:hover {
-        background: #f8f9fa;
-        border-color: #adb5bd;
+        background-color: #f36913;
+        transform:translateY(-1px)
+        
       }
     }
 
@@ -442,8 +442,6 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 12px 24px;
-      border-radius: 8px;
       font-weight: 500;
       transition: all 0.2s ease;
 

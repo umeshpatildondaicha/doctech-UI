@@ -72,6 +72,7 @@
   .tab-btn {
     border: none;
     background: transparent;
+    background-color: var(--primary-color);
     padding: 10px 16px;
     border-radius: 8px;
     font-size: 14px;
@@ -88,12 +89,11 @@
     justify-content: center;
 
     &:hover:not(.active) {
-      background: rgba(16, 185, 129, 0.1);
-      color: #10b981;
+      background: var(--secondary-background-color);
     }
 
     &.active {
-      background: #10b981;
+    background-color: var(--accent-color);
       color: #ffffff;
       box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
       transform: translateY(-1px);
@@ -419,19 +419,19 @@
   flex-wrap: wrap;
   gap: 8px;
 
-  .pill {
-    border-radius: 999px;
-    border: 1px solid #e5e7eb;
-    padding: 4px 10px;
-    font-size: 12px;
-    background: #ffffff;
-    cursor: pointer;
 
+  .pill {
+    border-radius:none;
+    font-size: 12px;
+    cursor: pointer;
     &.active {
       background: #10b981;
-      color: #ffffff;
       border-color: #10b981;
     }
+  }
+  .pill.active {
+    background-color: #009688;
+    color: white;
   }
 }
 

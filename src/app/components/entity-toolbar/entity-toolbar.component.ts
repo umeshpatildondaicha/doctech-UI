@@ -33,7 +33,7 @@ export class EntityToolbarComponent implements OnInit, OnDestroy, OnChanges {
   @Input() showCounts = true;
   @Input() currentCount: number | undefined;
   @Input() totalCount: number | undefined;
-  @Input() newLabel = 'New agent';
+  @Input() newLabel = '';
   @Input() showNew = true;
   @Input() showRefresh = true;
   @Input() showFilter = true;

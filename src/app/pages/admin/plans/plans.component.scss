@@ -180,18 +180,20 @@
 ───────────────────────────────────────────────────────────── */
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(295px, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  align-items: stretch;
 }
 
 .svc-card {
   background: var(--surface-color, #fff);
   border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 20px;
+  border-radius: 16px;
   overflow: hidden;
   position: relative;
   display: flex;
   flex-direction: column;
+  min-height: 300px;
   transition: transform 0.22s ease, box-shadow 0.22s ease;
 
   &:hover {
@@ -227,10 +229,11 @@
 
 /* Gradient header */
 .svc-header {
-  padding: 26px 22px 20px;
+  padding: 12px 14px 10px;
   color: #fff;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
 
   &::before {
     content: '';
@@ -265,7 +268,7 @@
   color: rgba(255, 255, 255, 0.9);
   padding: 3px 10px;
   border-radius: 20px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   position: relative;
   z-index: 1;
 }
@@ -293,27 +296,27 @@
 }
 
 .svc-icon-circle {
-  width: 54px;
-  height: 54px;
+  width: 48px;
+  height: 48px;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 15px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   position: relative;
   z-index: 1;
 
   mat-icon {
-    font-size: 28px;
-    width: 28px;
-    height: 28px;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
     color: #fff;
   }
 }
 
 .svc-name {
-  font-size: 21px;
+  font-size: 18px;
   font-weight: 800;
   color: #fff;
   margin: 0 0 4px;
