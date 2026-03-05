@@ -1,12 +1,9 @@
 .admin-billing {
   background: var(--page-background-color);
-  min-height: 100vh;
+  min-height: 100%;
   padding: var(--spacing-lg);
   max-width: 1440px;
   margin: 0 auto;
-
-  display: flex;
-  flex-direction: column;
 }
 
 .demo-pill {
@@ -29,11 +26,8 @@
   border: var(--primary-border);
   overflow: hidden;
   box-shadow: var(--card-shadow);
-
-  flex: 1;
-  min-height: 0;
-
-  margin-top: var(--spacing-md);
+  height: clamp(480px, calc(100vh - 480px), 800px);
+  margin-top: var(--spacing-sm);
   display: flex;
   flex-direction: column;
 }

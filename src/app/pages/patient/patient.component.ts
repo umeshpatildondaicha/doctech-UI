@@ -52,49 +52,53 @@ export class PatientComponent  implements OnInit{
       icon: 'groups'
     });
   }
-  apiConfig:any = {
-    dataConfig: {
-      url: environment.apiUrl,
-      rest: '/api/patients', // New format - API endpoint path
-      params: "",
-      context: "",
-      fiqlKey: "", // Key name for FIQL filter parameter
-      lLimitKey: 'llimit',
-      uLimitKey: 'ulimit',
-      requestType: 'GET',
-      type: 'GET', // Alternative format
-      queryParamsUrl: 'llimit=0&ulimit=100',
-      suppressNullValues: true,
-      suppressDefaultFiqlOnApply: false,
-      dataKey: "content",
-      countKey:"totalElements", // Key to extract data from response
-      dataType: 'object', 
-    },
+  // apiConfig:any = {
+  //   dataConfig: {
+  //     url: environment.apiUrl,
+  //     rest: '/api/patients', // New format - API endpoint path
+  //     params: "",
+  //     context: "",
+  //     fiqlKey: "", // Key name for FIQL filter parameter
+  //     lLimitKey: 'llimit',
+  //     uLimitKey: 'ulimit',
+  //     requestType: 'GET',
+  //     type: 'GET', // Alternative format
+  //     queryParamsUrl: 'llimit=0&ulimit=100',
+  //     suppressNullValues: true,
+  //     suppressDefaultFiqlOnApply: false,
+  //     dataKey: "content",
+  //     countKey:"totalElements", // Key to extract data from response
+  //     dataType: 'object', 
+  //   },
+  //   countConfig: {
+  //     rest: '/api/patients/doctor/DR1/connected/count',
+  //     type: 'GET',
+  //     queryParamsUrl: '',
+  //     suppressNullValues: true
+  //   },
+  //   filterConfig: {
+  //     filterConfig: [
+  //       { key: 'bloodGroup', label: 'Blood Group', type: 'input' },
+  //       { key: 'firstName', label: 'First Name', type: 'input' },
+  //       { key: 'lastName', label: 'Last Name', type: 'input' },
+  //       { key: 'dateOfBirth', label: 'Date of Birth', type: 'input' },
+  //       {key :'email',label:'Email',type:'input'},
+  //       {
+  //         key: 'gender',
+  //         label: 'Gender',
+  //         type: 'select',
+  //         optionList: [
+  //           { name: 'Male', value: 'MALE' },
+  //           { name: 'Female', value: 'FEMALE' },
+  //           { name: 'Other', value: 'OTHER' }
+  //         ]
+  //       },
+  //       { key: 'contact', label: 'Contact', type: 'input' },
+  //       { key: 'address', label: 'Address', type: 'input' }
+  //     ]
+  //   }
    
-    filterConfig: {
-      filterConfig: [
-        { key: 'bloodGroup', label: 'Blood Group', type: 'input' },
-        { key: 'firstName', label: 'First Name', type: 'input' },
-        { key: 'lastName', label: 'Last Name', type: 'input' },
-        { key: 'dateOfBirth', label: 'Date of Birth', type: 'input' },
-        {key :'email',label:'Email',type:'input'},
-        {
-          key: 'gender',
-          label: 'Gender',
-          type: 'select',
-          optionList: [
-            { name: 'Male', value: 'MALE' },
-            { name: 'Female', value: 'FEMALE' },
-            { name: 'Other', value: 'OTHER' }
-          ]
-        },
-        { key: 'contact', label: 'Contact', type: 'input' },
-        { key: 'address', label: 'Address', type: 'input' }
-      ]
-    }
-   
-  }
-
+  // }
 
   ngOnInit(): void {
     this.initializeGridOptions();
@@ -122,9 +126,7 @@ export class PatientComponent  implements OnInit{
 
   initializeGridOptions() {
     this.appointmentGridOptions  ={
-      filterConfig:this.apiConfig.filterConfig, 
-       paginationMode :'infinite',
-
+    paginationMode :'infinite',
 
       menuActions: [
         {

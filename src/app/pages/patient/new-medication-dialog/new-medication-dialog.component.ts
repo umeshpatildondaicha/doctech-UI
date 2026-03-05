@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef } from '@angular/material/dialog';
-import { DIALOG_DATA_TOKEN, AppButtonComponent, ToggleButtonComponent } from "@lk/core";
+import { DIALOG_DATA_TOKEN, AppButtonComponent } from "@lk/core";
 import { Subject, takeUntil, filter } from 'rxjs';
 
 export interface NewMedicationDialogData {
@@ -15,7 +15,7 @@ export interface NewMedicationDialogData {
 
 @Component({
     selector: 'app-new-medication-dialog',
-    imports: [FormsModule, MatButtonModule, MatIconModule, AppButtonComponent,ToggleButtonComponent],
+    imports: [FormsModule, MatButtonModule, MatIconModule, AppButtonComponent],
     templateUrl: './new-medication-dialog.component.html',
     styleUrls: ['./new-medication-dialog.component.scss']
 })
@@ -38,12 +38,6 @@ export class NewMedicationDialogComponent implements OnInit, OnDestroy {
     reasonForRequest: '',
     currentSymptoms: ''
   };
-  timingOptions = [
-    { value: 'morning', label: 'Morning' },
-    { value: 'afternoon', label: 'Afternoon' },
-    { value: 'evening', label: 'Evening' },
-    { value: 'night', label: 'Night' }
-  ];
 
   constructor() {
     // If editing, populate form with medication data

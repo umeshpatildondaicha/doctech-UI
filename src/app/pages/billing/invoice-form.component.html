@@ -139,16 +139,6 @@
           <div class="summary-item">Tax: <strong>₹ {{ getTotals().taxTotal | number:'1.0-2' }}</strong></div>
           <div class="summary-item total">Total: <strong>₹ {{ getTotals().total | number:'1.0-2' }}</strong></div>
         </div>
-
-        <!-- Invoice date aligned with footer area but inside main form -->
-        <div class="dates-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Invoice Date</mat-label>
-            <input matInput [matDatepicker]="picker" formControlName="date" />
-            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-          </mat-form-field>
-        </div>
         <mat-form-field appearance="outline" class="notes-field">
           <mat-label>Notes</mat-label>
           <textarea matInput rows="2" formControlName="notes" placeholder="Additional notes..."></textarea>
@@ -168,6 +158,25 @@
             }
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Pre-footer strip: dates (core dialog footer below is for actions only) -->
+    <div class="footer-dates">
+      <div class="dates-left">
+        <mat-form-field appearance="outline">
+          <mat-label>Invoice Date</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="date" />
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Due Date</mat-label>
+          <input matInput [matDatepicker]="picker2" formControlName="dueDate" />
+          <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+          <mat-datepicker #picker2></mat-datepicker>
+        </mat-form-field>
       </div>
     </div>
   </form>

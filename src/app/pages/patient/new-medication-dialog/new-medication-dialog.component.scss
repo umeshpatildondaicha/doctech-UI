@@ -54,16 +54,22 @@
     flex-wrap: wrap;
 
     .pill {
-      
+      padding: 8px 16px;
       border: 1px solid #ddd;
       border-radius: 20px;
+      background: #fff;
       cursor: pointer;
-      color: var(--primary-color);
-      font-size: 18px;
+      font-size: 14px;
       transition: all 0.2s;
+
+      &:hover {
+        border-color: #18b6b2;
+      }
+
       &.active {
-        background : var(--primary-color);
-        color:var(--secondary-color);
+        background: #18b6b2;
+        color: #fff;
+        border-color: #18b6b2;
       }
     }
   }

@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { DIALOG_DATA_TOKEN, DialogboxService, DialogFooterAction, AppButtonComponent, ToggleButtonComponent } from "@lk/core";
+import { DIALOG_DATA_TOKEN, DialogboxService, DialogFooterAction, AppButtonComponent } from "@lk/core";
 import { Exercise, ExerciseSet } from '../../interfaces/exercise.interface';
 import { ExerciseCreateComponent } from '../exercise-create/exercise-create.component';
 import { ExerciseSetsConfigDialogComponent } from '../exercise-sets-config-dialog/exercise-sets-config-dialog.component';
@@ -48,8 +48,7 @@ export interface ExerciseGroup {
         MatDatepickerModule,
         MatNativeDateModule,
         MatTooltipModule,
-        AppButtonComponent,
-        ToggleButtonComponent
+        AppButtonComponent
     ],
     templateUrl: './exercise-assignment-dialog.component.html',
     styleUrl: './exercise-assignment-dialog.component.scss'

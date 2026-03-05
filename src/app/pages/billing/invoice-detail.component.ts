@@ -16,10 +16,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { Observable, of } from 'rxjs';
-import { map, switchMap, catchError } from 'rxjs/operators';
 import { BillingService } from '../../services/billing.service';
-import { PatientService } from '../../services/patient.service';
 import { Invoice, InvoiceItem, PaymentRecord } from '../../interfaces/billing.interface';
 import { PaymentDialogComponent } from './payment-dialog.component';
 import { InvoiceFormComponent } from './invoice-form.component';
@@ -70,7 +67,6 @@ export class InvoiceDetailComponent implements OnInit, OnDestroy {
     private readonly route: ActivatedRoute,
     public readonly router: Router,
     private readonly billingService: BillingService,
-    private readonly patientService: PatientService,
     private readonly dialog: MatDialog,
     private readonly dialogService: DialogboxService,
     private readonly snackBar: MatSnackBar,
@@ -113,9 +109,7 @@ export class InvoiceDetailComponent implements OnInit, OnDestroy {
 
   private loadInvoice(): void {
     this.loading = true;
-    this.billingService.getInvoice(this.invoiceId).pipe(
-      switchMap(invoice => this.enrichPatientName(invoice))
-    ).pipe(takeUntil(this.destroy$)).subscribe({
+    this.billingService.getInvoice(this.invoiceId).subscribe({
       next: (invoice) => {
         this.invoice = invoice;
         this.loadPayments();
@@ -151,47 +145,25 @@ export class InvoiceDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** API often returns only patientId; resolve patient name from patient list. */
-  private enrichPatientName(invoice: Invoice): Observable<Invoice> {
-    const pid = String(invoice?.patientId ?? '').trim();
-    if (!pid) return of(invoice);
-    return this.patientService.getPatients().pipe(
-      map(res => {
-        const list = this.normalizePatientList(res);
-        for (const p of list) {
-          const id = p?.id != null ? String(p.id) : p?.patientId != null ? String(p.patientId) : null;
-          if (id !== pid) continue;
-          const firstName = p?.firstName ?? p?.first_name ?? '';
-          const lastName = p?.lastName ?? p?.last_name ?? '';
-          const fullName = (p?.fullName ?? `${firstName} ${lastName}`.trim() ?? p?.name ?? '').toString().trim();
-          if (fullName) {
-            return { ...invoice, patientName: fullName };
-          }
-          break;
-        }
-        return invoice;
-      }),
-      catchError(() => of(invoice))
-    );
-  }
-
-  private normalizePatientList(res: any): any[] {
-    if (!res) return [];
-    if (Array.isArray(res)) return res;
-    const data = res?.data ?? res?.content ?? res?.items ?? res?.patients ?? res;
-    if (Array.isArray(data)) return data;
-    if (data && typeof data === 'object' && Array.isArray((data as any).content)) return (data as any).content;
-    return [];
-  }
-
   private loadPayments(): void {
     if (!this.invoice?.id) return;
-    this.billingService.listPayments(this.invoice.id).subscribe({
+    this.billingService.listPayments({ invoiceId: this.invoice.id }).subscribe({
       next: (payments) => {
         this.payments = payments || [];
       },
       error: () => {
-        this.payments = [];
+        // Reconstruct from invoice.amountPaid as a single synthetic record
+        this.payments = (this.invoice?.amountPaid || 0) > 0
+          ? [{
+              id: 'PAY-1',
+              invoiceId: this.invoice!.id as string,
+              amount: this.invoice!.amountPaid || 0,
+              method: 'OTHER',
+              reference: '',
+              date: this.invoice!.date,
+              notes: 'Payment'
+            }]
+          : [];
       }
     });
   }

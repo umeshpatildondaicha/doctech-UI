@@ -53,11 +53,11 @@ export class DietService {
     );
   }
 
-  // DELETE — use HttpService so auth/headers are applied (same as create/update)
-  deleteDietPlan(doctorCode: string, id: number): Observable<any> {
-    const safeDoctor = encodeURIComponent((doctorCode || '').trim());
-    const url = `${this.baseUrl}/${safeDoctor}/diet-plans/deleteDietPlan/${id}`;
-    return this.httpService.sendDELETERequest(url);
+  // DELETE
+  deleteDietPlan(doctorCode: string, id: number) {
+    return this.http.delete(
+      `${this.baseUrl}/${doctorCode}/diet-plans/deleteDietPlan/${id}`
+    );
   }
   //Diet Plans Count
   getDietPlansCount(registrationNumber: string): Observable<number> {

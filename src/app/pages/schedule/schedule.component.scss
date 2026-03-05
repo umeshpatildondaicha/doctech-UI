@@ -1405,12 +1405,8 @@ $transition: var(--transition-fast);
 .timings-flow-add-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   font-weight: var(--font-weight-semibold);
-  .timings-flow-add-icon{
-    margin-right:5px;
-  }
-  
 }
 
 .timings-flow-label {

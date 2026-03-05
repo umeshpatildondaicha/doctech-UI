@@ -69,17 +69,6 @@ export class AppointmentComponent implements OnInit, AfterViewInit {
         title: 'Delete',
         icon: 'delete',
         click: (param: any) => this.deleteAppointment(param.data)
-      },
-      {
-        title: 'Approve',
-        icon: 'check_circle',
-        click: (param: any) => {
-          const data = param?.data;
-          if (data?.status !== 'PENDING') return;
-          this.approveAppointment(data);
-    
-        },
-
       }
     ]
   };
@@ -411,30 +400,7 @@ export class AppointmentComponent implements OnInit, AfterViewInit {
       }
     });
   }
-  approveAppointment(appointment: any): void {
-    const doctorCode =
-      appointment?.doctorRegistrationNumber ??
-      appointment?.doctorCode ??
-      this.authService.getDoctorRegistrationNumber()?.trim() ??
-      'DR1';
-    const requestId =
-      appointment?.appointmentPublicId ??
-      appointment?.publicId ??
-      appointment?.id;
-    if (!requestId) {
-      this.snackbarservice.error('Appointment ID not found.');
-      return;
-    }
-    this.appointmentService.approveAppointmentRequest(doctorCode, String(requestId)).subscribe({
-      next: () => {
-        this.snackbarservice.success('Appointment Approved Successfully');
-        this.refreshAppointmentGrid();
-      },
-      error: (err) => {
-        this.snackbarservice.error(err?.error?.message ?? 'Failed to approve appointment.');
-      }
-    });
-  }
+
   openRescheduleDialog(appointment: Appointment) {
     const dialogRef = this.dialogService.openDialog(AppointmentRescheduleComponent, {
       title: 'Reschedule Appointment',

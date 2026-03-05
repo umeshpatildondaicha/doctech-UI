@@ -26,9 +26,13 @@ $shadow-hover: var(--card-hover-shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
 
 .dashboard-shell {
   width: 100%;
-  max-width: 100%;
-  padding: 0 24px;   // thoda safe side spacing
-  margin: 0;
+  max-width: 1320px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+  min-height: 0;
 }
 
 // -----------------------------------------------------------------------------
@@ -137,8 +141,8 @@ $shadow-hover: var(--card-hover-shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
     padding: 1rem;
     background: transparent;
     min-height: 120px;
-
-    min-height: 300px;
+    flex: 1;
+    min-height: 0;
     overflow: auto;
   }
 }

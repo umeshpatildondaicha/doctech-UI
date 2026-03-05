@@ -25,14 +25,10 @@
         <div class="form-field">
           <label>Timing</label>
           <div class="timing-pills">
-            <app-toggle-button
-            [options]="timingOptions"
-            [(value)]="formData.timing"
-            [multiple]="false"
-            color="primary"  
-            [disabled]="false"
-            [(ngModel)]="formData.timing">
-          </app-toggle-button>
+            <app-button type="button" class="pill" [class.active]="formData.timing === 'Morning'" [text]="'Morning'" [appearance]="'stroked'" (btnClick)="setTiming('Morning')"></app-button>
+            <app-button type="button" class="pill" [class.active]="formData.timing === 'Afternoon'" [text]="'Afternoon'" [appearance]="'stroked'" (btnClick)="setTiming('Afternoon')"></app-button>
+            <app-button type="button" class="pill" [class.active]="formData.timing === 'Evening'" [text]="'Evening'" [appearance]="'stroked'" (btnClick)="setTiming('Evening')"></app-button>
+            <app-button type="button" class="pill" [class.active]="formData.timing === 'Night'" [text]="'Night'" [appearance]="'stroked'" (btnClick)="setTiming('Night')"></app-button>
           </div>
         </div>
       </div>

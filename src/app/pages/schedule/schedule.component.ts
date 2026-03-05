@@ -729,13 +729,11 @@ export class ScheduleComponent implements OnInit {
     this.timingsService.deleteBase(doctorId).subscribe({
       next: () => {
         this.loadTimingsFromApi({ fallbackToDemo: false });
-        this.snackbarservice.success('Base Availability Deleted Successfully');
 
       },
       error: (err) => {
         console.error('Delete base availability failed', err);
         this.scheduleApiError = err?.error?.message || err?.message || 'Failed to delete base availability.';
-        this.snackbarservice.error('Failed to delete base availability.');
       }
     });
   }
@@ -917,31 +915,9 @@ export class ScheduleComponent implements OnInit {
     return !!slot.patientName || !!slot.appointmentPublicId || !!slot.appointmentStatus;
   }
 
-  /** Returns display-format slot times (e.g. "5:20 PM") that are already booked for the selected date. */
-  private getBookedSlotTimesForSelectedDate(): Set<string> {
-    const dateIso = this.scheduleSelectedDateIso || this.toIsoDateOnly(this.selectedDate);
-    const booked = new Set<string>();
-    for (const a of this.mockAppointments || []) {
-      const aptDate = typeof a.appointment_date_time === 'string' && a.appointment_date_time.includes('T')
-        ? a.appointment_date_time.slice(0, 10)
-        : '';
-      if (aptDate === dateIso && a.slotTime) {
-        booked.add(a.slotTime.trim());
-      }
-    }
-    return booked;
-  }
-
   getAvailableSlotCards(limit = 12): AvailableSlotCard[] {
-    const bookedTimes = this.getBookedSlotTimesForSelectedDate();
     const slots = (this.scheduleSlots || [])
       .filter((s) => String(s.type).toUpperCase() === 'SLOT' && String(s.slotStatus).toUpperCase() === 'AVAILABLE')
-      .filter((s) => {
-        const start = this.toHHmm(s.startTime);
-        if (!start) return false;
-        const startLabel = this.formatTimeForDisplay(start);
-        return !bookedTimes.has(startLabel);
-      })
       .slice(0, Math.max(0, limit));
 
     return slots
@@ -1699,12 +1675,10 @@ export class ScheduleComponent implements OnInit {
     this.timingsService.deleteOverride(doctorId, item.recordId).subscribe({
       next: () => {
         this.loadTimingsFromApi({ fallbackToDemo: false });
-        this.snackbarservice.success('Override Deleted Successfully');
       },
       error: (err) => {
         console.error('Delete override failed', err);
         this.scheduleApiError = err?.error?.message || err?.message || 'Failed to delete override.';
-        this.snackbarservice.error('Failed to delete override.');
       }
     });
   }
@@ -2863,20 +2837,6 @@ export class ScheduleComponent implements OnInit {
 
   private createAppointmentForSlot(time: string, patient: PatientSearchResult): void {
     if (!time) return;
-    const dateIso = this.scheduleSelectedDateIso || this.toIsoDateOnly(this.selectedDate);
-    const slotTimeDisplay = this.formatTimeForDisplay(time);
-    const alreadyBooked = (this.mockAppointments || []).some(
-      (a) => {
-        const aptDate = typeof a.appointment_date_time === 'string' && a.appointment_date_time.includes('T')
-          ? a.appointment_date_time.slice(0, 10)
-          : '';
-        return aptDate === dateIso && (a.slotTime || '').trim() === slotTimeDisplay;
-      }
-    );
-    if (alreadyBooked) {
-      this.snackbarservice.error(`Slot ${slotTimeDisplay} is already booked. One appointment per slot.`);
-      return;
-    }
     const idStr = patient?.publicId ?? patient?.id ?? '';
     const patientId = this.patientIdToNumber(idStr);
     const patientName = (patient?.fullName ?? [patient?.firstName, patient?.lastName].filter(Boolean).join(' ').trim()) || 'Patient';
@@ -2892,7 +2852,7 @@ export class ScheduleComponent implements OnInit {
       status: 'SCHEDULED',
       patientName,
       doctorName: this.doctorInfo.doctorName,
-      slotTime: slotTimeDisplay
+      slotTime: this.formatTimeForDisplay(time)
     };
 
     this.mockAppointments.push(newAppointment);
@@ -2903,26 +2863,12 @@ export class ScheduleComponent implements OnInit {
 
   /** Create appointment from Book-appointment dialog result (form data with patient_id, appointment_date_time, etc.) */
   private createAppointmentFromDialogResult(result: { patient_id?: string | number; patientName?: string; appointment_date_time: string; notes?: string; doctor_id?: number }): void {
+    const patientId = this.patientIdToNumber(String(result.patient_id ?? '0'));
+    const patientName = result.patientName || `Patient ${patientId}`;
     const dateTime = result.appointment_date_time;
     const isoDate = typeof dateTime === 'string' && dateTime.includes('T') ? dateTime.slice(0, 10) : dateTime;
     const timePart = typeof dateTime === 'string' && dateTime.includes('T') ? dateTime.slice(11, 16) : '09:00'; // HH:mm
     const slotTimeDisplay = timePart.length === 5 ? this.formatTimeForDisplay(timePart) : '';
-
-    const alreadyBooked = (this.mockAppointments || []).some(
-      (a) => {
-        const aptDate = typeof a.appointment_date_time === 'string' && a.appointment_date_time.includes('T')
-          ? a.appointment_date_time.slice(0, 10)
-          : '';
-        return aptDate === isoDate && (a.slotTime || '').trim() === slotTimeDisplay;
-      }
-    );
-    if (alreadyBooked) {
-      this.snackbarservice.error(`Slot ${slotTimeDisplay} is already booked. One appointment per slot.`);
-      return;
-    }
-
-    const patientId = this.patientIdToNumber(String(result.patient_id ?? '0'));
-    const patientName = result.patientName || `Patient ${patientId}`;
 
     const newAppointment: Appointment = {
       appointment_id: this.mockAppointments.length + 1,

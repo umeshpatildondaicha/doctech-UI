@@ -1,4 +1,3 @@
-
 <div class="patient-billing-dashboard" [class.embedded]="embedded">
   <!-- Header -->
   @if (!embedded) {
@@ -40,13 +39,6 @@
         (btnClick)="generateStatement()"
         [disabled]="invoices.length === 0"
         ></app-button>
-        <app-button
-        [fontIcon]="'payments'"
-        [text]="'Record Payment'"
-        title="Record payment for highest balance invoice"
-        [disabled]="!topOutstandingInvoice"
-        (btnClick)="topOutstandingInvoice && recordPayment(topOutstandingInvoice)">
-      </app-button>
         <!-- <button mat-stroked-button (click)="generateStatement()" [disabled]="invoices.length === 0">
           <mat-icon>description</mat-icon>
           Statement
@@ -105,9 +97,15 @@
 </app-button>
 
     }
-   
+    <app-button
+    [fontIcon]="'payments'"
+    [text]="'Record Payment'"
+    title="Record payment for highest balance invoice"
+    [disabled]="!topOutstandingInvoice"
+    (btnClick)="topOutstandingInvoice && recordPayment(topOutstandingInvoice)">
+  </app-button>
   
-    <!-- <span class="spacer"></span>
+    <span class="spacer"></span>
     <div class="filter-chips">
       <app-button
       class="chip"
@@ -149,7 +147,7 @@
       (btnClick)="applyStatusFilter('OVERDUE')">
     </app-button>
     
-    </div> -->
+    </div>
   </div>
 
   <!-- Tabs -->

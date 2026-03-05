@@ -87,7 +87,100 @@ export class PatientSearchDialogComponent implements OnInit {
     }
   }
 
- 
+
+  // Mock patient data - in real app, this would come from a service
+  // private readonly mockPatients: PatientSearchResult[] = [
+  //   {
+  //     id: 'e7c9c8c3-3b0f-4d6a-bb3b-3b9e2a7a2f17',
+  //     firstName: 'John',
+  //     lastName: 'Doe',
+  //     fullName: 'John Doe',
+  //     dateOfBirth: '1985-03-15',
+  //     gender: 'Male',
+  //     contact: '+1 (555) 123-4567',
+  //     email: 'john.doe@email.com',
+  //     address: '123 Main St, New York, NY 10001',
+  //     emergencyContact: '+1 (555) 987-6543',
+  //     medicalHistory: ['Hypertension', 'Diabetes Type 2'],
+  //     allergies: ['Penicillin', 'Shellfish'],
+  //     profileImageUrl: 'assets/avatars/default-avatar.jpg'
+  //   },
+  //   {
+  //     id: 'PAT002',
+  //     firstName: 'Jane',
+  //     lastName: 'Smith',
+  //     fullName: 'Jane Smith',
+  //     dateOfBirth: '1990-07-22',
+  //     gender: 'Female',
+  //     contact: '+1 (555) 234-5678',
+  //     email: 'jane.smith@email.com',
+  //     address: '456 Oak Ave, Los Angeles, CA 90210',
+  //     emergencyContact: '+1 (555) 876-5432',
+  //     medicalHistory: ['Asthma'],
+  //     allergies: ['Latex'],
+  //     profileImageUrl: 'assets/avatars/default-avatar.jpg'
+  //   },
+  //   {
+  //     id: 'PAT003',
+  //     firstName: 'Mike',
+  //     lastName: 'Johnson',
+  //     fullName: 'Mike Johnson',
+  //     dateOfBirth: '1978-11-08',
+  //     gender: 'Male',
+  //     contact: '+1 (555) 345-6789',
+  //     email: 'mike.johnson@email.com',
+  //     address: '789 Pine St, Chicago, IL 60601',
+  //     emergencyContact: '+1 (555) 765-4321',
+  //     medicalHistory: ['High Cholesterol'],
+  //     allergies: ['Peanuts'],
+  //     profileImageUrl: 'assets/avatars/default-avatar.jpg'
+  //   },
+  //   {
+  //     id: 'PAT004',
+  //     firstName: 'Sarah',
+  //     lastName: 'Wilson',
+  //     fullName: 'Sarah Wilson',
+  //     dateOfBirth: '1992-05-14',
+  //     gender: 'Female',
+  //     contact: '+1 (555) 456-7890',
+  //     email: 'sarah.wilson@email.com',
+  //     address: '321 Elm St, Houston, TX 77001',
+  //     emergencyContact: '+1 (555) 654-3210',
+  //     medicalHistory: ['Migraine'],
+  //     allergies: ['Aspirin'],
+  //     profileImageUrl: 'assets/avatars/default-avatar.jpg'
+  //   },
+  //   {
+  //     id: 'PAT005',
+  //     firstName: 'David',
+  //     lastName: 'Brown',
+  //     fullName: 'David Brown',
+  //     dateOfBirth: '1988-09-30',
+  //     gender: 'Male',
+  //     contact: '+1 (555) 567-8901',
+  //     email: 'david.brown@email.com',
+  //     address: '654 Maple Dr, Phoenix, AZ 85001',
+  //     emergencyContact: '+1 (555) 543-2109',
+  //     medicalHistory: ['Arthritis'],
+  //     allergies: ['Ibuprofen'],
+  //     profileImageUrl: 'assets/avatars/default-avatar.jpg'
+  //   },
+  //   {
+  //     id: 'PAT006',
+  //     firstName: 'Lisa',
+  //     lastName: 'Garcia',
+  //     fullName: 'Lisa Garcia',
+  //     dateOfBirth: '1983-12-05',
+  //     gender: 'Female',
+  //     contact: '+1 (555) 678-9012',
+  //     email: 'lisa.garcia@email.com',
+  //     address: '987 Cedar Ln, Philadelphia, PA 19101',
+  //     emergencyContact: '+1 (555) 432-1098',
+  //     medicalHistory: ['Depression', 'Anxiety'],
+  //     allergies: ['Sulfa drugs'],
+  //     profileImageUrl: 'assets/avatars/default-avatar.jpg'
+  //   }
+  // ];
   apiConfig:any = {
     dataConfig: {
       url: environment.apiUrl,
@@ -111,18 +204,21 @@ export class PatientSearchDialogComponent implements OnInit {
       queryParamsUrl: '',
       suppressNullValues: true
     },
-    filterConfig:{
-      fields:[
-        {label:'Blood Group',value:'bloodGroup',inputType:'select'},
-        {label:'First Name',value:'firstName',inputType:'input'},
-        {label:'Last Name',value:'lastName',inputType:'input'},
-        {label:'Date of Birth',value:'dateOfBirth',inputType:'input'},
-        {label:'Gender',value:'gender',inputType:'select'},
-        {label:'Contact',value:'contact',inputType:'input'},
-        {label:'Email',value:'email',inputType:'input'},
-      ]
-    }
-    
+     footerActions:[
+      {
+        id: 'cancel',
+        text: 'Cancel',
+        color: 'primary',
+        appearance: 'flat'
+      },
+      {
+        id:'create',
+        text:'Reset Filters',
+        color:'primary',
+        appearance:'flat'
+        
+      }
+     ]
   }
   getConnectedPatients(): void {
     this.isLoading = true;
@@ -233,7 +329,7 @@ export class PatientSearchDialogComponent implements OnInit {
   }
   
   private initializeGrid(): void {
-     this.apiConfig.filterConfig.fields;
+  
        this.columnDefs = [
       { field: 'bloodGroup', headerName: 'Blood Group', width: 140, sortable: true, filter: true, cellRenderer: StatusCellRendererComponent },
       { field: 'firstName', headerName: 'First Name', width: 150, sortable: true, filter: true },
@@ -241,10 +337,10 @@ export class PatientSearchDialogComponent implements OnInit {
       { field: 'dateOfBirth', headerName: 'Date of Birth', width: 140, sortable: true, filter: true },
       { field: 'gender', headerName: 'Gender', width: 140, sortable: true, filter: true },
       { field: 'contact', headerName: 'Contact', width: 120, sortable: true, filter: true },
-      { field: 'email', headerName: 'Email', width: 150, sortable: true, filter: true },
+      { field: 'email', headerName: 'Email', width: 200, sortable: true, filter: true },
       { field: 'address', headerName: 'Address', width: 150, sortable: true, filter: true },
-      { field: 'createdDate', headerName: 'Created Date', width: 100, sortable: true, filter: true },
-      { field: 'updatedDate', headerName: 'Updated Date', width: 100, sortable: true, filter: true }
+      { field: 'createdDate', headerName: 'Created Date', width: 120, sortable: true, filter: true },
+      { field: 'updatedDate', headerName: 'Updated Date', width: 120, sortable: true, filter: true }
     ];
 
     this.gridOptions = {

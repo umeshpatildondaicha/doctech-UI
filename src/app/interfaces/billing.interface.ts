@@ -63,11 +63,8 @@ export interface DoctorBillingSummary {
 export interface HospitalBillingSummary {
   totalBilled: number;
   totalPaid: number;
-  totalCollected?: number;
   totalOutstanding: number;
-  /** Some backends use totalOverdue instead of overdue */
   overdue: number;
-  totalOverdue?: number;
   totalPatients: number;
   totalInvoices: number;
   byDoctor: DoctorBillingSummary[];
@@ -81,31 +78,3 @@ export interface Billing {
   date: string;
   status: string;
 }
-export interface CreateInvoiceRequest {
-  hospitalId: string;
-  patientId: string;
-  doctorId: string;
-  dueDate: string;
-  items: InvoiceItem[];
-  notes?: string;
-}
-export interface InvoiceResponse {
-  id: number;
-  invoiceNumber: string;
-  hospitalId: string;
-  patientId: string;
-  doctorId: string;
-  status: string;
-  subTotal: number;
-  taxTotal: number;
-  discountTotal: number;
-  totalAmount: number;
-  amountPaid: number;
-  balanceDue: number;
-  /** Optional if backend returns them */
-  date?: string;
-  dueDate?: string;
-  patientName?: string;
-  items?: InvoiceItem[];
-}
-

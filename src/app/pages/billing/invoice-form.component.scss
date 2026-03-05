@@ -1,19 +1,24 @@
 .invoice-form {
   width: 100%;
+  height: 100%;
 }
 
 .invoice-layout {
   display: grid;
   grid-template-columns: 350px 1fr;
   gap: 24px;
-  align-content: start;
-  padding: 4px 0;
+  height: calc(95vh - 120px);
+  max-height: 800px;
+  overflow: hidden;
 }
 
+// Left Section
 .left-section {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
 // Left Create Section
@@ -69,6 +74,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow: hidden;
 }
 
 .patient-card.compact {
@@ -82,21 +88,22 @@
 
 // Items Section
 .items-section {
+  flex: 1;
   display: flex;
   flex-direction: column;
   background: #f8f9fa;
   border-radius: 8px;
   padding: 16px;
   border: 1px solid #e0e0e0;
+  overflow: hidden;
+  min-height: 0;
 }
 
 .quick-templates {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
-  margin-bottom: 10px;
-  grid-template-columns: 1fr;
-  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
 
   .chip {
     display: inline-flex;
@@ -111,10 +118,10 @@
 
 .quick-add {
   display: grid;
-  grid-template-columns: 1fr ;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
   align-items: end;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
@@ -155,10 +162,12 @@
 }
 
 .items-list {
+  flex: 1;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  min-height: 120px;
+  padding-right: 8px;
 }
 
 .item-card {
@@ -258,11 +267,6 @@
   }
 }
 
-.dates-row {
-  margin-top: 12px;
-  margin-bottom: 4px;
-}
-
 .notes-field {
   width: 100%;
   margin-top: 8px;
@@ -301,7 +305,30 @@
   justify-content: flex-end;
 }
 
-// Single scrollbar is on mat-dialog-content; no nested scroll styling needed
+// Scrollbar styling
+.left-section::-webkit-scrollbar,
+.items-list::-webkit-scrollbar,
+.templates-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.left-section::-webkit-scrollbar-track,
+.items-list::-webkit-scrollbar-track,
+.templates-grid::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.left-section::-webkit-scrollbar-thumb,
+.items-list::-webkit-scrollbar-thumb,
+.templates-grid::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+
+  &:hover {
+    background: #555;
+  }
+}
 
 // Responsive
 @media (max-width: 1200px) {
@@ -317,6 +344,13 @@
 @media (max-width: 900px) {
   .invoice-layout {
     grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+    height: auto;
+    max-height: 90vh;
+  }
+
+  .left-section {
+    max-height: 300px;
   }
 
   .templates-grid {

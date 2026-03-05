@@ -23,7 +23,7 @@
           <!-- Appointments list: entity-toolbar + Create appointment -->
           <app-card class="sched-list-card" [divider]="true" [dense]="false">
             <div class="sched-list-header">
-              <app-entity-toolbar [title]="''" [subtitle]="''" [showCounts]="false" [newLabel]="'Create appointment'" 
+              <app-entity-toolbar [title]="''" [subtitle]="''" [showCounts]="false" [newLabel]="'Create appointment'"
                 [showRefresh]="false" [showFilter]="false" [searchPlaceholder]="'Search appointments...'"
                 (newClick)="createAppointment()">
               </app-entity-toolbar>
@@ -511,7 +511,7 @@
                   (higher overrides lower)</span>
                 <button type="button" class="timings-flow-add-btn" mat-flat-button color="primary"
                   (click)="openAvailabilitySetupWizard()">
-                  <app-icon fontIcon="add" [size]="18" class="timings-flow-add-icon"></app-icon>
+                  <app-icon fontIcon="add" [size]="18"></app-icon>
                   Add timings
                 </button>
               </div>
