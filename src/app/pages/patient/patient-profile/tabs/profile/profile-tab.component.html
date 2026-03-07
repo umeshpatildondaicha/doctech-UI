@@ -1,0 +1,175 @@
+<div class="profile-tab">
+
+  <!-- Profile Header Banner -->
+  <div class="profile-banner">
+    <div class="banner-gradient">
+      <div class="avatar-wrap">
+        <div class="avatar-circle">
+          <app-icon fontIcon="person" [size]="52" color="rgba(255,255,255,0.85)"></app-icon>
+        </div>
+        <div class="status-dot" [class]="info.admissionStatus?.toLowerCase()"></div>
+      </div>
+      <div class="banner-meta">
+        <h1 class="banner-name">{{ info.name || patientName || '—' }}</h1>
+        <div class="banner-sub">
+          <span class="banner-id">
+            <app-icon fontIcon="assignment_ind" [size]="14" color="rgba(255,255,255,0.75)"></app-icon>
+            {{ info.id || patientId }}
+          </span>
+          <span class="banner-dot">·</span>
+          <span>{{ info.age }} yrs · {{ info.gender }}</span>
+          <span class="banner-dot">·</span>
+          <span>{{ info.bloodGroup }}</span>
+        </div>
+        <div class="banner-badges">
+          <span class="bbadge status">{{ info.admissionStatus }}</span>
+          <span class="bbadge dept">
+            <app-icon fontIcon="business" [size]="12" color="rgba(255,255,255,0.8)"></app-icon>
+            {{ info.department }}
+          </span>
+          <span class="bbadge doctor">
+            <app-icon fontIcon="local_hospital" [size]="12" color="rgba(255,255,255,0.8)"></app-icon>
+            {{ info.primaryDoctor }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cards Grid -->
+  <div class="cards-grid">
+
+    <!-- Personal Info -->
+    <div class="info-card">
+      <div class="card-header">
+        <div class="card-icon-wrap primary">
+          <app-icon fontIcon="person_outline" [size]="18" color="var(--primary-color)"></app-icon>
+        </div>
+        <h2 class="card-title">Personal Information</h2>
+      </div>
+      <div class="detail-list">
+        <div class="detail-row">
+          <app-icon fontIcon="phone" [size]="16" color="var(--status-success-color)"></app-icon>
+          <div class="detail-body">
+            <span class="detail-label">Contact</span>
+            <span class="detail-value">{{ info.contactNumber }}</span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <app-icon fontIcon="email" [size]="16" color="var(--status-info-color)"></app-icon>
+          <div class="detail-body">
+            <span class="detail-label">Email</span>
+            <span class="detail-value">{{ info.email }}</span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <app-icon fontIcon="location_on" [size]="16" color="var(--status-warning-color)"></app-icon>
+          <div class="detail-body">
+            <span class="detail-label">Address</span>
+            <span class="detail-value">{{ info.address }}</span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <app-icon fontIcon="work" [size]="16" color="var(--text-muted)"></app-icon>
+          <div class="detail-body">
+            <span class="detail-label">Occupation</span>
+            <span class="detail-value">{{ info.occupation || '—' }}</span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <app-icon fontIcon="favorite" [size]="16" color="var(--status-danger-color)"></app-icon>
+          <div class="detail-body">
+            <span class="detail-label">Marital Status</span>
+            <span class="detail-value">{{ info.maritalStatus || '—' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Emergency & Next of Kin -->
+    <div class="info-card">
+      <div class="card-header">
+        <div class="card-icon-wrap danger">
+          <app-icon fontIcon="emergency" [size]="18" color="var(--status-danger-color)"></app-icon>
+        </div>
+        <h2 class="card-title">Emergency Contact</h2>
+      </div>
+      <div class="detail-list">
+        <div class="detail-row">
+          <app-icon fontIcon="phone_in_talk" [size]="16" color="var(--status-danger-color)"></app-icon>
+          <div class="detail-body">
+            <span class="detail-label">Emergency Number</span>
+            <span class="detail-value">{{ info.emergencyContact }}</span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <app-icon fontIcon="group" [size]="16" color="var(--status-info-color)"></app-icon>
+          <div class="detail-body">
+            <span class="detail-label">Relationship</span>
+            <span class="detail-value">{{ info.emergencyContactRelation || '—' }}</span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <app-icon fontIcon="person_pin" [size]="16" color="var(--primary-color)"></app-icon>
+          <div class="detail-body">
+            <span class="detail-label">Next of Kin</span>
+            <span class="detail-value">{{ info.nextOfKin || '—' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insurance section inside same card -->
+      <div class="card-divider"></div>
+      <div class="card-header sub">
+        <div class="card-icon-wrap success">
+          <app-icon fontIcon="verified_user" [size]="18" color="var(--status-success-color)"></app-icon>
+        </div>
+        <h2 class="card-title">Insurance</h2>
+      </div>
+      <div class="detail-list">
+        <div class="detail-row">
+          <app-icon fontIcon="shield" [size]="16" color="var(--status-success-color)"></app-icon>
+          <div class="detail-body">
+            <span class="detail-label">Provider</span>
+            <span class="detail-value">{{ info.insuranceProvider || '—' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Medical Info -->
+    <div class="info-card full-width">
+      <div class="card-header">
+        <div class="card-icon-wrap warning">
+          <app-icon fontIcon="medical_services" [size]="18" color="var(--status-warning-color)"></app-icon>
+        </div>
+        <h2 class="card-title">Medical Information</h2>
+      </div>
+      <div class="medical-grid">
+        <div class="tags-block">
+          <span class="tags-block-label">
+            <app-icon fontIcon="medical_information" [size]="14" color="var(--status-info-color)"></app-icon>
+            Diagnoses
+          </span>
+          <div class="tag-list">
+            @for (d of info.diagnosis; track d) {
+              <span class="tag diagnosis">{{ d }}</span>
+            }
+          </div>
+        </div>
+        <div class="tags-block">
+          <span class="tags-block-label">
+            <app-icon fontIcon="warning_amber" [size]="14" color="var(--status-danger-color)"></app-icon>
+            Allergies
+          </span>
+          <div class="tag-list">
+            @for (a of info.allergies; track a) {
+              <span class="tag allergy">{{ a }}</span>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,23 @@
+.medications-tab {
+  padding: 24px;
+
+  .medications-grid-container {
+    width: 100%;
+  }
+
+  .medications-grid {
+    width: 100%;
+  }
+
+  ::ng-deep .status-badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+
+    &.active { background: #f0fdf4; color: #16a34a; }
+    &.discontinued { background: #fef2f2; color: #dc2626; }
+    &.completed { background: #eff6ff; color: #2563eb; }
+  }
+}

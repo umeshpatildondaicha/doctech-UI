@@ -15,6 +15,8 @@ export class ChatService {
   private readonly currentChatSession = new BehaviorSubject<ChatSession | null>(null);
   private readonly messages = new BehaviorSubject<ChatMessage[]>([]);
   private readonly notifications = new BehaviorSubject<ChatNotification[]>([]);
+  private pollInterval: ReturnType<typeof setInterval> | null = null;
+  private static readonly POLL_INTERVAL_MS = 3000;
 
   constructor(
     private readonly patientService: PatientService,
@@ -151,6 +153,8 @@ export class ChatService {
       switchMap((s) => {
         // Always attempt WebSocket when opening chat (use appointment id for sending)
         this.connectWebSocket(s);
+        // Start REST polling fallback so new messages appear even if WebSocket drops
+        this.startPolling(s);
         // Load unified conversation (all messages for this doctor–patient) so doctor messages do not disappear
         const doctorCode = this.auth.getDoctorPublicCode() ?? this.auth.getDoctorRegistrationNumber() ?? 'me';
         const patientPublicId = (s.patientPublicId ?? s.id ?? '').toString().trim();
@@ -252,7 +256,35 @@ export class ChatService {
   }
 
   disconnectChat(): void {
+    this.stopPolling();
     this.chatApi.disconnect();
+  }
+
+  private startPolling(session: ChatSession): void {
+    this.stopPolling();
+    const doctorCode = this.auth.getDoctorPublicCode() ?? this.auth.getDoctorRegistrationNumber() ?? 'me';
+    const patientPublicId = (session.patientPublicId ?? session.id ?? '').toString().trim();
+    if (!patientPublicId) return;
+    this.pollInterval = setInterval(() => {
+      this.chatApi.getConversationMessages(doctorCode, patientPublicId).subscribe({
+        next: (msgs) => {
+          if (!Array.isArray(msgs) || msgs.length === 0) return;
+          const normalized = this.normalizeMessages(msgs, session);
+          // Only update if new messages arrived
+          if (normalized.length > this.messages.value.length) {
+            this.messages.next(normalized);
+          }
+        },
+        error: () => { /* silent — polling is best-effort */ }
+      });
+    }, ChatService.POLL_INTERVAL_MS);
+  }
+
+  private stopPolling(): void {
+    if (this.pollInterval != null) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
+    }
   }
 
   /** Observable of WebSocket connection state (true when connected and INIT sent). */

@@ -149,9 +149,10 @@ export class PatientComponent  implements OnInit{
   }
 
   onViewPatient(param: any) {
-    this.router.navigate(['/patient-profile'], { 
-      queryParams: { 
+    this.router.navigate(['/patient-profile'], {
+      queryParams: {
         patientId: param?.data?.patientId,
+        patientPublicId: param?.data?.publicId,
         patientName: `${param?.data?.firstName} ${param?.data?.lastName}`
       }
     });

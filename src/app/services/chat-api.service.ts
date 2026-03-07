@@ -36,6 +36,10 @@ export class ChatApiService {
     `${environment.apiUrl.replace(/^http/, 'ws').replace(/^https/, 'wss')}/ws/chat`;
   private ws: WebSocket | null = null;
   private initOkTimeout: ReturnType<typeof setTimeout> | null = null;
+  private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+  private lastInitPayload: ChatWsInitPayload | null = null;
+  private reconnectAttempts = 0;
+  private static readonly MAX_RECONNECT_ATTEMPTS = 3;
   private readonly messageSubject = new Subject<ChatMessage>();
   private readonly connectionSubject = new BehaviorSubject<boolean>(false);
   private readonly isDev = !environment.production;
@@ -74,7 +78,17 @@ export class ChatApiService {
    * appointmentId must be a real appointment UUID from the DB or backend responds "Appointment not found".
    */
   connectWebSocket(init: ChatWsInitPayload): void {
-    this.disconnect();
+    // Disconnect existing connection without clearing the new init payload
+    this.clearInitOkTimeout();
+    this.clearReconnectTimeout();
+    if (this.ws) {
+      this.ws.onclose = null; // prevent scheduleReconnect from firing during intentional disconnect
+      this.ws.close();
+      this.ws = null;
+      this.connectionSubject.next(false);
+    }
+    this.lastInitPayload = init;
+    this.reconnectAttempts = 0;
     const token = this.getAuthToken();
     const url = `${this.wsBaseUrl}?token=${encodeURIComponent(token || '')}`;
     if (this.isDev) {
@@ -108,38 +122,7 @@ export class ChatApiService {
       }, ChatApiService.INIT_OK_TIMEOUT_MS);
     };
 
-    this.ws.onmessage = (event) => {
-      if (this.isDev) console.log('[Chat] WS message raw:', typeof event.data === 'string' ? event.data : '(binary)');
-      try {
-        const data: ChatWsMessage = JSON.parse(event.data as string);
-        const msgType = typeof data.type === 'string' ? (data.type as string).toUpperCase() : '';
-        if (data.type === 'CHAT' && data.content != null) {
-          // Backend echoes saved message as { type: 'CHAT', id, content, senderType, senderPublicId, createdAt }
-          this.messageSubject.next(this.normalizeMessage({
-            id: data.id != null ? String(data.id) : undefined,
-            content: data.content,
-            senderType: (data.senderType === 'DOCTOR' || data.senderType === 'PATIENT' ? data.senderType : 'PATIENT') as 'DOCTOR' | 'PATIENT',
-            senderName: data.senderType === 'DOCTOR' ? 'Doctor' : 'Patient',
-            timestamp: data.createdAt ? new Date(data.createdAt) : new Date()
-          }));
-        } else if (data.type === 'NEW_MESSAGE' && data.payload && this.isChatMessage(data.payload)) {
-          this.messageSubject.next(this.normalizeMessage(data.payload));
-        } else if (msgType === 'INIT_OK' || msgType === 'INIT_ACK') {
-          this.clearInitOkTimeout();
-          this.connectionSubject.next(true);
-          if (this.isDev) console.log('[Chat] INIT OK received, connected');
-        } else if (msgType === 'ERROR') {
-          const msg = (data.message ?? (data.payload as any)?.message ?? 'Chat error').toString();
-          if (this.isDev) console.warn('[Chat] Server error:', msg);
-          this.connectionSubject.next(false);
-          this.snackBar.open(msg, 'Close', { duration: 5000 });
-        } else if (this.isDev && msgType) {
-          console.log('[Chat] WS message type:', msgType, data);
-        }
-      } catch (e) {
-        if (this.isDev) console.warn('[Chat] WS message parse error', e, event.data);
-      }
-    };
+    this.ws.onmessage = this.handleMessage.bind(this);
 
     this.ws.onclose = (ev) => {
       this.clearInitOkTimeout();
@@ -156,6 +139,7 @@ export class ChatApiService {
       }
       this.connectionSubject.next(false);
       this.ws = null;
+      this.scheduleReconnect();
     };
 
     this.ws.onerror = () => {
@@ -173,10 +157,104 @@ export class ChatApiService {
 
   disconnect(): void {
     this.clearInitOkTimeout();
+    this.clearReconnectTimeout();
+    this.lastInitPayload = null;
+    this.reconnectAttempts = 0;
     if (this.ws) {
+      this.ws.onclose = null; // prevent scheduleReconnect on intentional disconnect
       this.ws.close();
       this.ws = null;
       this.connectionSubject.next(false);
+    }
+  }
+
+  private clearReconnectTimeout(): void {
+    if (this.reconnectTimeout != null) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+    }
+  }
+
+  private scheduleReconnect(): void {
+    if (this.reconnectAttempts >= ChatApiService.MAX_RECONNECT_ATTEMPTS) return;
+    if (!this.lastInitPayload) return;
+    const delayMs = 5000 * (this.reconnectAttempts + 1);
+    this.clearReconnectTimeout();
+    this.reconnectTimeout = setTimeout(() => {
+      this.reconnectTimeout = null;
+      if (!this.ws && this.lastInitPayload) {
+        this.reconnectAttempts++;
+        const payload = this.lastInitPayload;
+        // Re-set lastInitPayload so connectWebSocket doesn't reset reconnectAttempts
+        this.lastInitPayload = payload;
+        if (this.isDev) console.log(`[Chat] Auto-reconnect attempt ${this.reconnectAttempts}`);
+        const token = this.getAuthToken();
+        const url = `${this.wsBaseUrl}?token=${encodeURIComponent(token || '')}`;
+        try {
+          this.ws = new WebSocket(url);
+        } catch (err) {
+          if (this.isDev) console.warn('[Chat] Reconnect WebSocket create failed', err);
+          this.scheduleReconnect();
+          return;
+        }
+        this.ws.onopen = () => {
+          this.connectionSubject.next(false);
+          this.ws?.send(JSON.stringify({
+            type: 'INIT',
+            appointmentId: payload.appointmentPublicId,
+            userPublicId: payload.userPublicId,
+            senderType: payload.senderType
+          }));
+          this.clearInitOkTimeout();
+          this.initOkTimeout = setTimeout(() => {
+            this.initOkTimeout = null;
+            if (this.ws?.readyState === WebSocket.OPEN) {
+              this.connectionSubject.next(false);
+            }
+          }, ChatApiService.INIT_OK_TIMEOUT_MS);
+        };
+        this.ws.onmessage = this.handleMessage.bind(this);
+        this.ws.onclose = (ev) => {
+          this.clearInitOkTimeout();
+          this.connectionSubject.next(false);
+          this.ws = null;
+          this.scheduleReconnect();
+        };
+        this.ws.onerror = () => {
+          this.connectionSubject.next(false);
+        };
+      }
+    }, delayMs);
+  }
+
+  private handleMessage(event: MessageEvent): void {
+    if (this.isDev) console.log('[Chat] WS message raw:', typeof event.data === 'string' ? event.data : '(binary)');
+    try {
+      const data: ChatWsMessage = JSON.parse(event.data as string);
+      const msgType = typeof data.type === 'string' ? (data.type as string).toUpperCase() : '';
+      if (data.type === 'CHAT' && data.content != null) {
+        this.messageSubject.next(this.normalizeMessage({
+          id: data.id != null ? String(data.id) : undefined,
+          content: data.content,
+          senderType: (data.senderType === 'DOCTOR' || data.senderType === 'PATIENT' ? data.senderType : 'PATIENT') as 'DOCTOR' | 'PATIENT',
+          senderName: data.senderType === 'DOCTOR' ? 'Doctor' : 'Patient',
+          timestamp: data.createdAt ? new Date(data.createdAt) : new Date()
+        }));
+      } else if (data.type === 'NEW_MESSAGE' && data.payload && this.isChatMessage(data.payload)) {
+        this.messageSubject.next(this.normalizeMessage(data.payload));
+      } else if (msgType === 'INIT_OK' || msgType === 'INIT_ACK') {
+        this.clearInitOkTimeout();
+        this.reconnectAttempts = 0;
+        this.connectionSubject.next(true);
+        if (this.isDev) console.log('[Chat] INIT OK received, connected');
+      } else if (msgType === 'ERROR') {
+        const msg = (data.message ?? (data.payload as any)?.message ?? 'Chat error').toString();
+        if (this.isDev) console.warn('[Chat] Server error:', msg);
+        this.connectionSubject.next(false);
+        this.snackBar.open(msg, 'Close', { duration: 5000 });
+      }
+    } catch (e) {
+      if (this.isDev) console.warn('[Chat] WS message parse error', e, event.data);
     }
   }
 

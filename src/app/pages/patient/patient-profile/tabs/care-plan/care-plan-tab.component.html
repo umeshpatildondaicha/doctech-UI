@@ -1,0 +1,35 @@
+<div class="care-plan-tab">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <app-icon fontIcon="medical_services" [size]="24"></app-icon>
+        Care Plan &amp; Schedule
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="care-timeline">
+        @for (item of careSchedule; track item.id) {
+          <div class="timeline-item">
+            <div class="timeline-marker" [style.background-color]="getStatusColor(item.status)">
+              <app-icon [fontIcon]="getStatusIcon(item.status)" [size]="24" color="white"></app-icon>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <h4>{{ item.title }}</h4>
+                <div class="timeline-meta">
+                  <span class="time">{{ item.startTime | date:'shortTime' }} - {{ item.endTime | date:'shortTime' }}</span>
+                  <span class="priority" [style.background-color]="getPriorityColor(item.priority)">{{ item.priority }}</span>
+                </div>
+              </div>
+              <p>{{ item.description }}</p>
+              <div class="timeline-footer">
+                <span class="assignee">{{ item.assignee }}</span>
+                <span class="status" [style.color]="getStatusColor(item.status)">{{ item.status }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

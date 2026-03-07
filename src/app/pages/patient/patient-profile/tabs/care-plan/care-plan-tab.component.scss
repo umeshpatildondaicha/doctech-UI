@@ -1,0 +1,66 @@
+.care-plan-tab {
+  padding: 24px;
+}
+
+.care-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 16px;
+
+  .timeline-marker {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .timeline-content {
+    flex: 1;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.06);
+
+    h4 { margin: 0 0 8px; font-size: 0.95rem; }
+    p { margin: 0 0 12px; font-size: 0.85rem; color: #555; }
+  }
+
+  .timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .timeline-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    .time { font-size: 0.8rem; color: #888; }
+    .priority {
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      color: white;
+      font-weight: 500;
+      text-transform: capitalize;
+    }
+  }
+
+  .timeline-footer {
+    display: flex;
+    justify-content: space-between;
+    .assignee { font-size: 0.8rem; color: #888; }
+    .status { font-size: 0.8rem; font-weight: 500; text-transform: capitalize; }
+  }
+}

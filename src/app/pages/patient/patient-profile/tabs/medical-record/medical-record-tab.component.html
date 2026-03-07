@@ -1,0 +1,108 @@
+<div class="medical-record-tab">
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card appointments">
+      <div class="card-icon">
+        <app-icon fontIcon="event" [size]="20" color="var(--primary-color)"></app-icon>
+      </div>
+      <div class="card-content">
+        <div class="card-number">{{ patientStats?.pendingAppointments }}</div>
+        <div class="card-label">UPCOMING APPOINTMENTS</div>
+      </div>
+    </div>
+    <div class="summary-card vitals">
+      <div class="card-icon">
+        <app-icon fontIcon="favorite" [size]="20" color="var(--status-warning-color)"></app-icon>
+      </div>
+      <div class="card-content">
+        <div class="card-number">{{ abnormalVitalsCount }}</div>
+        <div class="card-label">ABNORMAL VITALS</div>
+      </div>
+    </div>
+    <div class="summary-card labs">
+      <div class="card-icon">
+        <app-icon fontIcon="report_problem" [size]="20" color="var(--status-danger-color)"></app-icon>
+      </div>
+      <div class="card-content">
+        <div class="card-number">{{ patientStats?.abnormalLabReports }}</div>
+        <div class="card-label">ABNORMAL LAB RESULTS</div>
+      </div>
+    </div>
+    <div class="summary-card medications">
+      <div class="card-icon">
+        <app-icon fontIcon="local_pharmacy" [size]="20" color="var(--status-success-color)"></app-icon>
+      </div>
+      <div class="card-content">
+        <div class="card-number">{{ patientStats?.activeMedications }}</div>
+        <div class="card-label">ACTIVE MEDICATIONS</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="medical-content">
+    <!-- Latest Vital Signs -->
+    <div class="left-panel">
+      <div class="panel-card">
+        <div class="panel-header">
+          <app-icon fontIcon="favorite" [size]="18" color="var(--primary-color)"></app-icon>
+          <h3>Latest Vital Signs</h3>
+        </div>
+        <div class="panel-content">
+          <div class="vitals-list">
+            @for (vital of vitalSigns; track vital.type) {
+              <div class="vital-card" [class.abnormal]="!vital.isNormal">
+                <div class="vital-left">
+                  <div class="vital-label">{{ vital.type }}</div>
+                  <div class="vital-value">{{ vital.value }} {{ vital.unit }}</div>
+                </div>
+                <div class="vital-right">
+                  <div class="vital-status" [class]="vital.isNormal ? 'normal' : 'abnormal'">
+                    <app-icon [fontIcon]="vital.isNormal ? 'check_circle' : 'warning'" [size]="16"
+                      [color]="vital.isNormal ? 'var(--status-success-color)' : 'var(--status-danger-color)'">
+                    </app-icon>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today's Care Schedule -->
+    <div class="right-panel">
+      <div class="panel-card">
+        <div class="panel-header">
+          <app-icon fontIcon="schedule" [size]="18" color="var(--primary-color)"></app-icon>
+          <h3>Today's Care Schedule</h3>
+        </div>
+        <div class="panel-content">
+          <div class="care-timeline">
+            @for (item of careSchedule; track item.id) {
+              <div class="timeline-item">
+                <div class="timeline-marker" [style.background-color]="getStatusColor(item.status)">
+                  <app-icon [fontIcon]="getStatusIcon(item.status)" [size]="14" color="white"></app-icon>
+                </div>
+                <div class="timeline-content">
+                  <div class="timeline-header">
+                    <div class="timeline-time">{{ item.startTime | date:'shortTime' }}</div>
+                    <div class="timeline-priority" [style.background-color]="getPriorityColor(item.priority)">
+                      {{ item.priority }}
+                    </div>
+                  </div>
+                  <div class="timeline-title">{{ item.title }}</div>
+                  <div class="timeline-description">{{ item.description }}</div>
+                  <div class="timeline-footer">
+                    <span class="timeline-assignee">{{ item.assignee }}</span>
+                    <span class="timeline-status" [style.color]="getStatusColor(item.status)">{{ item.status }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

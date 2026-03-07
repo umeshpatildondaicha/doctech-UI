@@ -1,0 +1,88 @@
+<div class="relatives-tab">
+  <div class="relatives-header">
+    <h2>Patient Relatives</h2>
+    <app-button appearance="flat" [color]="'primary'" [text]="'Add Relative'" (btnClick)="addRelative()">
+      <app-icon fontIcon="add" [size]="16" [color]="'var(--primary-text-color)'"></app-icon>
+    </app-button>
+  </div>
+
+  <div class="relatives-list">
+    @for (relative of patientRelatives; track relative.id) {
+      <div class="relative-card">
+        <div class="relative-header">
+          <div class="relative-info">
+            <div class="relative-avatar" [style.background-color]="getRelativeRelationshipColor(relative.relationship)">
+              <app-icon [fontIcon]="getRelativeRelationshipIcon(relative.relationship)" [size]="25" [color]="'var(--primary-text-color)'"></app-icon>
+            </div>
+            <div class="relative-details">
+              <h4>{{ relative.relativeName }}</h4>
+              <p>{{ relative.relationship }} • {{ relative.contactNumber }}</p>
+              <div class="relative-badges">
+                @if (relative.emergencyContact) {
+                  <span class="emergency-badge">Emergency Contact</span>
+                }
+                @if (relative.canMakeDecisions) {
+                  <span class="decision-badge">Can Make Decisions</span>
+                }
+                <span class="verification-badge" [class.verified]="relative.verificationStatus === 'VERIFIED'">
+                  {{ relative.verificationStatus }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="relative-actions">
+            <app-button appearance="basic" [color]="'primary'" [text]="'Call'" (btnClick)="contactRelative(relative)">
+              <app-icon fontIcon="call" [size]="18"></app-icon>
+            </app-button>
+            @if (relative.verificationStatus !== 'VERIFIED') {
+              <app-button appearance="basic" color="accent" (btnClick)="verifyRelative(relative)">
+                <app-icon fontIcon="verified" [size]="16"></app-icon>
+                <span>Verify</span>
+              </app-button>
+            }
+          </div>
+        </div>
+        <div class="relative-details-expanded">
+          <div class="contact-info">
+            <h5>Contact Information</h5>
+            @if (relative.alternateContactNumber) {
+              <p><strong>Alternate:</strong> {{ relative.alternateContactNumber }}</p>
+            }
+            @if (relative.email) {
+              <p><strong>Email:</strong> {{ relative.email }}</p>
+            }
+            @if (relative.address) {
+              <p><strong>Address:</strong> {{ relative.address }}</p>
+            }
+          </div>
+          <div class="permissions-info">
+            <h5>Permissions</h5>
+            <div class="permissions-grid">
+              <div class="permission-item">
+                <app-icon fontIcon="notifications" [size]="16"></app-icon>
+                <span>Receive Updates: {{ relative.canReceiveUpdates ? 'Yes' : 'No' }}</span>
+              </div>
+              <div class="permission-item">
+                <app-icon fontIcon="visibility" [size]="16"></app-icon>
+                <span>Can Visit: {{ relative.canVisit ? 'Yes' : 'No' }}</span>
+              </div>
+            </div>
+          </div>
+          @if (relative.visitingHours) {
+            <div class="visiting-hours">
+              <h5>Visiting Hours</h5>
+              <p><strong>Time:</strong> {{ relative.visitingHours.startTime }} - {{ relative.visitingHours.endTime }}</p>
+              <p><strong>Days:</strong> {{ relative.visitingHours.days.join(', ') }}</p>
+            </div>
+          }
+          @if (relative.notes) {
+            <div class="relative-notes">
+              <h5>Notes</h5>
+              <p>{{ relative.notes }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

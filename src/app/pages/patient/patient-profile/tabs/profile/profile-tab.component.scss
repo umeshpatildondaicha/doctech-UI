@@ -1,0 +1,253 @@
+.profile-tab {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// ── Banner ────────────────────────────────────────────────────────────────────
+.profile-banner {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.banner-gradient {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 32px;
+  background: linear-gradient(135deg, var(--primary-color, #6366f1) 0%, var(--primary-dark, #4f46e5) 100%);
+  color: white;
+}
+
+.avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.avatar-circle {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-dot {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background: #10b981;
+
+  &.ipd { background: #10b981; }
+  &.opd { background: #f59e0b; }
+  &.discharged { background: #6b7280; }
+}
+
+.banner-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.banner-name {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1.2;
+}
+
+.banner-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.banner-id {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.banner-dot { opacity: 0.5; }
+
+.banner-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bbadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  backdrop-filter: blur(4px);
+}
+
+// ── Cards Grid ────────────────────────────────────────────────────────────────
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.info-card {
+  background: var(--card-bg, #fff);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+
+  &.full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+
+  &.sub {
+    margin-top: 0;
+    margin-bottom: 12px;
+  }
+}
+
+.card-icon-wrap {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &.primary { background: rgba(99, 102, 241, 0.1); }
+  &.danger { background: rgba(239, 68, 68, 0.1); }
+  &.success { background: rgba(16, 185, 129, 0.1); }
+  &.warning { background: rgba(245, 158, 11, 0.1); }
+}
+
+.card-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary, #1f2937);
+}
+
+.card-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.07);
+  margin: 16px 0;
+}
+
+// ── Detail Rows ───────────────────────────────────────────────────────────────
+.detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  app-icon { margin-top: 1px; flex-shrink: 0; }
+}
+
+.detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.detail-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted, #9ca3af);
+  font-weight: 600;
+}
+
+.detail-value {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary, #1f2937);
+  word-break: break-word;
+}
+
+// ── Medical Grid ──────────────────────────────────────────────────────────────
+.medical-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tags-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tags-block-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted, #9ca3af);
+  font-weight: 600;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+
+  &.diagnosis {
+    background: #eff6ff;
+    color: #2563eb;
+  }
+
+  &.allergy {
+    background: #fef2f2;
+    color: #dc2626;
+  }
+}

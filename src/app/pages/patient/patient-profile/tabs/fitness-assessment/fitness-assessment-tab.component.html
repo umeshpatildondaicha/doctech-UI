@@ -1,0 +1,191 @@
+<div class="fitness-assessment-tab">
+  <div class="tab-header">
+    <h2><mat-icon>monitor_heart</mat-icon> Fitness Assessment</h2>
+    <span class="header-subtitle">Patient-submitted health &amp; fitness evaluation</span>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+      <p>Loading assessment...</p>
+    </div>
+  } @else if (error) {
+    <div class="empty-state error-state">
+      <mat-icon class="empty-icon">error_outline</mat-icon>
+      <p>{{ error }}</p>
+      <button mat-raised-button color="primary" (click)="load()">Retry</button>
+    </div>
+  } @else if (!assessment) {
+    <div class="fitness-empty-state">
+      <div class="fitness-empty-icon-wrap">
+        <mat-icon class="fitness-empty-icon">monitor_heart</mat-icon>
+      </div>
+      <h3 class="fitness-empty-title">No Fitness Assessment Submitted</h3>
+      <p class="fitness-empty-subtitle">
+        This patient hasn't completed a fitness assessment yet. Ask them to open the
+        DocTech mobile app and fill out the health &amp; fitness evaluation form.
+      </p>
+      <div class="fitness-empty-steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-text">
+            <strong>Open DocTech App</strong>
+            <span>Patient logs into their account</span>
+          </div>
+        </div>
+        <mat-icon class="step-arrow">chevron_right</mat-icon>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-text">
+            <strong>Fill Assessment Form</strong>
+            <span>Navigate to Fitness Assessment</span>
+          </div>
+        </div>
+        <mat-icon class="step-arrow">chevron_right</mat-icon>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-text">
+            <strong>Submit &amp; Sync</strong>
+            <span>Results appear here automatically</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <!-- Meta row -->
+    <div class="assessment-meta">
+      <mat-chip>
+        <mat-icon>schedule</mat-icon>
+        Submitted: {{ assessment.submittedAt | date:'medium' }}
+      </mat-chip>
+      @if (history.length > 1) {
+        <mat-chip>
+          <mat-icon>history</mat-icon>
+          {{ history.length }} submissions total
+        </mat-chip>
+      }
+    </div>
+
+    <div class="assessment-grid">
+
+      <!-- Personal -->
+      <mat-card class="assessment-section">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>person</mat-icon>
+          <mat-card-title>Personal Information</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-grid">
+            <div class="info-item"><span class="label">Full Name</span><span class="value">{{ assessment.fullName || '—' }}</span></div>
+            <div class="info-item"><span class="label">Mobile</span><span class="value">{{ assessment.mobileNumber || '—' }}</span></div>
+            <div class="info-item"><span class="label">Email</span><span class="value">{{ assessment.emailAddress || '—' }}</span></div>
+            <div class="info-item"><span class="label">Gender</span><span class="value">{{ assessment.gender || '—' }}</span></div>
+            <div class="info-item"><span class="label">Date of Birth</span><span class="value">{{ assessment.dateOfBirth | date:'mediumDate' }}</span></div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Health -->
+      <mat-card class="assessment-section">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>health_and_safety</mat-icon>
+          <mat-card-title>Health Information</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-grid">
+            <div class="info-item"><span class="label">Weight Fluctuations</span><span class="value">{{ assessment.weightFluctuations === true ? 'Yes' : assessment.weightFluctuations === false ? 'No' : '—' }}</span></div>
+            <div class="info-item"><span class="label">Physician Advised No Exercise</span><span class="value">{{ assessment.physicianRecommendation === true ? 'Yes' : assessment.physicianRecommendation === false ? 'No' : '—' }}</span></div>
+            <div class="info-item"><span class="label">Has Addictions</span><span class="value">{{ assessment.hasAddictions === true ? 'Yes' : assessment.hasAddictions === false ? 'No' : '—' }}</span></div>
+            @if (assessment.healthTherapistInfo) {
+              <div class="info-item full-width"><span class="label">Health Therapist Info</span><span class="value">{{ assessment.healthTherapistInfo }}</span></div>
+            }
+          </div>
+          @if (assessment.healthConditions && assessment.healthConditions.length > 0) {
+            <div class="conditions-list">
+              <p class="label">Reported Conditions</p>
+              @for (cond of assessment.healthConditions; track cond) {
+                <mat-chip class="condition-chip"><mat-icon>warning_amber</mat-icon> {{ cond }}</mat-chip>
+              }
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Dietary & Goals -->
+      <mat-card class="assessment-section">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>restaurant</mat-icon>
+          <mat-card-title>Dietary Habits &amp; Goals</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-grid">
+            <div class="info-item"><span class="label">Meals / Day</span><span class="value">{{ assessment.mealsPerDay ?? '—' }}</span></div>
+            <div class="info-item"><span class="label">Water Glasses / Day</span><span class="value">{{ assessment.waterGlassesPerDay ?? '—' }}</span></div>
+            @if (assessment.mainFitnessGoal) {
+              <div class="info-item full-width"><span class="label">Main Goal</span><span class="value">{{ assessment.mainFitnessGoal }}</span></div>
+            }
+          </div>
+          @if (getTopGoals().length > 0) {
+            <div class="goals-section">
+              <p class="label">Top Rated Goals</p>
+              @for (item of getTopGoals(); track item.goal) {
+                <div class="goal-row">
+                  <span class="goal-name">{{ item.goal }}</span>
+                  <div class="stars">
+                    @for (s of getFitnessGoalStars(item.rating); track $index) {
+                      <mat-icon class="star filled">star</mat-icon>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Body Measurements -->
+      <mat-card class="assessment-section">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>straighten</mat-icon>
+          <mat-card-title>Body Measurements</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-grid">
+            <div class="info-item"><span class="label">Age</span><span class="value">{{ assessment.age ?? '—' }} yrs</span></div>
+            <div class="info-item"><span class="label">Height</span><span class="value">{{ assessment.height ?? '—' }} cm</span></div>
+            <div class="info-item"><span class="label">Weight</span><span class="value">{{ assessment.weight ?? '—' }} kg</span></div>
+            <div class="info-item"><span class="label">Neck</span><span class="value">{{ assessment.neckCircumference ?? '—' }} cm</span></div>
+            <div class="info-item"><span class="label">Chest</span><span class="value">{{ assessment.chestCircumference ?? '—' }} cm</span></div>
+            <div class="info-item"><span class="label">Bicep</span><span class="value">{{ assessment.bicepCircumference ?? '—' }} cm</span></div>
+            <div class="info-item"><span class="label">Forearm</span><span class="value">{{ assessment.forearmCircumference ?? '—' }} cm</span></div>
+            <div class="info-item"><span class="label">Waist</span><span class="value">{{ assessment.waistCircumference ?? '—' }} cm</span></div>
+            <div class="info-item"><span class="label">Hip</span><span class="value">{{ assessment.hipCircumference ?? '—' }} cm</span></div>
+            <div class="info-item"><span class="label">Thigh</span><span class="value">{{ assessment.thighCircumference ?? '—' }} cm</span></div>
+            <div class="info-item"><span class="label">Calf</span><span class="value">{{ assessment.calfCircumference ?? '—' }} cm</span></div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Fitness Testing -->
+      <mat-card class="assessment-section">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>fitness_center</mat-icon>
+          <mat-card-title>Fitness Testing</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-grid">
+            <div class="info-item"><span class="label">Step Test Steps</span><span class="value">{{ assessment.stepTestSteps ?? '—' }}</span></div>
+            <div class="info-item"><span class="label">Step Test Heart Rate</span><span class="value">{{ assessment.stepTestHeartRate ?? '—' }} bpm</span></div>
+            <div class="info-item"><span class="label">Sit &amp; Reach (1)</span><span class="value">{{ assessment.sitAndReachTest1 ?? '—' }} cm</span></div>
+            <div class="info-item"><span class="label">Sit &amp; Reach (2)</span><span class="value">{{ assessment.sitAndReachTest2 ?? '—' }} cm</span></div>
+            <div class="info-item"><span class="label">Sit &amp; Reach (3)</span><span class="value">{{ assessment.sitAndReachTest3 ?? '—' }} cm</span></div>
+            <div class="info-item"><span class="label">Knee Push-Ups</span><span class="value">{{ assessment.kneePushUps ?? '—' }} reps</span></div>
+            <div class="info-item"><span class="label">Plank Hold</span><span class="value">{{ assessment.plankSeconds ?? '—' }} sec</span></div>
+            <div class="info-item"><span class="label">Wall Sit</span><span class="value">{{ assessment.wallSitSeconds ?? '—' }} sec</span></div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div><!-- /.assessment-grid -->
+  }
+</div>

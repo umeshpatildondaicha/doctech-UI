@@ -1,0 +1,100 @@
+.relatives-tab {
+  padding: 24px;
+
+  .relatives-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    h2 { margin: 0; font-size: 1.2rem; font-weight: 700; }
+  }
+
+  .relatives-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .relative-card {
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+
+    .relative-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 16px;
+      background: #f8f9fa;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .relative-info {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .relative-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .relative-details {
+      h4 { margin: 0 0 4px; font-size: 1rem; font-weight: 600; }
+      p { margin: 0 0 8px; font-size: 0.85rem; color: #666; }
+    }
+
+    .relative-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+
+      span {
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.72rem;
+        font-weight: 600;
+      }
+    }
+
+    .emergency-badge { background: #fef2f2; color: #ef4444; }
+    .decision-badge { background: #eff6ff; color: #3b82f6; }
+    .verification-badge { background: #f3f4f6; color: #6b7280; }
+    .verification-badge.verified { background: #f0fdf4; color: #10b981; }
+
+    .relative-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .relative-details-expanded {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+
+      h5 { margin: 0 0 8px; font-size: 0.85rem; font-weight: 600; color: #555; }
+      p { margin: 2px 0; font-size: 0.85rem; color: #444; }
+    }
+
+    .permissions-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .permission-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: #555;
+    }
+  }
+}

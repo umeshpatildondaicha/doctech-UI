@@ -1,0 +1,160 @@
+<div class="overview-tab">
+  <div class="modern-overview">
+    <!-- Patient Header Card -->
+    <div class="patient-header-card">
+      <div class="header-content">
+        <div class="patient-avatar-section">
+          <div class="patient-avatar">
+            <div class="avatar-fallback">
+              <app-icon fontIcon="person" [size]="48" color="var(--text-muted)"></app-icon>
+            </div>
+            <div class="status-indicator" [class]="patientInfo?.admissionStatus?.toLowerCase()">
+              <app-icon fontIcon="circle" [size]="14"
+                [color]="patientInfo?.admissionStatus === 'IPD' ? 'var(--status-success-color)' : 'var(--status-warning-color)'">
+              </app-icon>
+            </div>
+          </div>
+          <div class="patient-meta">
+            <h1 class="patient-name">{{ patientInfo?.name }}</h1>
+            <div class="patient-id">
+              <app-icon fontIcon="assignment_ind" [size]="16" color="var(--primary-color)"></app-icon>
+              <span>{{ patientInfo?.id }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="patient-status-badges">
+          <div class="status-badge" [class]="patientInfo?.admissionStatus?.toLowerCase()">
+            <app-icon fontIcon="personal_injury" [color]="'var(--primary-text-color)'" [size]="14"></app-icon>
+            <span>{{ patientInfo?.admissionStatus }}</span>
+          </div>
+          <div class="status-badge department">
+            <app-icon fontIcon="business" [color]="'var(--primary-text-color)'" [size]="14"></app-icon>
+            <span>{{ patientInfo?.department }}</span>
+          </div>
+          @if (abnormalVitals.length > 0) {
+            <div class="status-badge alert">
+              <app-icon fontIcon="warning" [color]="'var(--primary-text-color)'" [size]="14"></app-icon>
+              <span>{{ abnormalVitals.length }} Abnormal Vitals</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Quick Details Grid -->
+      <div class="patient-details-card">
+        <div class="card-header">
+          <h2 class="card-title">Patient Details</h2>
+          @if (quickActions.length > 0) {
+            <button mat-icon-button [matMenuTriggerFor]="actionsMenu" class="actions-menu-btn">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionsMenu="matMenu" class="actions-menu">
+              @for (action of quickActions; track action.id) {
+                <button mat-menu-item (click)="onQuickAction(action.id)">
+                  <app-icon [fontIcon]="action.icon" [color]="action.color" [size]="25"></app-icon>
+                  <span>{{ action.label }}</span>
+                </button>
+              }
+            </mat-menu>
+          }
+        </div>
+        <div class="card-content">
+          <div class="details-grid">
+            <div class="detail-item">
+              <div class="detail-icon">
+                <app-icon fontIcon="person" [size]="25" color="var(--primary-color)"></app-icon>
+              </div>
+              <div class="detail-info">
+                <span class="detail-label">Age & Gender</span>
+                <span class="detail-value">{{ patientInfo?.age }} years, {{ patientInfo?.gender }}</span>
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-icon">
+                <app-icon fontIcon="invert_colors" [size]="25" color="var(--status-danger-color)"></app-icon>
+              </div>
+              <div class="detail-info">
+                <span class="detail-label">Blood Group</span>
+                <span class="detail-value">{{ patientInfo?.bloodGroup }}</span>
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-icon">
+                <app-icon fontIcon="phone" [size]="25" color="var(--status-success-color)"></app-icon>
+              </div>
+              <div class="detail-info">
+                <span class="detail-label">Contact</span>
+                <span class="detail-value">{{ patientInfo?.contactNumber }}</span>
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-icon">
+                <app-icon fontIcon="local_hospital" [size]="25" color="var(--status-info-color)"></app-icon>
+              </div>
+              <div class="detail-info">
+                <span class="detail-label">Primary Doctor</span>
+                <span class="detail-value">{{ patientInfo?.primaryDoctor }}</span>
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-icon">
+                <app-icon fontIcon="priority_high" [size]="25" color="var(--status-warning-color)"></app-icon>
+              </div>
+              <div class="detail-info">
+                <span class="detail-label">Emergency Contact</span>
+                <span class="detail-value">{{ patientInfo?.emergencyContact }}</span>
+              </div>
+            </div>
+            <div class="detail-item stat-item">
+              <div class="detail-icon">
+                <app-icon fontIcon="event" [size]="25" color="var(--primary-color)"></app-icon>
+              </div>
+              <div class="detail-info">
+                <span class="detail-label">Total Appointments</span>
+                <span class="detail-value stat-number">{{ patientStats?.totalAppointments }}</span>
+              </div>
+            </div>
+            <div class="detail-item stat-item">
+              <div class="detail-icon">
+                <app-icon fontIcon="healing" [size]="25" color="var(--status-success-color)"></app-icon>
+              </div>
+              <div class="detail-info">
+                <span class="detail-label">Active Medications</span>
+                <span class="detail-value stat-number">{{ patientStats?.activeMedications }}</span>
+              </div>
+            </div>
+            <div class="detail-item stat-item">
+              <div class="detail-icon">
+                <app-icon fontIcon="assessment" [size]="25" color="var(--status-info-color)"></app-icon>
+              </div>
+              <div class="detail-info">
+                <span class="detail-label">Lab Reports</span>
+                <span class="detail-value stat-number">{{ patientStats?.labReports }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diagnoses & Allergies -->
+    <div class="overview-bottom">
+      <div class="info-card">
+        <h3><app-icon fontIcon="medical_information" [size]="18" color="var(--primary-color)"></app-icon> Diagnoses</h3>
+        <div class="tag-list">
+          @for (d of patientInfo?.diagnosis; track d) {
+            <span class="diagnosis-tag">{{ d }}</span>
+          }
+        </div>
+      </div>
+      <div class="info-card">
+        <h3><app-icon fontIcon="warning" [size]="18" color="var(--status-warning-color)"></app-icon> Allergies</h3>
+        <div class="tag-list">
+          @for (a of patientInfo?.allergies; track a) {
+            <span class="allergy-tag">{{ a }}</span>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

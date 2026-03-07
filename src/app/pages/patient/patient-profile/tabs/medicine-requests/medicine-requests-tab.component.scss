@@ -1,0 +1,81 @@
+.medicine-requests-tab {
+  padding: 24px;
+
+  .medicine-requests-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    h2 { margin: 0; font-size: 1.2rem; font-weight: 700; }
+  }
+
+  .medicine-requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .medicine-request-card {
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+
+    .request-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 16px;
+      background: #f8f9fa;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+
+      h4 { margin: 0 0 4px; font-size: 1rem; font-weight: 600; }
+      p { margin: 0; font-size: 0.85rem; color: #666; }
+    }
+
+    .request-status {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+    }
+
+    .request-details {
+      padding: 16px;
+
+      .request-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px 16px;
+        margin-bottom: 12px;
+        p { margin: 0; font-size: 0.85rem; color: #555; }
+      }
+
+      .request-symptoms {
+        margin-bottom: 12px;
+        h5 { margin: 0 0 8px; font-size: 0.85rem; color: #555; }
+        .symptoms-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+      }
+
+      .request-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .request-approval,
+      .request-rejection {
+        margin-top: 12px;
+        padding: 12px;
+        border-radius: 8px;
+        background: #f0fdf4;
+        p { margin: 2px 0; font-size: 0.85rem; }
+      }
+
+      .request-rejection {
+        background: #fef2f2;
+      }
+    }
+  }
+}

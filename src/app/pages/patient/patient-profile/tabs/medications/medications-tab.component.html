@@ -1,0 +1,24 @@
+<div class="medications-tab">
+  <div class="medications-grid-container">
+    <app-grid
+      [gridOptions]="medicationsGridOptions"
+      [rowData]="medications"
+      [columnDefs]="medicationsColumns"
+      [height]="'520px'"
+      searchPlaceholder="Search medicines..."
+      class="medications-grid"
+      [rightTooltemplateRef]="medicationsActionsTemplate">
+    </app-grid>
+  </div>
+
+  <ng-template #medicationsActionsTemplate>
+    <app-button appearance="raised" color="primary" class="create-btn" (btnClick)="openNewMedicationDialog()" [text]="'Create'">
+    </app-button>
+    <app-button appearance="raised" color="primary" class="assign-btn" (btnClick)="openAssignMedicationsDialog()" [text]="'Assign Medicine'">
+    </app-button>
+    <app-button appearance="raised" color="primary" class="template-btn"
+      [disabled]="!canCreateMedicationTemplate()"
+      (btnClick)="openCreateTemplateDialog()" [text]="'Create Template'">
+    </app-button>
+  </ng-template>
+</div>

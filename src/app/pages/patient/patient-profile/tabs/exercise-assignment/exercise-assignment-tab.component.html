@@ -1,0 +1,112 @@
+<div class="exercise-assignment-tab">
+  <!-- Header -->
+  <div class="exercise-assignment-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h2>Exercise Assignments</h2>
+        <p class="header-subtitle">Manage and track patient exercise programs</p>
+      </div>
+      <app-button appearance="flat" [color]="'primary'" [text]="'Assign Exercise'" (btnClick)="openExerciseAssignmentDialog()">
+        <app-icon fontIcon="add" [size]="18"></app-icon>
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-section">
+    <div class="stat-card">
+      <div class="stat-icon"><mat-icon>fitness_center</mat-icon></div>
+      <div class="stat-content">
+        <div class="stat-number">{{ assignedExercises.length }}</div>
+        <div class="stat-label">Total Assignments</div>
+      </div>
+    </div>
+    <div class="stat-card active">
+      <div class="stat-icon"><mat-icon>play_circle</mat-icon></div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getActiveAssignmentsCount() }}</div>
+        <div class="stat-label">Active</div>
+      </div>
+    </div>
+    <div class="stat-card completed">
+      <div class="stat-icon"><mat-icon>check_circle</mat-icon></div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getCompletedAssignmentsCount() }}</div>
+        <div class="stat-label">Completed</div>
+      </div>
+    </div>
+    <div class="stat-card categories">
+      <div class="stat-icon"><mat-icon>category</mat-icon></div>
+      <div class="stat-content">
+        <div class="stat-number">{{ getUniqueCategoriesCount() }}</div>
+        <div class="stat-label">Categories</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assigned Exercises List -->
+  <div class="assigned-exercises-section">
+    <div class="section-header">
+      <h3>Assigned Exercises</h3>
+      @if (assignedExercises.length > 0) {
+        <span class="count-badge">{{ assignedExercises.length }} total</span>
+      }
+    </div>
+
+    @if (assignedExercises.length === 0) {
+      <div class="empty-state">
+        <mat-icon class="empty-icon">fitness_center</mat-icon>
+        <p>No exercises assigned yet. Click "Assign Exercise" to get started.</p>
+      </div>
+    }
+
+    @if (assignedExercises.length > 0) {
+      <div class="exercise-list-grid">
+        @for (assignment of assignedExercises; track assignment) {
+          <div class="exercise-item-row">
+            <div class="exercise-image-cell">
+              @if (assignment.exercise.imageUrl) {
+                <img [src]="assignment.exercise.imageUrl" [alt]="assignment.exercise.name" class="exercise-image">
+              } @else {
+                <div class="exercise-image-placeholder">
+                  <mat-icon>fitness_center</mat-icon>
+                </div>
+              }
+            </div>
+            <div class="exercise-name-cell">
+              <span class="exercise-name">{{ assignment.exercise.name }}</span>
+              @if (assignment.exercise.category) {
+                <span class="exercise-category-badge">{{ assignment.exercise.category }}</span>
+              }
+            </div>
+            <div class="exercise-sets-info">
+              @if (assignment.exercise.sets && assignment.exercise.sets.length > 0) {
+                <div class="sets-display">
+                  <span class="sets-text">
+                    {{ assignment.exercise.sets.length }} set{{ assignment.exercise.sets.length > 1 ? 's' : '' }} ×
+                    {{ getAverageReps(assignment.exercise.sets) }} reps
+                  </span>
+                  <app-button type="button" [fontIcon]="'edit'" title="Edit Sets" [appearance]="'icon'" (btnClick)="editExerciseSets(assignment)">
+                  </app-button>
+                </div>
+              } @else {
+                <div class="sets-display no-sets">
+                  <span class="sets-text">No sets configured</span>
+                  <app-button type="button" [fontIcon]="'add'" title="Configure Sets" [appearance]="'icon'" (btnClick)="editExerciseSets(assignment)">
+                  </app-button>
+                </div>
+              }
+            </div>
+            <div class="exercise-status-cell">
+              <span class="status-badge" [class]="assignment.status.toLowerCase()">{{ assignment.status }}</span>
+            </div>
+            <div class="exercise-actions-cell">
+              <app-button type="button" [fontIcon]="'delete'" title="Remove" [appearance]="'icon'" (btnClick)="removeExercise(assignment)">
+              </app-button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

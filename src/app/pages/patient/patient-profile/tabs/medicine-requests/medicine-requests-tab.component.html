@@ -1,0 +1,68 @@
+<div class="medicine-requests-tab">
+  <div class="medicine-requests-header">
+    <h2>Medicine Requests</h2>
+    <app-button appearance="flat" [color]="'primary'" [text]="'Request Medicine'" (btnClick)="addMedicineRequest()">
+      <app-icon fontIcon="add" [size]="16"></app-icon>
+    </app-button>
+  </div>
+
+  <div class="medicine-requests-list">
+    @for (request of medicineRequests; track request.id) {
+      <div class="medicine-request-card">
+        <div class="request-header">
+          <div class="request-info">
+            <h4>{{ request.medicineName }}</h4>
+            <p>{{ request.dosage }} • {{ request.frequency }} • {{ request.route }}</p>
+          </div>
+          <div class="request-status" [style.background-color]="getStatusColor(request.status)">
+            {{ request.status }}
+          </div>
+        </div>
+        <div class="request-details">
+          <div class="request-meta">
+            <p><strong>Requested by:</strong> {{ request.requestedBy }}</p>
+            <p><strong>Reason:</strong> {{ request.reason }}</p>
+            <p><strong>Urgency:</strong> {{ request.urgency }}</p>
+            <p><strong>Requested:</strong> {{ formatTimeAgo(request.requestTime) }}</p>
+          </div>
+          @if (request.currentSymptoms && request.currentSymptoms.length > 0) {
+            <div class="request-symptoms">
+              <h5>Current Symptoms:</h5>
+              <div class="symptoms-chips">
+                @for (symptom of request.currentSymptoms; track symptom) {
+                  <mat-chip>{{ symptom }}</mat-chip>
+                }
+              </div>
+            </div>
+          }
+          @if (request.status === 'PENDING') {
+            <div class="request-actions">
+              <app-button appearance="stroked" color="primary" (btnClick)="approveMedicineRequest(request)">
+                <app-icon fontIcon="check" [size]="16"></app-icon>
+                <span>Approve</span>
+              </app-button>
+              <app-button appearance="stroked" color="warn" (btnClick)="rejectMedicineRequest(request)">
+                <app-icon fontIcon="close" [size]="16"></app-icon>
+                <span>Reject</span>
+              </app-button>
+            </div>
+          }
+          @if (request.status === 'APPROVED') {
+            <div class="request-approval">
+              <p><strong>Approved by:</strong> {{ request.approvedBy }}</p>
+              <p><strong>Approved on:</strong> {{ formatTimeAgo(request.approvedDate!) }}</p>
+              @if (request.pharmacyNotes) {
+                <p><strong>Pharmacy Notes:</strong> {{ request.pharmacyNotes }}</p>
+              }
+            </div>
+          }
+          @if (request.status === 'REJECTED') {
+            <div class="request-rejection">
+              <p><strong>Rejection Reason:</strong> {{ request.rejectionReason }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

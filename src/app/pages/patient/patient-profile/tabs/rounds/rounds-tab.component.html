@@ -1,0 +1,88 @@
+<div class="rounds-tab">
+  <div class="rounds-header">
+    <h2>Patient Rounds</h2>
+    <div class="rounds-actions">
+      <app-button appearance="flat" [color]="'primary'" [text]="'Add Round'" (btnClick)="addNewRound()">
+        <app-icon fontIcon="add" [size]="16"></app-icon>
+      </app-button>
+      <app-button appearance="flat" color="primary" [text]="'Schedule Rounds'" (btnClick)="scheduleRounds()">
+        <app-icon fontIcon="schedule" [size]="16"></app-icon>
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Upcoming Rounds -->
+  <div class="round-schedules">
+    <h3>Upcoming Rounds</h3>
+    <div class="schedule-cards">
+      @for (schedule of roundSchedules; track schedule.id) {
+        <div class="schedule-card">
+          <div class="schedule-header">
+            <div class="schedule-type" [style.background-color]="getRoundTypeColor(schedule.roundType)">
+              <app-icon [fontIcon]="getRoundTypeIcon(schedule.roundType)" [size]="16" [color]="'var(--primary-text-color)'"></app-icon>
+              {{ schedule.roundType.replace('_', ' ') }}
+            </div>
+            <span class="schedule-priority" [style.background-color]="getPriorityColor(schedule.priority)">{{ schedule.priority }}</span>
+          </div>
+          <div class="schedule-details">
+            <p><strong>Assigned to:</strong> {{ schedule.assignedTo }}</p>
+            <p><strong>Frequency:</strong> {{ schedule.frequency.replace('_', ' ') }}</p>
+            <p><strong>Next:</strong> {{ formatTimeAgo(schedule.nextScheduled!) }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Recent Rounds -->
+  <div class="completed-rounds">
+    <h3>Recent Rounds</h3>
+    <div class="rounds-list">
+      @for (round of patientRounds; track round.id) {
+        <div class="round-card">
+          <div class="round-header">
+            <div class="round-type" [style.background-color]="getRoundTypeColor(round.roundType)">
+              <app-icon [fontIcon]="getRoundTypeIcon(round.roundType)" [size]="16" [color]="'var(--primary-text-color)'"></app-icon>
+              {{ round.roundType.replace('_', ' ') }}
+            </div>
+            <div class="round-meta">
+              <span class="round-performer">{{ round.performedBy }}</span>
+              <span class="round-time">{{ formatTimeAgo(round.roundTime) }}</span>
+            </div>
+          </div>
+          <div class="round-content">
+            <div class="round-notes">
+              <h4>Notes:</h4>
+              <p>{{ round.notes }}</p>
+            </div>
+            @if (round.observations.length > 0) {
+              <div class="round-observations">
+                <h4>Observations:</h4>
+                <ul>@for (o of round.observations; track o) { <li>{{ o }}</li> }</ul>
+              </div>
+            }
+            @if (round.vitalSigns) {
+              <div class="round-vitals">
+                <h4>Vital Signs:</h4>
+                <div class="vitals-grid">
+                  @if (round.vitalSigns.bloodPressure) {
+                    <div class="vital-item"><span class="vital-label">BP:</span><span class="vital-value">{{ round.vitalSigns.bloodPressure }}</span></div>
+                  }
+                  @if (round.vitalSigns.heartRate) {
+                    <div class="vital-item"><span class="vital-label">HR:</span><span class="vital-value">{{ round.vitalSigns.heartRate }} bpm</span></div>
+                  }
+                  @if (round.vitalSigns.temperature) {
+                    <div class="vital-item"><span class="vital-label">Temp:</span><span class="vital-value">{{ round.vitalSigns.temperature }}°C</span></div>
+                  }
+                  @if (round.vitalSigns.oxygenSaturation) {
+                    <div class="vital-item"><span class="vital-label">SpO2:</span><span class="vital-value">{{ round.vitalSigns.oxygenSaturation }}%</span></div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

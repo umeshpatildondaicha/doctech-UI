@@ -1,0 +1,119 @@
+<div class="diet-assignment-tab">
+  <!-- Header -->
+  <div class="diet-assignment-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h2>Diet Assignments</h2>
+        <p class="header-subtitle">Plan weekly meals or assign specific diets for today</p>
+      </div>
+      <div class="header-actions">
+        <app-button appearance="flat" [color]="'primary'" [text]="'New Weekly Plan'" (btnClick)="createWeeklyPlan()">
+          <app-icon fontIcon="add" [size]="18"></app-icon>
+        </app-button>
+        <app-button appearance="flat" [color]="'primary'" [text]="'Assign Diet'" (btnClick)="openDietAssignmentDialog()">
+          <app-icon fontIcon="add" [size]="18"></app-icon>
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  @if (dietAssignments.length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">restaurant_menu</mat-icon>
+      <h3>No Diet Assignments</h3>
+      <p>Click "Assign Diet" or "New Weekly Plan" to get started.</p>
+    </div>
+  }
+
+  @if (dietAssignments.length > 0) {
+    <div class="diet-assignment-cards-grid">
+      <!-- Individual Diets -->
+      @if (getIndividualDietAssignments().length > 0) {
+        <div class="weekly-plan-unified-card">
+          <div class="weekly-plan-card-header">
+            <div class="header-content">
+              <mat-icon class="header-icon">restaurant</mat-icon>
+              <div class="header-text">
+                <h3 class="header-title">Individual Diets</h3>
+                <p class="header-subtitle">Assigned specific diets</p>
+              </div>
+            </div>
+            <span class="summary-badge">{{ getTotalIndividualDiets() }} Diets</span>
+          </div>
+          <div class="individual-diets-content">
+            @for (assignment of getIndividualDietAssignments(); track assignment) {
+              <div class="individual-assignment-item">
+                <div class="assignment-header">
+                  <div class="assignment-info">
+                    <h4 class="assignment-title">{{ assignment.planName }}</h4>
+                    <p class="assignment-dates">
+                      <mat-icon>calendar_today</mat-icon>
+                      {{ formatDateShort(assignment.startDate) }} - {{ formatDateShort(assignment.endDate) }}
+                    </p>
+                  </div>
+                  <div class="assignment-actions">
+                    <app-button type="button" [fontIcon]="'visibility'" [appearance]="'icon'" (btnClick)="viewDietAssignment(assignment)"></app-button>
+                    <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" (btnClick)="removeDietAssignment(assignment)"></app-button>
+                  </div>
+                </div>
+                <div class="individual-diets-list">
+                  @for (diet of getIndividualDietsFromAssignment(assignment); track diet) {
+                    <div class="diet-item-row" (click)="viewDietDetails(diet)">
+                      <div class="diet-image-cell">
+                        @if (diet.imageUrl) {
+                          <img [src]="diet.imageUrl" [alt]="diet.name" class="diet-image">
+                        } @else {
+                          <div class="diet-image-placeholder"><mat-icon>restaurant</mat-icon></div>
+                        }
+                      </div>
+                      <div class="diet-name-cell">
+                        <span class="diet-name">{{ diet.name }}</span>
+                        @if (diet.dietType) {
+                          <span class="diet-type-badge">{{ diet.dietType }}</span>
+                        }
+                      </div>
+                      <div class="nutrition-grid">
+                        <div class="nutrition-item">
+                          <span class="nutrition-value">{{ diet.calories || 0 }}</span>
+                          <span class="nutrition-label">KCAL</span>
+                        </div>
+                        <div class="nutrition-item">
+                          <span class="nutrition-value">{{ diet.protein || 0 }}g</span>
+                          <span class="nutrition-label">PROTEIN</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Weekly Plans -->
+      @for (assignment of getWeeklyDietAssignments(); track assignment) {
+        <div class="weekly-plan-unified-card">
+          <div class="weekly-plan-card-header">
+            <div class="header-content">
+              <mat-icon class="header-icon">date_range</mat-icon>
+              <div class="header-text">
+                <h3 class="header-title">{{ assignment.planName }}</h3>
+                <p class="header-subtitle">Weekly Plan</p>
+              </div>
+            </div>
+            <div class="assignment-actions">
+              <app-button type="button" [fontIcon]="'visibility'" [appearance]="'icon'" (btnClick)="viewDietAssignment(assignment)"></app-button>
+              <app-button type="button" [fontIcon]="'delete'" [appearance]="'icon'" (btnClick)="removeDietAssignment(assignment)"></app-button>
+            </div>
+          </div>
+          <div class="week-days-nav">
+            @for (day of getWeekDays(); track day) {
+              <span class="day-tab">{{ day.substring(0, 3) }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

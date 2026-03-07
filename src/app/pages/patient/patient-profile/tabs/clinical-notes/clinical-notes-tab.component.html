@@ -1,0 +1,25 @@
+<div class="clinical-notes-tab">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <app-icon fontIcon="note" [size]="24"></app-icon>
+        Clinical Notes
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="notes-list">
+        @for (note of clinicalNotes; track note.id) {
+          <div class="note-item">
+            <div class="note-header">
+              <span class="note-type">{{ note.type }}</span>
+              <span class="note-date">{{ note.date | date:'mediumDate' }}</span>
+            </div>
+            <div class="note-title">{{ note.title }}</div>
+            <div class="note-content">{{ note.content }}</div>
+            <div class="note-author">{{ note.author }}</div>
+          </div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
