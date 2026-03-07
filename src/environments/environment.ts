@@ -48,6 +48,10 @@ export const environment = {
       getByTag: '/base/util/rest/BaseConfiguration/getBaseConfigByTag',
       getByKeyTypeApp: '/base/util/rest/BaseConfiguration/key-type-app'
     },
+    multilingual: {
+      base: '/api/multilingual',
+      data: '/api/multilingual/data'
+    },
     hospitals: {
       base: '/api/hospitals',
       register: '/api/hospitals'

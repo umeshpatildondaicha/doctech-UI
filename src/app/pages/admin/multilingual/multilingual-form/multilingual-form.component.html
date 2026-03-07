@@ -1,0 +1,98 @@
+<div class="multilingual-form">
+  <div class="guidelines-banner">
+    <span class="material-icons banner-icon">tips_and_updates</span>
+    <div class="banner-text">
+      <strong>Translation key guidelines</strong>
+      <ul>
+        <li>Use UPPER_SNAKE_CASE format only</li>
+        <li>Choose descriptive names that indicate purpose</li>
+      </ul>
+    </div>
+  </div>
+
+  <form [formGroup]="entryForm">
+    <div class="form-grid">
+
+      <!-- Message Key -->
+      <div class="form-field full-width">
+        <app-input
+          [label]="'Message Key *'"
+          [placeholder]="'e.g. USER_CREATED_SUCCESS'"
+          formControlName="lingualKey"
+          [prefixIconName]="'key'">
+        </app-input>
+        @if (hasError('lingualKey')) {
+          <div class="field-error">{{ getErrorMessage('lingualKey') }}</div>
+        } @else {
+          <div class="field-hint">Use UPPER_SNAKE_CASE (e.g. LOGIN_TITLE, PATIENT_CREATED_SUCCESS)</div>
+        }
+      </div>
+
+      <!-- Language -->
+      <div class="form-field">
+        <app-selectbox
+          [label]="'Language *'"
+          [options]="languageOptions"
+          formControlName="languageType"
+          [placeholder]="'Select language'">
+        </app-selectbox>
+        @if (hasError('languageType')) {
+          <div class="field-error">{{ getErrorMessage('languageType') }}</div>
+        }
+      </div>
+
+      <!-- Category / Module -->
+      <div class="form-field">
+        <app-input
+          [label]="'Category / Module'"
+          [placeholder]="'e.g. Authentication, Patient, Appointment'"
+          formControlName="category"
+          [prefixIconName]="'category'">
+        </app-input>
+        @if (hasError('category')) {
+          <div class="field-error">{{ getErrorMessage('category') }}</div>
+        }
+      </div>
+
+      <!-- App Name -->
+      <div class="form-field">
+        <app-input
+          [label]="'App Name *'"
+          [placeholder]="'e.g. DocTech'"
+          formControlName="appName"
+          [prefixIconName]="'apps'">
+        </app-input>
+        @if (hasError('appName')) {
+          <div class="field-error">{{ getErrorMessage('appName') }}</div>
+        }
+      </div>
+
+      <!-- Default Value -->
+      <div class="form-field">
+        <app-input
+          [label]="'Default Value (English fallback)'"
+          [placeholder]="'e.g. User created successfully'"
+          formControlName="defaultValue"
+          [prefixIconName]="'translate'">
+        </app-input>
+      </div>
+    </div>
+
+    <!-- Translation Value -->
+    <div class="form-field full-width translation-value-field">
+      <label class="value-label">
+        <span class="material-icons">translate</span>
+        Translation *
+      </label>
+      <textarea
+        class="translation-textarea"
+        formControlName="value"
+        placeholder="Enter the translated text for the selected language"
+        rows="5">
+      </textarea>
+      @if (hasError('value')) {
+        <div class="field-error">{{ getErrorMessage('value') }}</div>
+      }
+    </div>
+  </form>
+</div>

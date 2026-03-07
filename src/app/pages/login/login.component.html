@@ -14,26 +14,26 @@
         <p class="logo-sub">HEALTHCARE INTELLIGENCE</p>
       </div>
 
-      <p class="panel-tagline">Secure access to enterprise healthcare management</p>
+      <p class="panel-tagline">{{ 'LOGIN_PANEL_TAGLINE' | translate:'Secure access to enterprise healthcare management' }}</p>
 
       <!-- Quick-login SSO-style buttons -->
       <div class="quick-login-row">
         <button type="button" class="sso-btn" (click)="fillDoctorCredentials()">
           <mat-icon>medical_services</mat-icon>
-          <span>Doctor</span>
+          <span>{{ 'LOGIN_DOCTOR' | translate:'Doctor' }}</span>
         </button>
         <button type="button" class="sso-btn" (click)="fillHospitalCredentials()">
           <mat-icon>domain</mat-icon>
-          <span>Hospital</span>
+          <span>{{ 'LOGIN_HOSPITAL' | translate:'Hospital' }}</span>
         </button>
       </div>
 
-      <div class="divider-text">OR SIGN IN WITH CREDENTIALS</div>
+      <div class="divider-text">{{ 'LOGIN_OR_SIGN_IN_WITH' | translate:'OR SIGN IN WITH CREDENTIALS' }}</div>
 
       <!-- Login Form -->
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form" autocomplete="off">
 
-        <label class="field-label" for="login-email">STAFF ID OR EMAIL</label>
+        <label class="field-label" for="login-email">{{ 'LOGIN_EMAIL_LABEL' | translate:'STAFF ID OR EMAIL' }}</label>
         <div class="field-wrap" [class.field-error]="isFieldInvalid('email')">
           <mat-icon class="field-icon">person_outline</mat-icon>
           <input
@@ -47,7 +47,7 @@
           <div class="error-msg">{{ getErrorMessage('email') }}</div>
         }
 
-        <label class="field-label" for="login-password">PASSWORD</label>
+        <label class="field-label" for="login-password">{{ 'LOGIN_PASSWORD_LABEL' | translate:'PASSWORD' }}</label>
         <div class="field-wrap" [class.field-error]="isFieldInvalid('password')">
           <mat-icon class="field-icon">lock_outline</mat-icon>
           <input
@@ -68,9 +68,9 @@
           <label class="checkbox-container">
             <input type="checkbox" formControlName="rememberMe">
             <span class="checkmark"></span>
-            <span class="checkbox-text">Remember me</span>
+            <span class="checkbox-text">{{ 'LOGIN_REMEMBER_ME' | translate:'Remember me' }}</span>
           </label>
-          <a href="#" class="forgot-link">Forgot password?</a>
+          <a href="#" class="forgot-link">{{ 'LOGIN_FORGOT_PASSWORD' | translate:'Forgot password?' }}</a>
         </div>
 
         @if (errorMessage) {
@@ -95,12 +95,12 @@
           @if (isLoading) {
             <span class="btn-spinner"></span>
           }
-          {{ isLoading ? 'SIGNING IN...' : 'SIGN IN SECURELY' }}
+          {{ isLoading ? ('LOGIN_SIGNING_IN' | translate:'SIGNING IN...') : ('LOGIN_SIGN_IN' | translate:'SIGN IN SECURELY') }}
         </button>
       </form>
 
-      <p class="request-link">Don't have access?&nbsp;<a href="#">Request credentials</a></p>
-      <p class="request-link" style="margin-top:6px">New hospital?&nbsp;<a routerLink="/register" style="color:#0d6efd;font-weight:600">Register your hospital</a></p>
+      <p class="request-link">{{ 'LOGIN_NO_ACCESS' | translate:"Don't have access?" }}&nbsp;<a href="#">{{ 'LOGIN_REQUEST_CREDENTIALS' | translate:'Request credentials' }}</a></p>
+      <p class="request-link" style="margin-top:6px">{{ 'LOGIN_REGISTER_HOSPITAL' | translate:'New hospital?' }}&nbsp;<a routerLink="/register" style="color:#0d6efd;font-weight:600">{{ 'LOGIN_REGISTER_HOSPITAL' | translate:'Register your hospital' }}</a></p>
       <span class="version">Version {{ environment.version }} · Build {{ environment.buildNumber }}</span>
     </div>
   </aside>
@@ -125,11 +125,11 @@
     <div class="status-bar">
       <div class="status-item">
         <span class="status-dot"></span>
-        <span>SYSTEM OPERATIONAL</span>
+        <span>{{ 'LOGIN_SYSTEM_OPERATIONAL' | translate:'SYSTEM OPERATIONAL' }}</span>
       </div>
       <div class="status-item">
         <span class="status-dot amber"></span>
-        <span>ENCRYPTED</span>
+        <span>{{ 'LOGIN_ENCRYPTED' | translate:'ENCRYPTED' }}</span>
       </div>
       <div class="status-time">{{ currentTime }}</div>
     </div>
@@ -142,7 +142,7 @@
 
     <!-- Typing banner -->
     <div class="typing-banner">
-      <span class="typing-text">HEALTHCARE INTELLIGENCE NETWORK — SECURE GATEWAY</span>
+      <span class="typing-text">{{ 'LOGIN_HEALTHCARE_BANNER' | translate:'HEALTHCARE INTELLIGENCE NETWORK — SECURE GATEWAY' }}</span>
     </div>
 
     <!-- Circuit Hub -->
@@ -216,42 +216,42 @@
       <!-- Nodes -->
       <div class="node node-appt">
         <mat-icon>calendar_month</mat-icon>
-        <span class="node-label">Appointments</span>
+        <span class="node-label">{{ 'LOGIN_NODE_APPOINTMENTS' | translate:'Appointments' }}</span>
       </div>
 
       <div class="node node-bill">
         <mat-icon>payments</mat-icon>
-        <span class="node-label">Billing</span>
+        <span class="node-label">{{ 'LOGIN_NODE_BILLING' | translate:'Billing' }}</span>
       </div>
 
       <div class="node node-doc">
         <mat-icon>stethoscope</mat-icon>
-        <span class="node-label">Doctors</span>
+        <span class="node-label">{{ 'LOGIN_NODE_DOCTORS' | translate:'Doctors' }}</span>
       </div>
 
       <div class="node node-pharm">
         <mat-icon>local_pharmacy</mat-icon>
-        <span class="node-label">Pharmacy</span>
+        <span class="node-label">{{ 'LOGIN_NODE_PHARMACY' | translate:'Pharmacy' }}</span>
       </div>
 
       <div class="node node-rec">
         <mat-icon>folder_shared</mat-icon>
-        <span class="node-label">Records</span>
+        <span class="node-label">{{ 'LOGIN_NODE_RECORDS' | translate:'Records' }}</span>
       </div>
 
       <div class="node node-lab">
         <mat-icon>biotech</mat-icon>
-        <span class="node-label">Laboratory</span>
+        <span class="node-label">{{ 'LOGIN_NODE_LABORATORY' | translate:'Laboratory' }}</span>
       </div>
 
       <div class="node node-icu">
         <mat-icon>monitor_heart</mat-icon>
-        <span class="node-label">ICU / Wards</span>
+        <span class="node-label">{{ 'LOGIN_NODE_ICU_WARDS' | translate:'ICU / Wards' }}</span>
       </div>
 
       <div class="node node-emerg">
         <mat-icon>emergency</mat-icon>
-        <span class="node-label">Emergency</span>
+        <span class="node-label">{{ 'LOGIN_NODE_EMERGENCY' | translate:'Emergency' }}</span>
       </div>
     </div>
 
@@ -278,19 +278,19 @@
     <div class="stats-bar">
       <div class="stat-card">
         <div class="stat-num">{{ statHospitals }}</div>
-        <div class="stat-lbl">Hospitals</div>
+        <div class="stat-lbl">{{ 'LOGIN_STATS_HOSPITALS' | translate:'Hospitals' }}</div>
       </div>
       <div class="stat-card">
         <div class="stat-num">{{ statDoctors }}</div>
-        <div class="stat-lbl">Doctors</div>
+        <div class="stat-lbl">{{ 'LOGIN_STATS_DOCTORS' | translate:'Doctors' }}</div>
       </div>
       <div class="stat-card">
         <div class="stat-num">{{ statPatients }}</div>
-        <div class="stat-lbl">Patients</div>
+        <div class="stat-lbl">{{ 'LOGIN_STATS_PATIENTS' | translate:'Patients' }}</div>
       </div>
       <div class="stat-card">
         <div class="stat-num">{{ statStaff }}</div>
-        <div class="stat-lbl">Staff</div>
+        <div class="stat-lbl">{{ 'LOGIN_STATS_STAFF' | translate:'Staff' }}</div>
       </div>
     </div>
   </main>

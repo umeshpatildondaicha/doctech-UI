@@ -10,6 +10,8 @@ import { AppPatientQueueContentComponent } from './components/app-patient-queue-
 import { AuthService } from '@lk/core';
 import { AppTopbarComponent } from './components/app-topbar/app-topbar.component';
 import { Subject, takeUntil, filter } from 'rxjs';
+import { MultilingualService } from './services/multilingual.service';
+import { TranslatePipe } from './pipes/translate.pipe';
 
 @Component({
     selector: 'app-root',
@@ -19,8 +21,9 @@ import { Subject, takeUntil, filter } from 'rxjs';
     AppSidebarComponent,
     AppTopbarComponent,
     RightSidebarComponent,
-    AppPatientQueueContentComponent
-],
+    AppPatientQueueContentComponent,
+    TranslatePipe,
+  ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss'
 })
@@ -40,10 +43,18 @@ export class AppComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private multilingualService: MultilingualService
   ) {}
 
   ngOnInit() {
+    // Load multilingual labels for current language (used by translate pipe across the app)
+    this.multilingualService.loadLabels('DocTech').pipe(takeUntil(this.destroy$)).subscribe();
+    this.multilingualService.activeLanguage$.pipe(takeUntil(this.destroy$)).subscribe((lang) => {
+      this.multilingualService.loadLabels('DocTech', lang).subscribe();
+      this.cdr.detectChanges();
+    });
+
     // Get initial route
     const initialUrl = this.router.url || (isPlatformBrowser(this.platformId) ? window.location.pathname : '/');
     this.currentRoute = initialUrl;

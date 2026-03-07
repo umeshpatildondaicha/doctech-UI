@@ -39,6 +39,7 @@ import { AuthGuard, LoginGuard } from "@lk/core";
 import { BaseConfigurationComponent } from './pages/admin/base-configuration/base-configuration.component';
 import { HospitalComponent } from './pages/admin/hospital/hospital.component';
 import { StaffManagementComponent } from './pages/admin/staff/staff-management.component';
+import { MultilingualComponent } from './pages/admin/multilingual/multilingual.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
@@ -88,6 +89,12 @@ export const routes: Routes = [
     component: BaseConfigurationComponent,
     canActivate: [AuthGuard],
     data: { breadcrumb: 'Base Configuration', breadcrumbIcon: 'settings' }
+  },
+  {
+    path: 'admin/multilingual',
+    component: MultilingualComponent,
+    canActivate: [AuthGuard],
+    data: { breadcrumb: 'Multilingual', breadcrumbIcon: 'translate' }
   },
   // Additional routes for better navigation
   { path: 'exercise-create', component: ExerciseCreateComponent, canActivate: [AuthGuard] },

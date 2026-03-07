@@ -46,7 +46,7 @@
                   }
                 </span>
                 @if (showLabels) {
-                  <span class="label">{{ item.label }}</span>
+                  <span class="label">{{ (item.labelKey | translate) || item.label }}</span>
                 }
               </div>
             </button>
@@ -79,7 +79,7 @@
                     }
                   </span>
                   @if (showLabels) {
-                    <span class="label">{{ item.label }}</span>
+                    <span class="label">{{ (item.labelKey | translate) || item.label }}</span>
                   }
                 </div>
               </button>
@@ -113,7 +113,7 @@
                     }
                   </span>
                   @if (showLabels) {
-                    <span class="label">{{ item.label }}</span>
+                    <span class="label">{{ (item.labelKey | translate) || item.label }}</span>
                   }
                 </div>
               </button>
@@ -147,7 +147,7 @@
                     }
                   </span>
                   @if (showLabels) {
-                    <span class="label">{{ item.label }}</span>
+                    <span class="label">{{ (item.labelKey | translate) || item.label }}</span>
                   }
                 </div>
               </button>
@@ -180,7 +180,7 @@
                   }
                 </span>
                 @if (showLabels) {
-                  <span class="label">{{ item.label }}</span>
+                  <span class="label">{{ (item.labelKey | translate) || item.label }}</span>
                 }
               </div>
             </button>
