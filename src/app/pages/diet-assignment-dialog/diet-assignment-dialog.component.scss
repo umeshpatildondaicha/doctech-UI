@@ -3,37 +3,39 @@
   flex-direction: column;
   height: 100%;
   max-height: 90vh;
+  padding-top: 0px;
 
-  .dialog-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 24px 24px 0 24px;
-    border-bottom: 1px solid #e9ecef;
+  // .dialog-header {
+  //   display: flex;
+  //   justify-content: space-between;
+  //   align-items: center;
+  //   padding: 24px 24px 0 24px;
+  //   border-bottom: 1px solid #e9ecef;
 
-    h2 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: #2c3e50;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+  //   // h2 {
+  //   //   margin: 0;
+  //   //   font-size: 20px;
+  //   //   font-weight: 600;
+  //   //   color: #2c3e50;
+  //   //   display: flex;
+  //   //   align-items: center;
+  //   //   gap: 8px;
+  //   // }
 
-    .close-btn {
-      color: #6c757d;
-      transition: all 0.2s ease;
+  //   // .close-btn {
+  //   //   color: #6c757d;
+  //   //   transition: all 0.2s ease;
 
-      &:hover {
-        background: #f8f9fa;
-        color: #495057;
-      }
-    }
-  }
+  //   //   &:hover {
+  //   //     background: #f8f9fa;
+  //   //     color: #495057;
+  //   //   }
+  //   // }
+  // }
 
   .dialog-content {
     flex: 1;
+    padding: 0;
 
     .dialog-body {
       display: flex;
@@ -158,9 +160,9 @@
         }
 
         &.active {
-          color: #0b5ed7;
-          background: linear-gradient(135deg, #e0ecff 0%, #d6e4ff 100%);
-          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+          color:var(--primary-color);
+          background-color: var(--primary-color);
+
 
           .tab-count {
             background: rgba(11, 94, 215, 0.15);

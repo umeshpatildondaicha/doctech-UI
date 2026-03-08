@@ -20,7 +20,8 @@ import {
   DialogboxService,
   DialogFooterAction,
   GridComponent,
-  IconComponent
+  IconComponent,
+  SnackbarService
 } from "@lk/core";
 import { DietCreateComponent } from '../diet-create/diet-create.component';
 import { Diet } from '../../interfaces/diet.interface';
@@ -152,7 +153,8 @@ export class DietComponent implements OnInit, OnDestroy {
     private dialogService: DialogboxService,
     private dietservice: DietService,
     private eventService: CoreEventService,
-    private authService: AuthService
+    private authService: AuthService,
+    private snackbarservice :SnackbarService
   ) { }
 
   private updateBreadcrumb() {
@@ -291,8 +293,8 @@ export class DietComponent implements OnInit, OnDestroy {
   
           this.dietList = rawList.map((diet: any) => ({
             ...diet,
-  
-            // 🔥 FLATTEN nutrition for UI
+            dietId: diet.dietId ?? diet.id ?? '',
+            // FLATTEN nutrition for UI
             calories: diet.nutritionalInformation?.caloriesKcal ?? 0,
             protein: diet.nutritionalInformation?.protein ?? 0,
             carbs: diet.nutritionalInformation?.carbohydrates ?? 0,
@@ -359,43 +361,58 @@ export class DietComponent implements OnInit, OnDestroy {
       height: '90%',
       footerActions
     });
+    
   
     dialogRef.afterClosed().subscribe(result => {
-      // ❌ cancel / invalid
+      // cancel / invalid
+      
+
       if (!result || result === false || result?.action === 'cancel') {
         return;
+        
+
       }
       // Extract payload (component may close with { action: 'save', payload } or raw payload)
       const payload = result?.payload ?? result;
       if (!payload || typeof payload !== 'object' || !payload.name) {
         return;
+
       }
 
-      // ✅ CREATE
+      //  CREATE
       if (mode === 'create') {
         this.dietservice.createDietPlan(this.doctorCode, payload).subscribe({
           next: () => {
-            console.log('✅ Diet plan created successfully');
+            console.log(' Diet plan created successfully');
             this.loadDietsFromApi();
+            this.snackbarservice.success('Diet Plan Created Successfully');
           },
-          error: (err) => console.error('❌ Diet plan create failed', err)
+          error: (err) => {
+            console.error(' Diet plan create failed', err);
+            this.snackbarservice.error('Diet Plan Creation Failed');
+          }
+
         });
         return;
       }
 
-      // ✏️ EDIT
+      //  EDIT
       if (mode === 'edit') {
         const dietId = diet?.id ?? diet?.dietId;
         if (!dietId) {
-          console.error('❌ Diet plan id missing for update');
+          console.error(' Diet plan id missing for update');
           return;
         }
         this.dietservice.updateDietPlan(this.doctorCode, Number(dietId), payload).subscribe({
           next: () => {
-            console.log('✅ Diet plan updated successfully');
-            this.loadDietsFromApi();
+            console.log(' Diet plan updated successfully');
+            this.snackbarservice.success('Diet Plan Updated Successfully');
+             this.loadDietsFromApi();
           },
-          error: (err) => console.error('❌ Diet plan update failed', err)
+          error: (err) => {
+            console.error('Diet plan update failed', err);
+            this.snackbarservice.error('Diet Plan Update Failed');
+          }
         });
       }
     });
@@ -406,10 +423,14 @@ export class DietComponent implements OnInit, OnDestroy {
     this.onCreateDiet('edit', diet);
   }
 
-  onViewDiet(diet: Diet) {
-    // Navigate to the diet view page
-    console.log('Navigating to diet view:', diet.dietId);
-    this.router.navigate(['/diet/view', diet.dietId]);
+  onViewDiet(diet: Diet | any) {
+    const id = diet?.dietId ?? diet?.id;
+    if (id == null || id === '') {
+      console.warn('Diet view: missing diet id', diet);
+      return;
+    }
+    const idStr = String(id);
+    this.router.navigate(['/diet/view', idStr]);
   }
 
   onVideoClick(videoUrl: string) {
@@ -423,8 +444,29 @@ export class DietComponent implements OnInit, OnDestroy {
   }
 
   onDeleteDiet(diet: Diet) {
-    console.log('Delete diet:', diet);
-    // Implement delete diet functionality with confirmation dialog
+    const id = diet?.dietId ?? (diet as any)?.id;
+    if (id == null || id === '') {
+      this.snackbarservice.error('Cannot delete: diet id is missing.');
+      return;
+    }
+    const confirmed = confirm(`Are you sure you want to delete "${diet.name || 'this diet'}"? This action cannot be undone.`);
+    if (!confirmed) return;
+    const numId = typeof id === 'string' ? parseInt(id, 10) : Number(id);
+    if (Number.isNaN(numId)) {
+      this.snackbarservice.error('Invalid diet id.');
+      return;
+    }
+    this.dietservice.deleteDietPlan(this.doctorCode, numId).subscribe({
+      next: () => {
+        this.snackbarservice.success('Diet deleted successfully.');
+        this.loadDietsFromApi();
+      },
+      error: (err) => {
+        console.error('Delete diet failed', err);
+        const msg = err?.error?.message ?? err?.error?.error ?? (err?.status === 500 ? 'Server error. Please try again or contact support.' : 'Failed to delete diet.');
+        this.snackbarservice.error(msg);
+      }
+    });
   }
 
   onDietRowClick(event: any) {
@@ -449,8 +491,11 @@ export class DietComponent implements OnInit, OnDestroy {
     this.dietservice.getWeeklyDietPlans(this.doctorCode)
       .subscribe({
         next: (res: any) => {
-          console.log('weekly diet plans res', res);
-          this.dietPlans = res.data || res;
+          const rawPlans = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+          this.dietPlans = rawPlans.map((plan: any) => ({
+            ...plan,
+            planId: plan.planId ?? (plan.id != null ? String(plan.id) : '')
+          }));
           this.filteredDietPlans = [...this.dietPlans];
         },
         error: (err: any) => {
@@ -524,17 +569,47 @@ export class DietComponent implements OnInit, OnDestroy {
   }
 
   onViewPlan(plan: any) {
-    this.router.navigate(['/diet-plan-view', plan.planId]);
+    const id = plan?.planId ?? plan?.id;
+    if (id == null || id === '') {
+      console.warn('Diet plan view: missing plan id', plan);
+      return;
+    }
+    this.router.navigate(['/diet-plan-view', String(id)]);
   }
 
   onEditPlan(plan: any) {
-    // Reuse create page UI for editing
-    this.router.navigate(['/diet-plan-edit', plan.planId], { state: { plan } });
+    const id = plan?.planId ?? plan?.id;
+    if (id == null || id === '') {
+      console.warn('Diet plan edit: missing plan id', plan);
+      return;
+    }
+    this.router.navigate(['/diet-plan-edit', String(id)], { state: { plan } });
   }
 
   onDeletePlan(plan: any) {
-    console.log('Delete plan:', plan);
-    // Implement plan deletion with confirmation
+    const id = plan?.planId ?? plan?.id;
+    if (id == null || id === '') {
+      this.snackbarservice.error('Cannot delete: plan id is missing.');
+      return;
+    }
+    const confirmed = confirm(`Are you sure you want to delete "${plan.name || 'this plan'}"? This action cannot be undone.`);
+    if (!confirmed) return;
+    const numId = typeof id === 'string' ? parseInt(id, 10) : Number(id);
+    if (Number.isNaN(numId)) {
+      this.snackbarservice.error('Invalid plan id.');
+      return;
+    }
+    this.dietservice.deleteDietPlan(this.doctorCode, numId).subscribe({
+      next: () => {
+        this.snackbarservice.success('Diet plan deleted successfully.');
+        this.loadDietPlans();
+      },
+      error: (err) => {
+        console.error('Delete diet plan failed', err);
+        const msg = err?.error?.message ?? err?.error?.error ?? (err?.status === 500 ? 'Server error. Please try again or contact support.' : 'Failed to delete diet plan.');
+        this.snackbarservice.error(msg);
+      }
+    });
   }
 
   getStatusIcon(status: string): string {

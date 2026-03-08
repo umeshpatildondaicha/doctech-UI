@@ -1,6 +1,6 @@
 import {
   Component, OnInit, OnDestroy, ChangeDetectionStrategy,
-  ChangeDetectorRef, signal
+  ChangeDetectorRef, signal, Optional, Inject
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -9,6 +9,7 @@ import { Subject, forkJoin, of } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { PageComponent, BreadcrumbItem } from '@lk/core';
 import { AdminTabsComponent, type TabItem } from '../../../components';
@@ -94,7 +95,8 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Staff Management', route: '/admin/staff', icon: 'groups', isActive: true }
   ];
-
+  subDepartments: any[] = [];
+  department = this.subDepartments.find(d=>d.subDepartmentId===this.selectedStaff()?.raw.subDepartmentId)?.name ;
   readonly adminTabs: TabItem[] = [
     { id: '/admin/doctors', label: 'Doctors',  icon: 'medical_services' },
     { id: '/admin/staff',   label: 'Staff',    icon: 'groups'           },
@@ -110,6 +112,9 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
 
   addForm!: FormGroup;
   inviteForm!: FormGroup;
+
+  /** True when opened as a dialog (e.g. from Hospital page) — show only Add Staff form and close with result. */
+  readonly isDialogMode = signal(false);
 
   private readonly destroy$ = new Subject<void>();
 
@@ -140,12 +145,22 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
     private readonly fb:               FormBuilder,
     private readonly snackBar:         MatSnackBar,
     private readonly cdr:              ChangeDetectorRef,
-    private readonly router:           Router
+    private readonly router:           Router,
+    @Optional() private readonly dialogRef: MatDialogRef<StaffManagementComponent> | null,
+    @Optional() @Inject(MAT_DIALOG_DATA) private readonly dialogData: { mode?: string; staff?: unknown } | null
   ) {}
 
   ngOnInit(): void {
     this.initForms();
-    this.loadData();
+    const dialogMode = !!this.dialogRef && this.dialogData?.mode === 'create';
+    this.isDialogMode.set(dialogMode);
+    if (dialogMode) {
+      this.showAddPanel.set(true);
+      this.LoadSubDepartments();
+    } else {
+      this.loadData();
+      this.LoadSubDepartments();
+    }
   }
 
   ngOnDestroy(): void {
@@ -154,7 +169,17 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
   }
 
   // ── Navigation ─────────────────────────────────────────────────────────────
-
+ LoadSubDepartments(): void {
+    this.staffService.getDepartments().subscribe({
+      next:(res:any)=>{
+        this.subDepartments = res || [];
+        console.log("SubDepartments",res);
+      },
+      error:(err:any)=>{
+        console.log("Error loading ",err)
+      }
+    })
+ }
   onAdminTabChange(tabId: string): void {
     this.router.navigate([tabId]);
   }
@@ -223,6 +248,7 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
       contactNumber:[''],
       roles:        [[]],
       departmentId: [null],
+      subDepartmentId: [null],
       specialization:[''],
       shiftPattern: [''],
     };
@@ -239,8 +265,23 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
 
   addStaff(): void {
     if (this.addForm.invalid) { this.addForm.markAllAsTouched(); return; }
+    const formVal = this.addForm.value as any;
+    const deptId = formVal.subDepartmentId != null && formVal.subDepartmentId !== ''
+      ? Number(formVal.subDepartmentId)
+      : null;
+    const payload = {
+      ...formVal,
+      departmentId: deptId,
+      subDepartmentId: deptId,
+    };
+
+    if (this.isDialogMode() && this.dialogRef) {
+      this.dialogRef.close({ action: 'save', formData: payload });
+      return;
+    }
+
     this.isLoading.set(true);
-    this.staffService.createStaff(this.addForm.value)
+    this.staffService.createStaff(payload)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -258,11 +299,24 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
       });
   }
 
+  /** Close dialog with cancel (only used when opened as dialog). */
+  closeDialogCancel(): void {
+    if (this.isDialogMode() && this.dialogRef) {
+      this.dialogRef.close({ action: 'cancel' });
+    } else {
+      this.showAddPanel.set(false);
+    }
+  }
+
   sendInvite(): void {
     if (this.inviteForm.invalid) { this.inviteForm.markAllAsTouched(); return; }
     this.isLoading.set(true);
-    const dto: StaffInviteRequest = this.inviteForm.value as StaffInviteRequest;
-    this.staffService.inviteStaff(dto)
+    const dto: StaffInviteRequest & { subDepartmentId?: number } = this.inviteForm.value as any;
+    const payload: StaffInviteRequest & { subDepartmentId?: number } = {
+      ...dto,
+      departmentId: dto.departmentId ?? dto.subDepartmentId,
+    };
+    this.staffService.inviteStaff(payload)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res: { message?: string }) => {
@@ -288,6 +342,14 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
   getDepartmentName(id: number | undefined): string {
     if (!id) return '—';
     return this.departments.find(d => d.departmentId === id)?.name ?? String(id);
+  }
+
+  private getSubDepartmentName(id: number | undefined): string {
+    if (!id) return '';
+    const match = this.subDepartments.find((s: any) =>
+      s?.subDepartmentId === id || s?.id === id
+    );
+    return match?.name ?? '';
   }
 
   getOnboardingSteps(staff: DisplayStaff): { label: string; done: boolean; date?: string; sub?: string }[] {
@@ -382,7 +444,7 @@ export class StaffManagementComponent implements OnInit, OnDestroy {
       initials,
       avatarColor: AVATAR_COLORS[idx % AVATAR_COLORS.length],
       role,
-      department: this.getDepartmentName(s.departmentId),
+      department: this.getSubDepartmentName((s as any).subDepartmentId) || this.getDepartmentName(s.departmentId),
       shift,
       shiftIcon,
       status,

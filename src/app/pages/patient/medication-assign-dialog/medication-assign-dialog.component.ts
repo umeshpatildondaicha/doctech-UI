@@ -1,10 +1,10 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, JsonPipe } from '@angular/common';
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef } from '@angular/material/dialog';
-import { DIALOG_DATA_TOKEN, AppButtonComponent } from "@lk/core";
+import { DIALOG_DATA_TOKEN, AppButtonComponent, ToggleButtonComponent } from "@lk/core";
 import { Subject, takeUntil, filter } from 'rxjs';
 
 export interface MedicationAssignDialogData {
@@ -17,7 +17,7 @@ export interface MedicationAssignDialogData {
 
 @Component({
     selector: 'app-medication-assign-dialog',
-    imports: [CommonModule, FormsModule, MatButtonModule, MatIconModule, AppButtonComponent],
+    imports: [CommonModule, FormsModule, MatButtonModule, MatIconModule, AppButtonComponent,ToggleButtonComponent,JsonPipe],
     templateUrl: './medication-assign-dialog.component.html',
     styleUrls: ['./medication-assign-dialog.component.scss']
 })
@@ -36,6 +36,14 @@ export class MedicationAssignDialogComponent implements OnInit, OnDestroy {
   selectedMedicineForForm: any = null;
   medicineSearchText = '';
   templateSearchText = '';
+
+  /** Options for timing toggle (e.g. Morning, Afternoon, Evening, Night) */
+  timingOptions = [
+    { value: 'morning', label: 'Morning' },
+    { value: 'afternoon', label: 'Afternoon' },
+    { value: 'evening', label: 'Evening' },
+    { value: 'night', label: 'Night' }
+  ];
 
   // Form fields
   formData = {

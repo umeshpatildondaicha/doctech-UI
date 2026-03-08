@@ -1,5 +1,5 @@
 <div class="diet-assignment-dialog">
-  <div class="dialog-header">
+  <!-- <div class="dialog-header">
     <h2 mat-dialog-title>Assign Diet to {{ data.patientName }}</h2>
     <app-button
     [fontIcon]="'close'"
@@ -7,7 +7,7 @@
     (btnClick)="onCancel()"
     ></app-button>
 
-  </div>
+  </div> -->
 
   <div mat-dialog-content class="dialog-content">
     <div class="dialog-body">
@@ -21,15 +21,12 @@
           <div class="search-inline">
             <mat-form-field appearance="outline" class="search-field small">
               <mat-label>Search</mat-label>
-              <input matInput [(ngModel)]="searchQuery" [placeholder]="assignmentType === 'weekly' ? 'Search diet plans...' : 'Search diets...'">
+              <input matInput [(ngModel)]="searchQuery"
+                [placeholder]="assignmentType === 'weekly' ? 'Search diet plans...' : 'Search diets...'">
               <mat-icon matPrefix>search</mat-icon>
               @if (searchQuery) {
-                <app-button
-                [fontIcon]="'close'"
-                title="Clear Search"
-                (btnClick)="searchQuery=''"
-                ></app-button>
-                <!-- <button mat-icon-button matSuffix (click)="searchQuery=''">
+              <app-button [fontIcon]="'close'" title="Clear Search" (btnClick)="searchQuery=''"></app-button>
+              <!-- <button mat-icon-button matSuffix (click)="searchQuery=''">
                   <mat-icon>close</mat-icon>
                 </button> -->
               }
@@ -37,121 +34,88 @@
           </div>
 
           <div class="browse-tabs" role="tablist" aria-label="Diet selection tabs">
-            <app-button
-            class="tab-btn"
-            [fontIcon]="'calendar_today'"
-            [text]="'Weekly Plans'"
-            [class.active]="assignmentType === 'weekly'"
-            role="tab"
-            [attr.aria-selected]="assignmentType === 'weekly'"
-            (btnClick)="assignmentType = 'weekly'">
-          
-            @if (getFilteredPlans()?.length) {
+            <app-button class="tab-btn" [fontIcon]="'calendar_today'" [text]="'Weekly Plans'"
+              [class.active]="assignmentType === 'weekly'" role="tab" [attr.aria-selected]="assignmentType === 'weekly'"
+              (btnClick)="assignmentType = 'weekly'">
+
+              @if (getFilteredPlans()?.length) {
               <span class="tab-count">
                 {{ getFilteredPlans().length }}
               </span>
-            }
-          </app-button>
-          
-            <app-button
-               class="tab-btn"
-               [fontIcon]="'restaurant'"
-              [text]="'Individual Diets'"
-               [class.active]="assignmentType === 'individual'"
-               role="tab"
-                [attr.aria-selected]="assignmentType === 'individual'"
-                  (btnClick)="assignmentType = 'individual'">
+              }
+            </app-button>
 
-                  @if (getFilteredIndividualDiets()?.length) {
-                 <span class="tab-count">
-                 {{ getFilteredIndividualDiets().length }}
-    </span>
-  }
-</app-button>
+            <app-button class="tab-btn" [fontIcon]="'restaurant'" [text]="'Individual Diets'"
+              [class.active]="assignmentType === 'individual'" role="tab"
+              [attr.aria-selected]="assignmentType === 'individual'" (btnClick)="assignmentType = 'individual'">
+
+              @if (getFilteredIndividualDiets()?.length) {
+              <span class="tab-count">
+                {{ getFilteredIndividualDiets().length }}
+              </span>
+              }
+            </app-button>
 
           </div>
         </div>
 
         <!-- Weekly Plans Tab -->
         @if (assignmentType === 'weekly') {
-          <div class="diet-plans-list">
-            @for (plan of getFilteredPlans(); track plan) {
-              <div
-                class="diet-plan-item"
-                [class.selected]="isPlanSelected(plan)"
-                (click)="selectPlan(plan)"
-                (keydown.enter)="selectPlan(plan)"
-                tabindex="0"
-                role="button"
-                [attr.aria-label]="'Select ' + plan.name">
-                <div class="plan-info">
-                  <h4 class="plan-name">{{ plan.name }}</h4>
-                  <p class="plan-calories">{{ plan.dietsCount }} diets • {{ plan.duration }} days</p>
-                </div>
-                <div class="plan-actions">
-                    <app-button
-                    [fontIcon]="'visibility'"
-                    title="View plan details"
-                    (btnClick)="viewPlan(plan, $event)"
-                    ></app-button>
-                    <!-- <mat-icon>visibility</mat-icon> -->
-                  
-                  @if (isPlanSelected(plan)) {
-                    <mat-icon
-                      class="check-icon">
-                      check_circle
-                    </mat-icon>
-                  }
-                  @if (!isPlanSelected(plan)) {
-                    <!-- <button
+        <div class="diet-plans-list">
+          @for (plan of getFilteredPlans(); track plan) {
+          <div class="diet-plan-item" [class.selected]="isPlanSelected(plan)" (click)="selectPlan(plan)"
+            (keydown.enter)="selectPlan(plan)" tabindex="0" role="button" [attr.aria-label]="'Select ' + plan.name">
+            <div class="plan-info">
+              <h4 class="plan-name">{{ plan.name }}</h4>
+              <p class="plan-calories">{{ plan.dietsCount }} diets • {{ plan.duration }} days</p>
+            </div>
+            <div class="plan-actions">
+              <app-button [fontIcon]="'visibility'" title="View plan details"
+                (btnClick)="viewPlan(plan, $event)"></app-button>
+              <!-- <mat-icon>visibility</mat-icon> -->
+
+              @if (isPlanSelected(plan)) {
+              <mat-icon class="check-icon">
+                check_circle
+              </mat-icon>
+              }
+              @if (!isPlanSelected(plan)) {
+              <!-- <button
                       mat-icon-button
                       class="add-btn"
                       (click)="addPlan(plan, $event)"
                       matTooltip="Add plan">
                       <mat-icon>add</mat-icon>
                     </button> -->
-                    <app-button
-                    [fontIcon]="'add'"
-                    title="Add plan"
-                    (btnClick)="addPlan(plan,$event)"
-                    ></app-button>
-                  }
-                </div>
-              </div>
-            }
+              <app-button [fontIcon]="'add'" title="Add plan" (btnClick)="addPlan(plan,$event)"></app-button>
+              }
+            </div>
           </div>
+          }
+        </div>
         }
 
         <!-- Individual Diets Tab -->
         @if (assignmentType === 'individual') {
-          <div class="individual-diets-list">
-            @for (diet of getFilteredIndividualDiets(); track diet) {
-              <div
-                class="diet-item"
-                [class.selected]="isDietSelected(diet)"
-                (click)="toggleDietSelection(diet)"
-                (keydown.enter)="toggleDietSelection(diet)"
-                tabindex="0"
-                role="button"
-                [attr.aria-label]="'Select ' + diet.name">
-                <div class="diet-item-info">
-                  <h4 class="diet-item-name">{{ diet.name }}</h4>
-                  <p class="diet-item-meta">{{ diet.calories }} cal • {{ diet.protein }}g protein • {{ diet.dietType }}</p>
-                </div>
-                <div class="diet-item-actions">
-                  @if (isDietSelected(diet)) {
-                    <mat-icon
-                      class="check-icon">
-                      check_circle
-                    </mat-icon>
-                  }
-                  @if (!isDietSelected(diet)) {
-                    <app-button
-                    [fontIcon]="'add'"
-                    title="Add diet"
-                    (btnClick)="toggleDietSelection(diet);$event.stopPropagation()"
-                    ></app-button>
-                    <!-- <button
+        <div class="individual-diets-list">
+          @for (diet of getFilteredIndividualDiets(); track diet) {
+          <div class="diet-item" [class.selected]="isDietSelected(diet)" (click)="toggleDietSelection(diet)"
+            (keydown.enter)="toggleDietSelection(diet)" tabindex="0" role="button"
+            [attr.aria-label]="'Select ' + diet.name">
+            <div class="diet-item-info">
+              <h4 class="diet-item-name">{{ diet.name }}</h4>
+              <p class="diet-item-meta">{{ diet.calories }} cal • {{ diet.protein }}g protein • {{ diet.dietType }}</p>
+            </div>
+            <div class="diet-item-actions">
+              @if (isDietSelected(diet)) {
+              <mat-icon class="check-icon">
+                check_circle
+              </mat-icon>
+              }
+              @if (!isDietSelected(diet)) {
+              <app-button [fontIcon]="'add'" title="Add diet"
+                (btnClick)="toggleDietSelection(diet);$event.stopPropagation()"></app-button>
+              <!-- <button
 
                       mat-icon-button
                       class="add-btn"
@@ -159,11 +123,11 @@
                       matTooltip="Add diet">
                       <mat-icon>add</mat-icon>
                     </button> -->
-                  }
-                </div>
-              </div>
-            }
+              }
+            </div>
           </div>
+          }
+        </div>
         }
       </div>
 
@@ -172,130 +136,103 @@
         <h3>Assignment Summary ({{ getSelectedItemsCount() }})</h3>
 
         @if (assignmentType === 'weekly' && selectedPlan) {
-          <div class="summary-content">
-            <!-- Selected Plan Details -->
-            <div class="selected-plan-card">
-              <div class="plan-header">
-                <h4>{{ selectedPlan.name }}</h4>
-                <!-- <button
+        <div class="summary-content">
+          <!-- Selected Plan Details -->
+          <div class="selected-plan-card">
+            <div class="plan-header">
+              <h4>{{ selectedPlan.name }}</h4>
+              <!-- <button
                   mat-icon-button
                   (click)="removePlan()"
                   class="remove-btn">
                   <mat-icon>delete</mat-icon>
                 </button> -->
-                <app-button
-                [fontIcon]="'delete'"
-                title="Remove plan"
-                (btnClick)="removePlan()"
-                ></app-button>
-              </div>
-              <div class="plan-details">
-                <div class="detail-item">
-                  <span class="detail-label">Duration:</span>
-                  <span class="detail-value">{{ selectedPlan.duration }} days</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">Total Diets:</span>
-                  <span class="detail-value">{{ selectedPlan.dietsCount || 'N/A' }}</span>
-                </div>
-                <p class="plan-description">{{ selectedPlan.description }}</p>
-              </div>
+              <app-button [fontIcon]="'delete'" title="Remove plan" (btnClick)="removePlan()"></app-button>
             </div>
-            <!-- Compatibility Message -->
-            @if (selectedPlan.isCompatible !== false) {
-              <div class="compatibility-message">
-                <mat-icon class="check-icon">check_circle</mat-icon>
-                <span>This plan is compatible with the patient's allergies.</span>
+            <div class="plan-details">
+              <div class="detail-item">
+                <span class="detail-label">Duration:</span>
+                <span class="detail-value">{{ selectedPlan.duration }} days</span>
               </div>
-            }
+              <div class="detail-item">
+                <span class="detail-label">Total Diets:</span>
+                <span class="detail-value">{{ selectedPlan.dietsCount || 'N/A' }}</span>
+              </div>
+              <p class="plan-description">{{ selectedPlan.description }}</p>
+            </div>
           </div>
+          <!-- Compatibility Message -->
+          @if (selectedPlan.isCompatible !== false) {
+          <div class="compatibility-message">
+            <mat-icon class="check-icon">check_circle</mat-icon>
+            <span>This plan is compatible with the patient's allergies.</span>
+          </div>
+          }
+        </div>
         }
 
         <!-- Individual Diets Summary -->
         @if (assignmentType === 'individual' && selectedDiets.length > 0) {
-          <div class="summary-content">
-            <div class="selected-diets-list">
-              @for (diet of selectedDiets; track diet; let i = $index) {
-                <div
-                  class="selected-diet-item">
-                  <div class="diet-info">
-                    <h5 class="diet-name">{{ diet.name }}</h5>
-                    <p class="diet-meta">{{ diet.calories }} cal • {{ diet.protein }}g protein</p>
-                  </div>
-                  <app-button
-                  [fontIcon]="'delete'"
-                  title="Remove plan"
-                  (btnClick)="removeDiet(i)"
-                  ></app-button>
-                </div>
-              }
+        <div class="summary-content">
+          <div class="selected-diets-list">
+            @for (diet of selectedDiets; track diet; let i = $index) {
+            <div class="selected-diet-item">
+              <div class="diet-info">
+                <h5 class="diet-name">{{ diet.name }}</h5>
+                <p class="diet-meta">{{ diet.calories }} cal • {{ diet.protein }}g protein</p>
+              </div>
+              <app-button [fontIcon]="'delete'" title="Remove plan" (btnClick)="removeDiet(i)"></app-button>
             </div>
+            }
           </div>
+        </div>
         }
 
         <!-- Empty State -->
-        @if ((assignmentType === 'weekly' && !selectedPlan) || (assignmentType === 'individual' && selectedDiets.length === 0)) {
-          <div class="empty-state">
-            <mat-icon class="empty-icon">restaurant_menu</mat-icon>
-            @if (assignmentType === 'weekly') {
-              <p>No plan selected. Choose a plan from the list to see details here.</p>
-            }
-            @if (assignmentType === 'individual') {
-              <p>No diets selected. Choose diets from the list to add them.</p>
-            }
-          </div>
+        @if ((assignmentType === 'weekly' && !selectedPlan) || (assignmentType === 'individual' && selectedDiets.length
+        === 0)) {
+        <div class="empty-state">
+          <mat-icon class="empty-icon">restaurant_menu</mat-icon>
+          @if (assignmentType === 'weekly') {
+          <p>No plan selected. Choose a plan from the list to see details here.</p>
+          }
+          @if (assignmentType === 'individual') {
+          <p>No diets selected. Choose diets from the list to add them.</p>
+          }
+        </div>
         }
       </div>
     </div>
   </div>
 
   <!-- Footer -->
-  <div mat-dialog-actions class="dialog-footer">
-    <div class="footer-left">
+  <!-- <div mat-dialog-actions class="dialog-footer"> -->
+    <!-- <div class="footer-left">
       <div class="date-fields">
         <mat-form-field appearance="outline" class="date-picker">
           <mat-label>Start Date</mat-label>
-          <input
-            matInput
-            [matDatepicker]="pickerStart"
-            [(ngModel)]="startDate">
-            <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
-            <mat-datepicker #pickerStart></mat-datepicker>
-          </mat-form-field>
+          <input matInput [matDatepicker]="pickerStart" [(ngModel)]="startDate">
+          <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+          <mat-datepicker #pickerStart></mat-datepicker>
+        </mat-form-field>
 
-          <mat-form-field appearance="outline" class="date-picker">
-            <mat-label>Till Date</mat-label>
-            <input
-              matInput
-              [matDatepicker]="pickerEnd"
-              [(ngModel)]="endDate"
-              [min]="startDate">
-              <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
-              <mat-datepicker #pickerEnd></mat-datepicker>
-            </mat-form-field>
-          </div>
-        </div>
-        <div class="footer-right">
-          <app-button
-          [text]="'cancel'"
-          title="Cancel"
-          (btnClick)="onCancel()"
-          [appearance]="'flat'"
-          ></app-button>
-        
-          <app-button
-          
-          [appearance]="'flat'"
-          [text]="'Assign Diet'"
-          [color]="'primary'"
-          [disabled]="
+        <mat-form-field appearance="outline" class="date-picker">
+          <mat-label>Till Date</mat-label>
+          <input matInput [matDatepicker]="pickerEnd" [(ngModel)]="endDate" [min]="startDate">
+          <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+          <mat-datepicker #pickerEnd></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </div> -->
+    <!-- <div class="footer-right">
+      <app-button [text]="'cancel'" title="Cancel" (btnClick)="onCancel()" [appearance]="'flat'"></app-button>
+
+      <app-button [appearance]="'flat'" [text]="'Assign Diet'" [color]="'primary'" [disabled]="
             (assignmentType === 'weekly' && !selectedPlan) ||
             (assignmentType === 'individual' && selectedDiets.length === 0)
-          "
-          (btnClick)="onConfirm()">
-        </app-button>
-        
-        </div>
-      </div>
-    </div>
+          " (btnClick)="onConfirm()">
+      </app-button>
 
+    </div> -->
+  <!-- </div> -->
+</div>

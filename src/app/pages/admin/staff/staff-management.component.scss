@@ -579,6 +579,15 @@
   &:hover { background: var(--clr-bg); }
 }
 
+// ── Dialog mode (e.g. from Hospital page) ─────────────────────────────────────
+.staff-dialog-wrap {
+  display: flex; flex-direction: column; min-height: 0; max-height: 85vh;
+  .sp-form { flex: 1; min-height: 0; overflow-y: auto; }
+}
+.sp-header--dialog {
+  flex-shrink: 0;
+}
+
 // ── Side panels ───────────────────────────────────────────────────────────────
 .overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 900;

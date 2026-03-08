@@ -41,15 +41,16 @@ export class DoctorCreateComponent {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<DoctorCreateComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { mode: Mode, doctor?: Doctor }
+    @Inject(MAT_DIALOG_DATA) public data: { mode: Mode, doctor?: Doctor, hospitalId?: string }
   ) {
     this.mode = data?.mode || 'create';
     this.submitButtonText = this.getSubmitButtonText();
+    const initialHospitalId = data?.doctor?.hospitalId || data?.hospitalId || '';
     this.doctorForm = this.fb.group({
       firstName: [data?.doctor?.firstName || '', Validators.required],
       lastName: [data?.doctor?.lastName || '', Validators.required],
       registrationNumber: [data?.doctor?.registrationNumber || '', Validators.required],
-      hospitalId: [data?.doctor?.hospitalId || '', Validators.required],
+      hospitalId: [initialHospitalId, Validators.required],
       specialization: [data?.doctor?.specialization || '', Validators.required],
       globalNumber: [data?.doctor?.globalNumber || '', Validators.required],
       persanalNumber: [data?.doctor?.persanalNumber || '', Validators.required],
@@ -80,15 +81,15 @@ export class DoctorCreateComponent {
 
   onSubmit() {
     if (this.isViewMode) {
-      this.dialogRef.close();
+      this.dialogRef.close({ action: 'cancel' });
       return;
     }
     if (this.doctorForm.valid) {
-      this.dialogRef.close(this.doctorForm.value);
+      this.dialogRef.close({ action: 'save', formData: this.doctorForm.getRawValue() });
     }
   }
 
   onCancel() {
-    this.dialogRef.close();
+    this.dialogRef.close({ action: 'cancel' });
   }
 } 

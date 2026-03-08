@@ -683,12 +683,13 @@
 // ─── Add Person Panel ────────────────────────────────────────────────────────
 .add-person-panel {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 40%;
+  left: 40%;
   transform: translate(-50%, -50%);
-  width: 340px;
+  width: 80%;
+  height: 80%;
   background: var(--surface-card, #fff);
-  border-radius: 16px;
+  border-radius: 14px;
   box-shadow: 0 16px 48px rgba(0,0,0,.18);
   border: 1px solid rgba(0,0,0,.08);
   z-index: 50;
@@ -737,8 +738,8 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
-  padding: 8px 16px 14px;
+  gap: 12px;
+  padding: 12px 8px 8px;
 }
 
 // ─── Config Drawer ────────────────────────────────────────────────────────────

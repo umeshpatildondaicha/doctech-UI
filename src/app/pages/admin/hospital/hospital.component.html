@@ -25,7 +25,7 @@
         <mat-icon class="hps-ico hps-ico--cyan">stethoscope</mat-icon>
         <span class="hps-val">{{ statDoctors() }}</span>
         <span class="hps-lbl">Doctors</span>
-        <button type="button" class="hps-add hps-add--doctor" (click)="toggleAddDoctorForm()" matTooltip="Create doctor" matTooltipPosition="below">
+        <button type="button" class="hps-add hps-add--doctor" (click)="OpenAddDoctorDialog()" matTooltip="Create doctor" matTooltipPosition="below">
           <mat-icon>add</mat-icon>
         </button>
       </div>
@@ -40,7 +40,7 @@
         <mat-icon class="hps-ico hps-ico--amber">badge</mat-icon>
         <span class="hps-val">{{ statStaff() }}</span>
         <span class="hps-lbl">Staff</span>
-        <button type="button" class="hps-add hps-add--staff" (click)="toggleAddStaffForm()" matTooltip="Create staff" matTooltipPosition="below">
+        <button type="button" class="hps-add hps-add--staff" (click)="openStaffCreateDialog()" matTooltip="Create staff" matTooltipPosition="below">
           <mat-icon>add</mat-icon>
         </button>
       </div>
@@ -440,7 +440,7 @@
         }
 
         <!-- ── Add Doctor form ──────────────────────────────────────────── -->
-        @if (showAddDoctorForm()) {
+        <!-- @if (showAddDoctorForm()) {
           <div class="add-person-panel">
             <div class="app-head app-head--doctor">
               <mat-icon>stethoscope</mat-icon>
@@ -503,10 +503,10 @@
               </button>
             </div>
           </div>
-        }
+        } -->
 
         <!-- ── Add Staff form ───────────────────────────────────────────── -->
-        @if (showAddStaffForm()) {
+        <!-- @if (showAddStaffForm()) {
           <div class="add-person-panel">
             <div class="app-head app-head--staff">
               <mat-icon>badge</mat-icon>
@@ -555,7 +555,7 @@
               </button>
             </div>
           </div>
-        }
+        } -->
 
         <!-- Zoom FAB -->
         <div class="zoom-fab" aria-label="Canvas zoom controls">

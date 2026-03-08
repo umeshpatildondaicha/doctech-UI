@@ -16,9 +16,8 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { Doctor } from '../../../../interfaces/doctor.interface';
 import { HttpService } from '../../../../services/http.service';
-import { AppButtonComponent, DIALOG_DATA_TOKEN } from '@lk/core';
+import { AppButtonComponent, DIALOG_DATA_TOKEN, SnackbarService } from '@lk/core';
 import { DoctorService } from '../../../../services/doctor.service';
-import { AuthService } from '../../../../services/auth.service';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
@@ -49,7 +48,6 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private destroy$ = new Subject<void>();
   private doctorService = inject(DoctorService);
-  private authService = inject(AuthService);
 
   // Hidden submit button reference — used to trigger form submission from footer button
   @ViewChild('hiddenSubmitBtn') hiddenSubmitBtn!: ElementRef<HTMLButtonElement>;
@@ -87,7 +85,7 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
     'ACLS-EP', 'BLS Instructor', 'ACLS Instructor'
   ];
 
-  constructor() {
+  constructor(private snackbarservice :SnackbarService) {
     this.initializeForm();
   }
 
@@ -96,8 +94,7 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
       this.populateForm(this.data.doctor);
     }
 
-    // Test backend connection
-    this.testBackendConnection();
+  
 
     // Access dialogbox content component to update footer actions
     this.initializeFooterActions();
@@ -163,7 +160,7 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
             original(action);
           };
         } else {
-          // ⚠️ Fallback: patch DOM click on the footer button directly
+          // Fallback: patch DOM click on the footer button directly
           console.warn('onFooterAction hook not found — attaching DOM click fallback');
           const overlayPane = (overlayRef as any)?._pane as HTMLElement | undefined;
           if (overlayPane) {
@@ -307,17 +304,17 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
     });
   }
   onSubmit() {
-    console.log('🚀 onSubmit() called — form valid:', this.doctorForm.valid);
+    console.log(' onSubmit() called — form valid:', this.doctorForm.valid);
 
     if (!this.doctorForm.valid) {
       this.markFormGroupTouched();
       Object.keys(this.doctorForm.controls).forEach(key => {
         const control = this.doctorForm.get(key);
         if (control?.invalid) {
-          console.warn(`❌ Invalid field: ${key}`, control.errors);
+          console.warn(` Invalid field: ${key}`, control.errors);
         }
       });
-      this.snackBar.open('Please fix validation errors before submitting', 'Close', { duration: 3000 });
+      this.snackbarservice.error('Please fix validation errors before submitting');
       return;
     }
 
@@ -325,7 +322,7 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
 
     // Capture form data and close dialog — the POST is made in doctors.component.ts afterClosed()
     const formData = { ...this.doctorForm.value };
-    console.log('📋 Form data captured, closing dialog:', formData);
+    console.log(' Form data captured, closing dialog:', formData);
     this.dialogRef.close({ action: 'save', formData });
   }
 
@@ -399,7 +396,7 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
 
   // Invite existing doctor methods
   inviteExistingDoctor() {
-    console.log('📨 inviteExistingDoctor() called with:', {
+    console.log('inviteExistingDoctor() called with:', {
       inviteMobileNumber: this.inviteMobileNumber,
       inviteRole: this.inviteRole
     });
@@ -430,15 +427,15 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
       doctorRegistrationNumber: mobileNumber
     };
 
-    const hospitalId = this.authService.getHospitalPublicId();
+    const hospitalId = 'HOSP-001';
 
     this.doctorService.inviteDoctor(hospitalId, invitePayload)
       .subscribe({
         next: (res: any) => {
           this.isInviting = false;
           this.updateFooterActions();
-          this.snackBar.open('Invitation sent successfully!', 'Close', { duration: 3000 });
-          console.log('✅ Invitation sent successfully:', res);
+          this.snackbarservice.success('Invitation Sent Successfully');
+          console.log(' Invitation sent successfully:', res);
 
           this.inviteMobileNumber = '';
           this.inviteMessage = '';
@@ -455,7 +452,7 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
             err?.error?.error ||
             err?.message ||
             'Failed to send invitation. Please try again.';
-          this.snackBar.open(apiMsg, 'Close', { duration: 4000 });
+          this.snackbarservice.error(apiMsg);
           console.error('Invite doctor failed:', err);
         }
       });
@@ -469,7 +466,7 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
   // Tab management methods
   onTabChange(index: number) {
     this.selectedTabIndex = index;
-    console.log('📑 Tab changed to:', index === 0 ? 'Invite Existing' : 'Add New');
+    console.log('Tab changed to:', index === 0 ? 'Invite Existing' : 'Add New');
 
     // Clear any errors when switching tabs
     this.inviteMobileNumberError = '';
@@ -483,22 +480,22 @@ export class AdminDoctorCreateComponent implements OnInit, OnDestroy {
     this.updateFooterActions();
   }
 
-  testBackendConnection() {
-    console.log(' Testing backend connection...');
-    // this.http.get('https://doctech.solutions/api/ping')
-    //   .subscribe({
-    //     next: (response) => {
-    //       console.log('Backend connection successful:', response);
-    //       this.backendConnected = true;
-    //     },
-    //     error: (error) => {
-    //       console.warn(' Backend connection test failed:', error);
-    //       console.warn(' This is normal if your Spring app doesn\'t have a /ping endpoint');
-    //       this.backendConnected = false;
-    //     }
-    //   });
-    this.backendConnected = true;
-  }
+  // testBackendConnection() {
+  //   console.log(' Testing backend connection...');
+  //   // this.http.get('https://doctech.solutions/api/ping')
+  //   //   .subscribe({
+  //   //     next: (response) => {
+  //   //       console.log('Backend connection successful:', response);
+  //   //       this.backendConnected = true;
+  //   //     },
+  //   //     error: (error) => {
+  //   //       console.warn(' Backend connection test failed:', error);
+  //   //       console.warn(' This is normal if your Spring app doesn\'t have a /ping endpoint');
+  //   //       this.backendConnected = false;
+  //   //     }
+  //   //   });
+  //   this.backendConnected = true;
+  // }
 
   private markFormGroupTouched() {
     Object.keys(this.doctorForm.controls).forEach(key => {

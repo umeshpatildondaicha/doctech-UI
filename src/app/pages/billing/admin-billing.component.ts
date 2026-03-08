@@ -18,12 +18,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { BillingService } from '../../services/billing.service';
+import { BillingservicesService } from '../../services/billingservices.service';
+import { PatientService } from '../../services/patient.service';
 import { Invoice, DoctorBillingSummary } from '../../interfaces/billing.interface';
 import { PatientSearchDialogComponent } from '../patient-search-dialog/patient-search-dialog.component';
 import { AppCardComponent } from '../../core/components/app-card/app-card.component';
 import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
 import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-card/admin-stats-card.component';
 import { BillingCurrencyPipe } from '../../pipes/billing-currency.pipe';
+import { forkJoin } from 'rxjs';
 
 interface PatientBillingRow {
   patientId: string;
@@ -71,8 +74,8 @@ export class AdminBillingComponent implements OnInit, OnDestroy {
   summary = { billed: 0, paid: 0, outstanding: 0, overdue: 0 };
 
   allInvoices: Invoice[] = [];
-  patientRows: PatientBillingRow[] = [];
-  doctorRows: DoctorBillingSummary[] = [];
+  // patientRows: PatientBillingRow[] = [];
+  // doctorRows: DoctorBillingSummary[] = [];
 
   searchHints = [
     'Search by patient name...',
@@ -83,162 +86,7 @@ export class AdminBillingComponent implements OnInit, OnDestroy {
 
   // ── Patient summary grid ──────────────────────────────────────────────────
 
-  patientColumnDefs: ColDef[] = [
-    {
-      headerName: 'Patient',
-      field: 'patientName',
-      filter: 'agTextColumnFilter',
-      sortable: true,
-      minWidth: 200,
-      flex: 2,
-      cellRenderer: (p: any) => {
-        const name = p?.data?.patientName ?? '';
-        const id = p?.data?.patientId ?? '';
-        return `<div class="cell-two-line">
-          <div class="primary">${name}</div>
-          <div class="secondary">ID: ${id}</div>
-        </div>`;
-      }
-    },
-    {
-      headerName: 'Doctor',
-      field: 'doctorName',
-      filter: 'agTextColumnFilter',
-      sortable: true,
-      minWidth: 160,
-      flex: 1
-    },
-    {
-      headerName: 'Invoices',
-      field: 'invoicesCount',
-      sortable: true,
-      minWidth: 100,
-      maxWidth: 120
-    },
-    {
-      headerName: 'Billed',
-      field: 'billed',
-      sortable: true,
-      minWidth: 140,
-      valueFormatter: p => this.fmt(p.value)
-    },
-    {
-      headerName: 'Paid',
-      field: 'paid',
-      sortable: true,
-      minWidth: 140,
-      valueFormatter: p => this.fmt(p.value)
-    },
-    {
-      headerName: 'Outstanding',
-      field: 'outstanding',
-      sortable: true,
-      minWidth: 150,
-      cellRenderer: (p: any) => {
-        const v = Number(p?.value) || 0;
-        const color = v > 0 ? 'var(--status-danger-color)' : 'var(--status-success-color)';
-        return `<span style="color:${color};font-weight:600;">${this.fmt(v)}</span>`;
-      }
-    },
-    {
-      headerName: 'Overdue',
-      field: 'overdue',
-      sortable: true,
-      minWidth: 130,
-      cellRenderer: (p: any) => {
-        const v = Number(p?.value) || 0;
-        const color = v > 0 ? 'var(--status-warning-color)' : 'var(--status-neutral-color)';
-        return `<span style="color:${color};font-weight:600;">${this.fmt(v)}</span>`;
-      }
-    },
-    {
-      headerName: 'Last Invoice',
-      field: 'lastInvoiceDate',
-      sortable: true,
-      minWidth: 140,
-      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('en-IN') : '-'
-    }
-  ];
 
-  patientGridOptions: ExtendedGridOptions = {
-    rowHeight: 56,
-    headerHeight: 40,
-    animateRows: true,
-    pagination: true,
-    paginationPageSize: 25,
-    paginationPageSizeSelector: [10, 25, 50, 100]
-  };
-
-  // ── Doctor summary grid ───────────────────────────────────────────────────
-
-  doctorColumnDefs: ColDef[] = [
-    {
-      headerName: 'Doctor',
-      field: 'doctorName',
-      filter: 'agTextColumnFilter',
-      sortable: true,
-      minWidth: 200,
-      flex: 2,
-      cellRenderer: (p: any) => {
-        const name = p?.data?.doctorName ?? '';
-        const id = p?.data?.doctorId ?? '';
-        return `<div class="cell-two-line">
-          <div class="primary">${name}</div>
-          <div class="secondary">ID: ${id}</div>
-        </div>`;
-      }
-    },
-    {
-      headerName: 'Patients',
-      field: 'patientCount',
-      sortable: true,
-      minWidth: 100,
-      maxWidth: 120
-    },
-    {
-      headerName: 'Invoices',
-      field: 'invoiceCount',
-      sortable: true,
-      minWidth: 100,
-      maxWidth: 120
-    },
-    {
-      headerName: 'Total Billed',
-      field: 'totalBilled',
-      sortable: true,
-      minWidth: 150,
-      valueFormatter: p => this.fmt(p.value)
-    },
-    {
-      headerName: 'Total Collected',
-      field: 'totalPaid',
-      sortable: true,
-      minWidth: 150,
-      valueFormatter: p => this.fmt(p.value)
-    },
-    {
-      headerName: 'Outstanding',
-      field: 'totalOutstanding',
-      sortable: true,
-      minWidth: 150,
-      cellRenderer: (p: any) => {
-        const v = Number(p?.value) || 0;
-        const color = v > 0 ? 'var(--status-danger-color)' : 'var(--status-success-color)';
-        return `<span style="color:${color};font-weight:600;">${this.fmt(v)}</span>`;
-      }
-    },
-    {
-      headerName: 'Overdue',
-      field: 'overdue',
-      sortable: true,
-      minWidth: 130,
-      cellRenderer: (p: any) => {
-        const v = Number(p?.value) || 0;
-        const color = v > 0 ? 'var(--status-warning-color)' : 'var(--status-neutral-color)';
-        return `<span style="color:${color};font-weight:600;">${this.fmt(v)}</span>`;
-      }
-    }
-  ];
 
   doctorGridOptions: ExtendedGridOptions = {
     rowHeight: 56,
@@ -339,12 +187,18 @@ export class AdminBillingComponent implements OnInit, OnDestroy {
     headerHeight: 40,
     animateRows: true,
     pagination: true,
+  
+  
     paginationPageSize: 25,
     paginationPageSizeSelector: [10, 25, 50, 100]
   };
 
+  hospitalId = 'H1';
+
   constructor(
     private readonly billing: BillingService,
+    private readonly billingservices: BillingservicesService,
+    private readonly patientService: PatientService,
     private readonly dialogService: DialogboxService,
     private readonly snack: MatSnackBar,
     private readonly router: Router,
@@ -381,32 +235,80 @@ export class AdminBillingComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.isDemoData = false;
 
-    const params: Record<string, string> = {};
-    if (this.searchQuery) params['q'] = this.searchQuery;
+    forkJoin({
+      summary: this.billing.getHospitalSummary(this.hospitalId),
+      invoices: this.billingservices.getInvoices(this.hospitalId),
+      patients: this.patientService.getPatients()
+    }).subscribe({
+      next: ({ summary, invoices, patients }) => {
+        const s = Array.isArray(summary) ? summary[0] : summary;
+        this.summary = {
+          billed: Number(s?.totalBilled) || 0,
+          paid: Number((s as any)?.totalCollected) || Number((s as any)?.totalPaid) || 0,
+          outstanding: Number(s?.totalOutstanding) || 0,
+          overdue: Number((s as any)?.totalOverdue) || Number((s as any)?.overdue) || 0
+        };
 
-    this.billing.listInvoices(params).subscribe({
-      next: (res) => {
-        const rows = (res || []).map(r => ({
+        const patientList = this.normalizePatientList(patients);
+        const nameMap = new Map<string, string>();
+        for (const p of patientList) {
+          const rawId = p?.id ?? p?.patientId ?? p?.patient_id;
+          const id = rawId != null ? String(rawId).trim() : '';
+          if (!id) continue;
+          const firstName = p?.firstName ?? p?.first_name ?? '';
+          const lastName = p?.lastName ?? p?.last_name ?? '';
+          const fullName =
+            (p?.fullName && String(p.fullName).trim()) ||
+            `${firstName} ${lastName}`.trim() ||
+            (p?.name && String(p.name).trim()) ||
+            '';
+          if (fullName) {
+            nameMap.set(id, fullName);
+          }
+        }
+
+        const rows = (invoices || []).map(r => ({
           ...r,
+          patientName: (() => {
+            const pid = String(r.patientId ?? '').trim();
+            const mapped = pid ? nameMap.get(pid) : undefined;
+            return mapped || r.patientName;
+          })(),
           amountPaid: r.amountPaid ?? 0,
           balanceDue: r.balanceDue ?? Math.max((r.total || 0) - (r.amountPaid || 0), 0)
         }));
-        this.applyData(rows as Invoice[]);
+        let filtered = rows as Invoice[];
+        if (this.searchQuery) {
+          const q = this.searchQuery.toLowerCase();
+          filtered = filtered.filter(r =>
+            (r.patientName || '').toLowerCase().includes(q) ||
+            (r.patientId || '').toLowerCase().includes(q) ||
+            (r.invoiceNo || '').toLowerCase().includes(q)
+          );
+        }
+        this.applyData(filtered, /*recomputeSummary*/ false);
       },
       error: () => {
-        const demo = this.buildDemoData();
-        this.isDemoData = true;
-        this.applyData(demo);
-        this.snack.open('Backend unavailable — showing demo billing data', 'OK', { duration: 3500 });
+        this.loading = false;
+        this.snack.open('Failed to load hospital billing summary', 'Dismiss', { duration: 3500 });
       }
     });
   }
 
-  private applyData(invoices: Invoice[]): void {
+  /** Ensure API response is always an array (handles data/content/items wrappers). */
+  private normalizePatientList(res: any): any[] {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    const data = res.data ?? res.content ?? res.items ?? res.patients ?? res;
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray((data as any).content)) return (data as any).content;
+    return [];
+  }
+
+  private applyData(invoices: Invoice[], recomputeSummary = true): void {
     this.allInvoices = invoices;
-    this.computeSummary(invoices);
-    this.patientRows = this.aggregateByPatient(invoices);
-    this.doctorRows = this.aggregateByDoctor(invoices);
+    if (recomputeSummary) this.computeSummary(invoices);
+   
     this.loading = false;
   }
 
@@ -554,43 +456,4 @@ export class AdminBillingComponent implements OnInit, OnDestroy {
     URL.revokeObjectURL(url);
   }
 
-  // ── Demo data fallback ────────────────────────────────────────────────────
-
-  private buildDemoData(): Invoice[] {
-    const now = Date.now();
-    const d = (days: number) => new Date(now - days * 86_400_000).toISOString();
-    const f = (days: number) => new Date(now + days * 86_400_000).toISOString();
-
-    const mk = (
-      n: number, pid: string, pName: string, did: string,
-      total: number, paid: number, status: Invoice['status'],
-      date: string, dueDate?: string
-    ): Invoice => {
-      const id = `INV-${String(n).padStart(4, '0')}`;
-      return {
-        id, invoiceNo: `INV-2026-${String(n).padStart(3, '0')}`,
-        doctorId: did, patientId: pid, patientName: pName,
-        date, dueDate, status,
-        items: [
-          { description: 'OPD Consultation', quantity: 1, unitPrice: Math.min(total, 700), taxRate: 0, amountPaid: Math.min(paid, 700) },
-          { description: 'Diagnostics / Lab', quantity: 1, unitPrice: Math.max(total - 700, 0), taxRate: 0, amountPaid: Math.max(paid - 700, 0) }
-        ],
-        subTotal: total, taxTotal: 0, discountTotal: 0, total,
-        amountPaid: paid, balanceDue: Math.max(total - paid, 0), notes: ''
-      };
-    };
-
-    return [
-      mk(1, 'PAT-1001', 'Anjali Bendre',  'DOC-1', 3200, 3200, 'PAID',           d(98), f(0)),
-      mk(2, 'PAT-1002', 'Rahul Sharma',   'DOC-1', 4500, 2000, 'PARTIALLY_PAID', d(74), d(60)),
-      mk(3, 'PAT-1003', 'Aditi Verma',    'DOC-2', 1200,    0, 'ISSUED',         d(48), d(34)),
-      mk(4, 'PAT-1004', 'Vikram Singh',   'DOC-2', 3600, 3600, 'PAID',           d(8),  d(1)),
-      mk(5, 'PAT-1005', 'Neha Kapoor',    'DOC-1', 5000, 1500, 'PARTIALLY_PAID', d(16), d(2)),
-      mk(6, 'PAT-1006', 'Sanjay Patel',   'DOC-2', 1800,    0, 'ISSUED',         d(3),  f(7)),
-      mk(7, 'PAT-1007', 'Priya Mehta',    'DOC-3', 2500, 2500, 'PAID',           d(20), f(15)),
-      mk(8, 'PAT-1008', 'Arjun Rao',      'DOC-3', 3100,    0, 'ISSUED',         d(5),  d(5)),
-      mk(9, 'PAT-1009', 'Kavita Joshi',   'DOC-1', 6200, 6200, 'PAID',           d(45), f(0)),
-      mk(10,'PAT-1010', 'Deepak Nair',    'DOC-2', 2800,  900, 'PARTIALLY_PAID', d(12), d(8)),
-    ];
-  }
 }

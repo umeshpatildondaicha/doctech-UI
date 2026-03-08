@@ -1,5 +1,6 @@
 import { Component, OnChanges, OnInit, OnDestroy, Input, SimpleChanges } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Observable, Subject, forkJoin, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -14,17 +15,18 @@ import { MatTableModule } from '@angular/material/table';
 import { GridComponent, ExtendedGridOptions, DialogboxService, DialogFooterAction, AppButtonComponent } from "@lk/core";
 import { ColDef } from 'ag-grid-community';
 import { BillingService } from '../../services/billing.service';
-import { Invoice, PaymentRecord, InvoiceItem } from '../../interfaces/billing.interface';
+import { Invoice, PaymentRecord, InvoiceItem, CreateInvoiceRequest } from '../../interfaces/billing.interface';
 import { InvoiceFormComponent } from './invoice-form.component';
 import { PaymentDialogComponent } from './payment-dialog.component';
 import { InvoicePreviewDialogComponent } from './invoice-preview-dialog.component';
 import { BillingStatusRendererComponent } from './billing-status-renderer.component';
 import { AppCardComponent } from '../../core/components/app-card/app-card.component';
 import { InvoiceDetailComponent } from './invoice-detail.component';
+import { BillingservicesService } from '../../services/billingservices.service';
+import { AuthService } from '../../services/auth.service';
 
 // Filter type for status chips
 type StatusFilter = 'ALL' | 'UNPAID' | 'PARTIALLY_PAID' | 'PAID' | 'OVERDUE';
-const FORCE_DEMO_PATIENT_BILLING = false;
 
 @Component({
     selector: 'app-patient-billing-dashboard',
@@ -56,9 +58,10 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges, OnDe
   
   patientInfo: any = null;
   loading = false;
-  
+  doctorId:string ="DR1"
   invoices: Invoice[] = [];
   visibleInvoices: Invoice[] = [];
+  hospitalId ='H1';
   columnDefs: ColDef[] = [];
   gridOptions: ExtendedGridOptions = {};
   
@@ -106,11 +109,14 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges, OnDe
     private readonly billingService: BillingService,
     private readonly dialog: MatDialog,
     private readonly dialogService: DialogboxService,
-    private readonly snackBar: MatSnackBar
+    private readonly snackBar: MatSnackBar,
+    private readonly billingservices: BillingservicesService,
+    private readonly authService: AuthService
   ) {}
 
   ngOnInit(): void {
     // If patientId is provided as input, load immediately; otherwise derive from route
+    
     if (this.patientId) {
       this.loadPatientBilling();
     } else {
@@ -149,7 +155,6 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges, OnDe
       this.pendingOpenInvoiceId = this.openInvoiceId;
     }
   }
-
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['openInvoiceId'] && this.openInvoiceId) {
       this.pendingOpenInvoiceId = this.openInvoiceId;
@@ -475,34 +480,24 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges, OnDe
 
   private loadPatientBilling(): void {
     this.loading = true;
-    
-    // Load invoices first, then load payments separately
-    this.billingService.listInvoices({ patientId: this.patientId, patientName: this.patientName }).subscribe({
+    this.billingservices.getInvoices(this.hospitalId).subscribe({
       next: (invoices) => {
-        this.invoices = (invoices || []).map(inv => ({
-          ...inv,
-          amountPaid: inv.amountPaid ?? 0,
-          balanceDue: inv.balanceDue ?? Math.max((inv.total || 0) - (inv.amountPaid || 0), 0)
-        }));
+        const pid = (this.patientId || '').toString().trim();
+        this.invoices = (invoices || [])
+          .filter(inv => (inv.patientId || '').toString().trim() === pid || (inv.patientId || '').toString().endsWith(pid) || pid.endsWith((inv.patientId || '').toString()))
+          .map(inv => ({
+            ...inv,
+            amountPaid: inv.amountPaid ?? 0,
+            balanceDue: inv.balanceDue ?? Math.max((inv.total || 0) - (inv.amountPaid || 0), 0)
+          }));
         this.aggregateItems();
-        this.loadPayments(); // Load payments separately after invoices
+        this.loadPayments();
         this.calculateSummary();
         this.applyStatusFilter(this.activeStatus);
         this.tryOpenPendingInvoice();
         this.loading = false;
       },
       error: () => {
-        // Demo fallback for development
-        if (FORCE_DEMO_PATIENT_BILLING) {
-          this.invoices = this.getDemoPatientInvoices(this.patientId, this.patientName);
-          this.aggregateItems();
-          this.loadPayments();
-          this.calculateSummary();
-          this.applyStatusFilter(this.activeStatus);
-          this.loading = false;
-          this.snackBar.open('Backend unavailable — showing demo billing data', 'OK', { duration: 3000 });
-          return;
-        }
         this.loading = false;
         this.snackBar.open('Failed to load billing data', 'Dismiss', { duration: 3000 });
       }
@@ -510,34 +505,24 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges, OnDe
   }
 
   private loadPayments(): void {
-    // Fetch actual payment records from API
-    this.billingService.listPayments({ patientId: this.patientId }).subscribe({
-      next: (payments) => {
-        this.allPayments = (payments || []).map(p => ({
-          ...p,
-          date: p.date || new Date().toISOString()
-        }));
-        // Sort payments by date (newest first)
-        this.allPayments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      },
-      error: () => {
-        // Fallback: create payment records from invoice payment data if API fails
-        this.allPayments = [];
-        for (const inv of this.invoices) {
-          if (inv.amountPaid && inv.amountPaid > 0) {
-            this.allPayments.push({
-              id: `PAY-${inv.id}`,
-              invoiceId: inv.id || '',
-              amount: inv.amountPaid,
-              method: 'CASH',
-              reference: '',
-              date: inv.date,
-              notes: `Payment for invoice ${inv.invoiceNo}`
-            });
-          }
-        }
-        this.allPayments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      }
+    if (!this.invoices.length) {
+      this.allPayments = [];
+      return;
+    }
+    const calls = this.invoices
+      .filter(inv => inv.id)
+      .map(inv => this.billingService.listPayments(inv.id!).pipe(catchError(() => of([])))) as Observable<PaymentRecord[]>[];
+    if (calls.length === 0) {
+      this.allPayments = [];
+      return;
+    }
+    forkJoin(calls).pipe(
+      map(arr => arr.flat()),
+      map(list => list.map(p => ({ ...p, date: p.date || new Date().toISOString() }))),
+      map(list => list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()))
+    ).subscribe({
+      next: (payments) => { this.allPayments = payments; },
+      error: () => { this.allPayments = []; }
     });
   }
 
@@ -546,7 +531,7 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges, OnDe
     const ref = this.dialog.open(InvoiceDetailComponent, {
       width: '95%',
       maxWidth: '1200px',
-      maxHeight: '95vh',
+      maxHeight: '100vh',
       autoFocus: false,
       data: { invoiceId: inv.id, invoice: inv }
     });
@@ -580,45 +565,6 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges, OnDe
         }
       });
     }
-  }
-
-  private getDemoPatientInvoices(patientId: string, patientName: string): Invoice[] {
-    const now = Date.now();
-    const d = (daysAgo: number) => new Date(now - daysAgo * 24 * 60 * 60 * 1000).toISOString();
-    const due = (daysFromNow: number) => new Date(now + daysFromNow * 24 * 60 * 60 * 1000).toISOString();
-
-    const mk = (n: number, total: number, paid: number, status: Invoice['status'], date: string, dueDate?: string): Invoice => {
-      const id = `PINV-${patientId}-${n}`;
-      const invoiceNo = `INV-2026-${String(n).padStart(3, '0')}`;
-      const balanceDue = Math.max(total - paid, 0);
-      return {
-        id,
-        invoiceNo,
-        doctorId: 'DOC-1',
-        patientId,
-        patientName: patientName || 'Patient',
-        date,
-        dueDate,
-        status,
-        items: [
-          { description: 'OPD Consultation', quantity: 1, unitPrice: Math.min(total, 800), taxRate: 0, amountPaid: Math.min(paid, Math.min(total, 800)) },
-          { description: 'Medicine', quantity: 2, unitPrice: Math.max((total - 800) / 2, 0), taxRate: 0, amountPaid: Math.max(paid - 800, 0) }
-        ],
-        subTotal: total,
-        taxTotal: 0,
-        discountTotal: 0,
-        total,
-        amountPaid: paid,
-        balanceDue,
-        notes: ''
-      };
-    };
-
-    return [
-      mk(1, 3200, 3200, 'PAID', d(30), d(25)),
-      mk(2, 4500, 2000, 'PARTIALLY_PAID', d(18), d(10)),
-      mk(3, 1200, 0, 'ISSUED', d(8), due(7))
-    ];
   }
 
   private aggregateItems(): void {
@@ -666,6 +612,7 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges, OnDe
     const invoice = this.invoices.find(inv => inv.id === payment.invoiceId);
     return invoice?.invoiceNo || '-';
   }
+  
 
   private calculateSummary(): void {
     const today = new Date();
@@ -722,8 +669,10 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges, OnDe
 
   createNewInvoice(): void {
     const footerActions: DialogFooterAction[] = [
+    
       { id: 'cancel', text: 'Cancel', color: 'primary', appearance: 'flat' },
       { id: 'save', text: 'Create Invoice', color: 'primary', appearance: 'raised' }
+      
     ];
     const ref = this.dialogService.openDialog(InvoiceFormComponent, {
       title: 'New Invoice',
@@ -735,7 +684,7 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges, OnDe
         hidePatientInfo: true
       },
       width: '95%',
-      maxWidth: '1200px',
+      maxWidth: '1000px',
       maxHeight: '95vh',
       footerActions
     });
@@ -743,12 +692,37 @@ export class PatientBillingDashboardComponent implements OnInit, OnChanges, OnDe
     ref.afterClosed().subscribe((result: any) => {
       if (result?.action === 'save' && result.invoice) {
         const invoice = result.invoice as Invoice;
-        this.billingService.createInvoice(invoice).subscribe({
+        const doctorCode =
+          invoice.doctorId ||
+          this.authService.getDoctorRegistrationNumber() ||
+          this.authService.getDoctorPublicCode() ||
+          'DR1';
+        const payload: CreateInvoiceRequest = {
+          hospitalId: this.hospitalId,
+          patientId: invoice.patientId || this.patientId,
+          doctorId: doctorCode,
+          dueDate: invoice.dueDate || new Date().toISOString(),
+          items: invoice.items || [],
+          notes: invoice.notes
+        };
+        this.billingservices.createInvoice(payload).subscribe({
           next: () => {
             this.snackBar.open('Invoice created', 'OK', { duration: 2000 });
+            console.log("invoice Created Successfully");
             this.loadPatientBilling();
+
+            
           },
-          error: () => this.snackBar.open('Failed to create invoice', 'Dismiss', { duration: 3000 })
+          error: (error: any) => 
+            {
+              console.log("chukich ahe",error?.message)
+              this.snackBar.open(error?.message || 'Failed to create invoice', 'Dismiss', { duration: 3000 }
+            )
+            }
+            
+      
+          
+            
         });
       }
     });

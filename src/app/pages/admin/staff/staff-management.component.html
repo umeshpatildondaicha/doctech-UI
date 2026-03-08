@@ -1,3 +1,78 @@
+@if (isDialogMode()) {
+  <!-- Dialog mode: only Add Staff form (used from Hospital page) -->
+  <div class="staff-dialog-wrap">
+    <div class="sp-header sp-header--dialog">
+      <h3><mat-icon>person_add</mat-icon> Add Staff Member</h3>
+      <button type="button" class="sp-close" (click)="closeDialogCancel()" aria-label="Close"><mat-icon>close</mat-icon></button>
+    </div>
+    <form class="sp-form" [formGroup]="addForm" (ngSubmit)="addStaff()">
+      <div class="form-row">
+        <div class="form-field">
+          <label for="dialog-add-first">First Name <span class="req">*</span></label>
+          <input id="dialog-add-first" type="text" formControlName="firstName" placeholder="First name" />
+          @if (hasError(addForm, 'firstName', 'required')) { <span class="field-error">Required</span> }
+        </div>
+        <div class="form-field">
+          <label for="dialog-add-last">Last Name <span class="req">*</span></label>
+          <input id="dialog-add-last" type="text" formControlName="lastName" placeholder="Last name" />
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="dialog-add-email">Email <span class="req">*</span></label>
+        <input id="dialog-add-email" type="email" formControlName="email" placeholder="staff@hospital.com" />
+        @if (hasError(addForm, 'email', 'required')) { <span class="field-error">Email required</span> }
+        @if (hasError(addForm, 'email', 'email')) { <span class="field-error">Invalid email</span> }
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="dialog-add-contact">Contact</label>
+          <input id="dialog-add-contact" type="tel" formControlName="contactNumber" placeholder="+91 99999 00000" />
+        </div>
+        <div class="form-field">
+          <label for="dialog-add-exp">Experience (yrs)</label>
+          <input id="dialog-add-exp" type="number" formControlName="experienceYears" placeholder="0" min="0" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="dialog-add-dept">Department</label>
+          <select id="dialog-add-dept" formControlName="subDepartmentId">
+            <option [ngValue]="null">Select…</option>
+            @for (dept of subDepartments; track dept.subDepartmentId ?? dept.id) {
+              <option [ngValue]="dept.subDepartmentId ?? dept.id">{{ dept.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="dialog-add-shift">Shift</label>
+          <select id="dialog-add-shift" formControlName="shiftPattern">
+            <option value="">Select…</option>
+            @for (s of shiftPatterns; track s) { <option [value]="s">{{ s }}</option> }
+          </select>
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="dialog-add-spec">Specialization</label>
+        <input id="dialog-add-spec" type="text" formControlName="specialization" placeholder="e.g. ICU Nursing" />
+      </div>
+      <div class="form-field">
+        <label>Roles</label>
+        <div class="chip-grid">
+          @for (role of defaultRoles; track role) {
+            <div class="role-chip" [class.role-chip--on]="addForm.get('roles')?.value?.includes(role)"
+              (click)="toggleRole(addForm, role)">{{ role }}</div>
+          }
+        </div>
+      </div>
+      <div class="sp-actions">
+        <button type="button" class="btn-outline-sm" (click)="closeDialogCancel()">Cancel</button>
+        <button type="submit" class="btn-primary-sm" [disabled]="isLoading()">
+          <mat-icon>save</mat-icon> Save Staff
+        </button>
+      </div>
+    </form>
+  </div>
+} @else {
 <app-page [breadcrumb]="breadcrumb" [isFooter]="false">
   <div page-body class="staff-page">
 
@@ -125,7 +200,7 @@
                   </td>
                   <!-- Department -->
                   <td class="col-dept">
-                    <span class="dept-text">{{ staff.department }}</span>
+                    <span class="dept-id">{{ staff.department }}</span>
                   </td>
                   <!-- Shift -->
                   <td class="col-shift">
@@ -296,7 +371,7 @@
                   </div>
                   <div class="prof-item">
                     <span class="pi-lbl">DEPARTMENT</span>
-                    <span class="pi-val dept-text">{{ staff.department }}</span>
+                    <span class="pi-val dept-text">{{ staff.name }}</span>
                   </div>
                   <div class="prof-item">
                     <span class="pi-lbl">PRIMARY SHIFT</span>
@@ -576,10 +651,10 @@
           <div class="form-row">
             <div class="form-field">
               <label for="add-dept">Department</label>
-              <select id="add-dept" formControlName="departmentId">
+              <select id="add-dept" formControlName="subDepartmentId">
                 <option [ngValue]="null">Select…</option>
-                @for (dept of departments; track dept.departmentId) {
-                  <option [ngValue]="dept.departmentId">{{ dept.name }}</option>
+                @for (dept of subDepartments; track dept.subDepartmentId ?? dept.id) {
+                  <option [ngValue]="dept.subDepartmentId ?? dept.id">{{ dept.name }}</option>
                 }
               </select>
             </div>
@@ -655,8 +730,8 @@
               <label for="inv-dept">Department</label>
               <select id="inv-dept" formControlName="departmentId">
                 <option [ngValue]="null">Select…</option>
-                @for (dept of departments; track dept.departmentId) {
-                  <option [ngValue]="dept.departmentId">{{ dept.name }}</option>
+                @for (dept of subDepartments; track dept.subDepartmentId ?? dept.id) {
+                  <option [ngValue]="dept.subDepartmentId ?? dept.id">{{ dept.name }}</option>
                 }
               </select>
             </div>
@@ -689,3 +764,4 @@
 
   </div><!-- /staff-page -->
 </app-page>
+}

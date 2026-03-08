@@ -22,6 +22,9 @@ import { HospitalFlowService, OrgFlowLayout } from '../../../services/hospital-f
 import { HospitalSubscriptionService, SubscriptionDTO } from '../../../services/hospital-subscription.service';
 import { DoctorFeatureService } from '../../../services/doctor-feature.service';
 import { AuthService } from '../../../services/auth.service';
+import { MatDialog } from '@angular/material/dialog';
+import { StaffManagementComponent } from '../staff/staff-management.component';
+import { AdminDoctorCreateComponent } from '../doctors/doctor-create/doctor-create.component';
 
 type NodeId = string;
 type EdgeId = string;
@@ -29,17 +32,17 @@ type NodeType = 'hospital' | 'department' | 'subdepartment' | 'doctor' | 'staff'
 
 // Optional hierarchy: departments and sub-departments are optional.
 const VALID_PARENT_TYPES: Partial<Record<NodeType, NodeType[]>> = {
-  department:    ['hospital'],
+  department: ['hospital'],
   subdepartment: ['department'],
-  doctor:        ['hospital', 'department', 'subdepartment'],
-  staff:         ['doctor'],
+  doctor: ['hospital', 'department', 'subdepartment'],
+  staff: ['doctor'],
 };
 
-interface Hospital     { id: string; name: string; publicId: string; }
-interface Department   { id: string; name: string; code: string; headName: string; active: boolean; departmentId?: number; }
-interface SubDepartment{ id: string; name: string; departmentId?: number; subDepartmentId?: number; }
-interface Doctor       { id: string; name: string; specialization?: string; online?: boolean; publicId?: string; registrationNumber?: string; departmentId?: number; subDepartmentId?: number; }
-interface StaffMember  { id: string; name: string; role?: string; staffId?: number; }
+interface Hospital { id: string; name: string; publicId: string; }
+interface Department { id: string; name: string; code: string; headName: string; active: boolean; departmentId?: number; }
+interface SubDepartment { id: string; name: string; departmentId?: number; subDepartmentId?: number; }
+interface Doctor { id: string; name: string; specialization?: string; online?: boolean; publicId?: string; registrationNumber?: string; departmentId?: number; subDepartmentId?: number; }
+interface StaffMember { id: string; name: string; role?: string; staffId?: number; }
 
 interface Feature {
   id: string;
@@ -80,10 +83,10 @@ interface DragState {
 
 // Default icon map for known service codes
 const SERVICE_ICON_MAP: Record<string, string> = {
-  core:              '#2563eb',
-  physio_kit:        '#059669',
-  nutrition_kit:     '#d97706',
-  mental_wellness:   '#7c3aed',
+  core: '#2563eb',
+  physio_kit: '#059669',
+  nutrition_kit: '#d97706',
+  mental_wellness: '#7c3aed',
 };
 
 // Fallback feature icon by feature code prefix/pattern
@@ -91,30 +94,30 @@ const FEATURE_ICON_FALLBACK = 'star';
 
 // Hardcoded icon overrides for known feature codes (no icon in backend)
 const FEATURE_ICON_MAP: Record<string, string> = {
-  appointments:          'event',
-  chat:                  'chat',
-  prescriptions:         'description',
-  'patient-mgmt':        'people',
-  patient_management:    'people',
-  reports:               'bar_chart',
-  notifications:         'notifications',
-  'exercise-plans':      'fitness_center',
+  appointments: 'event',
+  chat: 'chat',
+  prescriptions: 'description',
+  'patient-mgmt': 'people',
+  patient_management: 'people',
+  reports: 'bar_chart',
+  notifications: 'notifications',
+  'exercise-plans': 'fitness_center',
   exercise_plan_creator: 'fitness_center',
-  'diet-basic':          'restaurant',
-  basic_diet_guidance:   'restaurant',
-  'progress-tracking':   'trending_up',
-  progress_tracking:     'trending_up',
-  assessment:            'assignment',
-  'video-library':       'play_circle',
-  'diet-planning':       'menu_book',
-  advanced_diet:         'menu_book',
-  'custom-forms':        'dynamic_form',
-  'meal-builder':        'kitchen',
-  'nutrition-analysis':  'analytics',
-  'food-database':       'library_books',
-  'mental-assessment':   'psychology_alt',
-  'therapy-schedule':    'calendar_today',
-  'mood-tracking':       'sentiment_satisfied',
+  'diet-basic': 'restaurant',
+  basic_diet_guidance: 'restaurant',
+  'progress-tracking': 'trending_up',
+  progress_tracking: 'trending_up',
+  assessment: 'assignment',
+  'video-library': 'play_circle',
+  'diet-planning': 'menu_book',
+  advanced_diet: 'menu_book',
+  'custom-forms': 'dynamic_form',
+  'meal-builder': 'kitchen',
+  'nutrition-analysis': 'analytics',
+  'food-database': 'library_books',
+  'mental-assessment': 'psychology_alt',
+  'therapy-schedule': 'calendar_today',
+  'mood-tracking': 'sentiment_satisfied',
   'custom-questionnaires': 'quiz',
 };
 
@@ -154,21 +157,21 @@ export class HospitalComponent implements OnInit, OnDestroy {
   private readonly hospitalPublicId = signal<string>('');
 
   // ── Entity data (loaded from API) ─────────────────────────────────────────────
-  readonly hospitals   = signal<Hospital[]>([]);
+  readonly hospitals = signal<Hospital[]>([]);
   readonly departments = signal<Department[]>([]);
   readonly subDepartments = signal<SubDepartment[]>([]);
-  readonly doctors     = signal<Doctor[]>([]);
-  readonly staff       = signal<StaffMember[]>([]);
+  readonly doctors = signal<Doctor[]>([]);
+  readonly staff = signal<StaffMember[]>([]);
 
   // ── Feature catalog (loaded from API) ────────────────────────────────────────
   readonly serviceGroups = signal<ServiceGroup[]>([]);
-  readonly allFeatures   = computed<Feature[]>(() =>
+  readonly allFeatures = computed<Feature[]>(() =>
     this.serviceGroups().flatMap(sg => sg.features)
   );
 
   // ── Hospital-level enabled feature IDs (from subscriptions) ──────────────────
   readonly hospitalSubscriptions = signal<SubscriptionDTO[]>([]);
-  readonly hospitalFeatureIds    = signal<string[]>([]);
+  readonly hospitalFeatureIds = signal<string[]>([]);
 
   // ── Doctor feature map (entityId → featureId[]) ───────────────────────────────
   readonly doctorFeatureMap = signal<Record<string, string[]>>({});
@@ -176,11 +179,11 @@ export class HospitalComponent implements OnInit, OnDestroy {
   readonly hospitalFeatureCount = computed(() => this.hospitalFeatureIds().length);
 
   // ── Org stats ────────────────────────────────────────────────────────────────
-  readonly statDepts    = computed(() => this.nodes().filter(n => n.type === 'department').length);
+  readonly statDepts = computed(() => this.nodes().filter(n => n.type === 'department').length);
   readonly statSubDepts = computed(() => this.nodes().filter(n => n.type === 'subdepartment').length);
-  readonly statDoctors  = computed(() => this.nodes().filter(n => n.type === 'doctor').length);
-  readonly statStaff    = computed(() => this.nodes().filter(n => n.type === 'staff').length);
-  readonly statOnline   = computed(() =>
+  readonly statDoctors = computed(() => this.nodes().filter(n => n.type === 'doctor').length);
+  readonly statStaff = computed(() => this.nodes().filter(n => n.type === 'staff').length);
+  readonly statOnline = computed(() =>
     this.nodes().filter(n =>
       n.type === 'doctor' && (this.doctors().find(d => d.id === n.entityId)?.online ?? false)
     ).length
@@ -370,32 +373,32 @@ export class HospitalComponent implements OnInit, OnDestroy {
   readonly nodes = signal<FlowNode[]>([]);
   readonly edges = signal<FlowEdge[]>([]);
 
-  readonly zoom        = signal(1);
-  readonly panX        = signal(0);
-  readonly panY        = signal(0);
-  readonly isDragging  = signal(false);
-  readonly isPanning   = signal(false);
-  readonly linkMode    = signal(false);
-  readonly linkSourceId= signal<NodeId | null>(null);
-  readonly selectedEdgeId   = signal<EdgeId | null>(null);
-  readonly selectedNodeId   = signal<NodeId | null>(null);
-  readonly showConfigPanel  = signal(true);
-  readonly showNodePicker   = signal(false);
-  readonly showAddStaffForm   = signal(false);
-  readonly showAddDoctorForm  = signal(false);
-  readonly showAddDeptForm    = signal(false);
+  readonly zoom = signal(1);
+  readonly panX = signal(0);
+  readonly panY = signal(0);
+  readonly isDragging = signal(false);
+  readonly isPanning = signal(false);
+  readonly linkMode = signal(false);
+  readonly linkSourceId = signal<NodeId | null>(null);
+  readonly selectedEdgeId = signal<EdgeId | null>(null);
+  readonly selectedNodeId = signal<NodeId | null>(null);
+  readonly showConfigPanel = signal(true);
+  readonly showNodePicker = signal(false);
+  readonly showAddStaffForm = signal(false);
+  readonly showAddDoctorForm = signal(false);
+  readonly showAddDeptForm = signal(false);
   readonly showAddSubDeptForm = signal(false);
-  readonly isCreating         = signal(false);
+  readonly isCreating = signal(false);
 
   readonly lastSavedAt = signal<Date | null>(null);
 
-  private readonly ZOOM_MIN  = 0.25;
-  private readonly ZOOM_MAX  = 2;
+  private readonly ZOOM_MIN = 0.25;
+  private readonly ZOOM_MAX = 2;
   private readonly ZOOM_STEP = 0.1;
-  readonly NODE_WIDTH        = 280;
-  readonly NODE_HEIGHT       = 72;
-  private readonly ROW_GAP   = 100;
-  private readonly COL_GAP   = 320;
+  readonly NODE_WIDTH = 280;
+  readonly NODE_HEIGHT = 72;
+  private readonly ROW_GAP = 100;
+  private readonly COL_GAP = 320;
   private readonly CANVAS_PADDING = 80;
   private readonly MAX_NODE_HEIGHT = 72;
 
@@ -408,27 +411,27 @@ export class HospitalComponent implements OnInit, OnDestroy {
 
   // ── Doctor create form ───────────────────────────────────────────────────────
   newDoctorFirstName = '';
-  newDoctorLastName  = '';
-  newDoctorSpec      = '';
-  newDoctorRegNo     = '';
-  newDoctorEmail     = '';
-  newDoctorPhone     = '';
-  newDoctorPassword  = '';
+  newDoctorLastName = '';
+  newDoctorSpec = '';
+  newDoctorRegNo = '';
+  newDoctorEmail = '';
+  newDoctorPhone = '';
+  newDoctorPassword = '';
 
   // ── Staff create form ─────────────────────────────────────────────────────────
   newStaffFirstName = '';
-  newStaffLastName  = '';
-  newStaffRole      = '';
-  newStaffEmail     = '';
-  newStaffPhone     = '';
+  newStaffLastName = '';
+  newStaffRole = '';
+  newStaffEmail = '';
+  newStaffPhone = '';
 
   // ── Department create form ────────────────────────────────────────────────────
   newDeptName = '';
   newDeptDesc = '';
 
   // ── Sub-Department create form ────────────────────────────────────────────────
-  newSubDeptName   = '';
-  newSubDeptDesc   = '';
+  newSubDeptName = '';
+  newSubDeptDesc = '';
   readonly newSubDeptDeptId = signal<number | null>(null);
 
   readonly zoomPercent = computed(() => Math.round(this.zoom() * 100));
@@ -474,10 +477,10 @@ export class HospitalComponent implements OnInit, OnDestroy {
     const q = this.pickerSearch.toLowerCase().trim();
     const cat = this.pickerCategory();
     const items: { id: string; name: string; type: NodeType; sub?: string }[] = [];
-    if (cat === 'all' || cat === 'department')    this.departments().forEach(d => items.push({ id: d.id, name: d.name, type: 'department', sub: d.code }));
+    if (cat === 'all' || cat === 'department') this.departments().forEach(d => items.push({ id: d.id, name: d.name, type: 'department', sub: d.code }));
     if (cat === 'all' || cat === 'subdepartment') this.subDepartments().forEach(s => items.push({ id: s.id, name: s.name, type: 'subdepartment' }));
-    if (cat === 'all' || cat === 'doctor')        this.doctors().forEach(d => items.push({ id: d.id, name: d.name, type: 'doctor', sub: d.specialization }));
-    if (cat === 'all' || cat === 'staff')         this.staff().forEach(s => items.push({ id: s.id, name: s.name, type: 'staff', sub: s.role }));
+    if (cat === 'all' || cat === 'doctor') this.doctors().forEach(d => items.push({ id: d.id, name: d.name, type: 'doctor', sub: d.specialization }));
+    if (cat === 'all' || cat === 'staff') this.staff().forEach(s => items.push({ id: s.id, name: s.name, type: 'staff', sub: s.role }));
     if (!q) return items;
     return items.filter(i => i.name.toLowerCase().includes(q) || (i.sub?.toLowerCase().includes(q) ?? false));
   });
@@ -485,21 +488,21 @@ export class HospitalComponent implements OnInit, OnDestroy {
   // ── Node helpers ──────────────────────────────────────────────────────────────
   nodeMatIcon(type: NodeType): string {
     switch (type) {
-      case 'hospital':     return 'local_hospital';
-      case 'department':   return 'business';
-      case 'subdepartment':return 'account_tree';
-      case 'doctor':       return 'stethoscope';
-      case 'staff':        return 'badge';
+      case 'hospital': return 'local_hospital';
+      case 'department': return 'business';
+      case 'subdepartment': return 'account_tree';
+      case 'doctor': return 'stethoscope';
+      case 'staff': return 'badge';
     }
   }
 
   nodeColor(type: NodeType): string {
     switch (type) {
-      case 'hospital':     return '#0d9488';
-      case 'department':   return '#2563eb';
-      case 'subdepartment':return '#7c3aed';
-      case 'doctor':       return '#0891b2';
-      case 'staff':        return '#d97706';
+      case 'hospital': return '#0d9488';
+      case 'department': return '#2563eb';
+      case 'subdepartment': return '#7c3aed';
+      case 'doctor': return '#0891b2';
+      case 'staff': return '#d97706';
     }
   }
 
@@ -507,22 +510,22 @@ export class HospitalComponent implements OnInit, OnDestroy {
 
   nodeLabel(n: FlowNode): string {
     switch (n.type) {
-      case 'hospital':     return 'Hospital';
-      case 'department':   return 'Department';
-      case 'subdepartment':return 'Sub-dept';
-      case 'doctor':       return 'Doctor';
-      case 'staff':        return 'Staff';
+      case 'hospital': return 'Hospital';
+      case 'department': return 'Department';
+      case 'subdepartment': return 'Sub-dept';
+      case 'doctor': return 'Doctor';
+      case 'staff': return 'Staff';
     }
   }
 
   nodeMeta(n: FlowNode): string {
     const count = this.edges().filter(e => e.from === n.id).length;
     switch (n.type) {
-      case 'hospital':      return `${count} Dept${count === 1 ? '' : 's'}`;
-      case 'department':    return `${count} child${count === 1 ? '' : 'ren'}`;
+      case 'hospital': return `${count} Dept${count === 1 ? '' : 's'}`;
+      case 'department': return `${count} child${count === 1 ? '' : 'ren'}`;
       case 'subdepartment': return `${this.descendantCountByType(n.id, 'staff')} Staff`;
-      case 'doctor':        return `${count} Staff`;
-      case 'staff':         return n.subtitle ?? '—';
+      case 'doctor': return `${count} Staff`;
+      case 'staff': return n.subtitle ?? '—';
     }
   }
 
@@ -544,21 +547,21 @@ export class HospitalComponent implements OnInit, OnDestroy {
     const n = this.selectedNode();
     if (!n) return 'Org Overview';
     switch (n.type) {
-      case 'hospital':     return 'Hospital Settings';
-      case 'department':   return 'Department Details';
-      case 'subdepartment':return 'Sub-Dept Details';
-      case 'doctor':       return 'Doctor Profile';
-      case 'staff':        return 'Staff Profile';
+      case 'hospital': return 'Hospital Settings';
+      case 'department': return 'Department Details';
+      case 'subdepartment': return 'Sub-Dept Details';
+      case 'doctor': return 'Doctor Profile';
+      case 'staff': return 'Staff Profile';
     }
   }
 
   childTypeLabel(parentType: NodeType): string {
     switch (parentType) {
-      case 'hospital':     return 'Departments & Doctors';
-      case 'department':   return 'Sub-Depts & Doctors';
-      case 'subdepartment':return 'Doctors';
-      case 'doctor':       return 'Staff Members';
-      default:             return 'Children';
+      case 'hospital': return 'Departments & Doctors';
+      case 'department': return 'Sub-Depts & Doctors';
+      case 'subdepartment': return 'Doctors';
+      case 'doctor': return 'Staff Members';
+      default: return 'Children';
     }
   }
 
@@ -566,24 +569,21 @@ export class HospitalComponent implements OnInit, OnDestroy {
     return FEATURE_ICON_MAP[featureCode] ?? FEATURE_ICON_FALLBACK;
   }
 
-  // ── Optional hierarchy – picker ───────────────────────────────────────────────
+  // ── Optional hierarchy – picker (items selectable only when valid parent is selected) ──
   pickerItemDisabled(itemType: NodeType): boolean {
     const sel = this.selectedNode();
-    switch (itemType) {
-      case 'department':    return false;
-      case 'subdepartment': return sel?.type !== 'department';
-      case 'doctor':        return !sel || !(VALID_PARENT_TYPES['doctor'] as NodeType[]).includes(sel.type);
-      case 'staff':         return sel?.type !== 'doctor';
-      default:              return true;
-    }
+    const validParents = VALID_PARENT_TYPES[itemType] as NodeType[] | undefined;
+    if (!validParents) return true;
+    return !sel || !validParents.includes(sel.type);
   }
 
   pickerItemHint(itemType: NodeType): string {
     switch (itemType) {
+      case 'department': return 'Select Hospital node first';
       case 'subdepartment': return 'Select a Department node first';
-      case 'doctor':        return 'Select Hospital, Dept or Sub-dept node first';
-      case 'staff':         return 'Select a Doctor node first';
-      default:              return '';
+      case 'doctor': return 'Select Hospital, Dept or Sub-dept node first';
+      case 'staff': return 'Select a Doctor node first';
+      default: return '';
     }
   }
 
@@ -598,20 +598,20 @@ export class HospitalComponent implements OnInit, OnDestroy {
     this.showNodePicker.set(true);
     this.pickerSearch = '';
     switch (node.type) {
-      case 'hospital':     this.setPickerCategory('department');    break;
-      case 'department':   this.setPickerCategory('doctor');        break;
-      case 'subdepartment':this.setPickerCategory('doctor');        break;
-      case 'doctor':       this.setPickerCategory('staff');         break;
+      case 'hospital': this.setPickerCategory('department'); break;
+      case 'department': this.setPickerCategory('doctor'); break;
+      case 'subdepartment': this.setPickerCategory('doctor'); break;
+      case 'doctor': this.setPickerCategory('staff'); break;
     }
   }
 
   quickAddLabel(type: NodeType): string {
     switch (type) {
-      case 'hospital':     return 'Add Department or Doctor';
-      case 'department':   return 'Add Sub-Dept or Doctor';
-      case 'subdepartment':return 'Add Doctor';
-      case 'doctor':       return 'Add Staff';
-      default:             return 'Add';
+      case 'hospital': return 'Add Department or Doctor';
+      case 'department': return 'Add Sub-Dept or Doctor';
+      case 'subdepartment': return 'Add Doctor';
+      case 'doctor': return 'Add Staff';
+      default: return 'Add';
     }
   }
 
@@ -660,13 +660,13 @@ export class HospitalComponent implements OnInit, OnDestroy {
     const rect = el.getBoundingClientRect();
     const newZoom = this.clampZoom(Math.min(rect.width / contentW, rect.height / contentH, 1));
     this.zoom.set(newZoom);
-    this.panX.set((rect.width  - contentW * newZoom) / 2 + (pad - minX) * newZoom);
+    this.panX.set((rect.width - contentW * newZoom) / 2 + (pad - minX) * newZoom);
     this.panY.set((rect.height - contentH * newZoom) / 2 + (pad - minY) * newZoom);
   }
 
   // ── Zoom ──────────────────────────────────────────────────────────────────────
-  zoomIn():    void { this.zoom.set(this.clampZoom(this.zoom() + this.ZOOM_STEP)); }
-  zoomOut():   void { this.zoom.set(this.clampZoom(this.zoom() - this.ZOOM_STEP)); }
+  zoomIn(): void { this.zoom.set(this.clampZoom(this.zoom() + this.ZOOM_STEP)); }
+  zoomOut(): void { this.zoom.set(this.clampZoom(this.zoom() - this.ZOOM_STEP)); }
   zoomReset(): void { this.zoom.set(1); this.panX.set(0); this.panY.set(0); }
 
   private clampZoom(v: number): number {
@@ -685,9 +685,9 @@ export class HospitalComponent implements OnInit, OnDestroy {
       if (newZoom === oldZoom) return;
       const rect = el.getBoundingClientRect();
       const cx = (ev.clientX - rect.left - this.panX()) / oldZoom;
-      const cy = (ev.clientY - rect.top  - this.panY()) / oldZoom;
-      this.panX.set(ev.clientX - rect.left  - cx * newZoom);
-      this.panY.set(ev.clientY - rect.top   - cy * newZoom);
+      const cy = (ev.clientY - rect.top - this.panY()) / oldZoom;
+      this.panX.set(ev.clientX - rect.left - cx * newZoom);
+      this.panY.set(ev.clientY - rect.top - cy * newZoom);
       this.zoom.set(newZoom);
     } else {
       this.panX.set(this.panX() - ev.deltaX);
@@ -733,7 +733,7 @@ export class HospitalComponent implements OnInit, OnDestroy {
   onDocMouseUp(): void {
     if (this.dragState?.moved) this.saveFlowLayout();
     this.dragState = null;
-    this.panState  = null;
+    this.panState = null;
     setTimeout(() => { this.isDragging.set(false); this.isPanning.set(false); });
   }
 
@@ -783,11 +783,11 @@ export class HospitalComponent implements OnInit, OnDestroy {
 
   private resolveDropParentId(nodeType: NodeType, sel: FlowNode | null): NodeId | undefined {
     switch (nodeType) {
-      case 'department':    return this.hospitalRoot()?.id;
+      case 'department': return this.hospitalRoot()?.id;
       case 'subdepartment': return sel?.type === 'department' ? sel.id : undefined;
-      case 'doctor':        return sel && (VALID_PARENT_TYPES['doctor'] as NodeType[]).includes(sel.type) ? sel.id : undefined;
-      case 'staff':         return sel?.type === 'doctor' ? sel.id : undefined;
-      default:              return undefined;
+      case 'doctor': return sel && (VALID_PARENT_TYPES['doctor'] as NodeType[]).includes(sel.type) ? sel.id : undefined;
+      case 'staff': return sel?.type === 'doctor' ? sel.id : undefined;
+      default: return undefined;
     }
   }
 
@@ -803,12 +803,13 @@ export class HospitalComponent implements OnInit, OnDestroy {
 
   // ── Add from picker (click) ───────────────────────────────────────────────────
   addFromPicker(item: { id: string; type: NodeType }): void {
+    if (this.pickerItemDisabled(item.type)) return;
     const sel = this.selectedNode();
     switch (item.type) {
-      case 'department':    this.addDepartmentNode(item.id); break;
-      case 'subdepartment': if (sel?.type === 'department')  this.addSubDepartmentNode(item.id); break;
-      case 'doctor':        if (sel && (VALID_PARENT_TYPES['doctor'] as NodeType[]).includes(sel.type)) this.addDoctorNode(item.id); break;
-      case 'staff':         if (sel?.type === 'doctor')      this.addStaffNode(item.id); break;
+      case 'department': if (sel?.type === 'hospital') this.addDepartmentNode(item.id); break;
+      case 'subdepartment': if (sel?.type === 'department') this.addSubDepartmentNode(item.id); break;
+      case 'doctor': if (sel && (VALID_PARENT_TYPES['doctor'] as NodeType[]).includes(sel.type)) this.addDoctorNode(item.id); break;
+      case 'staff': if (sel?.type === 'doctor') this.addStaffNode(item.id); break;
     }
   }
 
@@ -822,16 +823,80 @@ export class HospitalComponent implements OnInit, OnDestroy {
     this.showAddStaffForm.set(!this.showAddStaffForm());
     if (this.showAddStaffForm()) {
       this.newStaffFirstName = '';
-      this.newStaffLastName  = '';
-      this.newStaffRole      = '';
-      this.newStaffEmail     = '';
-      this.newStaffPhone     = '';
+      this.newStaffLastName = '';
+      this.newStaffRole = '';
+      this.newStaffEmail = '';
+      this.newStaffPhone = '';
     }
+  }
+  openStaffCreateDialog(): void {
+    const dialogRef = this.dialog.open(StaffManagementComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      maxHeight: '95vh',
+      data: { mode: 'create', staff: null },
+    });
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: any) => {
+      if (result?.action === 'save' && result?.formData) {
+        this.staffService.createStaff(result.formData).subscribe({
+          next: (created: any) => {
+            const id = `s_${created.id ?? Date.now()}`;
+            const name = [created.firstName ?? result.formData.firstName, created.lastName ?? result.formData.lastName].filter(Boolean).join(' ').trim();
+            this.staff.set([...this.staff(), {
+              id,
+              name: name || 'Staff',
+              role: created.roles?.[0] ?? result.formData.roles?.[0] ?? 'General',
+              staffId: created.id,
+            }]);
+          },
+        });
+      }
+    });
+  }
+  OpenAddDoctorDialog(): void {
+    const hospitalId = this.hospitalPublicId();
+    if (!hospitalId) {
+      return;
+    }
+    const dialogRef = this.dialogService.openDialog(AdminDoctorCreateComponent, {
+      title: 'Create New Doctor',
+      width: '90%',
+      height: '90%',
+      maxWidth: '900px',
+      maxHeight: '90vh',
+      data: { doctor: undefined },
+      footerActions: [
+        { id: 'cancel', text: 'Cancel', color: 'secondary', appearance: 'flat' },
+        { id: 'invite', text: 'Send Invitation', color: 'accent', appearance: 'raised', fontIcon: 'send' },
+        { id: 'save', text: 'Create Doctor', color: 'primary', appearance: 'raised', fontIcon: 'save' },
+      ],
+    });
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result: any) => {
+      if (result?.action === 'save' && result?.formData) {
+        this.doctorService.createDoctor(hospitalId, result.formData).subscribe({
+          next: (created: any) => {
+            const id = `d_${created.id ?? Date.now()}`;
+            const name = [created.firstName ?? result.formData.firstName, created.lastName ?? result.formData.lastName].filter(Boolean).join(' ').trim() || 'Doctor';
+            this.doctors.set([...this.doctors(), {
+              id,
+              name,
+              specialization: created.specialization ?? result.formData.specialization,
+              online: false,
+              publicId: created.publicId,
+              registrationNumber: created.registrationNumber,
+            }]);
+          },
+        });
+      }
+      if (result?.action === 'invite') {
+        // Optional: refresh doctors list if invite was sent
+      }
+    });
   }
 
   createNewStaff(): void {
     const firstName = this.newStaffFirstName.trim();
-    const lastName  = this.newStaffLastName.trim();
+    const lastName = this.newStaffLastName.trim();
     if (!firstName || !lastName) return;
     this.isCreating.set(true);
     const payload: any = {
@@ -843,7 +908,7 @@ export class HospitalComponent implements OnInit, OnDestroy {
     };
     this.staffService.createStaff(payload).pipe(takeUntil(this.destroy$)).subscribe({
       next: (created: any) => {
-        const id   = `s_${created.id ?? Date.now()}`;
+        const id = `s_${created.id ?? Date.now()}`;
         const name = `${created.firstName ?? firstName} ${created.lastName ?? lastName}`.trim();
         this.staff.set([...this.staff(), { id, name, role: created.roles?.[0] ?? this.newStaffRole ?? 'General', staffId: created.id }]);
         this.showAddStaffForm.set(false);
@@ -857,20 +922,20 @@ export class HospitalComponent implements OnInit, OnDestroy {
     this.showAddDoctorForm.set(!this.showAddDoctorForm());
     if (this.showAddDoctorForm()) {
       this.newDoctorFirstName = '';
-      this.newDoctorLastName  = '';
-      this.newDoctorSpec      = '';
-      this.newDoctorRegNo     = '';
-      this.newDoctorEmail     = '';
-      this.newDoctorPhone     = '';
-      this.newDoctorPassword  = '';
+      this.newDoctorLastName = '';
+      this.newDoctorSpec = '';
+      this.newDoctorRegNo = '';
+      this.newDoctorEmail = '';
+      this.newDoctorPhone = '';
+      this.newDoctorPassword = '';
     }
   }
 
   createNewDoctor(): void {
     const firstName = this.newDoctorFirstName.trim();
-    const lastName  = this.newDoctorLastName.trim();
-    const email     = this.newDoctorEmail.trim();
-    const password  = this.newDoctorPassword.trim();
+    const lastName = this.newDoctorLastName.trim();
+    const email = this.newDoctorEmail.trim();
+    const password = this.newDoctorPassword.trim();
     if (!firstName || !lastName || !email || !password) return;
     const hospitalId = this.hospitalPublicId();
     this.isCreating.set(true);
@@ -886,7 +951,7 @@ export class HospitalComponent implements OnInit, OnDestroy {
     };
     this.doctorService.createDoctor(hospitalId, payload).pipe(takeUntil(this.destroy$)).subscribe({
       next: (created: any) => {
-        const id   = `d_${created.id ?? Date.now()}`;
+        const id = `d_${created.id ?? Date.now()}`;
         const name = `${created.firstName ?? firstName} ${created.lastName ?? lastName}`.trim();
         this.doctors.set([...this.doctors(), {
           id, name,
@@ -942,7 +1007,7 @@ export class HospitalComponent implements OnInit, OnDestroy {
   }
 
   createNewSubDepartment(): void {
-    const name   = this.newSubDeptName.trim();
+    const name = this.newSubDeptName.trim();
     const deptId = this.newSubDeptDeptId();
     if (!name || !deptId) return;
     this.isCreating.set(true);
@@ -951,19 +1016,24 @@ export class HospitalComponent implements OnInit, OnDestroy {
       description: this.newSubDeptDesc.trim() || undefined,
       departmentId: deptId,
     };
-    this.subDeptService.createSubDepartment(payload).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (created: any) => {
-        const id = `sd_${created.id ?? Date.now()}`;
-        this.subDepartments.set([...this.subDepartments(), {
-          id, name: created.name ?? name,
-          departmentId: created.departmentId ?? deptId,
-          subDepartmentId: created.id,
-        }]);
-        this.showAddSubDeptForm.set(false);
-        this.isCreating.set(false);
+    this.staffService.getDepartments().subscribe({
+      next: (departments: any[]) => {
+        const dept = departments.find(d => d.departmentId === deptId);
+        if (dept) {
+          this.subDeptService.createSubDepartment(payload).subscribe({
+            next: (created: any) => {
+              const id = `sd_${created.id ?? Date.now()}`;
+              this.subDepartments.set([...this.subDepartments(), {
+                id, name: created.name ?? name,
+                departmentId: created.departmentId ?? deptId,
+                subDepartmentId: created.id,
+              }]);
+            }
+          })
+        }
       },
       error: () => this.isCreating.set(false),
-    });
+      })
   }
 
   // ── Link mode ─────────────────────────────────────────────────────────────────
@@ -988,7 +1058,7 @@ export class HospitalComponent implements OnInit, OnDestroy {
 
   edgeMidpoint(e: FlowEdge): { x: number; y: number } | null {
     const from = this.nodes().find(n => n.id === e.from);
-    const to   = this.nodes().find(n => n.id === e.to);
+    const to = this.nodes().find(n => n.id === e.to);
     if (!from || !to) return null;
     return {
       x: (from.x + this.NODE_WIDTH / 2 + to.x + this.NODE_WIDTH / 2) / 2,
@@ -1040,7 +1110,7 @@ export class HospitalComponent implements OnInit, OnDestroy {
   addDepartmentNode(deptId: string): void {
     const dept = this.departments().find(d => d.id === deptId);
     if (!dept) return;
-    const id   = `dept_${deptId}_${Math.random().toString(16).slice(2)}`;
+    const id = `dept_${deptId}_${Math.random().toString(16).slice(2)}`;
     const root = this.hospitalRoot();
     const existingDepts = this.connectedDepartments().length;
     const node: FlowNode = {
@@ -1055,7 +1125,7 @@ export class HospitalComponent implements OnInit, OnDestroy {
   }
 
   addSubDepartmentNode(subId: string): void {
-    const sub    = this.subDepartments().find(s => s.id === subId);
+    const sub = this.subDepartments().find(s => s.id === subId);
     const parent = this.selectedNode();
     if (!sub || parent?.type !== 'department') return;
     const existingChildren = this.edges().filter(e => e.from === parent.id).length;
@@ -1072,7 +1142,7 @@ export class HospitalComponent implements OnInit, OnDestroy {
   }
 
   addDoctorNode(doctorId: string): void {
-    const doc    = this.doctors().find(d => d.id === doctorId);
+    const doc = this.doctors().find(d => d.id === doctorId);
     const parent = this.selectedNode();
     const validParents = VALID_PARENT_TYPES['doctor'] as NodeType[];
     if (!doc || !parent || !validParents.includes(parent.type)) return;
@@ -1090,7 +1160,7 @@ export class HospitalComponent implements OnInit, OnDestroy {
   }
 
   addStaffNode(staffId: string): void {
-    const s      = this.staff().find(st => st.id === staffId);
+    const s = this.staff().find(st => st.id === staffId);
     const parent = this.selectedNode();
     if (!s || parent?.type !== 'doctor') return;
     const existingChildren = this.edges().filter(e => e.from === parent.id).length;
@@ -1183,9 +1253,9 @@ export class HospitalComponent implements OnInit, OnDestroy {
     const root = nodes.find(n => n.type === 'hospital');
     if (!root) return;
     const childrenMap = this.buildChildrenMap(this.edges());
-    const widthCache  = this.computeSubtreeWidths(root.id, childrenMap);
-    const posMap      = this.assignPositions(root.id, childrenMap, widthCache);
-    const positioned  = new Set(posMap.keys());
+    const widthCache = this.computeSubtreeWidths(root.id, childrenMap);
+    const posMap = this.assignPositions(root.id, childrenMap, widthCache);
+    const positioned = new Set(posMap.keys());
     let orphanX = this.CANVAS_PADDING;
     for (const n of nodes) {
       if (!positioned.has(n.id)) {
@@ -1200,12 +1270,12 @@ export class HospitalComponent implements OnInit, OnDestroy {
   // ── Edge geometry ─────────────────────────────────────────────────────────────
   edgePath(e: FlowEdge): string {
     const from = this.nodes().find(n => n.id === e.from);
-    const to   = this.nodes().find(n => n.id === e.to);
+    const to = this.nodes().find(n => n.id === e.to);
     if (!from || !to) return '';
     const vertGap = to.y - (from.y + this.NODE_HEIGHT);
     if (vertGap > 30) {
       const fx = from.x + this.NODE_WIDTH / 2, fy = from.y + this.NODE_HEIGHT;
-      const tx = to.x   + this.NODE_WIDTH / 2, ty = to.y;
+      const tx = to.x + this.NODE_WIDTH / 2, ty = to.y;
       const dy = vertGap * 0.45;
       return `M ${fx} ${fy} C ${fx} ${fy + dy}, ${tx} ${ty - dy}, ${tx} ${ty}`;
     }
@@ -1222,7 +1292,19 @@ export class HospitalComponent implements OnInit, OnDestroy {
   private readonly storageKey = 'adminHospitalFlow';
 
   /** Public alias called from the template toolbar save button */
-  save(): void { this.saveFlowLayout(); }
+  save(): void {
+    this.saveFlowLayout();
+    this.dialogService.openConfirmationDialog({
+      title: 'Save Flow',
+      message: 'Are you sure you want to save the flow?',
+      confirmText: 'Save',
+      cancelText: 'Cancel',
+      icon: 'save',
+      showConfirm: true,
+      showCancel: true,
+    });
+
+  }
 
   /** Persists canvas layout to backend and localStorage (fallback) */
   saveFlowLayout(): void {
@@ -1286,8 +1368,12 @@ export class HospitalComponent implements OnInit, OnDestroy {
   // ── Lifecycle ─────────────────────────────────────────────────────────────────
   ngOnInit(): void {
     this.resolveHospitalPublicId();
-  }
+    this.createNewSubDepartment();
 
+  }
+  openAddStaffDialog() {
+    this.showAddStaffForm.set(true);
+  }
   private resolveHospitalPublicId(): void {
     const pubId = this.authService.getHospitalPublicId();
     this.hospitalPublicId.set(pubId);
@@ -1299,89 +1385,83 @@ export class HospitalComponent implements OnInit, OnDestroy {
     this.loadError.set(null);
 
     forkJoin({
-      services:      this.featureCatalogService.getServicesWithFeatures().pipe(catchError(() => of([]))),
-      departments:   this.departmentService.getDepartments().pipe(catchError(() => of([]))),
-      subDepts:      this.subDeptService.getSubDepartments().pipe(catchError(() => of([]))),
-      doctors:       hospitalPubId
-                       ? this.doctorService.getDoctorByHospital(hospitalPubId).pipe(catchError(() => of({ doctorDetails: [] })))
-                       : of({ doctorDetails: [] as DoctorListItem[] }),
-      staffRes:      this.staffService.getStaff().pipe(catchError(() => of({ staffDetails: [] }))),
+      services: this.featureCatalogService.getServicesWithFeatures().pipe(catchError(() => of([]))),
+      departments: this.departmentService.getDepartments().pipe(catchError(() => of([]))),
+      subDepts: this.subDeptService.getSubDepartments().pipe(catchError(() => of([]))),
+      doctors: hospitalPubId
+        ? this.doctorService.getDoctorByHospital(hospitalPubId).pipe(catchError(() => of({ doctorDetails: [] })))
+        : of({ doctorDetails: [] as DoctorListItem[] }),
+      staffRes: this.staffService.getStaff().pipe(catchError(() => of({ staffDetails: [] }))),
       subscriptions: hospitalPubId
-                       ? this.subscriptionService.getSubscriptions(hospitalPubId).pipe(catchError(() => of([])))
-                       : of([] as SubscriptionDTO[]),
-      orgFlow:       hospitalPubId
-                       ? this.flowService.getOrgFlow(hospitalPubId).pipe(catchError(() => of(null)))
-                       : of(null),
+        ? this.subscriptionService.getSubscriptions(hospitalPubId).pipe(catchError(() => of([])))
+        : of([] as SubscriptionDTO[]),
+      orgFlow: hospitalPubId
+        ? this.flowService.getOrgFlow(hospitalPubId).pipe(catchError(() => of(null)))
+        : of(null),
     }).pipe(takeUntil(this.destroy$))
       .subscribe(({ services, departments, subDepts, doctors, staffRes, subscriptions, orgFlow }) => {
 
         // ── Services / features ──────────────────────────────────────────────
         const serviceGroups: ServiceGroup[] = (services as ServiceWithFeaturesDTO[]).map(svc => ({
-          service:   svc.name,
+          service: svc.name,
           serviceId: svc.id,
-          color:     SERVICE_ICON_MAP[svc.serviceCode] ?? '#6b7280',
-          features:  svc.features.map((f: FeatureDTO) => ({
-            id:           f.featureCode,
-            name:         f.name,
-            icon:         FEATURE_ICON_MAP[f.featureCode] ?? FEATURE_ICON_FALLBACK,
-            service:      svc.name,
-            serviceId:    svc.id,
+          color: SERVICE_ICON_MAP[svc.serviceCode] ?? '#6b7280',
+          features: svc.features.map((f: FeatureDTO) => ({
+            id: f.featureCode,
+            name: f.name,
+            icon: FEATURE_ICON_MAP[f.featureCode] ?? FEATURE_ICON_FALLBACK,
+            service: svc.name,
+            serviceId: svc.id,
             serviceColor: SERVICE_ICON_MAP[svc.serviceCode] ?? '#6b7280',
           } as Feature)),
         }));
         this.serviceGroups.set(serviceGroups);
 
-        // ── Departments ──────────────────────────────────────────────────────
-        if ((departments as any[]).length > 0) {
-          const mapped: Department[] = (departments as any[]).map((d, i) => ({
-            id:           `dep${d.departmentId ?? i}`,
-            name:         d.name,
-            code:         `DEPT-${(d.name ?? '').substring(0, 3).toUpperCase()}-${(d.departmentId ?? i).toString().padStart(2, '0')}`,
-            headName:     '',
-            active:       d.active !== false,
-            departmentId: d.departmentId,
-          }));
-          this.departments.set(mapped);
-        }
+        // ── Departments (always set from API so picker shows current data) ─────
+        const deptList = (departments as any[]) ?? [];
+        const mappedDepts: Department[] = deptList.map((d: any, i: number) => ({
+          id: `dep${d.departmentId ?? i}`,
+          name: d.name,
+          code: `DEPT-${(d.name ?? '').substring(0, 3).toUpperCase()}-${(d.departmentId ?? i).toString().padStart(2, '0')}`,
+          headName: '',
+          active: d.active !== false,
+          departmentId: d.departmentId,
+        }));
+        this.departments.set(mappedDepts);
 
-        // ── Sub-departments ──────────────────────────────────────────────────
-        if ((subDepts as any[]).length > 0) {
-          const mapped: SubDepartment[] = (subDepts as any[]).map((s: SubDeptModel) => ({
-            id:             `sub${s.subDepartmentId ?? Math.random()}`,
-            name:           s.name,
-            departmentId:   s.departmentId,
-            subDepartmentId: s.subDepartmentId,
-          }));
-          this.subDepartments.set(mapped);
-        }
+        // ── Sub-departments ───────────────────────────────────────────────────
+        const subList = (subDepts as any[]) ?? [];
+        const mappedSubs: SubDepartment[] = subList.map((s: SubDeptModel) => ({
+          id: `sub${s.subDepartmentId ?? Math.random()}`,
+          name: s.name,
+          departmentId: s.departmentId,
+          subDepartmentId: s.subDepartmentId,
+        }));
+        this.subDepartments.set(mappedSubs);
 
-        // ── Doctors ──────────────────────────────────────────────────────────
+        // ── Doctors ───────────────────────────────────────────────────────────
         const doctorList = (doctors as any)?.doctorDetails ?? [];
-        if (doctorList.length > 0) {
-          const mapped: Doctor[] = doctorList.map((d: DoctorListItem) => ({
-            id:               d.publicId ?? d.registrationNumber,
-            name:             `${d.firstName ?? ''} ${d.lastName ?? ''}`.trim() || d.registrationNumber,
-            specialization:   d.specialization,
-            online:           false,
-            publicId:         d.publicId,
-            registrationNumber: d.registrationNumber,
-            departmentId:     d.departmentId,
-            subDepartmentId:  d.subDepartmentId,
-          }));
-          this.doctors.set(mapped);
-        }
+        const mappedDoctors: Doctor[] = doctorList.map((d: DoctorListItem, i: number) => ({
+          id: d.publicId ?? d.registrationNumber ?? `doc-${i}`,
+          name: `${d.firstName ?? ''} ${d.lastName ?? ''}`.trim() || d.registrationNumber || 'Doctor',
+          specialization: d.specialization,
+          online: false,
+          publicId: d.publicId,
+          registrationNumber: d.registrationNumber,
+          departmentId: d.departmentId,
+          subDepartmentId: d.subDepartmentId,
+        }));
+        this.doctors.set(mappedDoctors);
 
-        // ── Staff ────────────────────────────────────────────────────────────
+        // ── Staff ─────────────────────────────────────────────────────────────
         const staffList = (staffRes as any)?.staffDetails ?? [];
-        if (staffList.length > 0) {
-          const mapped: StaffMember[] = staffList.map((s: any) => ({
-            id:      `s${s.staffId ?? Math.random()}`,
-            name:    `${s.firstName ?? ''} ${s.lastName ?? ''}`.trim(),
-            role:    (s.roles ?? []).join(', ') || s.specialization || 'Staff',
-            staffId: s.staffId,
-          }));
-          this.staff.set(mapped);
-        }
+        const mappedStaff: StaffMember[] = staffList.map((s: any) => ({
+          id: `s${s.staffId ?? Math.random()}`,
+          name: `${s.firstName ?? ''} ${s.lastName ?? ''}`.trim(),
+          role: (s.roles ?? []).join(', ') || s.specialization || 'Staff',
+          staffId: s.staffId,
+        }));
+        this.staff.set(mappedStaff);
 
         // ── Hospital subscriptions / features ────────────────────────────────
         const subs: SubscriptionDTO[] = Array.isArray(subscriptions) ? subscriptions : [];
@@ -1457,7 +1537,8 @@ export class HospitalComponent implements OnInit, OnDestroy {
     private readonly subscriptionService: HospitalSubscriptionService,
     private readonly doctorFeatureService: DoctorFeatureService,
     private readonly authService: AuthService,
-  ) {}
+    private readonly dialog: MatDialog
+  ) { }
 
   ngOnDestroy(): void {
     this.destroy$.next();
