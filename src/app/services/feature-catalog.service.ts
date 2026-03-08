@@ -4,8 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface FeatureDTO {
-  id: string;
-  featureCode: string;
+  id: string;           // UUID — the stable feature identifier from the backend
+  featureCode: string;  // short code, e.g. "appointments", "chat"
   name: string;
   description?: string;
 }

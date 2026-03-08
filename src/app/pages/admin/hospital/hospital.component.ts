@@ -22,6 +22,7 @@ import { HospitalFlowService, OrgFlowLayout } from '../../../services/hospital-f
 import { HospitalSubscriptionService, SubscriptionDTO } from '../../../services/hospital-subscription.service';
 import { DoctorFeatureService } from '../../../services/doctor-feature.service';
 import { AuthService } from '../../../services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 type NodeId = string;
 type EdgeId = string;
@@ -42,7 +43,8 @@ interface Doctor       { id: string; name: string; specialization?: string; onli
 interface StaffMember  { id: string; name: string; role?: string; staffId?: number; }
 
 interface Feature {
-  id: string;
+  id: string;           // UUID — the stable identity used for API calls and comparisons
+  featureCode: string;  // short code (e.g. "appointments") — used for icon lookup
   name: string;
   icon: string;
   service: string;
@@ -266,39 +268,50 @@ export class HospitalComponent implements OnInit, OnDestroy {
   }
 
   private enableHospitalFeature(feature: Feature): void {
+    const previousIds = this.hospitalFeatureIds();
+
     // Optimistic update
-    this.hospitalFeatureIds.set([...this.hospitalFeatureIds(), feature.id]);
+    this.hospitalFeatureIds.set([...previousIds, feature.id]);
     this.saveFlowLayout();
 
-    // Find the subscription for this service
     const hospitalPubId = this.hospitalPublicId();
     if (!hospitalPubId) return;
 
-    // Check if service is already subscribed
+    // Service already subscribed — no API call needed; all features of this service
+    // are already active at the backend. Sync local state so all sibling features show enabled.
     const existing = this.hospitalSubscriptions().find(s => s.serviceId === feature.serviceId && s.active);
-    if (existing) return; // Already subscribed to the service — no API call needed
+    if (existing) {
+      this.refreshHospitalFeatureIds();
+      return;
+    }
 
     this.subscriptionService.subscribe(hospitalPubId, feature.serviceId)
-      .pipe(catchError(() => of(null)))
+      .pipe(catchError(() => {
+        // Rollback on failure
+        this.hospitalFeatureIds.set(previousIds);
+        return of(null);
+      }))
       .subscribe(sub => {
         if (sub) {
           this.hospitalSubscriptions.set([...this.hospitalSubscriptions(), sub]);
-          // Refresh all feature IDs from subscriptions
+          // Expand to all features that are now active under this service
           this.refreshHospitalFeatureIds();
         }
       });
   }
 
   private disableHospitalFeature(feature: Feature): void {
-    // Optimistic update
-    this.hospitalFeatureIds.set(this.hospitalFeatureIds().filter(id => id !== feature.id));
-    // Also remove from all doctors
+    const previousIds = this.hospitalFeatureIds();
+    const previousDocMap = this.doctorFeatureMap();
+
+    // Optimistic update — remove from hospital and from every doctor
+    this.hospitalFeatureIds.set(previousIds.filter(id => id !== feature.id));
     const map = { ...this.doctorFeatureMap() };
     for (const key of Object.keys(map)) map[key] = map[key].filter(id => id !== feature.id);
     this.doctorFeatureMap.set(map);
     this.saveFlowLayout();
 
-    // Check if all features of this service are now disabled — if so, unsubscribe
+    // Unsubscribe from the service only when the last feature of that service is turned off
     const svcGroup = this.serviceGroups().find(sg => sg.serviceId === feature.serviceId);
     if (svcGroup) {
       const anyEnabled = svcGroup.features.some(f => f.id !== feature.id && this.isHospitalFeatureEnabled(f.id));
@@ -306,7 +319,12 @@ export class HospitalComponent implements OnInit, OnDestroy {
         const hospitalPubId = this.hospitalPublicId();
         if (!hospitalPubId) return;
         this.subscriptionService.unsubscribeByService(hospitalPubId, feature.serviceId)
-          .pipe(catchError(() => of(null)))
+          .pipe(catchError(() => {
+            // Rollback on failure
+            this.hospitalFeatureIds.set(previousIds);
+            this.doctorFeatureMap.set(previousDocMap);
+            return of(null);
+          }))
           .subscribe(() => {
             this.hospitalSubscriptions.set(
               this.hospitalSubscriptions().filter(s => s.serviceId !== feature.serviceId)
@@ -327,8 +345,9 @@ export class HospitalComponent implements OnInit, OnDestroy {
 
   private enableDoctorFeature(entityId: string, featureId: string): void {
     // Optimistic update
+    const previous = this.doctorFeatureMap()[entityId] ?? [];
     const map = { ...this.doctorFeatureMap() };
-    map[entityId] = [...(map[entityId] ?? []), featureId];
+    map[entityId] = [...previous, featureId];
     this.doctorFeatureMap.set(map);
     this.saveFlowLayout();
 
@@ -337,14 +356,21 @@ export class HospitalComponent implements OnInit, OnDestroy {
     if (!doctor?.publicId || !hospitalPubId) return;
 
     this.doctorFeatureService.grantFeature(doctor.publicId, featureId, hospitalPubId)
-      .pipe(catchError(() => of(null)))
+      .pipe(catchError(err => {
+        // Rollback on failure
+        const rollback = { ...this.doctorFeatureMap() };
+        rollback[entityId] = previous;
+        this.doctorFeatureMap.set(rollback);
+        return of(null);
+      }))
       .subscribe();
   }
 
   private disableDoctorFeature(entityId: string, featureId: string): void {
     // Optimistic update
+    const previous = this.doctorFeatureMap()[entityId] ?? [];
     const map = { ...this.doctorFeatureMap() };
-    map[entityId] = (map[entityId] ?? []).filter(id => id !== featureId);
+    map[entityId] = previous.filter(id => id !== featureId);
     this.doctorFeatureMap.set(map);
     this.saveFlowLayout();
 
@@ -353,7 +379,13 @@ export class HospitalComponent implements OnInit, OnDestroy {
     if (!doctor?.publicId || !hospitalPubId) return;
 
     this.doctorFeatureService.revokeFeature(doctor.publicId, featureId, hospitalPubId)
-      .pipe(catchError(() => of(null)))
+      .pipe(catchError(err => {
+        // Rollback on failure
+        const rollback = { ...this.doctorFeatureMap() };
+        rollback[entityId] = previous;
+        this.doctorFeatureMap.set(rollback);
+        return of(null);
+      }))
       .subscribe();
   }
 
@@ -388,6 +420,8 @@ export class HospitalComponent implements OnInit, OnDestroy {
   readonly isCreating         = signal(false);
 
   readonly lastSavedAt = signal<Date | null>(null);
+  readonly showApiReference = signal(false);
+  readonly curlCopied = signal(false);
 
   private readonly ZOOM_MIN  = 0.25;
   private readonly ZOOM_MAX  = 2;
@@ -432,6 +466,38 @@ export class HospitalComponent implements OnInit, OnDestroy {
   readonly newSubDeptDeptId = signal<number | null>(null);
 
   readonly zoomPercent = computed(() => Math.round(this.zoom() * 100));
+
+  // API reference (org-flow save/get)
+  readonly apiBaseUrl = environment.apiUrl;
+  readonly apiRequestBodyExample = '{ "layoutJson": "<JSON string: { nodes, edges }>" }';
+  readonly apiResponseFieldNames = ['hospitalPublicId', 'layoutJson', 'updatedAt'];
+  readonly saveFlowEndpoint = computed(() => {
+    const id = this.hospitalPublicId();
+    return id ? `${environment.apiUrl}${environment.endpoints.orgFlow.save(id)}` : '';
+  });
+  readonly getFlowEndpoint = computed(() => {
+    const id = this.hospitalPublicId();
+    return id ? `${environment.apiUrl}${environment.endpoints.orgFlow.get(id)}` : '';
+  });
+  readonly sampleCurl = computed(() => {
+    const base = this.apiBaseUrl;
+    const path = this.hospitalPublicId()
+      ? `/api/hospitals/${this.hospitalPublicId()}/org-flow`
+      : '/api/hospitals/YOUR_HOSPITAL_PUBLIC_ID/org-flow';
+    const samplePayload = JSON.stringify({
+      layoutJson: JSON.stringify({
+        nodes: [
+          { id: 'hospital_root', type: 'hospital', entityId: 'h1', title: 'Hospital', subtitle: 'Root', x: 0, y: 0 },
+          { id: 'dept_1', type: 'department', entityId: 'dep1', title: 'Cardiology', subtitle: 'CARD-01', x: 320, y: 172 },
+        ],
+        edges: [{ id: 'e_1', from: 'hospital_root', to: 'dept_1' }],
+      }),
+    });
+    return `curl -X PUT '${base}${path}' \\
+  -H 'Content-Type: application/json' \\
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \\
+  -d '${samplePayload.replace(/'/g, "'\\''")}'`;
+  });
 
   readonly canvasWidth = computed(() => {
     const ns = this.nodes();
@@ -1224,6 +1290,15 @@ export class HospitalComponent implements OnInit, OnDestroy {
   /** Public alias called from the template toolbar save button */
   save(): void { this.saveFlowLayout(); }
 
+  copyCurlToClipboard(): void {
+    const curl = this.sampleCurl();
+    if (!curl) return;
+    navigator.clipboard.writeText(curl).then(() => {
+      this.curlCopied.set(true);
+      setTimeout(() => this.curlCopied.set(false), 2000);
+    });
+  }
+
   /** Persists canvas layout to backend and localStorage (fallback) */
   saveFlowLayout(): void {
     const layout: OrgFlowLayout = { nodes: this.nodes(), edges: this.edges() };
@@ -1321,7 +1396,8 @@ export class HospitalComponent implements OnInit, OnDestroy {
           serviceId: svc.id,
           color:     SERVICE_ICON_MAP[svc.serviceCode] ?? '#6b7280',
           features:  svc.features.map((f: FeatureDTO) => ({
-            id:           f.featureCode,
+            id:           f.id,           // UUID — used for API calls and comparisons
+            featureCode:  f.featureCode,  // short code — used for icon lookup
             name:         f.name,
             icon:         FEATURE_ICON_MAP[f.featureCode] ?? FEATURE_ICON_FALLBACK,
             service:      svc.name,
