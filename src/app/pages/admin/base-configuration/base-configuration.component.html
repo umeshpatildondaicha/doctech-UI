@@ -4,10 +4,10 @@
       <!-- Entity Bar: search, Add Configuration, Filter -->
       <app-entity-toolbar
       [showCounts]="false"
-      [newLabel]="'Add Configuration'"
+      [newLabel]="'TOOLBAR_ADD_CONFIGURATION' | translate:'Add Configuration'"
       [showRefresh]="false"
       [showFilter]="true"
-      [searchPlaceholder]="'Search configurations...'"
+      [searchPlaceholder]="'TOOLBAR_SEARCH_PLACEHOLDER' | translate:'Search configurations...'"
       [searchSuggestions]="configSearchHints"
       (search)="onEntitySearch($event)"
       (newClick)="addConfiguration()"

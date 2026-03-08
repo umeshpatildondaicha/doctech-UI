@@ -1,5 +1,7 @@
 export interface SidebarMenuItem {
     label: string;
+    /** Translation key for dynamic multilingual label (e.g. MENU_DASHBOARD). When set, UI shows translated value. */
+    labelKey?: string;
     icon: string;
     /** Optional path to custom SVG/image for sidebar (e.g. assets/icons/name.svg). When set, used instead of icon for doctor menu. */
     iconSrc?: string;

@@ -9,7 +9,7 @@
   <div class="app-layout theme-teal" [class.sidebar-collapsed]="sidebarCollapsed">
     <app-sidebar
       [collapsed]="sidebarCollapsed"
-      appTitle="Shree Clinic"
+      [appTitle]="'APP_TITLE' | translate:'Shree Clinic'"
       (toggle)="toggleSidebar()"
     ></app-sidebar>
     <div class="main-section" [class.right-sidebar-expanded]="rightSidebarOpen && userType === 'DOCTOR'">

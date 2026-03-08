@@ -1,0 +1,146 @@
+<div class="create-translation-dialog">
+  <div class="dialog-header">
+    <h2 class="dialog-title">Create new translation key</h2>
+    <div class="header-actions">
+      <span class="completion-badge">
+        <span class="material-icons completion-icon">check_circle</span>
+        {{ completionPct }}% complete
+      </span>
+      <button type="button" class="icon-btn" aria-label="Information">
+        <span class="material-icons">info</span>
+      </button>
+      <button type="button" class="icon-btn" (click)="dialogRef.close()" aria-label="Close">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button type="button" class="tab" [class.active]="step === 1" (click)="step = 1">
+      <span class="tab-dot" [class.active]="step === 1"></span>
+      Key info
+    </button>
+    <button type="button" class="tab" [class.active]="step === 2" (click)="step === 1 && next()">
+      <span class="tab-dot" [class.active]="step === 2"></span>
+      Translations
+    </button>
+  </div>
+
+  <!-- Step 1: Key info -->
+  @if (step === 1) {
+    <div class="step-content step-key-info">
+      <div class="left-panel">
+        <div class="guidelines-box">
+          <strong>Translation key guidelines</strong>
+          <ul>
+            <li>Use <strong>UPPER_SNAKE_CASE</strong> format only</li>
+            <li>Choose descriptive names that indicate purpose</li>
+          </ul>
+        </div>
+        <form [formGroup]="keyInfoForm">
+          <div class="form-field full-width">
+            <label class="field-label">Message key *</label>
+            <input
+              type="text"
+              class="field-input"
+              formControlName="messageKey"
+              placeholder="e.g. USER_CREATED_SUCCESS"
+              maxlength="100">
+            <span class="char-count">{{ keyInfoForm.get('messageKey')?.value?.length || 0 }}/100</span>
+            @if (hasError(keyInfoForm, 'messageKey')) {
+              <div class="field-error">{{ getKeyInfoError('messageKey') }}</div>
+            }
+          </div>
+          <div class="form-field full-width">
+            <label class="field-label">Module name *</label>
+            <app-selectbox
+              [options]="moduleOptions"
+              displayExpr="label"
+              valueField="value"
+              formControlName="moduleName"
+              [placeholder]="'Search modules...'">
+            </app-selectbox>
+            @if (hasError(keyInfoForm, 'moduleName')) {
+              <div class="field-error">{{ getKeyInfoError('moduleName') }}</div>
+            }
+          </div>
+          <div class="form-field full-width">
+            <label class="field-label">Description / remark</label>
+            <textarea
+              class="field-textarea"
+              formControlName="description"
+              placeholder="Enter description or remark (optional)"
+              rows="3">
+            </textarea>
+          </div>
+        </form>
+      </div>
+      <div class="right-panel guidelines-panel">
+        <div class="guidelines-box right">
+          <strong>Field guidelines</strong>
+          <p><strong>Message key:</strong> (e.g. USER_CREATED_SUCCESS).</p>
+          <p><strong>Module name:</strong> Select one or more modules where this message appears. Same key can exist across modules.</p>
+          <p><strong>Description / remark:</strong> Optional. Add description or remark for documentation.</p>
+        </div>
+        <div class="examples-box">
+          <strong>Good examples</strong>
+          <p>Message Key: <code>USER_CREATED_SUCCESS</code><br>Translation: User created successfully</p>
+          <p>Message Key: <code>ERROR_INVALID_INPUT</code><br>Translation: Invalid input provided</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Step 2: Translations -->
+  @if (step === 2) {
+    <div class="step-content step-translations">
+      <div class="left-panel">
+        <form [formGroup]="translationsForm">
+          @for (lang of wizardLanguages; track lang.code) {
+            <div class="translation-field">
+              <label class="translation-label">
+                <span class="lang-flag">{{ lang.flag }}</span>
+                {{ lang.label }}
+                @if (lang.required) {
+                  <span class="required-tag">Required</span>
+                }
+              </label>
+              <textarea
+                class="translation-textarea"
+                [formControlName]="lang.code"
+                [placeholder]="lang.placeholder"
+                rows="3">
+              </textarea>
+              @if (hasError(translationsForm, lang.code)) {
+                <div class="field-error">{{ 'COMMON_FIELD_REQUIRED' | translate:'This field is required' }}</div>
+              }
+            </div>
+          }
+        </form>
+      </div>
+      <div class="right-panel guidelines-panel">
+        <div class="guidelines-box right">
+          <strong>Translations guidance</strong>
+          <p>Fill in translations for each language. English is required; other languages are optional but recommended.</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    @if (step === 1) {
+      <button type="button" class="btn btn-flat" (click)="dialogRef.close()">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="next()">Next &gt;</button>
+    } @else {
+      <button type="button" class="btn btn-flat" (click)="back()">&larr; Back</button>
+      <button type="button" class="btn btn-primary" (click)="submitCreate()" [disabled]="isSubmitting">
+        @if (isSubmitting) {
+          <span class="btn-spinner"></span>
+        }
+        Create translation key ✓
+      </button>
+    }
+  </div>
+</div>

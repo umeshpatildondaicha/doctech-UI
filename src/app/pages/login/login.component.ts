@@ -13,6 +13,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AuthService, LoginRequest, UserType } from "@lk/core";
 import { environment } from '../../../environments/environment';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { MultilingualService } from '../../services/multilingual.service';
 
 /**
  * Component responsible for user authentication
@@ -23,6 +25,7 @@ import { environment } from '../../../environments/environment';
     ReactiveFormsModule,
     MatIconModule,
     RouterLink,
+    TranslatePipe,
 ],
     templateUrl: './login.component.html',
     styleUrl: './login.component.scss',
@@ -69,7 +72,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly authService: AuthService,
     private readonly router: Router,
     private readonly snackBar: MatSnackBar,
-    private readonly cdr: ChangeDetectorRef
+    private readonly cdr: ChangeDetectorRef,
+    private readonly multilingualService: MultilingualService
   ) {}
 
   ngOnInit(): void {
@@ -270,32 +274,28 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
-   * Get error message for form control
+   * Get error message for form control (uses multilingual keys so message follows selected language).
    */
   public getErrorMessage(controlName: string): string {
     const control = this.getFormControl(controlName);
-    
-    if (!control?.errors) {
-      return '';
-    }
+    if (!control?.errors) return '';
 
-    if (control.errors['required']) {
-      return 'This field is required';
-    }
-    
-    if (control.errors['email']) {
-      return 'Please enter a valid email address';
-    }
-    
+    const t = (key: string, fallback: string) => {
+      const value = this.multilingualService.getLabel(key);
+      return value !== key ? value : fallback;
+    };
+
+    if (control.errors['required']) return t('COMMON_FIELD_REQUIRED', 'This field is required');
+    if (control.errors['email']) return t('COMMON_INVALID_EMAIL', 'Please enter a valid email address');
     if (control.errors['minlength']) {
-      return `Minimum length is ${control.errors['minlength'].requiredLength} characters`;
+      const len = control.errors['minlength'].requiredLength;
+      return `${t('COMMON_MIN_LENGTH', 'Minimum length is')} ${len} ${t('COMMON_CHARACTERS', 'characters')}`;
     }
-    
     if (control.errors['maxlength']) {
-      return `Maximum length is ${control.errors['maxlength'].requiredLength} characters`;
+      const len = control.errors['maxlength'].requiredLength;
+      return `${t('COMMON_MAX_LENGTH', 'Maximum length is')} ${len} ${t('COMMON_CHARACTERS', 'characters')}`;
     }
-
-    return 'Invalid input';
+    return t('COMMON_INVALID_INPUT', 'Invalid input');
   }
 
   /**

@@ -14,11 +14,12 @@ import { Router } from '@angular/router';
 import { IconComponent, MenuService, AuthService } from '@lk/core';
 import { Subscription } from 'rxjs';
 import type { SidebarMenuItem } from '../../interfaces/sidebarmenu.interface';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, TranslatePipe],
   templateUrl: './app-sidebar.component.html',
   styleUrl: './app-sidebar.component.scss',
 })

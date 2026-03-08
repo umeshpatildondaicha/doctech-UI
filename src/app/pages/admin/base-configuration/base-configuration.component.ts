@@ -23,6 +23,7 @@ import {
 } from '../../../services/base-configuration.service';
 import { BaseConfigurationFormComponent } from './base-configuration-form/base-configuration-form.component';
 import { EntityToolbarComponent } from '../../../components/entity-toolbar/entity-toolbar.component';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-base-configuration',
@@ -37,7 +38,8 @@ import { EntityToolbarComponent } from '../../../components/entity-toolbar/entit
     IconComponent,
     GridComponent,
     PageComponent,
-    EntityToolbarComponent
+    EntityToolbarComponent,
+    TranslatePipe,
   ],
   templateUrl: './base-configuration.component.html',
   styleUrl: './base-configuration.component.scss'

@@ -1,0 +1,74 @@
+<app-page [breadcrumb]="breadcrumb" [isFooter]="false">
+  <div page-body class="multilingual-page">
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <span class="material-icons">key</span>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ totalCount | number }}</div>
+          <div class="stat-label">{{ 'MULTILINGUAL_STAT_KEYS' | translate:'Translation Keys' }}</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">
+          <span class="material-icons">language</span>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ activeLanguagesCount }}</div>
+          <div class="stat-label">{{ 'MULTILINGUAL_STAT_LANGUAGES' | translate:'Active Languages' }}</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber">
+          <span class="material-icons">warning_amber</span>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ missingCount }}</div>
+          <div class="stat-label">{{ 'MULTILINGUAL_STAT_MISSING' | translate:'Missing Translations' }}</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <span class="material-icons">task_alt</span>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ completionPct }}%</div>
+          <div class="stat-label">{{ 'MULTILINGUAL_STAT_COMPLETION' | translate:'Overall Completion' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-card">
+
+      <!-- Toolbar -->
+      <div class="toolbar-row">
+        <app-entity-toolbar
+          [showCounts]="false"
+          [newLabel]="'TOOLBAR_ADD_TRANSLATION' | translate:'Add Translation'"
+          [showRefresh]="false"
+          [showFilter]="true"
+          [searchPlaceholder]="'MULTILINGUAL_SEARCH_PLACEHOLDER' | translate:'Search by message key...'"
+          [searchSuggestions]="searchHints"
+          (search)="onEntitySearch($event)"
+          (newClick)="addEntry()"
+          (filterClick)="onFilterClick()">
+        </app-entity-toolbar>
+      </div>
+
+      <!-- Grid -->
+      <div class="grid-section grid-toolbar-hidden">
+        <app-grid
+          [rowData]="entries"
+          [columnDefs]="columnDefs"
+          [gridOptions]="gridOptions"
+          [defaultViewMode]="'list'"
+          [searchPlaceholder]="'Search message keys...'">
+        </app-grid>
+      </div>
+
+    </div>
+  </div>
+</app-page>
