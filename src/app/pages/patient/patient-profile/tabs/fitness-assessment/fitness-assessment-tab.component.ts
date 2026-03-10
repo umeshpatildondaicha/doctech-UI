@@ -1,11 +1,12 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, JsonPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { FitnessAssessmentService, FitnessAssessmentDTO } from '../../../../../services/fitness-assessment.service';
+import { TranslatePipe } from '../../../../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-fitness-assessment-tab',
@@ -14,9 +15,11 @@ import { FitnessAssessmentService, FitnessAssessmentDTO } from '../../../../../s
     CommonModule,
     MatCardModule,
     MatIconModule,
+    TranslatePipe,
     MatChipsModule,
     MatProgressSpinnerModule,
-    MatButtonModule
+    MatButtonModule,
+    JsonPipe
   ],
   templateUrl: './fitness-assessment-tab.component.html',
   styleUrl: './fitness-assessment-tab.component.scss'
@@ -25,24 +28,37 @@ export class FitnessAssessmentTabComponent implements OnInit, OnChanges {
   @Input() patientId: string = '';
   @Input() patientName: string = '';
   @Input() patientPublicId: string | null = null;
+  selectedLanguage = 'hi';
+  
 
   assessment: FitnessAssessmentDTO | null = null;
   history: FitnessAssessmentDTO[] = [];
   loading = false;
   error: string | null = null;
+  currentStep :number =1;
+  totalSteps = 5;
 
   constructor(private readonly service: FitnessAssessmentService) {}
 
   ngOnInit(): void {
     this.load();
   }
-
+ nextStep():void{
+  if(this.currentStep < this.totalSteps){
+    this.currentStep ++ ;
+  }
+ }
+  prevStep():void{
+    if(this.currentStep >1){
+      this.currentStep -- ;
+    }
+  }
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['patientPublicId'] && !changes['patientPublicId'].firstChange) {
       this.load();
     }
   }
-
+  
   load(): void {
     if (!this.patientPublicId) return;
     this.loading = true;

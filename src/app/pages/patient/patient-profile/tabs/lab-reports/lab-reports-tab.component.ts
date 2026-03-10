@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { IconComponent } from '@lk/core';
+import { TranslatePipe } from '../../../../../pipes/translate.pipe';
 
 interface LabReport {
   id: string; testName: string; category: string; result: string;
@@ -13,7 +14,7 @@ interface LabReport {
 @Component({
   selector: 'app-lab-reports-tab',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatTableModule, IconComponent],
+  imports: [CommonModule, MatCardModule, MatTableModule, IconComponent,TranslatePipe],
   templateUrl: './lab-reports-tab.component.html',
   styleUrl: './lab-reports-tab.component.scss'
 })

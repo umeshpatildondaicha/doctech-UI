@@ -6,6 +6,7 @@ import { ExerciseAssignmentDialogComponent } from '../../../../exercise-assignme
 import { ExerciseSetsConfigDialogComponent } from '../../../../exercise-sets-config-dialog/exercise-sets-config-dialog.component';
 import { ExerciseListComponent } from '../../../../../components/exercise-list/exercise-list.component';
 import { Exercise } from '../../../../../interfaces/exercise.interface';
+import { TranslatePipe } from '../../../../../pipes/translate.pipe';
 
 interface AssignedExercise {
   exercise: Exercise;
@@ -17,7 +18,7 @@ interface AssignedExercise {
 @Component({
   selector: 'app-exercise-assignment-tab',
   standalone: true,
-  imports: [CommonModule, MatIconModule, IconComponent, AppButtonComponent, ExerciseListComponent],
+  imports: [CommonModule, MatIconModule, IconComponent, AppButtonComponent, ExerciseListComponent,TranslatePipe],
   templateUrl: './exercise-assignment-tab.component.html',
   styleUrl: './exercise-assignment-tab.component.scss'
 })

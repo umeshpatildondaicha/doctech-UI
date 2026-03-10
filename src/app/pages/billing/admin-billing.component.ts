@@ -27,6 +27,7 @@ import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-t
 import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-card/admin-stats-card.component';
 import { BillingCurrencyPipe } from '../../pipes/billing-currency.pipe';
 import { forkJoin } from 'rxjs';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 interface PatientBillingRow {
   patientId: string;
@@ -57,7 +58,8 @@ interface PatientBillingRow {
     PageComponent,
     PageBodyDirective,
     IconComponent,
-    BillingCurrencyPipe
+    BillingCurrencyPipe,
+    TranslatePipe
   ],
   templateUrl: './admin-billing.component.html',
   styleUrl: './admin-billing.component.scss'

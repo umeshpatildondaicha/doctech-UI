@@ -1,8 +1,9 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, JsonPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { IconComponent } from '@lk/core';
+import { TranslatePipe } from '../../../../../pipes/translate.pipe';
 
 interface VitalSign {
   id: string; type: string; value: number; unit: string;
@@ -12,7 +13,7 @@ interface VitalSign {
 @Component({
   selector: 'app-vitals-tab',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatTableModule, IconComponent],
+  imports: [CommonModule, MatCardModule, MatTableModule, IconComponent,JsonPipe,TranslatePipe],
   templateUrl: './vitals-tab.component.html',
   styleUrl: './vitals-tab.component.scss'
 })

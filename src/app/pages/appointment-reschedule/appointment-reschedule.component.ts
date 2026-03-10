@@ -14,6 +14,7 @@ import { filter } from 'rxjs';
 
 import { AppointmentService } from '../../services/appointment.service';
 import { AuthService } from '../../services/auth.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 interface TimeSlot {
   id: number;
@@ -32,6 +33,7 @@ interface TimeSlot {
     ImageComponent,
     IconComponent,
     FormsModule,
+    TranslatePipe,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatProgressSpinnerModule,

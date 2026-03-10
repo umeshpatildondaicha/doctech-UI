@@ -8,6 +8,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { DIALOG_DATA_TOKEN, AppInputComponent, AppSelectboxComponent, AppButtonComponent } from "@lk/core";
 import { Subject, takeUntil, filter } from 'rxjs';
+import { TranslatePipe } from '../../../../pipes/translate.pipe';
 
 export interface DoctorScheduleDialogData {
   doctor: any;
@@ -23,7 +24,8 @@ export interface DoctorScheduleDialogData {
     MatNativeDateModule,
     AppInputComponent,
     AppSelectboxComponent,
-    AppButtonComponent
+    AppButtonComponent,
+    TranslatePipe
 ],
     templateUrl: './doctor-schedule-dialog.component.html',
     styleUrls: ['./doctor-schedule-dialog.component.scss']

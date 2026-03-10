@@ -13,6 +13,7 @@ import { Mode } from '../../types/mode.type';
 import { DatePickerComponent } from "@lk/core";
 import { CalendarComponent, CalendarEvent } from "@lk/core";
 import { PatientSearchDialogComponent, PatientSearchResult } from '../patient-search-dialog/patient-search-dialog.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
     selector: 'app-appointment-create',
@@ -27,7 +28,8 @@ import { PatientSearchDialogComponent, PatientSearchResult } from '../patient-se
     ReactiveFormsModule,
     MatFormFieldModule,
     DatePickerComponent,
-    CalendarComponent
+    CalendarComponent,
+    TranslatePipe
 ]
 })
 export class AppointmentCreateComponent implements OnInit {

@@ -2,7 +2,8 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
-import { IconComponent } from '@lk/core';
+import { IconComponent} from '@lk/core';
+import { TranslatePipe } from '../../../../../pipes/translate.pipe';
 
 interface Appointment {
   id: string; date: Date; time: Date; type: string;
@@ -12,7 +13,7 @@ interface Appointment {
 @Component({
   selector: 'app-appointments-tab',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatTableModule, IconComponent],
+  imports: [CommonModule, MatCardModule, MatTableModule, IconComponent,TranslatePipe],
   templateUrl: './appointments-tab.component.html',
   styleUrl: './appointments-tab.component.scss'
 })

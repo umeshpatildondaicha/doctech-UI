@@ -10,7 +10,7 @@
       <!-- Left column -->
       <div class="col">
         <!-- Revenue Analytics -->
-        <app-card [title]="'Revenue Analytics'" [subtitle]="'Monthly View'" [divider]="true">
+        <app-card [title]="'REVENUE_ANALYTICS'|translate" [subtitle]="'MONTHLY_VIEW'|translate" [divider]="true">
           <div appCardActions>
             <app-button [fontIcon]="'more_vert'" [color]="'accent'" class="card-menu-btn"></app-button>
           </div>
@@ -25,7 +25,7 @@
         </app-card>
 
         <!-- Patient Flow -->
-        <app-card [title]="'Weekly Patient Flow'" [subtitle]="'This Week'" [divider]="true">
+        <app-card [title]="'WEEKLY_PATIENT_FLOW'|translate" [subtitle]="'THIS_WEEK'|translate" [divider]="true">
           @if (isBrowser) {
             <highcharts-chart [Highcharts]="Highcharts" [options]="patientFlowChartOptions" class="chart"></highcharts-chart>
           } @else {
@@ -37,7 +37,7 @@
         </app-card>
 
         <!-- Financial Summary -->
-        <app-card [title]="'Financial Summary'" [divider]="true">
+        <app-card [title]="'FINANCIAL_SUMMARY'|translate" [divider]="true">
           <div appCardActions>
             <app-button [text]="'View Details'" [color]="'primary'" [appearance]="'flat'"></app-button>
           </div>
@@ -63,7 +63,7 @@
       <!-- Right column -->
       <div class="col">
         <!-- Department Distribution -->
-        <app-card [title]="'Department Distribution'" [divider]="true">
+        <app-card [title]="'DEPARTMENT_DISTRIBUTION'|translate" [divider]="true">
           @if (isBrowser) {
             <highcharts-chart [Highcharts]="Highcharts" [options]="departmentChartOptions" class="chart"></highcharts-chart>
           } @else {
@@ -75,7 +75,7 @@
         </app-card>
 
         <!-- Department Performance -->
-        <app-card [title]="'Department Performance'" [divider]="true">
+        <app-card [title]="'DEPARTMENT_PERFORMANCE'|translate" [divider]="true">
           <div appCardActions>
             <app-button [text]="'View All'" [color]="'primary'" [appearance]="'flat'"></app-button>
           </div>
@@ -102,7 +102,7 @@
         </app-card>
 
         <!-- Recent Activities -->
-        <app-card [title]="'Recent Activities'" [divider]="true">
+        <app-card [title]="'RECENT_ACTIVITIES'|translate" [divider]="true">
           <div appCardActions>
             <app-button [text]="'View All'" [color]="'primary'" [appearance]="'flat'" (btnClick)="viewAllActivities()"></app-button>
           </div>

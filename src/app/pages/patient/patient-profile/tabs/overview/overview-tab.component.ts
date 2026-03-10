@@ -1,10 +1,11 @@
 import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, JsonPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { IconComponent, AppButtonComponent } from '@lk/core';
+import { TranslatePipe } from '../../../../../pipes/translate.pipe';
 
 export interface OverviewPatientInfo {
   id: string;
@@ -49,7 +50,7 @@ export interface QuickAction {
 @Component({
   selector: 'app-overview-tab',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatMenuModule, MatButtonModule, MatIconModule, IconComponent, AppButtonComponent],
+  imports: [CommonModule, MatCardModule, MatMenuModule, MatButtonModule, MatIconModule, IconComponent, AppButtonComponent,TranslatePipe,JsonPipe],
   templateUrl: './overview-tab.component.html',
   styleUrl: './overview-tab.component.scss'
 })

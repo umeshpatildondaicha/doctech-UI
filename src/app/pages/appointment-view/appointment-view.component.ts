@@ -6,10 +6,11 @@ import { IconComponent } from "@lk/core";
 import { ImageComponent } from "@lk/core";
 import { DIALOG_DATA_TOKEN } from "@lk/core";
 import { Subject } from 'rxjs';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
     selector: 'app-appointment-view',
-    imports: [CommonModule, IconComponent, ImageComponent],
+    imports: [CommonModule, IconComponent, ImageComponent,TranslatePipe],
     templateUrl: './appointment-view.component.html',
     styleUrl: './appointment-view.component.scss'
 })

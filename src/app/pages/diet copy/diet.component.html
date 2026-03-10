@@ -10,7 +10,7 @@
 
         <!-- Entity Toolbar: Search + Counts + Actions -->
         <app-entity-toolbar
-          title="Diets"
+           [title]="'DIET_LIST'|translate"
           [showCounts]="true"
           [currentCount]="filteredDiets.length"
           [totalCount]="dietList.length"
@@ -58,7 +58,7 @@
 
         <!-- Diet Plans Entity Toolbar: Search + Counts + Actions -->
         <app-entity-toolbar
-          title="Diet Plans"
+          [title]="'DIET_PLANS'|translate"
           [showCounts]="true"
           [currentCount]="filteredDietPlans.length"
           [totalCount]="dietPlans.length"

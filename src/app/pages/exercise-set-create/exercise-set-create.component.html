@@ -5,7 +5,7 @@
 
       <!-- Group Information -->
       <div class="form-section">
-        <h3 class="section-title">Group Information</h3>
+        <h3 class="section-title">{{'GROUP_INFORMATION'|translate}}</h3>
         <div class="form-row">
           <app-input
             label="Group Name *"
@@ -54,7 +54,7 @@
       <!-- Exercise Selection -->
       <div class="form-section">
         <div class="section-header">
-          <h3 class="section-title">Exercises in Group</h3>
+          <h3 class="section-title">{{'EXERCISES_IN_GROUP'|translate}}</h3>
         </div>
 
         <!-- Exercise Search and Filter -->
@@ -142,7 +142,7 @@
 
         <!-- Available Exercises -->
         <div class="available-exercises">
-          <h4 class="subsection-title">Available Exercises</h4>
+          <h4 class="subsection-title">{{'AVAILABLE_EXERCISES'|translate}}</h4>
           @if (getFilteredExercises().length > 0) {
             <div class="exercises-grid">
               @for (exercise of getFilteredExercises(); track exercise) {

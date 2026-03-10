@@ -12,7 +12,7 @@
       <div class="card-header">
         <h3 class="card-title">
           <app-icon [fontIcon]="'info'" class="card-icon"></app-icon>
-          Current Appointment
+          {{'CURRENT_APPOINTMENT'|translate}}
         </h3>
       </div>
       <div class="card-content">
@@ -38,7 +38,7 @@
       <div class="section-header">
         <h3 class="section-title">
           <app-icon [fontIcon]="'event'" class="section-icon"></app-icon>
-          Select New Date & Time
+          {{'SELECT_NEW_DATE_TIME'|translate}}
         </h3>
         <p class="section-subtitle">Choose a new date and available time slot for the appointment</p>
       </div>
@@ -125,7 +125,7 @@
         <!-- Notes Section -->
         <div class="form-section">
           <div class="form-section-header">
-            <h4 class="form-section-title">3. Reschedule Notes (Optional)</h4>
+            <h4 class="form-section-title">3. {{'RESCHEDULE_NOTES'|translate}}</h4>
           </div>
           <div class="notes-wrapper">
             <app-input

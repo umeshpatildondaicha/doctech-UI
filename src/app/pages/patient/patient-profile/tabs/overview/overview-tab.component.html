@@ -43,7 +43,7 @@
       <!-- Quick Details Grid -->
       <div class="patient-details-card">
         <div class="card-header">
-          <h2 class="card-title">Patient Details</h2>
+          <h2 class="card-title">{{'PATIENT_DETAILS'|translate}}</h2>
           @if (quickActions.length > 0) {
             <button mat-icon-button [matMenuTriggerFor]="actionsMenu" class="actions-menu-btn">
               <mat-icon>more_vert</mat-icon>
@@ -140,7 +140,7 @@
     <!-- Diagnoses & Allergies -->
     <div class="overview-bottom">
       <div class="info-card">
-        <h3><app-icon fontIcon="medical_information" [size]="18" color="var(--primary-color)"></app-icon> Diagnoses</h3>
+        <h3><app-icon fontIcon="medical_information" [size]="18" color="var(--primary-color)"></app-icon> {{'DIAGNOSES'|translate}}</h3>
         <div class="tag-list">
           @for (d of patientInfo?.diagnosis; track d) {
             <span class="diagnosis-tag">{{ d }}</span>
@@ -148,7 +148,7 @@
         </div>
       </div>
       <div class="info-card">
-        <h3><app-icon fontIcon="warning" [size]="18" color="var(--status-warning-color)"></app-icon> Allergies</h3>
+        <h3><app-icon fontIcon="warning" [size]="18" color="var(--status-warning-color)"></app-icon> {{'ALLERGIES'|translate}}</h3>
         <div class="tag-list">
           @for (a of patientInfo?.allergies; track a) {
             <span class="allergy-tag">{{ a }}</span>

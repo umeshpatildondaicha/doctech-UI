@@ -21,6 +21,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ExerciseCardComponent } from '../../components/exercise-card/exercise-card.component';
 import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
 import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-card/admin-stats-card.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
     selector: 'app-exercise',
@@ -45,7 +46,8 @@ import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-
     ExerciseCardComponent,
     AppInputComponent,
     EntityToolbarComponent,
-    AdminStatsCardComponent
+    AdminStatsCardComponent,
+    TranslatePipe
 ],
     templateUrl: './exercise.component.html',
     styleUrl: './exercise.component.scss'

@@ -3,7 +3,7 @@
     <form [formGroup]="exerciseForm" (ngSubmit)="onSubmit()" class="form">
       <!-- Basic Information -->
       <div class="form-section">
-        <h3 class="section-title">Basic Information</h3>
+        <h3 class="section-title">{{'BASIC_INFORMATION'|translate}}</h3>
         <div class="form-row">
           <app-input
             label="Name *"
@@ -71,7 +71,7 @@
 
       <!-- Description and Details -->
       <div class="form-section">
-        <h3 class="section-title">Description & Details</h3>
+        <h3 class="section-title">{{'DESCRIPTION_DETAILS'|translate}}</h3>
         <div class="form-row">
           <app-input
             label="Description *"
@@ -108,7 +108,7 @@
 
       <!-- Media Upload -->
       <div class="form-section">
-        <h3 class="section-title">Media</h3>
+        <h3 class="section-title">{{'MEDIA'|translate}}</h3>
         <div class="form-row">
           <div class="media-upload">
             <label class="upload-label">Upload Media (image / gif / video)</label>
@@ -144,7 +144,7 @@
 
       <!-- Sets Configuration -->
       <div class="form-section">
-        <h3 class="section-title">Sets Configuration</h3>
+        <h3 class="section-title">{{'SETS_CONFIGURATION'|translate}}</h3>
         <div class="sets-container" formArrayName="sets">
           @for (set of setsArray.controls; track set; let i = $index) {
             <div class="set-item" [formGroupName]="i">

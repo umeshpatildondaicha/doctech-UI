@@ -6,11 +6,12 @@ import { DietAssignmentDialogComponent } from '../../../../diet-assignment-dialo
 import { DietPlanCardComponent } from '../../../../../components/diet-plan-card/diet-plan-card.component';
 import { DietCardComponent } from '../../../../../components/diet-card/diet-card.component';
 import { Diet } from '../../../../../interfaces/diet.interface';
+import { TranslatePipe } from '../../../../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-diet-assignment-tab',
   standalone: true,
-  imports: [CommonModule, MatIconModule, IconComponent, AppButtonComponent, DietPlanCardComponent, DietCardComponent],
+  imports: [CommonModule, MatIconModule, IconComponent, AppButtonComponent, DietPlanCardComponent,TranslatePipe, DietCardComponent],
   templateUrl: './diet-assignment-tab.component.html',
   styleUrl: './diet-assignment-tab.component.scss'
 })

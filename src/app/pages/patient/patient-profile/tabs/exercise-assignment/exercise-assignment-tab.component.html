@@ -3,8 +3,8 @@
   <div class="exercise-assignment-header">
     <div class="header-content">
       <div class="header-text">
-        <h2>Exercise Assignments</h2>
-        <p class="header-subtitle">Manage and track patient exercise programs</p>
+        <h2>{{'EXERCISE_ASSIGNMENTS'|translate}}</h2>
+        <p class="header-subtitle">{{'MANAGE_TRACK_EXERCISE'|translate}}</p>
       </div>
       <app-button appearance="flat" [color]="'primary'" [text]="'Assign Exercise'" (btnClick)="openExerciseAssignmentDialog()">
         <app-icon fontIcon="add" [size]="18"></app-icon>
@@ -47,7 +47,7 @@
   <!-- Assigned Exercises List -->
   <div class="assigned-exercises-section">
     <div class="section-header">
-      <h3>Assigned Exercises</h3>
+      <h3>{{'ASSIGNED_EXERCISES'|translate}}</h3>
       @if (assignedExercises.length > 0) {
         <span class="count-badge">{{ assignedExercises.length }} total</span>
       }

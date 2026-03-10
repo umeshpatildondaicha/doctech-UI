@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { DIALOG_DATA_TOKEN, IconComponent } from '@lk/core';
+import { TranslatePipe } from '../../../../pipes/translate.pipe';
 
 export interface DoctorViewDialogData {
   doctor: any;
@@ -17,7 +18,8 @@ export interface DoctorViewDialogData {
         MatIconModule,
         MatCardModule,
         MatChipsModule,
-        IconComponent
+        IconComponent,
+        TranslatePipe
     ],
     templateUrl: './doctor-view-dialog.component.html',
     styleUrls: ['./doctor-view-dialog.component.scss']

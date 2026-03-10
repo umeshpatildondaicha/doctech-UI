@@ -10,6 +10,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { AppButtonComponent, DIALOG_DATA_TOKEN } from '@lk/core';
 import { Mode } from '../../types/mode.type';
 import { Subject, takeUntil, filter } from 'rxjs';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 export interface DialogData {
   diet?: any;  // API diet object (id, nutritionalInformation, mediaLinks, ingredients, recipe)
@@ -26,7 +27,8 @@ export interface DialogData {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    AppButtonComponent
+    AppButtonComponent,
+    TranslatePipe
 ],
     templateUrl: './diet-create.component.html',
     styleUrl: './diet-create.component.scss'

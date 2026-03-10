@@ -48,7 +48,7 @@
                       </div>
                     }
                   </div>
-                  <h1 class="m-h1">{{ selectedPost.title }}</h1>
+                  <h1 class="m-h1">{{ 'POSTS_LIST'|translate }}</h1>
                   <div class="m-content" [class.m-content--collapsed]="!isContentExpanded && (selectedPost.content || '').length > 320">
                     <div [innerHTML]="getSafeContent()"></div>
                     @if ((selectedPost.content || '').length > 320) {

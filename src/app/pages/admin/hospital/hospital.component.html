@@ -5,7 +5,7 @@
     <div class="hp-stats-bar">
       <div class="hps-item">
         <mat-icon class="hps-ico hps-ico--blue">business</mat-icon>
-        <span class="hps-val">{{ statDepts() }}</span>
+        <span class="hps-val">{{ statDepts()}}</span>
         <span class="hps-lbl">Departments</span>
         <button type="button" class="hps-add hps-add--dept" (click)="toggleAddDeptForm()" matTooltip="Create department" matTooltipPosition="below">
           <mat-icon>add</mat-icon>
@@ -23,18 +23,18 @@
       <div class="hps-sep"></div>
       <div class="hps-item">
         <mat-icon class="hps-ico hps-ico--cyan">stethoscope</mat-icon>
-        <span class="hps-val">{{ statDoctors() }}</span>
+        <span class="hps-val">{{ statDoctors()}}</span>
         <span class="hps-lbl">Doctors</span>
         <button type="button" class="hps-add hps-add--doctor" (click)="OpenAddDoctorDialog()" matTooltip="Create doctor" matTooltipPosition="below">
           <mat-icon>add</mat-icon>
         </button>
       </div>
       <div class="hps-sep"></div>
-      <div class="hps-item">
+      <!-- <div class="hps-item">
         <mat-icon class="hps-ico hps-ico--green">circle</mat-icon>
         <span class="hps-val">{{ statOnline() }}/{{ statDoctors() }}</span>
         <span class="hps-lbl">Online</span>
-      </div>
+      </div> -->
       <div class="hps-sep"></div>
       <div class="hps-item">
         <mat-icon class="hps-ico hps-ico--amber">badge</mat-icon>
@@ -45,11 +45,11 @@
         </button>
       </div>
       <div class="hps-sep"></div>
-      <div class="hps-item">
+      <!-- <div class="hps-item">
         <mat-icon class="hps-ico hps-ico--teal">widgets</mat-icon>
         <span class="hps-val">{{ hospitalFeatureCount() }}</span>
         <span class="hps-lbl">Features</span>
-      </div>
+      </div> -->
 
       <div class="hps-spacer"></div>
 
@@ -783,6 +783,43 @@
                     <div class="oo-hier-row"><span class="oo-node-tag oo-node-tag--hospital">Hospital</span> → <span class="oo-node-tag oo-node-tag--dept">Dept</span> → <span class="oo-node-tag oo-node-tag--sub">Sub-Dept</span> → <span class="oo-node-tag oo-node-tag--doc">Doctor</span></div>
                     <div class="oo-hier-row"><span class="oo-node-tag oo-node-tag--hospital">Hospital</span> → <span class="oo-node-tag oo-node-tag--dept">Dept</span> → <span class="oo-node-tag oo-node-tag--doc">Doctor</span> <span class="oo-hier-opt">(no Sub-Dept)</span></div>
                     <div class="oo-hier-row"><span class="oo-node-tag oo-node-tag--hospital">Hospital</span> → <span class="oo-node-tag oo-node-tag--doc">Doctor</span> <span class="oo-hier-opt">(no Dept)</span></div>
+                  </div>
+
+                  <!-- API Reference -->
+                  <div class="oo-api">
+                    <button type="button" class="oo-api-toggle" (click)="showApiReference.set(!showApiReference())">
+                      <mat-icon>code</mat-icon>
+                      <span>Save flow API &amp; sample cURL</span>
+                      <mat-icon class="oo-api-chevron" [class.open]="showApiReference()">expand_more</mat-icon>
+                    </button>
+                    @if (showApiReference()) {
+                      <div class="oo-api-body">
+                        <div class="oo-api-row">
+                          <span class="oo-api-method oo-api-method--put">PUT</span>
+                          <span class="oo-api-path">{{ saveFlowEndpoint() || (apiBaseUrl + '/api/hospitals/{hospitalPublicId}/org-flow') }}</span>
+                        </div>
+                        <div class="oo-api-desc">Save flow layout (nodes + edges). Request body:</div>
+                        <pre class="oo-api-code">{{ apiRequestBodyExample }}</pre>
+                        <div class="oo-api-row">
+                          <span class="oo-api-method oo-api-method--get">GET</span>
+                          <span class="oo-api-path">{{ getFlowEndpoint() || (apiBaseUrl + '/api/hospitals/{hospitalPublicId}/org-flow') }}</span>
+                        </div>
+                        <div class="oo-api-desc">Get saved flow. Response: @for (f of apiResponseFieldNames; track f) { <code>{{ f }}</code>@if (!$last) {<span>, </span>} }.</div>
+                        <div class="oo-api-curl-wrap">
+                          <div class="oo-api-curl-label">Sample cURL (save)</div>
+                          <pre class="oo-api-curl">{{ sampleCurl() }}</pre>
+                          <button type="button" class="oo-api-copy" (click)="copyCurlToClipboard()">
+                            @if (curlCopied()) {
+                              <mat-icon>check</mat-icon>
+                              <span>Copied</span>
+                            } @else {
+                              <mat-icon>content_copy</mat-icon>
+                              <span>Copy</span>
+                            }
+                          </button>
+                        </div>
+                      </div>
+                    }
                   </div>
                 </div>
               }

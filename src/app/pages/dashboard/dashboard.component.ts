@@ -14,6 +14,7 @@ import { AppointmentService } from '../../services/appointment.service';
 import { AuthService } from '../../services/auth.service';
 import { PatientService } from '../../services/patient.service';
 import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-card/admin-stats-card.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 interface DashboardStats {
   bookAppointment: number;
@@ -75,6 +76,7 @@ interface AppointmentRequest {
         PageComponent,
         PageBodyDirective,
         ImageComponent,
+        TranslatePipe
         
        
     ],

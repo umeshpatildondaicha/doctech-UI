@@ -1,7 +1,8 @@
 <div class="fitness-assessment-tab">
   <div class="tab-header">
-    <h2><mat-icon>monitor_heart</mat-icon> Fitness Assessment</h2>
-    <span class="header-subtitle">Patient-submitted health &amp; fitness evaluation</span>
+    <h2><mat-icon>monitor_heart</mat-icon>{{ 'FITNESS_ASSESSMENT_TITLE' | translate }}</h2>
+    
+    <span class="header-subtitle">{{'PATIENT_FITNESS_EVALUATION'|translate}}</span>
   </div>
 
   @if (loading) {
@@ -52,7 +53,6 @@
       </div>
     </div>
   } @else {
-    <!-- Meta row -->
     <div class="assessment-meta">
       <mat-chip>
         <mat-icon>schedule</mat-icon>
@@ -65,29 +65,68 @@
         </mat-chip>
       }
     </div>
+     
+    <div class="steps-wrapper">
 
+      <div class="step-item" [class.active]="currentStep >= 1">
+        <div class="step-circle">1</div>
+        <span>Info</span>
+      </div>
+    
+      <div class="step-line" [class.active]="currentStep > 1"></div>
+    
+      <div class="step-item" [class.active]="currentStep >= 2">
+        <div class="step-circle">2</div>
+        <span>Health</span>
+      </div>
+    
+      <div class="step-line" [class.active]="currentStep > 2"></div>
+    
+      <div class="step-item" [class.active]="currentStep >= 3">
+        <div class="step-circle">3</div>
+        <span>Diet</span>
+      </div>
+    
+      <div class="step-line" [class.active]="currentStep > 3"></div>
+    
+      <div class="step-item" [class.active]="currentStep >= 4">
+        <div class="step-circle">4</div>
+        <span>Body</span>
+      </div>
+    
+      <div class="step-line" [class.active]="currentStep > 4"></div>
+    
+      <div class="step-item" [class.active]="currentStep >= 5">
+        <div class="step-circle">5</div>
+        <span>Tests</span>
+      </div>
+    
+    </div>
+    <!-- Meta row -->
     <div class="assessment-grid">
-
       <!-- Personal -->
+      @if (currentStep === 1) {
       <mat-card class="assessment-section">
-        <mat-card-header>
+        <mat-card-header class="section-header">
           <mat-icon mat-card-avatar>person</mat-icon>
           <mat-card-title>Personal Information</mat-card-title>
         </mat-card-header>
         <mat-card-content>
           <div class="info-grid">
-            <div class="info-item"><span class="label">Full Name</span><span class="value">{{ assessment.fullName || '—' }}</span></div>
-            <div class="info-item"><span class="label">Mobile</span><span class="value">{{ assessment.mobileNumber || '—' }}</span></div>
-            <div class="info-item"><span class="label">Email</span><span class="value">{{ assessment.emailAddress || '—' }}</span></div>
-            <div class="info-item"><span class="label">Gender</span><span class="value">{{ assessment.gender || '—' }}</span></div>
-            <div class="info-item"><span class="label">Date of Birth</span><span class="value">{{ assessment.dateOfBirth | date:'mediumDate' }}</span></div>
+            <div class="info-item"><span class="label">Full Name :</span><span class="value">{{ assessment.fullName || '—' }}</span></div>
+            <div class="info-item"><span class="label">Mobile :</span><span class="value">{{ assessment.mobileNumber || '—' }}</span></div>
+            <div class="info-item"><span class="label">Email :</span><span class="value">{{ assessment.emailAddress || '—' }}</span></div>
+            <div class="info-item"><span class="label">Gender :</span><span class="value">{{ assessment.gender || '—' }}</span></div>
+            <div class="info-item"><span class="label">Date of Birth :</span><span class="value">{{ assessment.dateOfBirth | date:'mediumDate' }}</span></div>
           </div>
         </mat-card-content>
       </mat-card>
+    }
 
       <!-- Health -->
+      @if (currentStep === 2) {
       <mat-card class="assessment-section">
-        <mat-card-header>
+        <mat-card-header class="section-header">
           <mat-icon mat-card-avatar>health_and_safety</mat-icon>
           <mat-card-title>Health Information</mat-card-title>
         </mat-card-header>
@@ -110,10 +149,12 @@
           }
         </mat-card-content>
       </mat-card>
+    }
 
       <!-- Dietary & Goals -->
+      @if (currentStep === 3) {
       <mat-card class="assessment-section">
-        <mat-card-header>
+        <mat-card-header class="section-header">
           <mat-icon mat-card-avatar>restaurant</mat-icon>
           <mat-card-title>Dietary Habits &amp; Goals</mat-card-title>
         </mat-card-header>
@@ -142,10 +183,12 @@
           }
         </mat-card-content>
       </mat-card>
+    }
 
       <!-- Body Measurements -->
+      @if (currentStep === 4) {
       <mat-card class="assessment-section">
-        <mat-card-header>
+        <mat-card-header class="section-header">
           <mat-icon mat-card-avatar>straighten</mat-icon>
           <mat-card-title>Body Measurements</mat-card-title>
         </mat-card-header>
@@ -165,10 +208,12 @@
           </div>
         </mat-card-content>
       </mat-card>
+    }
 
       <!-- Fitness Testing -->
+      @if (currentStep === 5) {
       <mat-card class="assessment-section">
-        <mat-card-header>
+        <mat-card-header class="section-header">
           <mat-icon mat-card-avatar>fitness_center</mat-icon>
           <mat-card-title>Fitness Testing</mat-card-title>
         </mat-card-header>
@@ -185,7 +230,15 @@
           </div>
         </mat-card-content>
       </mat-card>
-
+    }
     </div><!-- /.assessment-grid -->
+    <div class="step-footer">
+      @if (currentStep > 1) {
+        <button mat-stroked-button color="primary" (click)="prevStep()">Previous</button>
+      }
+      @if (currentStep < totalSteps) {
+        <button mat-raised-button color="primary" (click)="nextStep()">Next Step</button>
+      }
+    </div>
   }
 </div>

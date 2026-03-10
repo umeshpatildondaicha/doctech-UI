@@ -15,6 +15,7 @@ import { AppSelectboxComponent } from "@lk/core";
 import { IconComponent, DIALOG_DATA_TOKEN } from "@lk/core";
 import { ExerciseSet, Exercise } from '../../interfaces/exercise.interface';
 import { Subject, takeUntil, filter } from 'rxjs';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 interface ExerciseGroup {
   groupId: string;
@@ -43,7 +44,8 @@ interface ExerciseGroup {
     AppButtonComponent,
     AppInputComponent,
     AppSelectboxComponent,
-    IconComponent
+    IconComponent,
+    TranslatePipe
 ],
     templateUrl: './exercise-set-create.component.html',
     styleUrl: './exercise-set-create.component.scss'

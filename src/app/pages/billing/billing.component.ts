@@ -31,6 +31,7 @@ import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-t
 import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-card/admin-stats-card.component';
 import { BillingCurrencyPipe } from '../../pipes/billing-currency.pipe';
 import { BillingservicesService, PatientBillingSummaryRow } from '../../services/billingservices.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 interface PatientBillingSummaryRowLocal extends PatientBillingSummaryRow {
   /** Used only by aggregatePatients when building from invoices */
@@ -53,7 +54,8 @@ interface PatientBillingSummaryRowLocal extends PatientBillingSummaryRow {
     PageComponent,
     PageBodyDirective,
     IconComponent,
-    BillingCurrencyPipe
+    BillingCurrencyPipe,
+    TranslatePipe
   ],
   templateUrl: './billing.component.html',
   styleUrl: './billing.component.scss'

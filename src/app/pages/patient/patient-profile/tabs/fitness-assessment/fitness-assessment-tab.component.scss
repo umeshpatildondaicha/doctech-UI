@@ -1,92 +1,237 @@
+// ─── Design tokens (use theme vars where available) ─────────────────────────────
+$fa-primary: var(--primary-color, #6366f1);
+$fa-primary-light: rgba(99, 102, 241, 0.08);
+$fa-text: var(--text-primary, #1a1a2e);
+$fa-muted: var(--text-muted, #6b7280);
+$fa-border: rgba(0, 0, 0, 0.06);
+$fa-border-strong: rgba(0, 0, 0, 0.1);
+$fa-surface: var(--surface-card, #fff);
+$fa-bg-subtle: #f8fafc;
+$fa-radius: 12px;
+$fa-radius-sm: 8px;
+$fa-radius-md:10px;
+$fa-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+$fa-shadow-card: 0 4px 12px rgba(0, 0, 0, 0.06);
+
 .fitness-assessment-tab {
   padding: 24px;
+  max-width: 100%;
+  background: transparent;
 
+  // ─── Tab header ─────────────────────────────────────────────────────────────
   .tab-header {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    gap: 6px;
+    margin-bottom: 28px;
+    padding: 20px 20px 20px 0;
+    border-bottom: 2px solid $fa-border;
 
     h2 {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       margin: 0;
-      font-size: 1.25rem;
+      font-size: 1.375rem;
       font-weight: 700;
-      mat-icon { color: #6366f1; }
+      color: $fa-text;
+      letter-spacing: -0.02em;
+
+      mat-icon {
+        color: $fa-primary;
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        padding: 6px;
+        border-radius: 10px;
+        background: $fa-primary-light;
+      }
     }
 
     .header-subtitle {
-      color: var(--text-muted, #888);
-      font-size: 0.85rem;
+      color: $fa-muted;
+      font-size: 0.875rem;
+      padding-left: 44px; // align with title after icon
+      line-height: 1.4;
     }
   }
 
+  // ─── Stepper ────────────────────────────────────────────────────────────────
+  .steps-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 10px 12px;
+    background: $fa-bg-subtle;
+    border: 1px solid $fa-border;
+    border-radius: $fa-radius;
+    gap: 0;
+  }
+
+  .step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: $fa-muted;
+    flex-shrink: 0;
+    transition: color 0.2s ease;
+
+    .step-circle {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid #e2e8f0;
+      background: $fa-surface;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: #94a3b8;
+      transition: border-color 0.2s, background-color 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+  }
+
+  .step-item.active {
+    color: $fa-primary;
+
+    .step-circle {
+      border-color: $fa-primary;
+      background: $fa-primary;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+    }
+  }
+
+  .step-line {
+    flex: 1;
+    min-width: 28px;
+    height: 3px;
+    background: #e2e8f0;
+    margin: 0 6px;
+    border-radius: 2px;
+    transition: background 0.25s ease;
+  }
+
+  .step-line.active {
+    background: linear-gradient(90deg, $fa-primary, rgba(99, 102, 241, 0.6));
+  }
+
+  // ─── Step footer (Prev / Next) ──────────────────────────────────────────────
+  .step-footer {
+    margin-top: 28px;
+    padding: 20px 0 0;
+    border-top: 1px solid $fa-border;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+
+    button {
+      min-width: 100px;
+      text-transform: none;
+      font-weight: 600;
+    }
+  }
+
+  // ─── Loading state ─────────────────────────────────────────────────────────
   .loading-state {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 48px;
-    color: #888;
+    gap: 16px;
+    padding: 64px 24px;
+    color: $fa-muted;
+    background: $fa-bg-subtle;
+    border-radius: $fa-radius;
+    border: 1px dashed $fa-border;
+
+    p {
+      margin: 0;
+      font-size: 0.9375rem;
+      font-weight: 500;
+    }
   }
 
   .empty-state {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 48px;
+    gap: 16px;
+    padding: 48px 24px;
     text-align: center;
-    color: #888;
+    color: $fa-muted;
+    background: $fa-bg-subtle;
+    border-radius: $fa-radius;
+    border: 1px solid $fa-border;
 
-    &.error-state { color: #ef4444; }
-    .empty-icon { font-size: 48px; height: 48px; width: 48px; opacity: 0.4; }
+    &.error-state {
+      color: #b91c1c;
+      background: rgba(239, 68, 68, 0.04);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .empty-icon {
+      font-size: 56px;
+      height: 56px;
+      width: 56px;
+      opacity: 0.6;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.9375rem;
+      max-width: 360px;
+    }
   }
 
+  // ─── Fitness empty state (no assessment yet) ────────────────────────────────
   .fitness-empty-state {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 56px 32px 48px;
+    padding: 56px 32px 52px;
     text-align: center;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.04) 0%, rgba(16, 185, 129, 0.04) 100%);
-    border: 2px dashed rgba(99, 102, 241, 0.2);
+    background: linear-gradient(145deg, rgba(99, 102, 241, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+    border: 2px dashed rgba(99, 102, 241, 0.25);
     border-radius: 20px;
 
     .fitness-empty-icon-wrap {
-      width: 96px;
-      height: 96px;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(16, 185, 129, 0.12));
+      background: linear-gradient(145deg, rgba(99, 102, 241, 0.12), rgba(16, 185, 129, 0.12));
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
       animation: float 3s ease-in-out infinite;
+      border: 2px solid rgba(99, 102, 241, 0.15);
 
       .fitness-empty-icon {
         font-size: 48px;
         width: 48px;
         height: 48px;
-        color: #6366f1;
+        color: $fa-primary;
       }
     }
 
     .fitness-empty-title {
       margin: 0 0 12px;
-      font-size: 1.35rem;
+      font-size: 1.375rem;
       font-weight: 700;
-      color: var(--text-primary, #1a1a2e);
+      color: $fa-text;
+      letter-spacing: -0.02em;
     }
 
     .fitness-empty-subtitle {
-      margin: 0 0 36px;
-      font-size: 0.9rem;
-      color: #6b7280;
+      margin: 0 0 40px;
+      font-size: 0.9375rem;
+      color: $fa-muted;
       max-width: 480px;
       line-height: 1.6;
     }
@@ -94,113 +239,392 @@
     .fitness-empty-steps {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
       flex-wrap: wrap;
       justify-content: center;
 
       .step {
         display: flex;
         align-items: center;
-        gap: 12px;
-        background: white;
-        border: 1px solid rgba(0, 0, 0, 0.06);
-        border-radius: 12px;
-        padding: 14px 18px;
+        gap: 14px;
+        background: $fa-surface;
+        border: 1px solid $fa-border;
+        border-radius: $fa-radius;
+        padding: 16px 20px;
         text-align: left;
-        min-width: 175px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        min-width: 180px;
+        box-shadow: $fa-shadow;
+        transition: box-shadow 0.2s, border-color 0.2s;
+
+        &:hover {
+          box-shadow: $fa-shadow-card;
+          border-color: $fa-border-strong;
+        }
 
         .step-number {
-          width: 32px;
-          height: 32px;
+          width: 36px;
+          height: 36px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #6366f1, #10b981);
-          color: white;
+          background: linear-gradient(145deg, $fa-primary, #10b981);
+          color: #fff;
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: 700;
-          font-size: 0.85rem;
+          font-size: 0.875rem;
           flex-shrink: 0;
         }
 
         .step-text {
           display: flex;
           flex-direction: column;
-          gap: 2px;
-          strong { font-size: 0.85rem; color: #1f2937; }
-          span { font-size: 0.75rem; color: #9ca3af; }
+          gap: 4px;
+
+          strong {
+            font-size: 0.875rem;
+            color: $fa-text;
+            font-weight: 600;
+          }
+
+          span {
+            font-size: 0.75rem;
+            color: $fa-muted;
+            line-height: 1.3;
+          }
         }
       }
 
       .step-arrow {
-        color: #d1d5db;
-        font-size: 22px;
-        width: 22px;
-        height: 22px;
-        @media (max-width: 640px) { display: none; }
+        color: #cbd5e1;
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+
+        @media (max-width: 640px) {
+          display: none;
+        }
       }
     }
   }
 
+  // ─── Meta chips (submitted date, history) ───────────────────────────────────
   .assessment-meta {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     flex-wrap: wrap;
-    margin-bottom: 20px;
-    mat-chip { display: flex; align-items: center; gap: 4px; }
-    mat-icon { font-size: 14px; height: 14px; width: 14px; }
+    margin-bottom: 24px;
+
+    mat-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: $fa-bg-subtle;
+      border: 1px solid $fa-border;
+    }
+
+    mat-icon {
+      font-size: 16px;
+      height: 16px;
+      width: 16px;
+      opacity: 0.85;
+    }
   }
 
+  // ─── Assessment content (cards) ───────────────────────────────────────────────
   .assessment-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-    gap: 20px;
+    display: block;
   }
 
   .assessment-section {
-    mat-card-header { margin-bottom: 12px; }
+    margin-bottom: 0;
+    border-radius: $fa-radius;
+    border: 1px solid $fa-border;
+    box-shadow: $fa-shadow;
+    overflow: hidden;
+    background: $fa-surface;
 
+    // Section header: icon + title strip
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      padding: 10px 12px;
+      background: linear-gradient(90deg, $fa-primary-light 0%, transparent 100%);
+      border-bottom: 1px solid $fa-border;
+
+      mat-card-title {
+        margin: 0;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: $fa-text;
+        line-height: 1.3;
+      }
+
+      [mat-card-avatar] {
+        color: $fa-primary;
+        font-size: 26px;
+        width: 30px;
+        height: 30px;
+        background: $fa-primary-light;
+        border-radius: $fa-radius-md;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-left:8px;
+        margin-top: 12px;
+      }
+    }
+
+    mat-card-content {
+      padding: 20px;
+      padding-top: 20px;
+    }
+
+    // Info grid: label + value pairs
     .info-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 16px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0;
 
       .info-item {
         display: flex;
         flex-direction: column;
-        gap: 2px;
-        &.full-width { grid-column: 1 / -1; }
-        .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #888; }
-        .value { font-size: 0.9rem; font-weight: 500; }
+        gap: 4px;
+        padding: 14px 16px;
+        border-radius: $fa-radius-sm;
+        background: transparent;
+        transition: background 0.15s;
+
+        &:nth-child(4n + 1),
+        &:nth-child(4n + 2) {
+          background: rgba(0, 0, 0, 0.02);
+        }
+
+        &.full-width {
+          grid-column: 1 / -1;
+        }
+
+        .label {
+          font-size: 0.6875rem;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          color: $fa-muted;
+          font-weight: 600;
+        }
+
+        .value {
+          font-size: 0.9375rem;
+          font-weight: 500;
+          color: $fa-text;
+          line-height: 1.4;
+        }
       }
     }
 
+    // Conditions list (health step)
     .conditions-list {
-      margin-top: 12px;
-      .label { font-size: 0.72rem; text-transform: uppercase; color: #888; margin-bottom: 8px; }
-      mat-chip { margin: 4px; font-size: 0.8rem; }
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid $fa-border;
+
+      > .label {
+        display: block;
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: $fa-muted;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      mat-chip {
+        margin: 4px 8px 4px 0;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: $fa-text;
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.25);
+
+        mat-icon {
+          font-size: 16px;
+          height: 16px;
+          width: 16px;
+          margin-right: 4px;
+          color: #d97706;
+        }
+      }
     }
 
+    // Goals section (diet step)
     .goals-section {
-      margin-top: 12px;
-      .label { font-size: 0.72rem; text-transform: uppercase; color: #888; margin-bottom: 8px; }
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid $fa-border;
+
+      > .label {
+        display: block;
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: $fa-muted;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
 
       .goal-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 6px 0;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        .goal-name { font-size: 0.85rem; flex: 1; }
-        .stars { display: flex; gap: 2px; }
-        .star.filled { color: #f59e0b; font-size: 16px; height: 16px; width: 16px; }
+        padding: 10px 12px;
+        border-radius: $fa-radius-sm;
+        background: rgba(0, 0, 0, 0.02);
+        margin-bottom: 6px;
+        border: 1px solid transparent;
+        transition: background 0.15s, border-color 0.15s;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .goal-name {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: $fa-text;
+          flex: 1;
+        }
+
+        .stars {
+          display: flex;
+          gap: 2px;
+          flex-shrink: 0;
+        }
+
+        .star.filled {
+          color: #f59e0b;
+          font-size: 18px;
+          height: 18px;
+          width: 18px;
+        }
       }
     }
   }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .fitness-assessment-tab {
+    padding: 16px;
+
+    .tab-header {
+      margin-bottom: 22px;
+      padding-bottom: 16px;
+
+      h2 {
+        font-size: 1.2rem;
+
+        mat-icon {
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+        }
+      }
+
+      .header-subtitle {
+        padding-left: 0;
+      }
+    }
+
+    .steps-wrapper {
+      padding: 12px 14px;
+      margin-bottom: 22px;
+    }
+
+    .step-item {
+      font-size: 0.75rem;
+
+      .step-circle {
+        width: 34px;
+        height: 34px;
+        font-size: 0.8125rem;
+      }
+    }
+
+    .step-line {
+      min-width: 12px;
+      margin: 0 2px;
+    }
+
+    .assessment-section {
+      .section-header {
+        padding: 14px 16px;
+
+        mat-card-title {
+          font-size: 1rem;
+        }
+
+        [mat-card-avatar] {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+    
+        }
+      }
+
+      mat-card-content {
+        padding: 16px;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+
+        .info-item:nth-child(4n + 1),
+        .info-item:nth-child(4n + 2) {
+          background: transparent;
+        }
+
+        .info-item {
+          padding: 12px 0;
+          border-bottom: 1px solid $fa-border;
+
+          &:last-child {
+            border-bottom: none;
+          }
+        }
+      }
+    }
+
+    .step-footer {
+      margin-top: 22px;
+      padding-top: 18px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .fitness-assessment-tab {
+    padding: 12px;
+
+    .fitness-empty-state {
+      padding: 40px 20px 36px;
+
+      .fitness-empty-steps .step {
+        min-width: 100%;
+      }
+    }
+  }
 }

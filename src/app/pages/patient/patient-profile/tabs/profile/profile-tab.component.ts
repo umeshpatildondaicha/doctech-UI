@@ -1,12 +1,13 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, JsonPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { IconComponent } from '@lk/core';
+import { TranslatePipe } from '../../../../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-profile-tab',
   standalone: true,
-  imports: [CommonModule, MatCardModule, IconComponent],
+  imports: [CommonModule, MatCardModule,JsonPipe, IconComponent,TranslatePipe],
   templateUrl: './profile-tab.component.html',
   styleUrl: './profile-tab.component.scss'
 })

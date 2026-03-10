@@ -19,6 +19,7 @@ import { HttpService } from '../../../../services/http.service';
 import { AppButtonComponent, DIALOG_DATA_TOKEN, SnackbarService } from '@lk/core';
 import { DoctorService } from '../../../../services/doctor.service';
 import { HttpClient } from '@angular/common/http';
+import { TranslatePipe } from '../../../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-admin-doctor-create',
@@ -35,7 +36,8 @@ import { HttpClient } from '@angular/common/http';
     MatButtonModule,
     MatProgressSpinnerModule,
     MatTabsModule,
-    AppButtonComponent
+    AppButtonComponent,
+    TranslatePipe
   ]
 })
 export class AdminDoctorCreateComponent implements OnInit, OnDestroy {

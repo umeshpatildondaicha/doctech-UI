@@ -362,7 +362,7 @@
               <!-- Professional info -->
               <div class="dp-section">
                 <h4 class="dp-section-title">
-                  <mat-icon>work_history</mat-icon> Professional History
+                  <mat-icon>work_history</mat-icon> {{'PROFESSIONAL_HISTORY'|translate}}
                 </h4>
                 <div class="prof-grid">
                   <div class="prof-item">
@@ -402,7 +402,7 @@
               <!-- Weekly shift visual -->
               <div class="dp-section">
                 <h4 class="dp-section-title">
-                  <mat-icon>calendar_view_week</mat-icon> Weekly Shift Distribution
+                  <mat-icon>calendar_view_week</mat-icon> {{'WEEKLY_SHIFT_DISTRIBUTION'|translate}}
                 </h4>
                 <div class="week-grid">
                   @for (day of ['M','T','W','T','F','S','S']; track $index) {
@@ -420,7 +420,7 @@
                 <div class="dp-section">
                   <h4 class="dp-section-title">
                     <mat-icon>checklist</mat-icon>
-                    Onboarding Progress
+                    {{'ONBOARDING_PROGRESS'|translate}}
                     <span class="onboard-pct">{{ onboardingPercent }}%</span>
                   </h4>
                   <div class="onboard-steps">
@@ -445,7 +445,7 @@
 
                 <div class="dp-section">
                   <h4 class="dp-section-title">
-                    <mat-icon>admin_panel_settings</mat-icon> Quick Admin Actions
+                    <mat-icon>admin_panel_settings</mat-icon> {{'QUICK_ADMIN_ACTIONS'|translate}}
                   </h4>
                   <div class="admin-actions">
                     <button class="admin-action-btn admin-action-btn--blue">
@@ -532,7 +532,7 @@
               </div>
 
               <div class="dp-section">
-                <h4 class="dp-section-title"><mat-icon>history</mat-icon> Recent Login Activity</h4>
+                <h4 class="dp-section-title"><mat-icon>history</mat-icon> {{'RECENT_LOGIN_ACTIVITY'|translate}}</h4>
                 <div class="login-list">
                   @for (ev of staff.loginActivity; track ev.ip) {
                     <div class="login-event" [class.login-event--failed]="ev.type === 'failed'">
@@ -554,7 +554,7 @@
               <div class="dp-section">
                 <div class="doc-header">
                   <div>
-                    <h4 class="dp-section-title"><mat-icon>folder_open</mat-icon> Document Verification</h4>
+                    <h4 class="dp-section-title"><mat-icon>folder_open</mat-icon> {{'DOCUMENT_VERIFICATION'|translate}}</h4>
                     <p class="doc-sub">Review and approve uploaded files</p>
                   </div>
                   <button class="doc-upload-btn">

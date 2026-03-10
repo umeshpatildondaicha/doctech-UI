@@ -8,11 +8,12 @@ import { BLOG_CATEGORIES, BlogDocType, BlogDocument, BlogPost } from './blogs.da
 import { finalize } from 'rxjs';
 import { BlogService } from '../../services/blog.service';
 import { AuthService } from '../../services/auth.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-blogs',
   standalone: true,
-  imports: [CommonModule, FormsModule, PageComponent, PageBodyDirective, IconComponent, DividerComponent, AppButtonComponent],
+  imports: [CommonModule,TranslatePipe, FormsModule, PageComponent, PageBodyDirective, IconComponent, DividerComponent, AppButtonComponent],
   templateUrl: './blogs.component.html',
   styleUrl: './blogs.component.scss'
 })

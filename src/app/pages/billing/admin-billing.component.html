@@ -14,7 +14,7 @@
       <!-- Toolbar -->
       <div class="toolbar-row">
         <app-entity-toolbar
-          [title]="'Hospital Billing'"
+          [title]="'HOSPITAL_BILLING'|translate"
           [showCounts]="true"
           [currentCount]="allInvoices.length"
           [totalCount]="allInvoices.length"
@@ -40,7 +40,7 @@
       <!-- Tabs: By Patient | By Doctor | All Invoices -->
       <mat-tab-group class="billing-tabs" animationDuration="150ms">
 
-        <mat-tab label=" Hospital Billing Summary">
+        <mat-tab label="{{'HOSPITAL_BILLING_SUMMARY'|translate}}">
           <app-grid
             class="billing-grid"
           [rowData]="allInvoices"

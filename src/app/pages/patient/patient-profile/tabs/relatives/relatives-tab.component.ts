@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { IconComponent, AppButtonComponent, DialogboxService, DialogFooterAction } from '@lk/core';
 import { AddRelativeDialogComponent } from '../../../add-relative-dialog/add-relative-dialog.component';
 import { PatientRelative } from '../../../../../interfaces/patient-relatives.interface';
+import { TranslatePipe } from '../../../../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-relatives-tab',
   standalone: true,
-  imports: [CommonModule, IconComponent, AppButtonComponent],
+  imports: [CommonModule, IconComponent, AppButtonComponent,TranslatePipe],
   templateUrl: './relatives-tab.component.html',
   styleUrl: './relatives-tab.component.scss'
 })
@@ -39,7 +40,7 @@ export class RelativesTabComponent implements OnInit {
       { id: 'save', text: 'Add Relative', color: 'primary', appearance: 'raised' }
     ];
     const ref = this.dialogService.openDialog(AddRelativeDialogComponent, {
-      title: 'Add Patient Relative', width: '600px',
+      title: 'Add Patient Relative', width: '800px', height:'80%',
       data: { patientId: this.patientId, patientName: this.patientName },
       footerActions
     });

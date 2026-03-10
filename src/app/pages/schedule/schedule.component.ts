@@ -41,6 +41,7 @@ import { WeekroutinedialogComponent } from './weekroutinedialog/weekroutinedialo
 import { AvailabilitySetupDialogComponent } from './availability-setup-dialog/availability-setup-dialog.component';
 import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
 import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-card/admin-stats-card.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 type TimingPriorityTab = 'p4' | 'p3' | 'p2' | 'p1';
 
@@ -314,7 +315,8 @@ interface DoctorSchedule {
     TabComponent,
     EntityToolbarComponent,
     AdminStatsCardComponent,
-    NgIf
+    NgIf,
+    TranslatePipe
   ],
   templateUrl: './schedule.component.html',
   styleUrls: ['./schedule.component.scss']

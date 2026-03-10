@@ -1,7 +1,7 @@
 <div class="doctor-schedule-dialog">
   <form [formGroup]="scheduleForm" class="schedule-form">
     <div class="form-section">
-      <h3 class="section-title">Doctor Information</h3>
+      <h3 class="section-title">{{'DOCTOR_INFORMATION'|translate}}</h3>
       <div class="form-row">
         <app-input
           label="Doctor ID"
@@ -17,7 +17,7 @@
     </div>
 
     <div class="form-section">
-      <h3 class="section-title">Schedule Configuration</h3>
+      <h3 class="section-title">{{'SCHEDULE_CONFIGURATION'|translate}}</h3>
       <div class="form-row">
         <app-selectbox
           label="Schedule Type"
@@ -71,7 +71,7 @@
     </div>
 
     <div class="form-section">
-      <h3 class="section-title">Working Days</h3>
+      <h3 class="section-title">{{'WORKING_DAYS'|translate}}</h3>
       <div class="days-selection">
         @for (day of daysOfWeek; track day) {
           <app-button

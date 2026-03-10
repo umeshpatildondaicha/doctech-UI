@@ -4,7 +4,7 @@
   <div class="dialog-content">
     <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()" class="form">
 
-      <div class="section-title-wrapper"><h4 class="section-title">Appointment Details</h4></div>
+      <div class="section-title-wrapper"><h4 class="section-title">{{'APPOINTMENT_DETAILS'|translate}}</h4></div>
 
       <div class="form-row top-space">
         <div class="patient-search-section">
@@ -29,7 +29,7 @@
           @if (!selectedPatient) {
             <div class="patient-selection-hint">
               <app-icon [fontIcon]="'info'" [size]="16"></app-icon>
-              <span>Click above to open the list, select a patient, then click <strong>Select Patient</strong> in the dialog to add them.</span>
+              <span>{{'OPEN_PATIENT_LIST'|translate}}</span>
             </div>
           }
 

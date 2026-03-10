@@ -120,11 +120,11 @@
                 <div class="empty-ico" aria-hidden="true"><app-icon fontIcon="event_available" [size]="48"></app-icon>
                 </div>
                 <p class="empty-title">
-                  @if (scheduleApiLoading) { Loading schedule... } @else { No booked appointments for this day }
+                  @if (scheduleApiLoading) { {{'LOADING_SCHEDULE'|translate}} } @else { {{'NO_BOOKED_APPOINTMENTS'|translate}} }
                 </p>
                 <p class="empty-sub">
                   @if (!scheduleApiLoading) {
-                  {{ scheduleSummary.available }} slot(s) available. Select another date or create a new appointment.
+                  {{ scheduleSummary.available }} {{'AVAILABLE_SLOTS_MESSAGE'|translate}}
                   }
                 </p>
               </div>
@@ -226,13 +226,13 @@
             <div class="timings-view-grid">
               <div class="timings-config-pane">
                 <div class="timings-pane-header">
-                  <h4>Shift configuration</h4>
+                  <h4>{{'SHIFT_CONFIGURATION'|translate}}</h4>
                 </div>
                 @if (timingsTab === 'p4') {
                 <div class="timings-config-body">
                   <div class="timings-info-banner">
                     <app-icon fontIcon="info" [size]="20"></app-icon>
-                    <span>Shift configuration is read-only. Changes are made in Manage mode.</span>
+                    <span>{{'SHIFT_CONFIG_READ_ONLY'|translate}}</span>
                   </div>
                   <div class="timings-field-grid">
                     <div class="timings-field">

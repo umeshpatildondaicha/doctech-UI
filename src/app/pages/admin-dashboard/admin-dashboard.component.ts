@@ -7,6 +7,7 @@ import { HighchartsChartModule } from 'highcharts-angular';
 import { AdminStatsCardComponent, StatCard as OverviewStatCard } from '../../components/admin-stats-card/admin-stats-card.component';
 import { AppCardComponent } from '../../core/components/app-card/app-card.component';
 import { AppCardActionsDirective } from '../../core/components/app-card/app-card-actions.directive';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 interface AdminDashboardStatCard {
   title: string;
@@ -48,7 +49,7 @@ interface FinancialMetric {
 
 @Component({
     selector: 'app-admin-dashboard',
-    imports: [CommonModule, HighchartsChartModule, AppButtonComponent, IconComponent, AdminStatsCardComponent, PageComponent, AppCardComponent, AppCardActionsDirective],
+    imports: [CommonModule, HighchartsChartModule, AppButtonComponent, IconComponent, AdminStatsCardComponent, PageComponent,TranslatePipe, AppCardComponent, AppCardActionsDirective],
     templateUrl: './admin-dashboard.component.html',
     styleUrl: './admin-dashboard.component.scss'
 })

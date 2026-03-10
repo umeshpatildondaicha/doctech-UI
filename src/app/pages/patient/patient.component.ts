@@ -225,6 +225,7 @@ export class PatientComponent  implements OnInit{
     const dialogRef = this.dialogService.openDialog(PatientCreateComponent, {
       title: mode === 'create' ? 'Create Patient' : mode === 'edit' ? 'Edit Patient' : 'View Patient',
       width: '70%',
+      height:'80vh',
       data: {
         mode,
         patient: param,

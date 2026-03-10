@@ -3,7 +3,7 @@ import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ColDef } from 'ag-grid-community';
 import { Appointment } from '../../interfaces/appointment.interface';
-import { ExtendedGridOptions, GridComponent, SnackbarService } from "@lk/core";
+import { ExtendedGridOptions, GridComponent, SnackbarService, } from "@lk/core";
 import { AppButtonComponent } from "@lk/core";
 import { IconComponent } from "@lk/core";
 import { CalendarComponent } from "@lk/core";
@@ -17,10 +17,12 @@ import { AppointmentService } from '../../services/appointment.service';
 import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment';
 import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
+import { JsonPipe } from '@angular/common';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-appointment',
-  imports: [GridComponent, AppButtonComponent, IconComponent, CalendarComponent, PageComponent, EntityToolbarComponent],
+  imports: [GridComponent, AppButtonComponent, IconComponent, CalendarComponent, PageComponent, EntityToolbarComponent,JsonPipe,TranslatePipe],
   templateUrl: './appointment.component.html',
   styleUrl: './appointment.component.scss'
 })
@@ -50,6 +52,7 @@ export class AppointmentComponent implements OnInit, AfterViewInit {
     'Search by doctor name...',
     'Search by status or reason...'
   ];
+  
 
   appointmentColumns: ColDef[] = [];
   appointmentGridOptions: ExtendedGridOptions = {
@@ -306,7 +309,8 @@ export class AppointmentComponent implements OnInit, AfterViewInit {
     const dialogRef = this.dialogService.openDialog(AppointmentCreateComponent, {
       title: mode === 'create' ? 'Create Appointment' : mode === 'edit' ? 'Edit Appointment' : 'View Appointment',
       data: { mode, appointment: data },
-      width: '60%',
+      width: '70%',
+      height:'80vh',
       footerActions: footerActions
 
     });
@@ -391,7 +395,8 @@ export class AppointmentComponent implements OnInit, AfterViewInit {
     const dialogRef = this.dialogService.openDialog(AppointmentViewComponent, {
       title: 'View Appointment',
       data: { appointment },
-      width: '50%',
+      width: '60%',
+      height:'80vh',
       footerActions: footerActions
     });
 
@@ -439,7 +444,8 @@ export class AppointmentComponent implements OnInit, AfterViewInit {
     const dialogRef = this.dialogService.openDialog(AppointmentRescheduleComponent, {
       title: 'Reschedule Appointment',
       data: { appointment },
-      width: '50%'
+      width: '60%',
+      height:'70vh'
     });
 
     dialogRef.afterClosed().subscribe((result) => {

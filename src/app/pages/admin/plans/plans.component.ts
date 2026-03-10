@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PageComponent, BreadcrumbItem } from '@lk/core';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 export type BillingCycle = 'monthly' | 'yearly';
 
@@ -38,7 +39,7 @@ export interface HospitalService {
 
 @Component({
   selector: 'app-plans',
-  imports: [CommonModule, FormsModule, MatIconModule, MatTooltipModule, PageComponent],
+  imports: [CommonModule, FormsModule, MatIconModule, MatTooltipModule, PageComponent,TranslatePipe],
   templateUrl: './plans.component.html',
   styleUrl: './plans.component.scss'
 })

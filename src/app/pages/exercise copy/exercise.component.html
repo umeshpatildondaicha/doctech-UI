@@ -10,7 +10,7 @@
 
         <!-- Entity Toolbar: Search + Counts + Actions -->
         <app-entity-toolbar
-          title="Exercises"
+          [title]="'EXERCISE'|translate"
           [showCounts]="true"
           [currentCount]="getFilteredExercises().length"
           [totalCount]="exercises.length"
@@ -63,7 +63,7 @@
 
         <!-- Entity Toolbar for Groups: Search + Counts + Actions -->
         <app-entity-toolbar
-          title="Exercise Groups"
+          [title]="'EXERCISE_GROUPS'|translate"
           [showCounts]="true"
           [currentCount]="getFilteredGroups().length"
           [totalCount]="exerciseGroups.length"

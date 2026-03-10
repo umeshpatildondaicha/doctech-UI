@@ -17,11 +17,13 @@ import { DIALOG_DATA_TOKEN } from "@lk/core";
 import { Exercise, ExerciseSet } from '../../interfaces/exercise.interface';
 import { Mode } from '../../types/mode.type';
 import { Subject, takeUntil, filter } from 'rxjs';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
     selector: 'app-exercise-create',
     imports: [
     FormsModule,
+    TranslatePipe,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,

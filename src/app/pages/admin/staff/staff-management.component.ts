@@ -16,6 +16,7 @@ import { AdminTabsComponent, type TabItem } from '../../../components';
 import { StaffService, StaffMember, StaffInviteRequest } from '../../../services/staff.service';
 import { DepartmentService, Department } from '../../../services/department.service';
 import { ReplacePipe } from '../../../pipes/replace.pipe';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 export type StaffStatus = 'Active' | 'Off Duty' | 'On Break' | 'On Leave';
 export type ShiftLabel = 'Morning' | 'Evening' | 'Night' | 'Rotating' | 'Flexible' | '-';
@@ -71,6 +72,7 @@ const AVATAR_COLORS = [
     PageComponent,
     AdminTabsComponent,
     ReplacePipe,
+    TranslatePipe
   ],
   templateUrl: './staff-management.component.html',
   styleUrl: './staff-management.component.scss',

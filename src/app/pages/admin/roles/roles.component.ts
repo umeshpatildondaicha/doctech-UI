@@ -3,7 +3,7 @@ import {
   ChangeDetectionStrategy, ChangeDetectorRef,
   signal
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, JsonPipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, forkJoin, of } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
@@ -13,6 +13,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PageComponent, BreadcrumbItem } from '@lk/core';
 import { AdminTabsComponent, type TabItem } from '../../../components';
 import { RoleService, Role, FeatureCatalog, RolePermission } from '../../../services/role.service';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 export type ActionKey = 'read' | 'write' | 'update' | 'delete';
 
@@ -40,6 +41,8 @@ export interface GroupedFeatures {
     MatIconModule,
     PageComponent,
     AdminTabsComponent,
+    JsonPipe,
+    TranslatePipe
   ],
   templateUrl: './roles.component.html',
   styleUrl: './roles.component.scss',

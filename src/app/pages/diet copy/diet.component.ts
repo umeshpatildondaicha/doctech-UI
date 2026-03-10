@@ -35,6 +35,7 @@ import { DietService } from '../../services/diet.service';
 import { AuthService } from '../../services/auth.service';
 import { EntityToolbarComponent } from '../../components/entity-toolbar/entity-toolbar.component';
 import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-card/admin-stats-card.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-diet',
@@ -59,7 +60,8 @@ import { AdminStatsCardComponent, StatCard } from '../../components/admin-stats-
     DietCardComponent,
     DietPlanCardComponent,
     EntityToolbarComponent,
-    AdminStatsCardComponent
+    AdminStatsCardComponent,
+    TranslatePipe
   ],
   templateUrl: './diet.component.html',
   styleUrl: './diet.component.scss'

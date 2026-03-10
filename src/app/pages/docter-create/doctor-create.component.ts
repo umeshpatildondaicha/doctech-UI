@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { CheckboxComponent } from "@lk/core";
 import { Mode } from '../../types/mode.type';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
     selector: 'app-doctor-create',
@@ -24,7 +25,9 @@ import { Mode } from '../../types/mode.type';
         FormsModule,
         ReactiveFormsModule,
         MatFormFieldModule,
-        CheckboxComponent
+        CheckboxComponent,
+        TranslatePipe
+
     ] // Add form controls, app-input, app-selectbox, app-button, etc. as needed
 })
 export class DoctorCreateComponent {
